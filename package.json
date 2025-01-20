@@ -1,10 +1,19 @@
 {
   "name": "nitro-web",
-  "description": "",
+  "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
+  "repository": "github:boycce/nitro-web",
   "version": "0.0.1",
-  "private": true,
   "main": "client.js",
   "type": "module",
+  "keywords": [
+    "express",
+    "javascript",
+    "monastery",
+    "mongodb",
+    "react",
+    "tailwind",
+    "webpack"
+  ],
   "imports": {
     "#nitro-web/*": { "default": "./*" }
   },
@@ -20,8 +29,9 @@
     "dev:client": "NITRO=true webpack serve --progress --config ./_example/webpack.config.js",
     "dev:server": "NITRO=true nodemon ./_example/server -q -w ./_example/server/ -w ./_example/components/ -w ./server/ -w ./components/ -e js",
     "dev:server:lint": "eslint ./_example/components ./_example/server ./components/ ./server/",
-    "minor": "standard-version --release-as minor && git push staging master",
-    "patch": "standard-version --release-as patch && git push staging master",
+    "major": "standard-version --release-as major && npm publish",
+    "minor": "standard-version --release-as minor && npm publish",
+    "patch": "standard-version --release-as patch && npm publish",
     "start": "node ./_example/server",
     "stripe": "stripe listen --forward-to localhost:3001/api/stripe/webhook"
   },
