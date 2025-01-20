@@ -1,0 +1,84 @@
+
+/* ---- Tailwind UI Components ---------- */
+
+@layer base {
+  .border-bottom-with-space {
+    @apply relative mb-[6px] after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-gray-200;
+  }
+}
+
+@layer components {
+  .btn-blue {
+    @apply bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded;
+  }
+}
+
+/* ---- Typography (wysiwyg) ------------ */
+
+.content {
+  ol a,
+  ul a,
+  p a {
+    text-decoration: none;
+  }
+  ol a:hover,
+  ul a:hover,
+  p a:hover,
+  ol a:focus,
+  ul a:focus,
+  p a:focus {
+    text-decoration: none;
+  }
+}
+
+/* ---- Elements --------------------- */
+
+.underline1,
+.underline2,
+.underline3 {
+  /* e.g. new project subscribe title */
+  position: relative;
+  display: inline-block;
+  &:before {
+    content: "";
+    position: absolute;
+    bottom: 0.15em;
+    height: 1px;
+    width: 100%;
+    background-color: transparent;
+    transition: background 0.2s ease;
+  }
+  &.is-active,
+  &:hover {
+    &:before {
+      background-color: currentColor;
+    }
+    &.is-white:before {
+      background-color: white;
+    }
+  }
+  &.underline2:before {
+    bottom: 0.1em;
+  }
+  /* more of a dotted line, e.g. subscription features */
+  &.underline3 {
+    &:before {
+      bottom: -0.08em;
+      background: repeating-linear-gradient(90deg, currentColor 0 3px, transparent 0 6px) top;
+      opacity: 0.12;
+      transition: opacity 0.15s ease;
+    }
+    &.is-active,
+    &:hover {
+      &:before {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+/* ---- Misc ------------------------- */
+
+.__PrivateStripeElementLoader {
+  display: none !important;
+}

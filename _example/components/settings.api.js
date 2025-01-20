@@ -1,0 +1,1 @@
+export { settings as default } from '#nitro-web/server.js'

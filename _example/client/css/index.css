@@ -1,0 +1,35 @@
+/* Note: there seems to be a bug with postcss-import not reloading after saving an imported file that previously had an error.
+  So we need to restart the dev server. */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* Tailwind UI components & Inter font */
+@import 'nitro-web/client/css/components.css';
+@import 'nitro-web/client/css/fonts.css';
+
+/* Typography */
+@layer base {
+  .h1, .content h1 {
+    @apply text-dark mb-2 text-2xl font-bold;
+  }
+  .h2, .content h2 {
+    @apply text-dark mb-2 text-xl font-bold;
+  }
+  .h3, .content h3 {
+    @apply text-dark mb-2 text-lg font-bold;
+  }
+  .h4 {
+    @apply text-dark mb-2 text-base font-bold;
+  }
+  .h5 {
+    @apply text-dark mb-2 text-sm font-bold;
+  }
+  label, .label {
+    @apply text-sm-label font-medium;
+  }
+}
+
+html {
+  font-size: 15.5px;
+}

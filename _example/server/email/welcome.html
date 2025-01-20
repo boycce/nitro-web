@@ -1,0 +1,27 @@
+<!-- You can view templates at http://localhost:3001/email/welcome -->
+<!-- To modify the css, add your own /server/email/partials/email.css file -->
+
+<!-- extends references the default nitro layout file -->
+{% extends "partials/layout1.swig" %}
+
+<!-- block content is the content of the email -->
+{% block content %}
+
+  [[ subject = Welcome to Nitro ]]
+  <b>%recipient.greet%</b>,<br/>
+  <br/>
+  Thanks for trying out Nitro (the example)! <br/>
+  <br/>
+  If you have any feature requests, feedback or questions, please don't hesitate to reach out to us at <a href="mailto:%recipient.replyToEmail%">%recipient.replyToEmail%</a>.<br/>
+  <br/>
+  <br/>
+  <span mc:edit="button">
+    <a class="button" href="%recipient.domain%/signin?email=%recipient.email%" target="_blank">
+      Account Sign In
+    </a>
+  </span><br/>
+  <br/>
+  Thanks,<br/>
+  <b>The Nitro Team</b>
+
+{% endblock %}
