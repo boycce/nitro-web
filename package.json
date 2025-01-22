@@ -2,7 +2,7 @@
   "name": "nitro-web",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
   "repository": "github:boycce/nitro-web",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "client.js",
   "type": "module",
   "keywords": [
