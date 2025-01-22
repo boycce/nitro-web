@@ -10,7 +10,7 @@ npm i nitro-web
 
 ### Install
 
-1. Copy `./_example` into your project
+1. Copy ./_example into your project
 2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "^0.0.1"`
 3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
 4. In tsconfig.json, remove
@@ -25,16 +25,16 @@ npm i nitro-web
 
 ### Usage
 
-On the client, you can import components and page-components as you would normally. See the example folder for further info.
+On the client, you can import components and page-components as you would normally. See ./example for further info.
 
 ```javascript
 import { SigninPage, Toggle, util } from 'nitro-web'
 ```
 
-On the server, you can import the express router, default models, and controllers. See the example folder for further info.
+On the server, you can import the express router, default models, and controllers. See ./example for further info.
 
 ```javascript
-import { setupRouter, util } from 'nitro-web/server.js'
+import { setupRouter, util } from 'nitro-web/server'
 const server = await setupRouter(config)
 server.listen(3001, '0.0.0.0')
 ```
