@@ -21,7 +21,8 @@
     ".": "./client/index.js",
     "./server": "./server/index.js",
     "./util": "./util.js",
-    "./webpack.config": "./webpack.config.js"
+    "./.eslintrc.json": "./.eslintrc.json",
+    "./webpack.config.js": "./webpack.config.js"
   },
   "scripts": {
     "dev": "npm run dev -w example",

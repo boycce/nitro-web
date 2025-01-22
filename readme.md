@@ -4,17 +4,16 @@
 
 Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀
 
-### Install
-
 ```bash
 npm i nitro-web
 ```
 
-### Setup
+### Install
 
-1. Copy the `./_example` folder to your project
-2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "0.0.1"`
-3. In tsconfig.json, remove 
+1. Copy `./_example` into your project
+2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "^0.0.1"`
+3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
+4. In tsconfig.json, remove
 ```json
     "paths": {
       "nitro-web": [
@@ -22,7 +21,7 @@ npm i nitro-web
       ],
     },
 ```
-4. `npm i`
+5. Run `npm i`
 
 ### Usage
 

@@ -7,7 +7,6 @@ const pwd = process.env.PWD + '/'
 export default {
   inject: 'awsUrl clientUrl currencies countries env googleMapsApiKey stripePublishableKey testEmail',
 
-  // apiUrl: process.env.originUrl || 'http://localhost:3001',
   clientUrl: process.env.originUrl || 'http://localhost:3000',
   emailFrom: process.env.emailFrom,
   emailReplyTo: process.env.emailReplyTo,

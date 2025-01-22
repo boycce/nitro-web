@@ -6,13 +6,12 @@
   "type": "module",
   "scripts": {
     "build": "NODE_ENV=production webpack --target=web",
-    "dev": "clear  && npm run dev:lint --silent & npm run dev:server --silent & npm run dev:client --silent",
+    "dev": "clear && npm run dev:lint --silent & npm run dev:server --silent & npm run dev:client --silent",
     "dev:client": "webpack serve --progress --config ./webpack.config.js",
     "dev:server": "nodemon ./server -q -w ./server/ -w ./components/ -e js",
     "dev:lint": "eslint ./components ./server/",
-    "major": "standard-version --release-as major",
-    "minor": "standard-version --release-as minor",
-    "patch": "standard-version --release-as patch",
+    "minor": "standard-version --release-as minor && git push staging",
+    "patch": "standard-version --release-as patch && git push staging",
     "start": "node ./server",
     "stripe": "stripe listen --forward-to localhost:3001/api/stripe/webhook"
   },
@@ -80,6 +79,9 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.6.0",
     "webpack-node-externals": "^1.7.2"
+  },
+  "eslintConfig": {
+    "extends": "../.eslintrc.json"
   },
   "engines": {
     "node": "^18"
