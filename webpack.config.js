@@ -116,6 +116,7 @@ export const getConfig = (config) => {
               // Dont transpile node modules except for date-fns, which uses ES6
               return path.includes('node_modules') 
                 && !path.includes('node_modules/date-fns')
+                && !path.includes('node_modules/nitro-web')
             }
           ),
           use: [
