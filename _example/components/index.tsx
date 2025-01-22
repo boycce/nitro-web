@@ -15,8 +15,6 @@ import {
 } from 'nitro-web'
 import config from '../client/config'
 
-console.log(config)
-
 // Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
 export const SigninPage = () => <Signin config={config} />
 SigninPage.route = {
@@ -68,8 +66,7 @@ ResetPasswordPage.route = {
 // }
 
 // Dashboard page
-import { css } from '@emotion/react'
-import { theme } from 'twin.macro'
+import { css, theme } from 'twin.macro'
 
 export function DashboardPage() {
   return (
@@ -82,7 +79,7 @@ export function DashboardPage() {
   )
 }
 const style = css`
-  p {
+  p,.example-usage-of-tailwind-variable {
     color: ${theme('colors.dark')};
   }
 `

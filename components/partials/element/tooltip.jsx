@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 
 export function Tooltip({ text, children, className, classNamePopup, isSmall }) {
   return (

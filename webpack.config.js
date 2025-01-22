@@ -101,7 +101,7 @@ export const getConfig = (config) => {
                   // }),
                   postcssNested,
                   postcssFor,
-                  tailwindcss({ config: './tailwind.config.js' }), 
+                  tailwindcss({ config: path.resolve(config.pwd, 'tailwind.config.js') }), 
                   autoprefixer,
                 ],
               },
@@ -132,10 +132,16 @@ export const getConfig = (config) => {
                   '@babel/plugin-syntax-dynamic-import',
                   '@babel/plugin-transform-runtime',
                   '@emotion/babel-plugin',
-                  // Below allows us to reference tailwindcss theme variables in emotion
+                  // Below allows us to reference tailwindcss theme variables in emotion blocks
+                  // https://github.com/ben-rogerson/twin.macro/blob/master/docs/options.md
                   // https://medium.com/fredwong-it/emotion-tailwind-twin-macro-7fdc5f2ae5f9
-                  // https://github.com/ben-rogerson/twin.examples/tree/master/webpack-emotion-typescript
-                  'babel-plugin-macros',
+                  // https://github.com/ben-rogerson/twin.examples/tree/master/react-emotion-typescript#complete-the-typescript-setup
+                  ['babel-plugin-macros', {
+                    'twin': {
+                      preset: 'emotion',
+                      config: path.resolve(config.pwd, 'tailwind.config.js'),
+                    },
+                  }],
                   // 'react-refresh/babel', // !isBuild && _require.resolve('react-refresh/babel'),
                 ].filter(Boolean),
               },

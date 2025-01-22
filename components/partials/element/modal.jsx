@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { IsFirstRender } from '../is-first-render.js'
 import SvgX1 from '../../../client/imgs/icons/x1.svg'
 

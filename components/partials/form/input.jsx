@@ -1,4 +1,4 @@
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import * as util from '../../../util.js'
 import { InputCurrency } from './input-currency.jsx'
 import { InputColor } from './input-color.jsx'
@@ -66,6 +66,9 @@ export function Input({ name='', state, id, type='text', ...props }) {
     InputEl = InputCurrency
   }
 
+  // Icon
+  const iconEl = <IconEl iconDir={iconDir} IconSvg={IconSvg} onClick={onClick} type={type} />
+
   // Create base props object
   const inputProps = {
     ...props,
@@ -73,6 +76,7 @@ export function Input({ name='', state, id, type='text', ...props }) {
     id: id || name,
     type: inputType,
     value: value,
+    iconEl: iconEl,
     className: 
       'col-start-1 row-start-1 block w-full rounded-md bg-white py-2 text-sm outline outline-1 -outline-offset-1 ' +
       'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 sm:text-sm/6 ' +
@@ -82,16 +86,12 @@ export function Input({ name='', state, id, type='text', ...props }) {
   }
 
   // Only add iconEl prop for custom components
-  const showIconElHere = !['color', 'date'].includes(type)
-  const iconEl = <IconEl iconDir={iconDir} IconSvg={IconSvg} onClick={onClick} type={type} />
-  if (!showIconElHere) {
-    inputProps.iconEl = iconEl
-  }
+  if (!['color', 'date'].includes(type)) delete inputProps.iconEl
 
   return (
     // https://tailwindui.com/components/application-ui/forms/input-groups#component-474bd025b849b44eb3c46df09a496b7a
     <div css={style} className={`mt-input-before mb-input-after grid grid-cols-1 ${props?.className || ''}`}>
-      { showIconElHere && iconEl }
+      { !inputProps.iconEl && iconEl }
       <InputEl {...inputProps} />
       {error && <div class="mt-1.5 text-xs text-danger">{error.detail}</div>}
     </div>
@@ -103,7 +103,7 @@ function IconEl({ iconDir, IconSvg, onClick, type }) {
   return (
     !!IconSvg && 
     <div 
-      className={`col-start-1 row-start-1 ${iconSize} self-center text-gray-400 select-none relative z-[1] ` +
+      className={`col-start-1 row-start-1 ${iconSize} self-center text-[#c6c8ce] select-none relative z-[1] ` +
         `pointer-events-${type == 'password' ? 'auto' : 'none'} ` +
         (iconDir == 'right' ? 'justify-self-end mr-3' : 'justify-self-start ml-3')
       }

@@ -1,17 +1,17 @@
-/** @type {import('tailwindcss').Config} */
 // https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
 import defaultTheme from 'tailwindcss/defaultTheme'
 import colors from 'tailwindcss/colors'
 import path from 'path'
 import Color from 'color'
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
+const nitroDir = path.dirname(require.resolve('nitro-web'))
 
 export default {
   content: {
     relative: true,
     files: [
       './components/**/*.{ts,tsx}',
-      path.join(path.dirname(require.resolve('nitro-web')), '../components/**/*.{js,jsx}'),
+      path.join(nitroDir, '../components/**/*.{js,jsx}'),
     ],
   },
   experimental: {

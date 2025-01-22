@@ -1,4 +1,4 @@
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { Outlet } from 'react-router-dom'
 import { Message } from '../element/message.jsx'
 import { Sidebar } from '../element/sidebar.jsx'

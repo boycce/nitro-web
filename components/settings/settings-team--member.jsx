@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { Button } from '../partials/element/button.jsx'
 import { Modal } from '../partials/element/modal.jsx'
 import { FormError } from '../partials/form/form-error.jsx'

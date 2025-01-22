@@ -1,3 +1,4 @@
+import { css, theme } from 'twin.macro'
 import * as util from '../../util.js'
 import { Topbar } from '../partials/element/topbar.jsx'
 import { Input } from '../partials/form/input.jsx'
@@ -46,7 +47,8 @@ export function Signin({ config }) {
   }
 
   return (
-    <div>
+    <div css={style}>
+    {/* <div> */}
       <Topbar title={<>Sign in to your Account</>} />
 
       <form onSubmit={onSubmit}>
@@ -73,3 +75,8 @@ export function Signin({ config }) {
   )
 }
 
+const style = css`
+  .example-usage-of-tailwind-variable {
+    color: ${theme('colors.primary')};
+  }
+`

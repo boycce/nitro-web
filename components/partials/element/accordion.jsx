@@ -1,4 +1,4 @@
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { IsFirstRender } from '../is-first-render.js'
 
 export function Accordion({ children, className, expanded, onChange }) {

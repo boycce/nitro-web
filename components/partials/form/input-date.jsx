@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { DayPicker } from 'react-day-picker'
 import { format, isValid, parse } from 'date-fns'
 import { getCurrencyPrefixWidth } from '../../../util.js'

@@ -130,7 +130,7 @@ export function RemoveModal ({ show, setShow }) {
   )
 }
 
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 const style = (_theme) => css`
   /* input[type='file'] {
     padding: 8px 18px;

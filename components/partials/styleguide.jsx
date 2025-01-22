@@ -13,14 +13,13 @@ export function Styleguide({ config }) {
     address: '',
     country: 'us',
     currency: 'nzd', // can be commented too
-    // amount: 100,
-    // brandColor: '#F3CA5F',
+    amount: 100,
+    brandColor: '#F3CA5F',
     firstName: 'Tony',
     date: Date.now(),
     errors: [
       { title: 'address', detail: 'Address is required' },
       { title: 'currency', detail: 'Currency is required' },
-      // { title: 'brandColor', detail: 'Color is required' },
     ],
   })
 

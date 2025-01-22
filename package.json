@@ -67,11 +67,13 @@
     "monastery": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "stripe": "^9.16.0"
+    "stripe": "^9.16.0",
+    "twin.macro": "^3.4.1"
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.11.0",
     "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.4",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",

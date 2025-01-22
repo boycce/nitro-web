@@ -1,4 +1,4 @@
-import { css } from '@emotion/react'
+import { css } from 'twin.macro'
 import { Outlet } from 'react-router-dom'
 import { Message } from '../element/message.jsx'
 
@@ -17,7 +17,7 @@ export function Layout2({ Logo }) {
           <Outlet />
         </div>
 
-        <div class="wrapper-2 w-full px-5 pb-4 flex items-center w-full text-sm text-[#1F1F1F]">
+        <div class="wrapper-2 w-full px-5 pb-4 flex items-center text-sm text-[#1F1F1F]">
           <ul class="flex-1 flex gap-4 list-style-none">
             <li><Link class="underline1" to="/">Home</Link></li>
             <li><Link class="underline1" to="/signin">About</Link></li>
