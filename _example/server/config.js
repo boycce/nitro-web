@@ -1,11 +1,8 @@
 import 'dotenv/config'
-import { dirname, resolve } from 'path'
-import { fileURLToPath } from 'url'
 import { createRequire } from 'module'
 const _require = createRequire(import.meta.url)
-const projectDir = resolve(dirname(fileURLToPath(import.meta.url)) + '/../') + '/'
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
-const isNitro = process.env.NITRO
+const pwd = process.env.PWD + '/'
 
 export default {
   inject: 'awsUrl clientUrl currencies countries env googleMapsApiKey stripePublishableKey testEmail',
@@ -19,15 +16,6 @@ export default {
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
   testEmail: process.env.testEmail,
-
-  clientDir: projectDir + 'client/',
-  componentsDir: projectDir + 'components/',
-  distDir: projectDir + 'client/dist/',
-  emailTemplateDir: projectDir + 'server/email/',
-  modelsDir: projectDir + 'server/models/',
-  projectDir: projectDir,
-  tmpDir: projectDir + 'tmp/',
-  nitroDir: resolve(isNitro ? projectDir + '../' : projectDir + 'node_modules/nitro-web/') + '/',
 
   awsUrl: process.env.awsUrl,
   googleMapsApiKey: process.env.googleMapsApiKey,
@@ -115,6 +103,6 @@ export default {
     },
   },
 
-  version: _require(projectDir + (isNitro ? '../' : '') + 'package.json').version,
-  isNitro: isNitro,
+  pwd: pwd,
+  version: _require(pwd + 'package.json').version,
 }

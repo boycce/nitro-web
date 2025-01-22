@@ -54,7 +54,7 @@ export const DropHandler = ({ onDrop, children, className }) => {
   return (
     <div 
       ref={dropRef}
-      class={`${className} relative w-full p-[20px] border border-dashed border-input-border border-2 rounded-md ${dragging ? 'border-primary before:content-[""] before:absolute before:inset-0 before:bg-primary before:opacity-5' : ''}`}
+      class={`${className} relative w-full p-[20px] border-2 border-dashed border-input-border rounded-md ${dragging ? 'border-primary before:content-[""] before:absolute before:inset-0 before:bg-primary before:opacity-5' : ''}`}
     >
       {children}
     </div>

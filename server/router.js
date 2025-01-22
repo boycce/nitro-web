@@ -14,19 +14,16 @@ import * as util from '../util.js'
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
 export async function setupRouter (config) {
-  const { componentsDir, distDir, emailTemplateDir, env, middleware, version } = config
+  const { env, middleware, version } = config
+  const { componentsDir, distDir, emailTemplateDir } = util.getDirectories(path, config.pwd)
   const expressApp = express()
   const server = http.createServer(expressApp)
   const apiRoutes = {}
   const controllers = {}
   const allMiddleware = { ...defaultMiddleware, ...(middleware || {}) }
 
-  if (!componentsDir) {
-    throw new Error('setupRouter: `config.componentsDir` missing')
-  } else if (!env) {
+  if (!env) {
     throw new Error('setupRouter: `config.env` missing')
-  } else if (!emailTemplateDir) {
-    throw new Error('setupRouter: `config.emailTemplateDir` missing')
   }
 
   // Extend request/response with our custom error responses
@@ -95,8 +92,7 @@ export async function setupRouter (config) {
     expressApp.get('/email/partials/email.css', (req, res) => {
       // first check if there is a custom email.css in the emailTemplateDir
       // if not, return the default nitro email.css
-      console.log(_dirname)
-      if (fs.existsSync(emailTemplateDir + '/partials/email.css')) res.sendFile(emailTemplateDir + '/partials/email.css')
+      if (fs.existsSync(emailTemplateDir + 'partials/email.css')) res.sendFile(emailTemplateDir + 'partials/email.css')
       else res.sendFile(_dirname + 'email/partials/email.css')
     })
     expressApp.get('/email/:name', async (req, res) => {

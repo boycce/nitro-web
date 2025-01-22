@@ -3,5 +3,5 @@ declare module '*.svg' {
   export default content
 }
 declare global {
-  const sharedStore: any
+  const sharedStore: Record<string, unknown>
 }

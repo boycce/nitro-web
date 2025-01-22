@@ -11,14 +11,17 @@ import { getCurrencyPrefixWidth } from '../../../util.js'
  * @param {cents} [value] - e.g. 123 (input is always controlled if state is passed in)
  */
 export function InputCurrency({ id, config, className, currency='nzd', onChange, placeholder, value }) {
+  if (!config?.currencies || !config?.countries) {
+    throw new Error(
+      'InputCurrency: `config.currencies` and `config.countries` is required, check out the nitro example for more info.'
+    )
+  }
   const ref = useRef()
   const [dontFix, setDontFix] = useState()
   const [settings, setSettings] = useState(() => getCurrencySettings(currency))
   const [dollars, setDollars] = useState(() => toDollars(value, true, settings))
   const [prefixWidth, setPrefixWidth] = useState()
   ref.current = { settings, dontFix }
-
-  if (!config) throw new Error('InputCurrency: `config` is required')
 
   useEffect(() => {
     if (settings.currency !== currency) {

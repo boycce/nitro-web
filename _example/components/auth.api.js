@@ -1,1 +1,1 @@
-export { auth as default } from '#nitro-web/server.js'
+export { auth as default } from 'nitro-web/server'

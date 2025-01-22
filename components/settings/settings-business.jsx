@@ -36,7 +36,7 @@ export function SettingsBusiness({ config }) {
   }
 
   return (
-    <div css={style}>
+    <div>
       <Topbar 
         title={<>Settings</>} 
         submenu={
@@ -116,6 +116,3 @@ export function SettingsBusiness({ config }) {
   )
 }
 
-import { css } from '@emotion/react'
-const style = (_theme) => css`
-`

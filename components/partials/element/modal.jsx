@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css } from 'twin.macro'
+import { css } from '@emotion/react'
 import { IsFirstRender } from '../is-first-render.js'
 import SvgX1 from '../../../client/imgs/icons/x1.svg'
 
@@ -221,7 +221,7 @@ const style = () => css`
       }
       &:hover {
         line {
-          stroke: ${theme('colors.primary-dark')};
+          /* stroke: theme'colors.primary-dark'; */
         }
       }
     }

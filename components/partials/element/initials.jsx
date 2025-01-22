@@ -1,4 +1,4 @@
-import { css } from 'twin.macro'
+import { css } from '@emotion/react'
 
 export function Initials({ icon, isBig, isMedium, isSmall, isRound, className }) {
   return (

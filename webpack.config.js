@@ -7,7 +7,7 @@ import HtmlWebpackPlugin from 'html-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import webpackNodeExternals from 'webpack-node-externals'
 import path from 'path'
-import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
+// import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin'
 import tailwindcss from 'tailwindcss'
 import webpack from 'webpack'
 import ESLintPlugin from 'eslint-webpack-plugin'
@@ -15,31 +15,27 @@ import postcssImport from 'postcss-import'
 import postcssNested from 'postcss-nested'
 import postcssFor from 'postcss-for'
 import { createRequire } from 'module'
-import postcssImportResolver from 'postcss-import-resolver'
+import { getDirectories } from './util.js'
+
 const _require = createRequire(import.meta.url)
+const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
+const isBuild = process.env.NODE_ENV == 'production'
 
-export function getWebpackConfig(config) {
-  // Configurables
-  const { clientDir, componentsDir, distDir, isNitro, nitroDir } = config
-  const imgsDir = path.join(clientDir, 'imgs/')
-  const fontsDir = path.join(clientDir, 'fonts/')
-  const build = process.env.NODE_ENV == 'production'
+axiosRetry(axios, {
+  retries: 10,
+  retryDelay: () => 150,
+  retryCondition: (e) =>  e.code == 'ECONNREFUSED',
+})
 
-  const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
+// process.traceDeprecation = true
+export const getConfig = (config) => {
+  const { clientDir, componentsDir, distDir, imgsDir, fontsDir } = getDirectories(path, config.pwd)
 
-  axiosRetry(axios, {
-    retries: 10,
-    retryDelay: () => 150,
-    retryCondition: (e) =>  e.code == 'ECONNREFUSED',
-  })
-
-  // process.traceDeprecation = true
-  // eslint-disable-next-line
   return (env, argv) => [{
-    devtool: build ? false : 'source-map',
+    devtool: isBuild ? false : 'source-map',
     entry: clientDir + 'index.ts',
-    // entry: build ? './client/index.tsx' : ['webpack-plugin-serve/client', './client/index.tsx'], // check this
-    mode: build ? 'production' : 'development',
+    // entry: isBuild ? './client/index.tsx' : ['webpack-plugin-serve/client', './client/index.tsx'], // check this
+    mode: isBuild ? 'production' : 'development',
     // target=node ignores node_modules
     externals: argv.target?.[0] == 'node' ? [webpackNodeExternals()] : [],
     // target=node  ignores builtin modules
@@ -94,17 +90,18 @@ export function getWebpackConfig(config) {
             { loader: 'postcss-loader', options: {
               postcssOptions: {
                 plugins: [
-                  !isNitro ? postcssImport : postcssImport({ 
-                    resolve: postcssImportResolver({
-                      alias: { 
-                        'nitro-web/client/css/components.css': path.resolve(nitroDir, 'client/css/components.css'),
-                        'nitro-web/client/css/fonts.css': path.resolve(nitroDir, 'client/css/fonts.css'),
-                      },
-                    }),
-                  }),
+                  postcssImport,
+                  // postcssImport({ 
+                  //   resolve: postcssImportResolver({
+                  //     alias: { 
+                  //       'nitro-web/client/css/components.css': path.resolve(nitroDir, 'client/css/components.css'),
+                  //       'nitro-web/client/css/fonts.css': path.resolve(nitroDir, 'client/css/fonts.css'),
+                  //     },
+                  //   }),
+                  // }),
                   postcssNested,
                   postcssFor,
-                  tailwindcss({ config: `./${isNitro ? '_example/' : ''}tailwind.config.js` }), 
+                  tailwindcss({ config: './tailwind.config.js' }), 
                   autoprefixer,
                 ],
               },
@@ -127,8 +124,8 @@ export function getWebpackConfig(config) {
               options: {
                 presets: [
                   ['@babel/preset-env', { debug: false }],
-                  ['@babel/preset-react', { runtime: 'automatic', importSource: '@emotion/react' }],
                   ['@babel/preset-typescript', { allowNamespaces: true }],
+                  ['@babel/preset-react', { runtime: 'automatic', importSource: '@emotion/react', development: !isBuild }],
                 ],
                 plugins: [
                   'react-html-attrs',
@@ -139,7 +136,7 @@ export function getWebpackConfig(config) {
                   // https://medium.com/fredwong-it/emotion-tailwind-twin-macro-7fdc5f2ae5f9
                   // https://github.com/ben-rogerson/twin.examples/tree/master/webpack-emotion-typescript
                   'babel-plugin-macros',
-                  !build && _require.resolve('react-refresh/babel'),
+                  // 'react-refresh/babel', // !isBuild && _require.resolve('react-refresh/babel'),
                 ].filter(Boolean),
               },
             },
@@ -231,7 +228,7 @@ export function getWebpackConfig(config) {
       // We are outputing assets into a handy subdir to allow for easier asset cache control. We can't
       // simply use `path` because webpack-dev-server won't work when writeFiles=false (in memory).
       // Because of this we manually need to prefix all output filenames with `assets/`.
-      filename: `assets/bundle.[name]${build ? '.[contenthash]' : ''}.js`,
+      filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.js`,
       path: distDir,
       publicPath: '/',
     },
@@ -249,7 +246,7 @@ export function getWebpackConfig(config) {
           },
         },
       },
-      minimize: build,
+      minimize: isBuild,
     },
     plugins: [
       // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)(),
@@ -270,10 +267,10 @@ export function getWebpackConfig(config) {
         extensions: ['js', 'mjs', 'jsx'],
         exclude: ['node_modules'],
       }),
-      new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${build ? '.[contenthash]' : ''}.css` }),
+      new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.css` }),
       new HtmlWebpackPlugin({ template: clientDir + 'index.html', filename: distDir + 'index.html' }),
       new CleanTerminalPlugin({ skipFirstRun: true }),
-      !build && new ReactRefreshWebpackPlugin({ overlay: false }),
+      // !isBuild && new ReactRefreshWebpackPlugin({ overlay: false }),
     ].filter(Boolean),
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
@@ -281,8 +278,6 @@ export function getWebpackConfig(config) {
       alias: {
         // required for auto-importing page components into nitro app.js router
         'componentsDir': componentsDir,
-        // needed only for only the example app. There are also css aliases above in postcss plugins
-        'nitro-web': isNitro ? path.resolve(nitroDir, 'client.js') : undefined,
       },
     },
     stats: {
@@ -298,5 +293,4 @@ export function getWebpackConfig(config) {
       ignored: new RegExp(`(${componentsDir}.*\\.api\\.js$|node_modules/(?!cherry))`),
     },
   }]
-
 }

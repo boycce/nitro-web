@@ -2,7 +2,7 @@
 // https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
 import defaultTheme from 'tailwindcss/defaultTheme'
 import colors from 'tailwindcss/colors'
-import { nitroDir } from './server/config'
+import path from 'path'
 import Color from 'color'
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
 
@@ -11,7 +11,7 @@ export default {
     relative: true,
     files: [
       './components/**/*.{ts,tsx}',
-      nitroDir + 'components/**/*.{js,jsx}',
+      path.join(path.dirname(require.resolve('nitro-web')), '../components/**/*.{js,jsx}'),
     ],
   },
   experimental: {
@@ -54,24 +54,15 @@ export default {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
-        // '2xs': ['0.75rem', { lineHeight: '1.5' }],
-        // 'xs': ['0.81rem', { lineHeight: '1.5' }],
-        // 'sm': ['0.875rem', { lineHeight: '1.5' }],
-        // 'base': ['1rem', { lineHeight: '1.5' }],
-        // 'lg': ['1.125rem', { lineHeight: '1.75' }],
-        // 'xl': ['1.25rem', { lineHeight: '1.75' }],
-        // '2xl': ['1.4rem', { lineHeight: '1.75' }],
-        // '3xl': ['1.875rem', { lineHeight: '1.75' }],
-
-        '2xs': ['0.77rem', { lineHeight: '1.5' }],  // ~12px
-        'xs': ['0.83rem', { lineHeight: '1.5' }],   // ~13px
-        'sm-label': ['0.87rem', { lineHeight: '1.5' }], // ~13.5px
-        'sm': ['0.90rem', { lineHeight: '1.5' }],   // ~14px
-        'base': ['1rem', { lineHeight: '1.5' }],    // 15.5px
-        'lg': ['1.16rem', { lineHeight: '1.75' }],  // ~18px
-        'xl': ['1.29rem', { lineHeight: '1.75' }],  // ~20px
-        '2xl': ['1.45rem', { lineHeight: '1.75' }], // ~22.4px
-        '3xl': ['1.94rem', { lineHeight: '1.75' }], // ~30px
+        '2xs': ['0.77rem', { lineHeight: '1.5' }],
+        'xs': ['0.83rem', { lineHeight: '1.5' }],
+        'sm-label': ['0.87rem', { lineHeight: '1.5' }],
+        'sm': ['0.90rem', { lineHeight: '1.5' }],
+        'base': ['1rem', { lineHeight: '1.5' }],
+        'lg': ['1.16rem', { lineHeight: '1.75' }],
+        'xl': ['1.29rem', { lineHeight: '1.75' }],
+        '2xl': ['1.45rem', { lineHeight: '1.75' }],
+        '3xl': ['1.94rem', { lineHeight: '1.75' }],
       },
       spacing: {
         'input-before': '0.625rem',

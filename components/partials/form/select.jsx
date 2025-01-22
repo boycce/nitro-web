@@ -1,5 +1,5 @@
 /*eslint-disable*/
-import { css } from 'twin.macro'
+import { css } from '@emotion/react'
 import { twMerge } from 'tailwind-merge'
 import ReactSelect, { components, createFilter } from 'react-select'
 import { ChevronDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'

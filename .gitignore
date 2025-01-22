@@ -4,9 +4,9 @@ node_modules
 **/node_modules
 
 # User files
-.env
+./.env
 resources/me
-resources/migrate-mongo-config-*
+migrate-mongo-config-*
 
 # Generated files
 

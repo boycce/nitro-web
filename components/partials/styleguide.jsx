@@ -1,4 +1,3 @@
-/*eslint-disable*/
 import { getCountryOptions, getCurrencyOptions, ucFirst } from '../../util.js'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { Input } from './form/input.jsx'
@@ -75,7 +74,8 @@ export function Styleguide({ config }) {
         </div>
         <div>
           <label for="input1">Label</label>
-          <Checkbox name="input1" type="radio" text="Radio 1" subtext="some additional text here 1." id="input1-1" class="!mb-0" defaultChecked />
+          <Checkbox name="input1" type="radio" text="Radio 1" subtext="some additional text here 1." id="input1-1" class="!mb-0" 
+            defaultChecked />
           <Checkbox name="input1" type="radio" text="Radio 2" subtext="some additional text here 2." id="input1-2" class="!mt-0" />
         </div>
         <div>
@@ -118,8 +118,8 @@ export function Styleguide({ config }) {
         <div><Button color="primary-md">*-md (default)</Button></div>
         <div><Button color="primary-lg">*-lg button</Button></div>
         <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />}>IconLeft=Element</Button></div>
-        <div><Button IconRight="v">IconRight="v"</Button></div>
-        <div><Button IconRight2="v" className="w-[200px]">IconRight2="v"</Button></div>
+        <div><Button IconRight="v">IconRight=&quot;v&quot;</Button></div>
+        <div><Button IconRight2="v" className="w-[200px]">IconRight2=&quot;v&quot;</Button></div>
         <div><Button color="primary" isLoading>primary isLoading</Button></div>
       </div>
 

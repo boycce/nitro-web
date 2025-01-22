@@ -1,4 +1,3 @@
-/* eslint-disable brace-style */
 import { css } from '@emotion/react'
 import * as util from '../../../util.js'
 import { InputCurrency } from './input-currency.jsx'
@@ -121,6 +120,7 @@ function ColorIcon({ hex }) {
 
 const style = () => css`
   input {
+    appearance: textfield;
     -moz-appearance: textfield;
   }
   input::-webkit-outer-spin-button,

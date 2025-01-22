@@ -5,11 +5,12 @@ import nunjucks from 'nunjucks'
 import inlineCss from 'inline-css'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
+import path from 'path'
+import { getDirectories } from '../../util.js'
 
 let templates = {}
 let nodemailerMailgun = undefined
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
-
 
 export async function sendEmail({ template, to, bcc, data={}, from, replyTo, recipientVariables, subject, test, skipCssInline, config }) {
   /**
@@ -72,7 +73,7 @@ export async function sendEmail({ template, to, bcc, data={}, from, replyTo, rec
   let settings = {
     bcc: bcc,
     from: from,
-    isDev: config.clientUrl.match(/:/),
+    isDev: config.clientUrl.match(/:/), // possibly use config.env here
     recipientVariables: recipientVariables,
     replyTo: replyTo,
     skipCssInline: skipCssInline,
@@ -81,34 +82,35 @@ export async function sendEmail({ template, to, bcc, data={}, from, replyTo, rec
     test: config.emailTestMode || test,
     to: to,
     url: config.clientUrl,
+    emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
   }
 
   // Grab html and send
-  let html = template.match('<') ? template : await getTemplate(settings, config)
+  let html = template.match('<') ? template : await getTemplate(settings)
   if (!html) throw new Error('Sendmail: No template returned from getTemplate(..)')
   return await sendWithMailgun(settings, html) // note, mailgun errors are resolved
 }
 
-async function getTemplate(settings, config) {
+async function getTemplate(settings) {
   try {
     var templateName = settings.template
     if (!templates[templateName] || settings.isDev) {
-      nunjucks.configure({ noCache: config.env === 'development' })
+      nunjucks.configure({ noCache: settings.isDev })
       // Setup the nunjucks environment
-      let env = new nunjucks.Environment([
-        new nunjucks.FileSystemLoader(`${config.emailTemplateDir}`), // user templates take precedence
+      let nunjucksEnv = new nunjucks.Environment([
+        new nunjucks.FileSystemLoader(`${settings.emailTemplateDir}`), // user templates take precedence
         new nunjucks.FileSystemLoader(`${_dirname}`), // then fallback to nitro default templates
       ])
       // Get the template
-      let template = env.getTemplate(templateName + '.html', true)
+      let template = nunjucksEnv.getTemplate(templateName + '.html', true)
       // Render the template
       let html = template.render({})
       if (settings.skipCssInline && settings.test) {
         templates[templateName] = html
       } else {
         try { 
-          // First try to inline the CSS from the user templates directory (config.emailTemplateDir)
-          templates[templateName] = await inlineCssForPath(html, config.emailTemplateDir)
+          // First try to inline the CSS from the user templates directory
+          templates[templateName] = await inlineCssForPath(html, settings.emailTemplateDir)
         } catch (e) {
           // If the CSS is not found, use default nitro CSS file
           if (templateName == 'reset-password' || templateName == 'welcome') {

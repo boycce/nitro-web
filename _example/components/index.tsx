@@ -15,7 +15,9 @@ import {
 } from 'nitro-web'
 import config from '../client/config'
 
-// Signin page (can be saved onto a seperate file under the components folder)
+console.log(config)
+
+// Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
 export const SigninPage = () => <Signin config={config} />
 SigninPage.route = {
   '/signin': true,
@@ -66,9 +68,12 @@ ResetPasswordPage.route = {
 // }
 
 // Dashboard page
+import { css } from '@emotion/react'
+import { theme } from 'twin.macro'
+
 export function DashboardPage() {
   return (
-    <div>
+    <div css={style}>
       <h1 className="h1 mb-8">Dashboard</h1>
       <p className="text-gray-700">
         Welcome to Nitro, a modular React/Express base project, styled using Tailwind 🚀.
@@ -76,6 +81,11 @@ export function DashboardPage() {
     </div>
   )
 }
+const style = css`
+  p {
+    color: ${theme('colors.dark')};
+  }
+`
 DashboardPage.route = {
   '/': true,
   'meta': { 'title': 'Dashboard - Nitro', layout: 1 },
@@ -223,3 +233,4 @@ PricingPage.route = {
   '/pricing': true,
   'meta': { 'title': 'Pricing - Nitro', layout: 1 },
 }
+

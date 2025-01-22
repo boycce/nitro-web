@@ -490,6 +490,19 @@ export function getCurrencyPrefixWidth (prefix, paddingRight=0) {
   return width
 }
 
+export function getDirectories (path, pwd) {
+  const _pwd = pwd || process.env.PWD
+  return {
+    clientDir: path.join(_pwd, process.env.clientDir || 'client', '/'),
+    componentsDir: path.join(_pwd, process.env.componentsDir || 'components', '/'),
+    distDir: path.join(_pwd, process.env.distDir || ((process.env.clientDir || 'client') + '/dist'), '/'),
+    emailTemplateDir: path.join(_pwd, process.env.emailTemplateDir || 'server/email', '/'),
+    fontsDir: path.join(_pwd, (process.env.clientDir || 'client'), 'fonts', '/'),
+    imgsDir: path.join(_pwd, (process.env.clientDir || 'client'), 'imgs', '/'),
+    tmpDir: path.join(_pwd, process.env.tmpDir || 'tmp', '/'),
+  }
+}
+
 export function getLink (obj, query) {
   /**
    * @param {object} obj - new query object

@@ -1,5 +1,5 @@
 // todo: finish tailwind conversion
-import { css, theme } from 'twin.macro'
+import { css } from '@emotion/react'
 import { DayPicker } from 'react-day-picker'
 import { format, isValid, parse } from 'date-fns'
 import { getCurrencyPrefixWidth } from '../../../util.js'
@@ -124,7 +124,7 @@ const style = () => css`
   .rdp {
     --rdp-cell-size: 34px;
     --rdp-caption-font-size: 12px;
-    --rdp-accent-color: ${theme('colors.primary')};
+    --rdp-accent-color: blue; /* theme('colors.primary') */
     font-size: 13px;
     margin: 0 12px 11px;
     svg {
@@ -179,7 +179,7 @@ const style = () => css`
             &:active {
               color: white;
               &:before {
-                background-color: ${theme('colors.primary')};
+                background-color: blue; /* theme('colors.primary') */
               }
             }
           }
@@ -188,15 +188,15 @@ const style = () => css`
           color: white;
           :before {
             border-radius: 50%;
-            background-color: ${theme('colors.primary')};
+            background-color: blue; /* theme('colors.primary') */
           }
         }
         .rdp-day_range_middle {
-          color: ${theme('colors.dark')};
+          color: black; /* theme('colors.dark') */
           :before {
             border-radius: 0;
             border: 1px solid rgb(151 133 185);
-            background-color: ${theme('colors.primary-light')};
+            background-color:  blue; /* theme('colors.primary-light') */
           }
         }
         .rdp-day_range_start,
