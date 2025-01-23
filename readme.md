@@ -13,15 +13,7 @@ npm i nitro-web
 1. Copy ./_example into your project
 2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "^0.0.1"`
 3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
-4. In tsconfig.json, remove
-```json
-    "paths": {
-      "nitro-web": [
-        "../client/index.js",
-      ],
-    },
-```
-5. Run `npm i`
+4. Run `npm i`
 
 ### Usage
 

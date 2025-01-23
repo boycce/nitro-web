@@ -3,7 +3,8 @@
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
   "repository": "github:boycce/nitro-web",
   "version": "0.0.3",
-  "main": "client.js",
+  "main": "./client/index.js",
+  "types": "./types/client/index.d.ts",
   "type": "module",
   "keywords": [
     "express",
@@ -18,9 +19,21 @@
     "_example"
   ],
   "exports": {
-    ".": "./client/index.js",
-    "./server": "./server/index.js",
-    "./util": "./util.js",
+    ".": {
+      "require": "./client/index.js",
+      "import": "./client/index.js",
+      "types": "./types/client/index.d.ts"
+    },
+    "./server": {
+      "require": "./server/index.js",
+      "import": "./server/index.js",
+      "types": "./types/server/index.d.ts"
+    },
+    "./util": {
+      "require": "./util.js",
+      "import": "./util.js",
+      "types": "./types/util.d.ts"
+    },
     "./.eslintrc.json": "./.eslintrc.json",
     "./webpack.config.js": "./webpack.config.js"
   },
@@ -28,7 +41,8 @@
     "dev": "npm run dev -w example",
     "major": "standard-version --release-as major && npm publish",
     "minor": "standard-version --release-as minor && npm publish",
-    "patch": "standard-version --release-as patch && npm publish"
+    "patch": "standard-version --release-as patch && npm publish",
+    "types": "tsc client/*.js components/**/*.jsx --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },
   "dependencies": {
     "@uiw/color-convert": "^2.3.0",
@@ -85,7 +99,8 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^4.0.0",
     "eslint-webpack-plugin": "^2.7.0",
-    "standard-version": "^9.3.2"
+    "standard-version": "^9.3.2",
+    "typescript": "^5.7.3"
   },
   "engines": {
     "node": "^18"

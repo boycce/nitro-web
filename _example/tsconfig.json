@@ -17,11 +17,6 @@
     "noImplicitThis": true,
     "noStrictGenericChecks": false,
     "outDir": "./dist",
-    "paths": {
-      "nitro-web": [
-        "../client/index.js",
-      ],
-    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,

@@ -1,3 +1,4 @@
+// export const pi = parseFloat(3.142)
 export * from './app.js'
 export * from '../util.js'
 export * as util from '../util.js'
