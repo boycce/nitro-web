@@ -111,7 +111,15 @@
     "skip": {
       "changelog": true,
       "tag": true
-    }
+    },
+    "bumpFiles": [
+      "package.json",
+      "package-lock.json",
+      {
+        "filename": "readme.md",
+        "updater": "./semver-updater.cjs"
+      }
+    ]
   },
   "jest": {
     "transform": {}
