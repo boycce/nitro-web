@@ -1,5 +1,6 @@
 // Component: https://tailwindui.com/components/application-ui/application-shells/sidebar#component-a69d85b6237ea2ad506c00ef1cd39a38
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
+import avatarImg from '../../../client/imgs/avatar.jpg'
 import {
   Bars3Icon,
   HomeIcon,
@@ -55,7 +56,7 @@ export function Sidebar({ Logo }) {
         </button>
         <div className="flex-1 text-sm/6 font-semibold text-gray-900">Dashboard</div>
         <Link to="#">
-          <img alt="" src="/assets/imgs/user.jpg" className="size-8 rounded-full bg-gray-50" />
+          <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
         </Link>
       </div>
       
@@ -155,7 +156,7 @@ function SidebarContents ({ Logo }) {
               to="#"
               className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
             >
-              <img alt="" src="/assets/imgs/user.jpg" className="size-8 rounded-full bg-gray-50" />
+              <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
               <span aria-hidden="true" class="truncate1">{user?.name || 'Guest'}</span>
             </Link>
           </li>

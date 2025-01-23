@@ -2,6 +2,7 @@ import axios from '@hokify/axios'
 import axiosRetry from 'axios-retry'
 import autoprefixer from 'autoprefixer'
 import CleanTerminalPlugin from 'clean-terminal-webpack-plugin'
+import { CleanWebpackPlugin } from 'clean-webpack-plugin'
 import CopyWebpackPlugin from 'copy-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
@@ -15,7 +16,7 @@ import postcssImport from 'postcss-import'
 import postcssNested from 'postcss-nested'
 import postcssFor from 'postcss-for'
 import { createRequire } from 'module'
-import { getDirectories } from './util.js'
+import { getDirectories, getPublicPath } from './util.js'
 
 const _require = createRequire(import.meta.url)
 const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
@@ -29,7 +30,8 @@ axiosRetry(axios, {
 
 // process.traceDeprecation = true
 export const getConfig = (config) => {
-  const { clientDir, componentsDir, distDir, imgsDir, fontsDir } = getDirectories(path, config.pwd)
+  const { clientDir, componentsDir, distDir, imgsDir } = getDirectories(path, config.pwd)
+  const publicPath = getPublicPath(config.env, config.homepage, config.publicPath)
 
   return (env, argv) => [{
     devtool: isBuild ? false : 'source-map',
@@ -178,6 +180,13 @@ export const getConfig = (config) => {
           ],
         },
         {
+          test: /\.(png|jpe?g|gif|woff|woff2|ttf|eot)$/i,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/images/[name].[ext][query]',//[hash][ext][query]
+          },
+        },
+        {
           test: /\.svg$/,
           use: [
             {
@@ -237,7 +246,7 @@ export const getConfig = (config) => {
       // Because of this we manually need to prefix all output filenames with `assets/`.
       filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.js`,
       path: distDir,
-      publicPath: '/',
+      publicPath: publicPath,
     },
     performance: {
       hints: false,
@@ -257,11 +266,11 @@ export const getConfig = (config) => {
     },
     plugins: [
       // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)(),
+      new CleanWebpackPlugin(),
       new CopyWebpackPlugin({
         patterns: [
           { from: imgsDir + 'favicon.png', to: './favicon.png' },
           { from: imgsDir, to: './assets/imgs' },
-          { from: fontsDir, to: './assets/fonts' },
         ],
       }),
       new webpack.DefinePlugin({
@@ -270,6 +279,7 @@ export const getConfig = (config) => {
           isDemo: process.env.isDemo,
           version: config.version,
         }),
+        PUBLIC_PATH: publicPath,
       }),
       new ESLintPlugin({
         extensions: ['js', 'mjs', 'jsx'],

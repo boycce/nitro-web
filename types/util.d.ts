@@ -84,11 +84,11 @@ export function getDirectories(path: any, pwd: any): {
     componentsDir: any;
     distDir: any;
     emailTemplateDir: any;
-    fontsDir: any;
     imgsDir: any;
     tmpDir: any;
 };
 export function getLink(obj: any, query: any): string;
+export function getPublicPath(env: any, homepage: any, publicPath: any): string;
 export function getStripeClientPromise(stripePublishableKey: any): any;
 export function getResponseErrors(errs: any): any;
 export function inArray(array: any, key: any, value: any): any;

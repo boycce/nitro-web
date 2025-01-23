@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "main": "webpack.config.js",
   "type": "module",
+  "homepage": "https://boycce.github.io/nitro-web/",
   "scripts": {
     "build": "NODE_ENV=production webpack --target=web",
     "dev": "clear && npm run dev:lint --silent & npm run dev:server --silent & npm run dev:client --silent",
@@ -49,6 +50,7 @@
     "babel-plugin-macros": "^3.1.0",
     "babel-plugin-react-html-attrs": "^2.1.0",
     "clean-terminal-webpack-plugin": "https://github.com/boycce/clean-terminal-webpack-plugin.git",
+    "clean-webpack-plugin": "^4.0.0",
     "color": "^4.2.3",
     "copy-webpack-plugin": "^12.0.2",
     "core-js": "^3.12.1",

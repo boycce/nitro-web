@@ -14,6 +14,7 @@ export default {
   env: env,
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
+  publicPath: process.env.publicPath,
   testEmail: process.env.testEmail,
 
   awsUrl: process.env.awsUrl,
@@ -121,5 +122,6 @@ export default {
   },
 
   pwd: pwd,
+  homepage: _require(pwd + 'package.json').homepage,
   version: _require(pwd + 'package.json').version,
 }

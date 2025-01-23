@@ -261,9 +261,7 @@ function Option(props) {
 const DropdownIndicator = (props) => {
   return (
     <components.DropdownIndicator {...props}>
-      {/* <img src="/assets/imgs/icons/v.svg" /> */}
       <ChevronDownIcon className="size-6 -my-0.5 -mx-1" />
-      {/* <ChevronDownIcon /> */}
     </components.DropdownIndicator>
   )
 }
@@ -287,8 +285,9 @@ const MultiValueRemove = (props) => {
 
 function Flag({ flag }) {
   if (!flag) return null
+  const publicPath = PUBLIC_PATH // eslint-disable-line
   return (
-    <span class="flag" style={{ backgroundImage: `url(/assets/imgs/flags/${flag}.svg)` }} />
+    <span class="flag" style={{ backgroundImage: `url(${publicPath}assets/imgs/flags/${flag}.svg)` }} />
   )
 }
 
