@@ -1,0 +1,26 @@
+# Application files
+client/dist
+node_modules
+**/node_modules
+*.log
+
+# User files
+./.env
+resources/me
+migrate-mongo-config-*
+
+# Thumbnail and view configuration files
+._*
+.DS_Store
+Desktop.ini
+Thumbs.db
+.~*.xlsx
+.~*.xlsm
+.~*.xls
+
+# External disk files
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.vscode
