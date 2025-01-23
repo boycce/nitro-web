@@ -287,6 +287,7 @@ export const getConfig = (config) => {
       }),
       new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.css` }),
       new HtmlWebpackPlugin({ template: clientDir + 'index.html', filename: distDir + 'index.html' }),
+      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPath }),
       new CleanTerminalPlugin({ skipFirstRun: true }),
       // !isBuild && new ReactRefreshWebpackPlugin({ overlay: false }),
     ].filter(Boolean),
@@ -311,4 +312,27 @@ export const getConfig = (config) => {
       ignored: new RegExp(`(${componentsDir}.*\\.api\\.js$|node_modules/(?!cherry))`),
     },
   }]
+}
+
+class InterpolateHtmlPlugin {
+  constructor(htmlWebpackPlugin, replacements) {
+    this.htmlWebpackPlugin = htmlWebpackPlugin
+    this.replacements = replacements
+  }
+  apply(compiler) {
+    compiler.hooks.compilation.tap('InterpolateHtmlPlugin', compilation => {
+      this.htmlWebpackPlugin
+        .getHooks(compilation)
+        .afterTemplateExecution.tap('InterpolateHtmlPlugin', data => {
+          // Run HTML through a series of user-specified string replacements.
+          for (const key in this.replacements) {
+            const value = this.replacements[key]
+            data.html = data.html.replace(
+              new RegExp('{' + key + '}', 'g'),
+              value
+            )
+          }
+        })
+    })
+  }
 }
