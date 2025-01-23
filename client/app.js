@@ -1,4 +1,4 @@
-import { createBrowserRouter, redirect, useParams, RouterProvider } from 'react-router-dom' 
+import { createBrowserRouter, createHashRouter, redirect, useParams, RouterProvider } from 'react-router-dom' 
 import ReactDOM from 'react-dom/client'
 import { createContainer } from 'react-tracked'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from '../util.js'
@@ -7,8 +7,9 @@ export async function setupApp(config, layouts) {
   // Fetch state and init app
   const settings = {
     middleware: Object.assign(defaultMiddleware, config.middleware || {}),
-    beforeApp: config.beforeApp || defaultBeforeApp,
+    beforeApp: (config.beforeApp || defaultBeforeApp).bind(null, config),
     beforeStoreUpdate: config.beforeStoreUpdate || defaultBeforeStoreUpdate,
+    isDemo: config.isDemo,
     layouts: layouts,
   }
   if (!settings.layouts) throw new Error('layouts are required')
@@ -161,7 +162,7 @@ function getRouter(settings) {
 
   // Generate createBrowserRouter array
   let nonce
-  const createBrowserRouterArray = layouts.map((routes, i) => {
+  const createRouterArray = layouts.map((routes, i) => {
     if (!routes) return
     const Layout = settings.layouts[i]
     if (!Layout) throw new Error(`Please pass Layout${i+1 || ''} to appSetup()`)
@@ -191,11 +192,12 @@ function getRouter(settings) {
     }
   }).filter(o => o)
 
-  // console.log(createBrowserRouterArray) ////////////////////////
+  // console.log(createRouterArray) ////////////////////////
 
-  // Create BrowserRouter (if there is no error above otheriwse router will be empty)
-  if (createBrowserRouterArray.length) {
-    return createBrowserRouter(createBrowserRouterArray)
+  // Create Browser/HashRouter (if there is no error above otheriwse router will be empty)
+  if (createRouterArray.length) {
+    if (settings.isDemo) return createHashRouter(createRouterArray) // Use HashRouter for demo
+    else return createBrowserRouter(createRouterArray) // Use BrowserRouter otherwise
   }
 }
 
@@ -234,11 +236,12 @@ function scrollbarElement() {
 
 // ---- Overridable defaults ------------
 
-async function defaultBeforeApp() {
+async function defaultBeforeApp(config) {
   /**
    * Gets called once before React is initialised
    * @return {promise} - newStoreData which is used for window.store, later merged with the config.store() defaults
    */
+  let apiAvailable
   let newStoreData
   try {
     // Unload prehot data
@@ -246,14 +249,15 @@ async function defaultBeforeApp() {
       window.sharedStoreCache = window.prehot.sharedStoreCache
       delete window.prehot
     }
-    if (!window.sharedStoreCache) {
-      newStoreData = (await axios().get('/api/state', { 'axios-retry': { retries: 7 }, timeout: 4000 })).data
+    if (!window.sharedStoreCache && !config.isDemo) {
+      newStoreData = (await axios().get('/api/state', { 'axios-retry': { retries: 3 }, timeout: 4000 })).data
+      apiAvailable = true
     }
   } catch (err) {
     console.error('We had trouble connecting to the API, please refresh')
     console.log(err)
   }
-  return newStoreData || window.sharedStoreCache
+  return { ...(newStoreData || window.sharedStoreCache), apiAvailable }
 }
 
 function defaultBeforeStoreUpdate(store, newStoreData) {

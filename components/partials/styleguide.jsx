@@ -142,8 +142,9 @@ export function Styleguide({ config }) {
             name="multi"
             isMulti={true}
             options={[
-              { value: 'edit', label: 'Edit' },
-              { value: 'delete', label: 'Delete' },
+              { value: 'blue', label: 'Blue' },
+              { value: 'green', label: 'Green' },
+              { value: 'yellow', label: 'Yellow' },
             ]}
           />
         </div>

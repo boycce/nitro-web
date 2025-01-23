@@ -2,17 +2,20 @@
  * Any component with a .route property is called a page component. Any page component found under /components 
  * will be automatically imported and setup by the client router, we're just listing them all here for the sake of example.
  */
+import { css, theme } from 'twin.macro'
 import { 
   Signin, 
   Signup, 
   ResetInstructions, 
   ResetPassword, 
+  Dashboard,
+  Styleguide, 
+  NotFound,
   // SettingsAccount, 
   // SettingsBusiness, 
   // SettingsTeam, 
-  Styleguide, 
-  NotFound,
 } from 'nitro-web'
+
 import config from '../client/config'
 
 // Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
@@ -66,23 +69,7 @@ ResetPasswordPage.route = {
 // }
 
 // Dashboard page
-import { css, theme } from 'twin.macro'
-
-export function DashboardPage() {
-  return (
-    <div css={style}>
-      <h1 className="h1 mb-8">Dashboard</h1>
-      <p className="text-gray-700">
-        Welcome to Nitro, a modular React/Express base project, styled using Tailwind 🚀.
-      </p>
-    </div>
-  )
-}
-const style = css`
-  p,.example-usage-of-tailwind-variable {
-    color: ${theme('colors.dark')};
-  }
-`
+export const DashboardPage = () => <Dashboard config={config} />
 DashboardPage.route = {
   '/': true,
   'meta': { 'title': 'Dashboard - Nitro', layout: 1 },
@@ -102,7 +89,7 @@ NotFoundPage.route = {
   'meta': { 'title': 'Nothing found - Nitro', layout: 1 },
 }
 
-// Tailwind UI pricing page example
+// Custom Tailwind UI page example
 export function PricingPage() {
   const tiers = [
     {
@@ -135,7 +122,7 @@ export function PricingPage() {
     return classes.filter(Boolean).join(' ')
   }
   return (
-    <div className="relative isolate bg-white py-12 md:py-16 px-6">
+    <div className="relative isolate bg-white py-12 md:py-16 px-6" css={style}>
       <div aria-hidden="true" className="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl">
         <div
           style={{
@@ -226,8 +213,12 @@ export function PricingPage() {
     </div>
   )
 }
+const style = css`
+  .example-usage-of-tailwind-variable {
+    color: ${theme('colors.dark')};
+  }
+`
 PricingPage.route = {
   '/pricing': true,
   'meta': { 'title': 'Pricing - Nitro', layout: 1 },
 }
-

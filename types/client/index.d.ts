@@ -3,6 +3,9 @@ export * from "../util.js";
 export * as util from "../util.js";
 export { Signin } from "../components/auth/signin.jsx";
 export { Signup } from "../components/auth/signup.jsx";
+export { Dashboard } from "../components/dashboard/dashboard.jsx";
+export { NotFound } from "../components/partials/not-found.jsx";
+export { Styleguide } from "../components/partials/styleguide.jsx";
 export { Accordion } from "../components/partials/element/accordion.jsx";
 export { Avatar } from "../components/partials/element/avatar.jsx";
 export { Button } from "../components/partials/element/button.jsx";
@@ -22,7 +25,5 @@ export { Toggle } from "../components/partials/form/toggle.jsx";
 export { Layout1 } from "../components/partials/layout/layout1.jsx";
 export { Layout2 } from "../components/partials/layout/layout2.jsx";
 export { IsFirstRender } from "../components/partials/is-first-render.js";
-export { NotFound } from "../components/partials/not-found.jsx";
-export { Styleguide } from "../components/partials/styleguide.jsx";
 export { ResetInstructions, ResetPassword } from "../components/auth/reset.jsx";
 //# sourceMappingURL=index.d.ts.map

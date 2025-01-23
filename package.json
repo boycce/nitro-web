@@ -40,11 +40,14 @@
   "scripts": {
     "dev": "npm run dev -w example",
     "dev:client": "npm run dev:client -w example",
+    "dev:client-only": "isDemo=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
     "build": "npm run build -w example",
+    "deploy": "npm run build && npm gh-pages -d ./_example/client/dist",
     "major": "standard-version --release-as major && npm publish",
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version --release-as patch && npm publish",
+    "start": "npm run start -w example",
     "types": "tsc client/*.js components/**/*.jsx --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },
   "dependencies": {
@@ -101,6 +104,7 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^4.0.0",
     "eslint-webpack-plugin": "^2.7.0",
+    "gh-pages": "^6.3.0",
     "standard-version": "^9.3.2",
     "tailwindcss": "^3.4.17",
     "twin.macro": "^3.4.1",

@@ -1,4 +1,3 @@
-import { css, theme } from 'twin.macro'
 import * as util from '../../util.js'
 import { Topbar } from '../partials/element/topbar.jsx'
 import { Input } from '../partials/form/input.jsx'
@@ -28,7 +27,7 @@ export function Signin({ config }) {
       util.axios().get('/api/signout')
         .then(() => isLoading[1](''))
         .then(() => navigate({ pathname: '/signin', search: location.search }, { replace: true }))
-        .catch(err => console.error(err))
+        .catch(err => console.error(err) || isLoading[1](''))
     }
   }, [isSignout])
 
@@ -47,8 +46,7 @@ export function Signin({ config }) {
   }
 
   return (
-    <div css={style}>
-    {/* <div> */}
+    <div>
       <Topbar title={<>Sign in to your Account</>} />
 
       <form onSubmit={onSubmit}>
@@ -74,9 +72,3 @@ export function Signin({ config }) {
     </div>
   )
 }
-
-const style = css`
-  .example-usage-of-tailwind-variable {
-    color: ${theme('colors.primary')};
-  }
-`

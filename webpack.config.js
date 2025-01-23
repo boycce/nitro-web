@@ -267,6 +267,7 @@ export const getConfig = (config) => {
       new webpack.DefinePlugin({
         CONFIG: JSON.stringify({
           ...pick(config, config.inject ? config.inject.split(' ') : []),
+          isDemo: process.env.isDemo,
           version: config.version,
         }),
       }),
