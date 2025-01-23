@@ -63,3 +63,8 @@ npm run start
 - `jest: ^29.7.0`
 - `migrate-mongo: ^10.0.0`
 - `eslint-plugin-jest: ^28.9.0`
+
+### Package notes
+
+- Added twin.macro is required as a dev dependency to ./. Note that this may cause errors when npm linking nitro-web, since dev deps are not installed.
+- Added tailwindcss^3 as a dev dependency to ./ to stop tailwind^4.0.0 from being installed
