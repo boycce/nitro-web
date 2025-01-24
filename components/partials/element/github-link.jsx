@@ -2,8 +2,10 @@ import GithubIcon from '../../../client/imgs/github.svg'
 
 export function GithubLink({ filename }) {
   const base = 'https://github.com/boycce/nitro-web/blob/master/'
-  // Since webpack is started from ./_example, we need to remove ../ from filename
-  const link = base + filename.replace(/^\.\.\//, '')
+  // Filenames are relative to the webpack start directory
+  // 1. Remove ../ from filename (i.e. for _example build)
+  // 2. Remove node_modules/nitro-web/ from filename (i.e. for packages using nitro-web)
+  const link = base + filename.replace(/^(\.\.\/|.*node_modules\/nitro-web\/)/, '')
   
   return (
     // <a href={link}>Go to Github</a>
