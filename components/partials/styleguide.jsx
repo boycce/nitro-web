@@ -6,6 +6,7 @@ import { Select } from './form/select.jsx'
 import { Dropdown } from './element/dropdown.jsx'
 import { Button } from './element/button.jsx'
 import { Checkbox } from './form/checkbox.jsx'
+import { GithubLink } from './element/github-link.jsx'
 
 export function Styleguide({ config }) {
   const [customerSearch, setCustomerSearch] = useState('')
@@ -54,6 +55,7 @@ export function Styleguide({ config }) {
 
   return (
     <div class="mb-10 text-left max-w-[1100px]">
+      <GithubLink filename={__filename} />
       <div class="mb-7">
         <h1 class="h1 m-0">Styleguide</h1>
       </div>

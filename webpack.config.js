@@ -233,6 +233,9 @@ export const getConfig = (config) => {
         },
       ],
     },
+    node: {
+      __filename: true,
+    },
     output: {
       // devtoolModuleFilenameTemplate: (info) => {
       //   // DevTools doesn't link webpack:// sourcemap filepaths, force file://.
