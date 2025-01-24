@@ -11,7 +11,7 @@ npm i nitro-web
 ### Install
 
 1. Copy ./_example into your project
-2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "~0.0.10"`
+2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "~0.0.11"`
 3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
 4. Run `npm i`
 
