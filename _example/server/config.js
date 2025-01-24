@@ -123,5 +123,6 @@ export default {
 
   pwd: pwd,
   homepage: _require(pwd + 'package.json').homepage,
+  repository: _require(pwd + 'package.json').repository,
   version: _require(pwd + 'package.json').version,
 }

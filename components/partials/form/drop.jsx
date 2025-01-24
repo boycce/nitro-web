@@ -1,5 +1,6 @@
 import { isRegex, deepFind, s3Image } from '../../../util.js'
 import { DropHandler } from './drop-handler.jsx'
+import noImage from '../../../client/imgs/no-image.svg'
 
 export function Drop({ awsUrl, className, id, name, onChange, multiple, state, ...props }) {
   /**
@@ -108,7 +109,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
             {
               urls.map((url, i) => (
                 <div key={i} class="flex align-items-center gap-1">
-                  <img src={url} width="100%" />
+                  <img src={url || noImage} width="100%" />
                 </div>
               ))
             }

@@ -1,5 +1,6 @@
 import { s3Image } from '../../../util.js'
 import { Initials } from './initials.jsx'
+import noImage from '../../../client/imgs/no-image.svg'
 import avatarImg from '../../../client/imgs/avatar.jpg'
 
 export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className }) {
@@ -22,7 +23,7 @@ export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className 
 
   return (
     user.avatar 
-    ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small')} /> 
+    ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small') || noImage} /> 
     : showPlaceholderImage ? <img class={classes} src={avatarImg} width="30px" /> 
     : <Initials class={classes} icon={{ initials: getInitials(user), hex: getHex(user) }} isRound={isRound} isMedium={true} />
   )

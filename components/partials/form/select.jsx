@@ -285,7 +285,8 @@ const MultiValueRemove = (props) => {
 
 function Flag({ flag }) {
   if (!flag) return null
-  const publicPath = PUBLIC_PATH // eslint-disable-line
+  // todo: public needs to come from webpack
+  const publicPath = '/'
   return (
     <span class="flag" style={{ backgroundImage: `url(${publicPath}assets/imgs/flags/${flag}.svg)` }} />
   )
@@ -323,36 +324,6 @@ const style = () => css`
   } */
 
   /*
-  todo: not yet accounted for (maybe remove)
-
-  .bb:not(:last-child) {
-    // option border
-    position: relative;
-    margin-bottom: 6px;
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      height: 2px;
-      width: 100%;
-      background-color: $border-color;
-    }
-  }
-  .bt:not(:first-child) {
-    // option border
-    position: relative;
-    margin-top: 6px;
-    &:after {
-      content: "";
-      position: absolute;
-      top: -4px;
-      left: 0;
-      height: 2px;
-      width: 100%;
-      background-color: $border-color;
-    }
-  }
   .flag {
     // https://github.com/lipis/flag-icons
     flex-shrink: 0;

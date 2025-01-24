@@ -205,6 +205,7 @@ export const getConfig = (config) => {
                         },
                       },
                     },
+                    // 'removeDimensions', (dont need this, just use width/height={undefined} if required)
                     // {
                     //   name: 'addClassesToSVGElement',
                     //   params: {
@@ -279,7 +280,6 @@ export const getConfig = (config) => {
           isDemo: process.env.isDemo,
           version: config.version,
         }),
-        PUBLIC_PATH: publicPath,
       }),
       new ESLintPlugin({
         extensions: ['js', 'mjs', 'jsx'],

@@ -11,7 +11,7 @@ npm i nitro-web
 ### Install
 
 1. Copy ./_example into your project
-2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "^0.0.8"`
+2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "~0.0.8"`
 3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
 4. Run `npm i`
 
@@ -66,5 +66,5 @@ npm run start
 
 ### Package notes
 
-- Added twin.macro is required as a dev dependency to ./. Note that this may cause errors when npm linking nitro-web, since dev deps are not installed.
-- Added tailwindcss^3 as a dev dependency to ./ to stop tailwind^4.0.0 from being installed
+- Added twin.macro is required as a peer dependency to ./. 
+- Added tailwindcss^3 as a peer dependency to ./ to stop tailwind^4.0.0 from being installed

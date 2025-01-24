@@ -16,7 +16,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Sidebar({ Logo }) {
+export function Sidebar({ Logo, menu, links }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <>
@@ -39,14 +39,14 @@ export function Sidebar({ Logo }) {
                 </button>
               </div>
             </TransitionChild>
-            <SidebarContents Logo={Logo} />
+            <SidebarContents Logo={Logo} menu={menu} links={links} />
           </DialogPanel>
         </div>
       </Dialog>
 
       {/* Static sidebar for desktop */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
-        <SidebarContents Logo={Logo} />
+        <SidebarContents Logo={Logo} menu={menu} links={links} />
       </div>
       
       {/* mobile sidebar closed */}
@@ -65,7 +65,7 @@ export function Sidebar({ Logo }) {
   )
 }
 
-function SidebarContents ({ Logo }) {
+function SidebarContents ({ Logo, menu, links }) {
   const location = useLocation()
   const [{ user }] = sharedStore.useTracked()
 
@@ -75,45 +75,49 @@ function SidebarContents ({ Logo }) {
     else return ''
   }
 
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon },
-    { name: 'Pricing (example)', href: '/pricing', icon: UsersIcon },
-    { name: 'Styleguide', href: '/styleguide', icon: PaintBrushIcon },
-    { name: 'Signout', href: '/signout', icon: ArrowLeftCircleIcon },
+  const _menu = menu || [
+    { name: 'Dashboard', to: '/', Icon: HomeIcon },
+    { name: 'Styleguide', to: '/styleguide', Icon: PaintBrushIcon },
+    { name: 'Pricing (example)', to: '/pricing', Icon: UsersIcon },
+    { name: 'Signout', to: '/signout', Icon: ArrowLeftCircleIcon },
   ]
 
-  const teams = [
-    { id: 1, name: 'Team 1', href: '#', initial: 'T' },
-    { id: 2, name: 'Team 2', href: '#', initial: 'H' },
+  const _links = links || [
+    { name: 'Team 1', to: '#', initial: 'T' },
+    { name: 'Team 2', to: '#', initial: 'H' },
   ]
 
   // Sidebar component, swap this element with another sidebar if you like
   return (
     <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white py-5 px-10 lg:border-r lg:border-gray-200">
       <div className="flex h-16 shrink-0 items-center">
-        <Logo alt="Nitro" width="70" />
+        <Link to="/">
+          <Logo alt="Nitro" width="70" height={undefined} />
+        </Link>
       </div>
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => (
+              {_menu.map((item) => (
                 <li key={item.name}>
                   <Link
-                    to={item.href}
+                    to={item.to}
                     className={classNames(
-                      isActive(item.href)
+                      isActive(item.to)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
                       'group flex gap-x-3 items-center rounded-md p-2 text-sm/6 font-semibold'
                     )}
                   >
-                    <item.icon
-                      className={classNames(
-                        isActive(item.href) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
-                        'size-5 shrink-0'
-                      )}
-                    />
+                    { item.Icon && 
+                      <item.Icon
+                        className={classNames(
+                          isActive(item.to) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                          'size-5 shrink-0'
+                        )}
+                      />
+                    }
                     {item.name}
                   </Link>
                 </li>
@@ -121,14 +125,14 @@ function SidebarContents ({ Logo }) {
             </ul>
           </li>
           <li>
-            <div className="text-xs/6 font-semibold text-gray-400">Your teams</div>
+            <div className="text-xs/6 font-semibold text-gray-400">Other Links</div>
             <ul role="list" className="-mx-2 mt-2 space-y-1">
-              {teams.map((team) => (
+              {_links.map((team) => (
                 <li key={team.name}>
                   <Link
-                    to={team.href}
+                    to={team.to}
                     className={classNames(
-                      isActive(team.href)
+                      isActive(team.to)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
                       'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
@@ -136,7 +140,7 @@ function SidebarContents ({ Logo }) {
                   >
                     <span
                       className={classNames(
-                        isActive(team.href)
+                        isActive(team.to)
                           ? 'border-indigo-600 text-indigo-600'
                           : 'border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600',
                         'flex size-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium'

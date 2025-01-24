@@ -2,6 +2,7 @@
   "name": "nitro-web",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
   "repository": "github:boycce/nitro-web",
+  "homepage": "https://boycce.github.io/nitro-web/",
   "version": "0.0.8",
   "main": "./client/index.js",
   "types": "./types/client/index.d.ts",
@@ -43,9 +44,9 @@
     "dev:client-only": "isDemo=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
     "build": "isDemo=true npm run build -w example",
-    "major": "standard-version --release-as major && npm publish",
-    "minor": "standard-version --release-as minor && npm publish",
-    "patch": "standard-version --release-as patch && npm publish",
+    "major": "npm run types && standard-version --release-as major && npm publish",
+    "minor": "npm run types && standard-version --release-as minor && npm publish",
+    "patch": "npm run types && standard-version --release-as patch && npm publish",
     "start": "npm run start -w example",
     "types": "tsc client/*.js components/**/*.jsx --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },
@@ -87,26 +88,18 @@
     "monastery": "^3.5.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "stripe": "^9.16.0"
+    "stripe": "^9.16.0",
+    "tailwindcss": "^3.4.17",
+    "twin.macro": "^3.4.1"
   },
   "devDependencies": {
     "@emotion/eslint-plugin": "^11.11.0",
-    "@emotion/react": "^11.11.4",
-    "@emotion/styled": "^11.11.4",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "@typescript-eslint/eslint-plugin": "^8.18.1",
-    "@typescript-eslint/parser": "^8.18.1",
     "babel-eslint": "^10.0.3",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^4.0.0",
-    "eslint-webpack-plugin": "^2.7.0",
-    "standard-version": "^9.3.2",
-    "tailwindcss": "^3.4.17",
-    "twin.macro": "^3.4.1",
-    "typescript": "^5.7.3"
+    "standard-version": "^9.3.2"
   },
   "engines": {
     "node": "^18"
@@ -126,9 +119,6 @@
         "updater": "./semver-updater.cjs"
       }
     ]
-  },
-  "jest": {
-    "transform": {}
   },
   "author": "",
   "license": "ISC"
