@@ -1,13 +1,19 @@
-// Shared store
+// Ambient type declarations
+
+// Store
 declare global {
   const sharedStore: Record<string, unknown>
 }
 
-// Svgs
+// Wepback: Svgs
 declare module '*.svg' {
   const content: string | React.FC<React.SVGProps<SVGElement>>
-  export default content
 }
 
-// Webpack config
+// Wepback: Images
+declare module '*.jpg' {
+  const content: string
+}
+
+// Webpack: environment variable
 declare const CONFIG: Record<string, string>

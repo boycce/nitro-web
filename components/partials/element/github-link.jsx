@@ -1,3 +1,4 @@
+import { css } from 'twin.macro'
 import GithubIcon from '../../../client/imgs/github.svg'
 
 export function GithubLink({ filename }) {
@@ -9,8 +10,12 @@ export function GithubLink({ filename }) {
   
   return (
     // <a href={link}>Go to Github</a>
-    <a href={link} className="fixed top-0 right-0">
+    <a href={link} className="fixed top-0 right-0" css={style}>
       <GithubIcon />
     </a>
   )
 }
+
+const style = css`
+  //
+`

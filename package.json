@@ -5,7 +5,7 @@
   "homepage": "https://boycce.github.io/nitro-web/",
   "version": "0.0.11",
   "main": "./client/index.js",
-  "types": "./types/client/index.d.ts",
+  "types": "./types/index.d.ts",
   "type": "module",
   "keywords": [
     "express",
@@ -23,7 +23,7 @@
     ".": {
       "require": "./client/index.js",
       "import": "./client/index.js",
-      "types": "./types/client/index.d.ts"
+      "types": "./types/index.d.ts"
     },
     "./server": {
       "require": "./server/index.js",
@@ -48,7 +48,7 @@
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version --release-as patch && npm publish",
     "start": "npm run start -w example",
-    "types": "tsc client/*.js components/**/*.jsx --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
+    "types": "tsc client/*.js components/**/*.jsx types/global.d.ts --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },
   "dependencies": {
     "@uiw/color-convert": "^2.3.0",
@@ -91,15 +91,6 @@
     "stripe": "^9.16.0",
     "tailwindcss": "^3.4.17",
     "twin.macro": "^3.4.1"
-  },
-  "devDependencies": {
-    "@emotion/eslint-plugin": "^11.11.0",
-    "babel-eslint": "^10.0.3",
-    "eslint": "^8.57.1",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-react": "^7.19.0",
-    "eslint-plugin-react-hooks": "^4.0.0",
-    "standard-version": "^9.3.2"
   },
   "engines": {
     "node": "^18"
