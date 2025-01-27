@@ -1,4 +1,5 @@
-import { ucFirst, fullName } from '../../util.js'
+// @ts-nocheck
+import { ucFirst, fullName } from 'nitro-web/util'
 
 export default {
 

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import fs from 'fs'
 import path, { dirname } from 'path'
 import http from 'http'
@@ -8,8 +9,8 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import sortRouteAddressesNodeps from 'sort-route-addresses-nodeps'
 
-import { sendEmail } from './email/index.js'
-import * as util from '../util.js'
+import { sendEmail } from 'nitro-web/server'
+import * as util from 'nitro-web/util'
 
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 

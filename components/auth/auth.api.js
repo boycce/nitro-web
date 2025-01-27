@@ -1,11 +1,12 @@
+// @ts-nocheck
 import MongoStore from 'connect-mongo'
 import crypto from 'crypto'
 import expressSession from 'express-session'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import db from 'monastery'
-import { sendEmail } from '../../server/email/index.js'
-import * as util from '../../util.js'
+import { sendEmail } from 'nitro-web/server'
+import * as util from 'nitro-web/util'
 // import stripeController from '../billing/stripe.api.js'
 
 let config = {}

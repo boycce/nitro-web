@@ -18,11 +18,14 @@
     "noImplicitThis": true,
     "noStrictGenericChecks": false,
     "outDir": "./dist",
+    "paths": {
+      "types": ["./types.ts"]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es6",
+    "target": "es6"
   },
-  "include": ["client", "components", "types"]
+  "include": ["client", "components", "types"],
 }

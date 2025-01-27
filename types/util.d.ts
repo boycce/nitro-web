@@ -88,7 +88,6 @@ export function getDirectories(path: any, pwd: any): {
     tmpDir: any;
 };
 export function getLink(obj: any, query: any): string;
-export function getPublicPath(env: any, homepage: any, publicPath: any): string;
 export function getStripeClientPromise(stripePublishableKey: any): any;
 export function getResponseErrors(errs: any): any;
 export function inArray(array: any, key: any, value: any): any;
@@ -134,7 +133,18 @@ export function mongoDocWithinPassedAddress(address: any, km: any, prefix: any):
 export function mongoPointDifference(point1: any, point2: any): string;
 export function objectMap(object: any, fn: any): {};
 export function omit(obj: any, fields: any): any;
-export function onChange(setState: any, event: any, beforeSetState: any): any;
+/**
+ * Updates state from an input event, you can also update deep state properties
+ * @param {Function} setState
+ * @param {Empty | Event | Array[{string}, {string|number|fn}]}
+ *   {Empty} - pass undefined to return a reusable function, e.g. const _onChange = onChange(setState)
+ *   {Event} - pass the event object,                        e.g. <input onChange={_onChange}>
+ *   {Array} - pass an array with [path, value],             e.g. <input onChange={() => _onChange(['name', 'Joe'])}>
+ * @param {Function} [beforeSetState] - optional function to run before setting the state
+ *
+ * @return {Function | Promise({state, chunks, target})}
+ */
+export function onChange(setState: Function, event: any, beforeSetState?: Function): Function | Promise<any>;
 export function pad(num: any, padLeft: any, fixedRight: any): any;
 export function pick(obj: any, keys: any): {};
 export function queryObject(search: any, assignTrue: any): any;

@@ -18,6 +18,9 @@
     "noImplicitThis": true,
     "noStrictGenericChecks": false,
     "outDir": "./dist",
+    "paths": {
+      "types": ["./types.ts"]
+    },
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": true,

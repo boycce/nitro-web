@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import axios from '@hokify/axios'
 import nodemailer from 'nodemailer'
 import mailgun from 'nodemailer-mailgun-transport'
@@ -6,7 +7,7 @@ import inlineCss from 'inline-css'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import path from 'path'
-import { getDirectories } from '../../util.js'
+import { getDirectories } from 'nitro-web/util'
 
 let templates = {}
 let nodemailerMailgun = undefined

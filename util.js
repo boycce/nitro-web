@@ -1,3 +1,4 @@
+// @ts-nocheck
 import _axios from '@hokify/axios'
 import axiosRetry from 'axios-retry'
 import dateformat from 'dateformat'
@@ -59,7 +60,7 @@ export function buildUrl (url, parameters) {
    */
   const params = Object.keys(parameters).map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(parameters[p])}`)
   return [url, params.join('&')].join('?')
-}
+}   
 
 export function camelCase (str, capitaliseFirst, allowNumber) {
   let regex = (capitaliseFirst ? '(?:^[a-z0-9]|' : '(?:') + '[-]+[a-z0-9])'
@@ -516,27 +517,6 @@ export function getLink (obj, query) {
   return queryString(newQueryObj) || '?'
 }
 
-export function getPublicPath(env, homepage, publicPath) {
-  /**
-   * Returns public path used for webapck (we can't use relative paths)
-   * @param {string} env - 'development', 'staging', 'production'
-   * @param {string} publicPath - proces.env.publicPath
-   * @param {string} homepage - package.json homepage
-   */
-  if (publicPath) {
-    const publicPathObj = new URL(publicPath, 'https://domain.com')
-    return publicPathObj.pathname
-
-  } else if (homepage) {
-    const homepageObj = new URL(homepage, 'https://domain.com')
-    if (env === 'development') return '/'
-    else return homepageObj.pathname
-
-  } else {
-    return '/'
-  }
-}
-
 export function getStripeClientPromise (stripePublishableKey) {
   return global.stripeClientPromise || (global.stripeClientPromise = loadStripe(stripePublishableKey))
 }
@@ -787,19 +767,19 @@ export function omit (obj, fields) {
   return shallowCopy
 }
 
+/**
+ * Updates state from an input event, you can also update deep state properties
+ * @param {Function} setState
+ * @param {Empty | Event | Array[{string}, {string|number|fn}]}
+ *   {Empty} - pass undefined to return a reusable function, e.g. const _onChange = onChange(setState)
+ *   {Event} - pass the event object,                        e.g. <input onChange={_onChange}>
+ *   {Array} - pass an array with [path, value],             e.g. <input onChange={() => _onChange(['name', 'Joe'])}>
+ * @param {Function} [beforeSetState] - optional function to run before setting the state
+ * 
+ * @return {Function | Promise({state, chunks, target})}
+ */
+/////////////////////////////////////////////////////////////////////convert to bind
 export function onChange (setState, event, beforeSetState) {
-  /**
-   * Updates state from an input event, you can also update deep state properties
-   * 
-   * @param {function} setState
-   * @param {Empty | Event | Array[{string}, {string|number|fn}]}
-   *   {Empty} - pass undefined to return a reusable function, e.g. const _onChange = onChange(setState)
-   *   {Event} - pass the event object,                        e.g. <input onChange={_onChange}>
-   *   {Array} - pass an array with [path, value],             e.g. <input onChange={() => _onChange(['name', 'Joe'])}>
-   * @param {function} beforeSetState - optional function to run before setting the state
-   * 
-   * @return {Function | Promise({state, chunks, target})}
-   */
   if (typeof event === 'undefined') {
     return onChange.bind(this, setState)
   }

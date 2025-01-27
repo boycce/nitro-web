@@ -3,6 +3,7 @@
  * will be automatically imported and setup by the client router, we're just listing them all here for the sake of example.
  */
 import { css, theme } from 'twin.macro'
+import config from '../client/config'
 import { 
   Signin, 
   Signup, 
@@ -16,7 +17,6 @@ import {
   // SettingsTeam, 
 } from 'nitro-web'
 
-import config from '../client/config'
 
 // Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
 export const SigninPage = () => <Signin config={config} />

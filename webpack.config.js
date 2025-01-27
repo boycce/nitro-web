@@ -16,7 +16,7 @@ import postcssImport from 'postcss-import'
 import postcssNested from 'postcss-nested'
 import postcssFor from 'postcss-for'
 import { createRequire } from 'module'
-import { getDirectories, getPublicPath } from './util.js'
+import { getDirectories } from 'nitro-web/util'
 
 const _require = createRequire(import.meta.url)
 const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
@@ -278,10 +278,8 @@ export const getConfig = (config) => {
         ],
       }),
       new webpack.DefinePlugin({
-        CONFIG: JSON.stringify({
+        INJECTED: JSON.stringify({
           ...pick(config, config.inject ? config.inject.split(' ') : []),
-          isDemo: process.env.isDemo,
-          version: config.version,
         }),
       }),
       new ESLintPlugin({
@@ -337,5 +335,26 @@ class InterpolateHtmlPlugin {
           }
         })
     })
+  }
+}
+
+function getPublicPath(env, homepage, publicPath) {
+  /**
+   * Returns public path used for webapck (we can't use relative paths)
+   * @param {string} env - 'development', 'staging', 'production'
+   * @param {string} publicPath - proces.env.publicPath
+   * @param {string} homepage - package.json homepage
+   */
+  if (publicPath) {
+    const publicPathObj = new URL(publicPath, 'https://domain.com')
+    return publicPathObj.pathname
+
+  } else if (homepage) {
+    const homepageObj = new URL(homepage, 'https://domain.com')
+    if (env === 'development') return '/'
+    else return homepageObj.pathname
+
+  } else {
+    return '/'
   }
 }

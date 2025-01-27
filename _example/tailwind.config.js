@@ -11,7 +11,7 @@ export default {
     relative: true,
     files: [
       './components/**/*.{ts,tsx}',
-      path.join(nitroDir, '../components/**/*.{js,jsx}'),
+      path.join(nitroDir, '../components/**/*.{ts,tsx}'),
     ],
   },
   experimental: {

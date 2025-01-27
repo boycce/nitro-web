@@ -1,1 +1,2 @@
-export default { ...CONFIG } // Environment variables from webpack
+export type Config = import('nitro-web/types').Config & {}
+export default { ...INJECTED } as Config

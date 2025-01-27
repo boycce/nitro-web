@@ -5,17 +5,21 @@ const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'develop
 const pwd = process.env.PWD + '/'
 
 export default {
-  inject: 'awsUrl clientUrl currencies countries env googleMapsApiKey stripePublishableKey testEmail',
+  inject: 'awsUrl clientUrl currencies countries env googleMapsApiKey isStatic placeholderEmail stripePublishableKey version',
 
   clientUrl: process.env.originUrl || 'http://localhost:3000',
   emailFrom: process.env.emailFrom,
   emailReplyTo: process.env.emailReplyTo,
   emailTestMode: process.env.emailTestMode,
   env: env,
+  homepage: _require(pwd + 'package.json').homepage,
+  isStatic: process.env.isStatic,
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
+  placeholderEmail: process.env.placeholderEmail,
   publicPath: process.env.publicPath,
-  testEmail: process.env.testEmail,
+  pwd: pwd, // change to rootDir
+  version: _require(pwd + 'package.json').version,
 
   awsUrl: process.env.awsUrl,
   googleMapsApiKey: process.env.googleMapsApiKey,
@@ -120,9 +124,4 @@ export default {
       else res.unauthorized('Please sign in first.')
     },
   },
-
-  pwd: pwd,
-  homepage: _require(pwd + 'package.json').homepage,
-  repository: _require(pwd + 'package.json').repository,
-  version: _require(pwd + 'package.json').version,
 }

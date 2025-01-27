@@ -4,8 +4,7 @@
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "version": "0.0.11",
-  "main": "./client/index.js",
-  "types": "./types/index.d.ts",
+  "main": "./client/index.ts",
   "type": "module",
   "keywords": [
     "express",
@@ -20,35 +19,31 @@
     "_example"
   ],
   "exports": {
-    ".": {
-      "require": "./client/index.js",
-      "import": "./client/index.js",
-      "types": "./types/index.d.ts"
-    },
-    "./server": {
-      "require": "./server/index.js",
-      "import": "./server/index.js",
-      "types": "./types/server/index.d.ts"
-    },
+    ".": "./client/index.ts",
+    "./client/imgs/*": "./client/imgs/*",
+    "./client/globals": "./client/globals.ts",
+    "./server": "./server/index.js",
+    "./types": "./types.ts",
+    "./.eslintrc.json": "./.eslintrc.json",
+    "./tsconfig.json": "./tsconfig.json",
+    "./webpack.config.js": "./webpack.config.js",
     "./util": {
       "require": "./util.js",
       "import": "./util.js",
       "types": "./types/util.d.ts"
-    },
-    "./.eslintrc.json": "./.eslintrc.json",
-    "./webpack.config.js": "./webpack.config.js"
+    }
   },
   "scripts": {
     "dev": "npm run dev -w example",
     "dev:client": "npm run dev:client -w example",
-    "dev:client-only": "isDemo=true npm run dev:client -w example",
+    "dev:client-only": "isStatic=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
-    "build": "isDemo=true npm run build -w example",
+    "build": "isStatic=true npm run build -w example",
     "major": "standard-version --release-as major && npm publish",
     "minor": "standard-version --release-as minor && npm publish",
     "patch": "standard-version --release-as patch && npm publish",
     "start": "npm run start -w example",
-    "types": "tsc client/*.js components/**/*.jsx types/global.d.ts --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
+    "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },
   "dependencies": {
     "@uiw/color-convert": "^2.3.0",

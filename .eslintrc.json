@@ -11,24 +11,7 @@
     "node": true
   },
   "globals": {
-    // Project globals
-    "CONFIG": true,
-    "cssVar": true,
-    "onChange": true,
-    "sharedStore": true,
-    "sharedStoreCache": true,
-    // Dependency globals
-    "Link": true,
-    "forwardRef": true,
-    "useCallback": true,
-    "useEffect": true,
-    "useLocation": true,
-    "useNavigate": true,
-    "useImperativeHandle": true,
-    "useMemo": true,
-    "useParams": true,
-    "useState": true,
-    "useRef": true
+    "Link": true
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -58,10 +41,12 @@
       "allowObject": true 
     }],
     "max-len": ["error", { "code": 140, "ignorePattern": "^\\s*(<(rect|path|line)\\s|class=|className=|'|`)" }],
+    "no-var": "off",
     "no-prototype-builtins": "off",
     "@typescript-eslint/no-this-alias": "off",
-
+    "@typescript-eslint/ban-ts-comment": "off",
     "no-unused-vars": "off",
+    "@typescript-eslint/no-unsafe-function-type": "off",
     "@typescript-eslint/no-unused-vars": ["error", { 
       "argsIgnorePattern": "^_", 
       "varsIgnorePattern": "^_", 
