@@ -27,5 +27,10 @@
     "strict": true,
     "target": "es6"
   },
-  "include": ["client", "components", "types"],
+  "include": [
+    "client",
+    "components/**/*.tsx",
+    "components/**/*.ts",
+    "types"
+  ]
 }

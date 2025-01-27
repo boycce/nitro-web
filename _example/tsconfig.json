@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": true,
-    "checkJs": true,
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
@@ -27,5 +26,10 @@
     "strict": true,
     "target": "es6"
   },
-  "include": ["client", "components", "types"],
+  "include": [
+    "client",
+    "components/**/*.tsx",
+    "components/**/*.ts",
+    "types"
+  ]
 }

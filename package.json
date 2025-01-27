@@ -39,9 +39,9 @@
     "dev:client-only": "isStatic=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
     "build": "isStatic=true npm run build -w example",
-    "major": "standard-version --release-as major && npm publish",
-    "minor": "standard-version --release-as minor && npm publish",
-    "patch": "standard-version --release-as patch && npm publish",
+    "major": "npm run types && standard-version --release-as major && npm publish",
+    "minor": "npm run types && standard-version --release-as minor && npm publish",
+    "patch": "npm run types && standard-version --release-as patch && npm publish",
     "start": "npm run start -w example",
     "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
   },

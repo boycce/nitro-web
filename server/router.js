@@ -44,6 +44,11 @@ export async function setupRouter (config) {
     let name = filepath.replace(/^.*[\\\/]|\.api\.js$/g, '') // eslint-disable-line
     controllers[name] = file
 
+    if (!file) {
+      console.warn(`API warning: no default export found on file ${filepath}`)
+      continue
+    }
+
     if (file.setup) file.setup(allMiddleware, config)
     if (file.routes) {
       util.each(file.routes, (_middleware, key) => {
