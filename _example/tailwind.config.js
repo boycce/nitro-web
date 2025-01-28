@@ -1,8 +1,8 @@
-// https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
 import defaultTheme from 'tailwindcss/defaultTheme'
 import colors from 'tailwindcss/colors'
 import path from 'path'
 import Color from 'color'
+
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
 const nitroDir = path.dirname(require.resolve('nitro-web'))
 
@@ -15,11 +15,11 @@ export default {
     ],
   },
   experimental: {
-    optimizeUniversalDefaults: true, // remove unneeded varables from universal selectors
+    optimizeUniversalDefaults: true, // remove undesired variables from universal selectors
   },
   theme: {
+    // Full list: https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
     extend: {
-      // Nitro theme variables
       boxShadow: {
         'dropdown-ul': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
       },
