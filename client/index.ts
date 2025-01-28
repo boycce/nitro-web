@@ -50,3 +50,6 @@ export { Layout2 } from '../components/partials/layout/layout2'
 
 // Component Other
 export { IsFirstRender } from '../components/partials/is-first-render'
+
+// IsDemo environment variable
+export const isDemo = ISDEMO

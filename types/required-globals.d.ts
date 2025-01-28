@@ -7,6 +7,7 @@ import { CSSInterpolation } from '@emotion/serialize'
 declare global {
   /** Webpack injected config variables */
   const INJECTED: Record<string, string|boolean|object>
+  const ISDEMO: boolean
   /** Webpack svg loader */
   module '*.svg' {
     const content: React.FC<React.SVGProps<SVGElement>>

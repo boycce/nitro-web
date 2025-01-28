@@ -4,6 +4,7 @@
  */
 import { css, theme } from 'twin.macro'
 import config from '../client/config'
+import { isDemo } from 'nitro-web'
 import { 
   Signin, 
   Signup, 
@@ -79,7 +80,7 @@ DashboardPage.route = {
 export const StyleguidePage = () => <Styleguide config={config} />
 StyleguidePage.route = {
   '/styleguide': true,
-  'meta': { title: 'Style Guide - Nitro', layout: 1 },
+  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'} - Nitro`, layout: 1 },
 }
 
 // Not found page
@@ -139,9 +140,14 @@ export function PricingPage() {
           Choose the right plan for you
         </p>
       </div>
-      <p className="mx-auto mt-6 max-w-2xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
-        Choose an affordable plan that’s packed with the best features for engaging your audience, creating customer
-        loyalty, and driving sales.
+      <p className="mx-auto mt-6 max-w-3xl text-pretty text-center text-lg font-medium text-gray-600 sm:text-xl/8">
+        This is a&nbsp;
+        <a class="underline" href="https://tailwindui.com/components/marketing/sections/pricing" target="_blank" rel="noreferrer">
+          pricing page
+        </a> example using one of the&nbsp;
+        <a class="underline" href="https://tailwindui.com/components" target="_blank" rel="noreferrer">
+          Tailwind UI
+        </a> components. With minor composition changes, it&apos;s almost copy/paste.
       </p>
       <div className="mx-auto mt-16 grid max-w-lg grid-cols-1 items-center gap-y-6 sm:mt-20 sm:gap-y-0 lg:max-w-4xl lg:grid-cols-2">
         {tiers.map((tier, tierIdx) => (

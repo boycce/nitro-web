@@ -2,9 +2,9 @@ import { css, theme } from 'twin.macro'
 
 export function Dashboard({ config }: { config: { isStatic?: boolean } }) {
   const [store] = useTracked()
-  const textColor = store.apiAvailable ? 'text-green-700' : 'text-pink-700'
-  const fillColor = store.apiAvailable ? 'fill-green-500' : 'fill-pink-500'
-  const bgColor = store.apiAvailable ? 'bg-green-100' : 'bg-pink-100'
+  const textColor = store.apiAvailable ? 'text-green-700' : config.isStatic ? 'text-gray-700' : 'text-pink-700'
+  const fillColor = store.apiAvailable ? 'fill-green-500' : config.isStatic ? 'fill-gray-500' : 'fill-pink-500'
+  const bgColor = store.apiAvailable ? 'bg-green-100' : config.isStatic ? 'bg-[#eeeeee]' : 'bg-pink-100'
 
   return (
     <div css={style}>

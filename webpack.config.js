@@ -162,11 +162,6 @@ export const getConfig = (config) => {
           },
         },
         {
-          test: /styleguide\.html$/i,
-          exclude: [/\/server\/email/],
-          loader: 'html-loader',
-        },
-        {
           test: /\.csv$/,
           use: [
             {
@@ -278,6 +273,7 @@ export const getConfig = (config) => {
         ],
       }),
       new webpack.DefinePlugin({
+        ISDEMO: !!process.env.isDemo,
         INJECTED: JSON.stringify({
           ...pick(config, config.inject ? config.inject.split(' ') : []),
         }),

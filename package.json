@@ -35,10 +35,10 @@
   },
   "scripts": {
     "dev": "npm run dev -w example",
-    "dev:client": "npm run dev:client -w example",
-    "dev:client-only": "isStatic=true npm run dev:client -w example",
+    "dev:client": "isDemo=true npm run dev:client -w example",
+    "dev:client-only": "isDemo=true isStatic=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
-    "build": "isStatic=true npm run build -w example",
+    "build": "isDemo=true isStatic=true npm run build -w example",
     "major": "npm run types && standard-version --release-as major && npm publish",
     "minor": "npm run types && standard-version --release-as minor && npm publish",
     "patch": "npm run types && standard-version --release-as patch && npm publish",
