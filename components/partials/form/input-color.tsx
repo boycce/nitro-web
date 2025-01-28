@@ -1,9 +1,7 @@
-import { css } from 'twin.macro'
 import { hsvaToHex, hexToHsva, validHex, HsvaColor } from '@uiw/color-convert'
 import Saturation from '@uiw/react-color-saturation'
 import Hue from '@uiw/react-color-hue'
 import { Dropdown, util } from 'nitro-web'
-import React from 'react'
 
 type InputColorProps = {
   className?: string
@@ -32,7 +30,7 @@ export function InputColor({ className, defaultColor='#333', iconEl, id, onChang
         <ColorPicker key={lastChanged} defaultColor={defaultColor} id={id} value={value} onChange={onChange} />
       }
     >
-      <div className="grid grid-cols-1" css={style}>
+      <div className="grid grid-cols-1">
         {iconEl}
         <input 
           {...props} 
@@ -59,7 +57,7 @@ function ColorPicker({ id='', onChange, value='', defaultColor='' }: InputColorP
   return (
     <>
       <Saturation
-        css={style}
+        className="!w-[100%] !h-[150px]"
         hsva={hsva}
         onChange={(newHsva) => {
           setHsva(newHsva)
@@ -67,7 +65,6 @@ function ColorPicker({ id='', onChange, value='', defaultColor='' }: InputColorP
         }}
       />
       <Hue
-        css={style}
         hue={hsva.h}
         onChange={(newHue) => {
           setHsva({ ...hsva, ...newHue })
@@ -78,12 +75,5 @@ function ColorPicker({ id='', onChange, value='', defaultColor='' }: InputColorP
   )
 }
 
-const style = css`
-  /////////////////////
-  .w-color-interactive {
-    width: 100% !important;
-    height: 150px !important;
-  }
-`
 
 

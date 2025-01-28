@@ -1,3 +1,4 @@
+import { twMerge } from 'tailwind-merge'
 import { ChevronDownIcon } from '@heroicons/react/20/solid'
 
 type Props = {
@@ -32,10 +33,10 @@ export function Button({ color='primary', size='md', className, isLoading, IconL
 
   // Icon position
   const contentLayouts = {
-    left: 'w-full inline-flex items-center',
-    right: 'w-full inline-flex items-center',
-    right2: 'w-full inline-flex items-center justify-between',
-    none: 'w-full ',
+    left: 'w-full inline-flex items-center gap-x-1.5',
+    right: 'w-full inline-flex items-center gap-x-1.5',
+    right2: 'w-full inline-flex items-center justify-between gap-x-1.5',
+    none: 'w-full gap-x-1.5',
   }
 
   let colorAndSize = ''
@@ -43,25 +44,23 @@ export function Button({ color='primary', size='md', className, isLoading, IconL
   else if (color.match(/secondary/)) colorAndSize = `${secondary} ${sizes[size]}`
   else if (color.match(/white/)) colorAndSize = `${white} ${sizes[size]}`
 
-  let contentLayout = `${contentLayouts[iconPosition]}`
-  if (!(className||'').match(/gap-/)) contentLayout += ' gap-x-1.5'
+  const contentLayout = `${contentLayouts[iconPosition]}`
+  const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
-  function getIcon(Icon: React.ReactNode|'v', className: string) {
-    if (Icon == 'v') return <ChevronDownIcon className={className} />
+  function getIcon(Icon: React.ReactNode | 'v') {
+    if (Icon == 'v') return <ChevronDownIcon className="size-6 -my-6 -mx-1" />
     else return Icon
   }
   
   return (
-    <button class={`${base} ${colorAndSize} ${className||''}`} {...props}>
-      <span class={`${contentLayout} ${isLoading ? 'opacity-0' : ''}`}>
-        {IconLeft && getIcon(IconLeft, 'size-6 -my-6 -mx-1')}
-        {children}
-        {IconRight && getIcon(IconRight, 'size-6 -my-6 -mx-1')}
-        {IconRight2 && getIcon(IconRight2, 'size-6 -my-6 -mx-1')}
-      </span>
+    <button class={twMerge(`${base} ${colorAndSize} ${contentLayout} ${loading} ${className||''}`)} {...props}>
+      {IconLeft && getIcon(IconLeft)}
+      {children}
+      {IconRight && getIcon(IconRight)}
+      {IconRight2 && getIcon(IconRight2)}
       {
         isLoading && 
-        <span class="absolute inset-0 flex items-center justify-center">
+        <span class="!opacity-100 absolute inset-0 flex items-center justify-center">
           <span className="w-4 h-4 rounded-full animate-spin border-2 border-t-transparent border-white" />
         </span>
       }

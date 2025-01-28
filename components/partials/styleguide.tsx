@@ -52,7 +52,11 @@ export function Styleguide({ config }: { config: Config }) {
     <div class="mb-10 text-left max-w-[1100px]">
       <GithubLink filename={__filename} />
       <div class="mb-7">
-        <h1 class="h1 m-0">Styleguide</h1>
+        <h1 class="h1">Styleguide</h1>
+        <p>
+          Components are styled using&nbsp;
+          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
+        </p>
       </div>
 
       <h2 class="h3">Links</h2>
@@ -76,7 +80,8 @@ export function Styleguide({ config }: { config: Config }) {
         </div>
         <div>
           <label for="input2">Label</label>
-          <Checkbox name="input2" type="toggle" text="Toggle" subtext="some additional text here." defaultChecked />
+          <Checkbox name="input2" type="toggle" text="Toggle sm" subtext="some additional text here." class="!mb-0"  defaultChecked />
+          <Checkbox name="input3" type="toggle" text="Toggle md" size="md" subtext="some additional text here." />
         </div>
       </div>
 
@@ -84,7 +89,7 @@ export function Styleguide({ config }: { config: Config }) {
       <div class="flex flex-wrap gap-x-6 gap-y-4 mb-8">
         <div>
           <Dropdown options={options} minWidth="250px">
-            <Button IconRight2="v" class="gap-x-3">Dropdown</Button>
+            <Button IconRight="v" class="gap-x-3">Dropdown</Button>
           </Dropdown>
         </div>
         <div>
@@ -116,7 +121,7 @@ export function Styleguide({ config }: { config: Config }) {
         <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />}>IconLeft=Element</Button></div>
         <div><Button IconRight="v">IconRight=&quot;v&quot;</Button></div>
         <div><Button IconRight2="v" className="w-[200px]">IconRight2=&quot;v&quot;</Button></div>
-        <div><Button color="primary" isLoading>primary isLoading</Button></div>
+        <div><Button color="primary" IconRight="v" isLoading>primary isLoading</Button></div>
       </div>
 
       <h2 class="h3">Selects</h2>
