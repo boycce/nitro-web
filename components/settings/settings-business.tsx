@@ -80,7 +80,7 @@ export function SettingsBusiness({ config }) {
             </div>
             <div class="col">
               <label for="business.name">Trading Name</label>
-              <Input name="business.name" placeholder="E.g. Stark Industries" state={state} onChange={onChange(setState)} />
+              <Input name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange(setState)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">Custom Address</Link>

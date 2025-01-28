@@ -11,7 +11,7 @@ export function Styleguide({ config }: { config: Config }) {
     currency: 'nzd', // can be commented too
     amount: 100,
     brandColor: '#F3CA5F',
-    firstName: 'Tony',
+    firstName: 'Bruce',
     date: Date.now(),
     errors: [
       { title: 'address', detail: 'Address is required' },

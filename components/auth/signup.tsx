@@ -32,11 +32,11 @@ export function Signup({ config }: { config: Config}) {
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>
-            <Input name="name" placeholder="E.g. Tony Stark" state={state} onChange={onChange.bind(setState)} />
+            <Input name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={onChange.bind(setState)} />
           </div>
           <div>
             <label for="business.name">Company Name</label>
-            <Input name="business.name" placeholder="E.g. Stark Industries" state={state} onChange={onChange.bind(setState)} />
+            <Input name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
           </div>
         </div>
         <div>

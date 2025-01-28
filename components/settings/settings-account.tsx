@@ -48,11 +48,11 @@ export function SettingsAccount() {
           <div class="cols cols-6 cols-gap-3">
             <div class="col">
               <label for="firstName">First Name(s)</label>
-              <Input name="firstName" placeholder="E.g. Tony" state={state} onChange={onChange(setState)} />
+              <Input name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange(setState)} />
             </div>
             <div class="col">
               <label for="lastName">Last Name</label>
-              <Input name="lastName" placeholder="E.g. Stark" state={state} onChange={onChange(setState)} />
+              <Input name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange(setState)} />
             </div>
             <div class="col">
               <label for="email">Email Address</label>
