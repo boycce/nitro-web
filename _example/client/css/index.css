@@ -26,7 +26,7 @@
     @apply text-dark mb-2 text-sm font-bold;
   }
   label, .label {
-    @apply text-sm-label font-medium;
+    @apply text-sm font-medium;
   }
 }
 

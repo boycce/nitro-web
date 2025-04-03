@@ -1,134 +1,165 @@
-// @ts-nocheck
 import { css } from 'twin.macro'
-import { InputColor, InputCurrency, util } from 'nitro-web' // InputDate
-
+import { twMerge } from 'tailwind-merge'
+import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
+import { Errors, type Error } from 'types'
 import {
   EnvelopeIcon,
-  // CalendarIcon,
+  CalendarIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
   EyeIcon,
   EyeSlashIcon,
 } from '@heroicons/react/20/solid'
 
-interface InputProps {
+type InputProps = React.InputHTMLAttributes<HTMLInputElement>
+type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
+type FieldExtraProps = {
+  // field name or path on state (used to match errors), e.g. 'date', 'company.email'
   name: string
-  state?: any
   id?: string
-  type?: string
-  [key: string]: any
+  // state object to get the value, and check errors against
+  state?: { errors: Errors, [key: string]: unknown }
+  type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+  icon?: React.ReactNode
+  iconPos?: 'left' | 'right'
 }
+type IconWrapperProps = {
+  iconPos: string
+  icon?: React.ReactNode
+  [key: string]: unknown
+}
+// Discriminated union (https://stackoverflow.com/a/77351290/1900648)
+export type FieldProps = (
+  | ({ type?: 'text' | 'password' | 'email' | 'filter' | 'search' } & InputProps & FieldExtraProps)
+  | ({ type: 'textarea' } & TextareaProps & FieldExtraProps)
+  | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
+  | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
+  | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
+)
 
-export function Input({ name='', state, id, type='text', ...props }: InputProps) {
-  /**
-   * Input
-   * @param {string} name - field name or path on state (used to match errors), e.g. 'date', 'company.email'
-   * @param {object} state - State object to get the value, and check errors against
-   * @param {string} [id] - not required, name used if not provided
-   * @param {('password'|'email'|'text'|'date'|'filter'|'search'|'color'|'textarea'|'currency')} [type='text']
-   */
-  let IconSvg: React.ReactNode
-  let onClick: () => void
-  let iconDir = 'right'
-  let InputEl = 'input'
-  const [inputType, setInputType] = useState(() => { // eslint-disable-line
-    return type == 'password' ? 'password' : (type == 'textarea' ? type : 'text')
-  })
+export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
+  // type must be kept as props.type for TS to be happy and follow the conditions below
+  let error!: Error
+  let value!: string
+  let Icon!: React.ReactNode
+  const type = props.type
+  const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
 
-  if (!name) throw new Error('Input component requires a `name` prop')
+  if (!props.name) {
+    throw new Error('Input component requires a `name` prop')
+  }
   
-  // Input is always controlled if state is passed in
-  if (props.value) {
-    var value = props.value
-  } else if (typeof state == 'object') {
-    value = util.deepFind(state, name)
-    if (typeof value == 'undefined') value = ''
-  }
+  // Input type
+  const [inputType, setInputType] = useState(() => { // eslint-disable-line
+    return type == 'password' ? 'password' : (type == 'textarea' ? 'textarea' : 'text')
+  })
+  
+  // Value: Input is always controlled if state is passed in
+  if (props.value) value = props.value as string
+  else if (typeof state == 'object') value = util.deepFind(state, props.name) ?? ''
 
-  // Find any errors that match this input path
+  // Errors: find any that match this input path
   for (const item of (state?.errors || [])) {
-    if (util.isRegex(name) && (item.title||'').match(name)) var error = item
-    else if (item.title == name) error = item
-  }
-
-  // Special input types
-  if (type == 'password') {
-    onClick = () => setInputType(o => o == 'password' ? 'text' : 'password')
-    IconSvg = inputType == 'password' ? <EyeSlashIcon /> : <EyeIcon />
-  } else if (type == 'email') { 
-    IconSvg = <EnvelopeIcon />
-  // } else if (type == 'date') { 
-  //   IconSvg = <CalendarIcon />
-  //   InputEl = InputDate
-  } else if (type == 'filter') { 
-    IconSvg = <FunnelIcon />
-  } else if (type == 'search') { 
-    IconSvg = <MagnifyingGlassIcon />
-  } else if (type == 'color') {
-    iconDir = 'left'
-    IconSvg = <ColorIcon hex={value}/>
-    InputEl = InputColor
-  } else if (type == 'textarea') {
-    InputEl = 'textarea'
-  } else if (type == 'currency') {
-    if (!props.config) throw new Error('Input: `config` is required when type=currency')
-    InputEl = InputCurrency
+    if (util.isRegex(props.name) && (item.title || '').match(props.name)) error = item
+    else if (item.title == props.name) error = item
   }
 
   // Icon
-  const iconEl = <IconEl iconDir={iconDir} IconSvg={IconSvg} onClick={onClick} type={type} />
-
-  // Create base props object
-  const inputProps = {
-    ...props,
-    // autoComplete: props.autoComplete || 'off',
-    id: id || name,
-    type: inputType,
-    value: value,
-    iconEl: iconEl,
-    className: 
-      'col-start-1 row-start-1 block w-full rounded-md bg-white py-2 text-sm outline outline-1 -outline-offset-1 ' +
-      'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 sm:text-sm/6 ' +
-      (iconDir == 'right' && IconSvg ? 'sm:pr-9 pl-3 pr-10 ' : IconSvg ? 'sm:pl-9 pl-10 pr-3 ' : 'px-3 ') +
-      (error ? 'text-red-900 outline-danger focus:outline-danger ' : 'text-input outline-input-border focus:outline-primary ') + 
-      (iconDir == 'right' ? 'justify-self-start ' : 'justify-self-end '),
+  if (type == 'password') {
+    Icon = <IconWrapper 
+      iconPos={iconPos} 
+      icon={icon || inputType == 'password' ? <EyeSlashIcon /> : <EyeIcon />} 
+      onClick={() => setInputType(o => o == 'password' ? 'text' : 'password')}
+      className="pointer-events-auto"
+    />
+  } else if (type == 'email') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <EnvelopeIcon />} />
+  } else if (type == 'filter') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <FunnelIcon />} className="size-3"  />
+  } else if (type == 'search') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <MagnifyingGlassIcon />} className="size-4" />
+  } else if (type == 'color') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <ColorSvg hex={value}/>} className="size-[17px]" />
+  } else if (type == 'date') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-4" />
+  } else {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon} />
   }
 
-  // Only add iconEl prop for custom components
-  if (!['color', 'date'].includes(type)) delete inputProps.iconEl
+  // Classname
+  const inputClassName = getInputClasses({ error, Icon, iconPos, type })
+  const commonProps = { id: props.name || props.id, value: value, className: inputClassName }
 
+  // Type has to be referenced as props.type for TS to be happy
+  if (!type || type == 'text' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        {Icon}<input {...props} {...commonProps} type={inputType} />
+      </FieldContainer>
+    )
+  } else if (type == 'textarea') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        {Icon}<textarea {...props} {...commonProps} />
+      </FieldContainer>
+    )
+  } else if (type == 'currency') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        {Icon}<FieldCurrency {...props} {...commonProps} />
+      </FieldContainer>
+    )
+  } else if (type == 'color') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        <FieldColor {...props} {...commonProps} Icon={Icon} />
+      </FieldContainer>
+    )
+  } else if (type == 'date') { 
+    return (
+      <FieldContainer error={error} className={props.className}>
+        <FieldDate {...props} {...commonProps} Icon={Icon} />
+      </FieldContainer>
+    )
+  }
+}
+
+function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
   return (
-    // https://tailwindui.com/components/application-ui/forms/input-groups#component-474bd025b849b44eb3c46df09a496b7a
-    <div css={style} className={`mt-input-before mb-input-after grid grid-cols-1 ${props?.className || ''}`}>
-      { !inputProps.iconEl && iconEl }
-      <InputEl {...inputProps} />
+    <div css={style} className={`mt-input-before mb-input-after grid grid-cols-1 ${className || ''}`}>
+      {children}
       {error && <div class="mt-1.5 text-xs text-danger">{error.detail}</div>}
     </div>
   )
 }
 
-type IconElProps = {
-  iconDir: string
-  IconSvg: React.ReactNode
-  onClick: () => void
-  type: string
-}
-
-function IconEl({ iconDir, IconSvg, onClick, type }: IconElProps) {
-  const iconSize = type == 'color' ? 'size-[18px]' : 'size-4'
+function getInputClasses({ error, Icon, iconPos, type }: { error: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
+  const paddingLeft = type == 'color' ? 'sm:pl-9 pl-9' : 'sm:pl-8 pl-8'
+  const paddingRight = type == 'color' ? 'sm:pr-9 pr-9' : 'sm:pr-8 pr-8'
   return (
-    !!IconSvg && 
-    <div 
-      className={`col-start-1 row-start-1 ${iconSize} self-center text-[#c6c8ce] select-none relative z-[1] ` +
-        `pointer-events-${type == 'password' ? 'auto' : 'none'} ` +
-        (iconDir == 'right' ? 'justify-self-end mr-3' : 'justify-self-start ml-3')
-      }
-      onClick={onClick}
-    >{IconSvg}</div>
+    'col-start-1 row-start-1 block w-full rounded-md bg-white py-2 text-sm leading-[1.65] outline outline-1 -outline-offset-1 ' +
+    'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
+    (iconPos == 'right' && Icon ? `${paddingRight} pl-3 ` : (Icon ? `${paddingLeft} pr-3 ` : 'px-3 ')) +
+    (error ? 'text-red-900 outline-danger focus:outline-danger ' : 'text-input outline-input-border focus:outline-primary ') + 
+    (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ')
   )
 }
 
-function ColorIcon({ hex }: { hex: string }) {
+function IconWrapper({ icon, iconPos, ...props }: IconWrapperProps) {
+  return (
+    !!icon && 
+    <div
+      {...props}
+      className={twMerge(
+        'relative size-[14px] col-start-1 row-start-1 self-center text-[#c6c8ce] select-none z-[1] ' +
+        (iconPos == 'right' ? 'justify-self-end mr-3 ' : 'justify-self-start ml-3 ') + 
+        props.className || ''
+      )}
+    >{icon}</div>
+  )
+}
+
+function ColorSvg({ hex }: { hex?: string }) {
   return (
     <span class="block size-full rounded-md" style={{ backgroundColor: hex ? hex : '#f1f1f1' }}></span>
   )

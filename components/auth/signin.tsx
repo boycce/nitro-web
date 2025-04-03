@@ -1,4 +1,4 @@
-import { Topbar, Input, Button, FormError, util } from 'nitro-web'
+import { Topbar, Field, Button, FormError, util } from 'nitro-web'
 import { Config, Errors } from 'types'
 
 export function Signin({ config }: { config: Config }) {
@@ -50,14 +50,14 @@ export function Signin({ config }: { config: Config }) {
       <form onSubmit={onSubmit}>
         <div>
           <label for="email">Email Address</label>
-          <Input name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
         </div>
         <div>
           <div class="flex justify-between"> 
             <label for="password">Password</label>
             <Link to="/reset" class="label underline2">Forgot?</Link>
           </div>
-          <Input name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
+          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
         </div>
         
         <div class="mb-14">

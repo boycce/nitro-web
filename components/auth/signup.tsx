@@ -1,4 +1,4 @@
-import { Button, Input, FormError, Topbar, util } from 'nitro-web'
+import { Button, Field, FormError, Topbar, util } from 'nitro-web'
 import { Config, Errors } from 'types'
 
 export function Signup({ config }: { config: Config}) {
@@ -32,20 +32,20 @@ export function Signup({ config }: { config: Config}) {
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>
-            <Input name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={onChange.bind(setState)} />
+            <Field name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={onChange.bind(setState)} />
           </div>
           <div>
             <label for="business.name">Company Name</label>
-            <Input name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
+            <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
           </div>
         </div>
         <div>
           <label for="email">Email Address</label>
-          <Input name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
         </div>
         <div>
           <label for="password">Password</label>
-          <Input name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
+          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
         </div>
         
         <div class="mb-14">

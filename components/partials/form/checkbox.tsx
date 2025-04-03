@@ -95,7 +95,7 @@ export function Checkbox({ name, id, size='sm', subtext, text, type='checkbox', 
         }
       </div>
       {text && 
-        <label for={id} className="self-center text-sm-label select-none">
+        <label for={id} className="self-center text-sm select-none">
           <span className="text-gray-900">{text}</span>
           <span className="ml-2 text-gray-500">{subtext}</span>
         </label>

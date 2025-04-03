@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import { ChevronDownIcon } from '@heroicons/react/20/solid'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
 
 type Props = {
   color?: 'primary'|'secondary'|'white'
@@ -16,7 +16,7 @@ type Props = {
 export function Button({ color='primary', size='md', className, isLoading, IconLeft, IconRight, IconRight2, children, ...props }: Props) {
   // const size = (color.match(/xs|sm|md|lg/)?.[0] || 'md') as 'xs'|'sm'|'md'|'lg'
   const iconPosition = IconLeft ? 'left' : IconRight ? 'right' : IconRight2 ? 'right2' : 'none'
-  const base = 'relative inline-block font-semibold shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+  const base = 'relative inline-block font-medium shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
 
   // Button types
   const primary = 'bg-primary text-white shadow-sm hover:bg-primary-hover focus-visible:outline-primary'
@@ -48,7 +48,8 @@ export function Button({ color='primary', size='md', className, isLoading, IconL
   const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
   function getIcon(Icon: React.ReactNode | 'v') {
-    if (Icon == 'v') return <ChevronDownIcon className="size-6 -my-6 -mx-1" />
+    if (Icon == 'v' || Icon == 'down') return <ChevronDownIcon className="size-5 -my-6 -mx-1" />
+    if (Icon == '^' || Icon == 'up') return <ChevronUpIcon className="size-5 -my-6 -mx-1" />
     else return Icon
   }
   

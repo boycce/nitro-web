@@ -31,20 +31,24 @@ const server = await setupRouter(config)
 server.listen(3001, '0.0.0.0')
 ```
 
-### Running in development
+### Run
 
 ```bash
+# Running in development (watching for changes)
 npm run dev:server # run and watch the nodemon server
 npm run dev:client # run and watch the webpack dev server
-npm run dev # or, run and watch both server and client
-```
+npm run dev # or run and watch both the server and client
 
-### Building for production
-
-```bash
+# Building for production
 npm run build
 npm run start
 ```
+
+### Nitro Development
+
+The same run commands can be used in ./ which are actually executed in ./example/ via npm workspaces (`-w` flag).
+
+If util.js is updated, you must run `npm run types` to update the types file.
 
 ### Versions
 

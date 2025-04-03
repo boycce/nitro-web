@@ -1,10 +1,10 @@
-// @ts-nocheck
+//@ts-nocheck
 // todo: finish tailwind conversio
 
 ////// look at the select type error below
 import * as util from 'nitro-web/util'
 import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
-import { Button, Input, Select, Topbar, Tabbar } from 'nitro-web'
+import { Button, Field, Select, Topbar, Tabbar } from 'nitro-web'
 
 export function SettingsBusiness({ config }) {
   const isLoading = useState('')
@@ -65,7 +65,7 @@ export function SettingsBusiness({ config }) {
                 type="country" 
                 state={state} 
                 options={useMemo(() => util.getCountryOptions(config.countries), [])} 
-                onChange={onChange(setState)}
+                onChange={onChange.bind(setState)}
               />
             </div>
             <div class="col">
@@ -75,37 +75,37 @@ export function SettingsBusiness({ config }) {
                 type="country" 
                 state={state} 
                 options={useMemo(() => util.getCurrencyOptions(config.currencies), [])}
-                onChange={onChange(setState)}
+                onChange={onChange.bind(setState)}
               />
             </div>
             <div class="col">
               <label for="business.name">Trading Name</label>
-              <Input name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange(setState)} />
+              <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">Custom Address</Link>
               <label for="business.address">Address (Start Typing...)</label>
-              <Input name="business.address.full" placeholder="" state={state} onChange={onChange(setState)} />
+              <Field name="business.address.full" placeholder="" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <label for="business.website">Website</label>
-              <Input name="business.website" placeholder="https://" state={state} onChange={onChange(setState)} />
+              <Field name="business.website" placeholder="https://" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <label for="business.phone">Mobile Number</label>
-              <Input name="business.phone" placeholder="" state={state} onChange={onChange(setState)} />
+              <Field name="business.phone" placeholder="" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">What&apos;s this for?</Link>
               <label for="tax.number">GST Number</label>
-              <Input class="mb-0" name="tax.number" placeholder="Appears on your documents" state={state} 
-                onChange={onChange(setState)} />
+              <Field class="mb-0" name="tax.number" placeholder="Appears on your documents" state={state} 
+                onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">What&apos;s this for?</Link>
               <label for="business.number">NZBN</label>
-              <Input class="mb-0" name="business.number" placeholder="Appears on your documents" state={state} 
-                onChange={onChange(setState)} />
+              <Field class="mb-0" name="business.number" type="text" rows="23" placeholder="Appears on your documents" state={state} 
+                onChange={onChange.bind(setState)} />
             </div>
           </div>
         </form>

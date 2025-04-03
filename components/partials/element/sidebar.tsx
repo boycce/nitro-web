@@ -115,7 +115,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                       isActive(item.to)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
-                      'group flex gap-x-3 items-center rounded-md p-2 text-sm/6 font-semibold'
+                      'group flex gap-x-3 items-center rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >
                     { item.Icon && 
@@ -143,7 +143,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                       isActive(team.to)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
-                      'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold'
+                      'group flex gap-x-3 rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >
                     <span

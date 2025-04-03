@@ -1,6 +1,6 @@
 // @ts-nocheck
 // todo: finish tailwind conversion
-import { Button, FormError, Input, Modal, Select } from 'nitro-web'
+import { Button, FormError, Field, Modal, Select } from 'nitro-web'
 import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
 
 export function SettingsTeamMember ({ showModal, setShowModal }) {
@@ -38,7 +38,7 @@ export function SettingsTeamMember ({ showModal, setShowModal }) {
               name="role"
               isSearchable={false}
               placeholder="Select a role"
-              onChange={onChange(setState)} 
+              onChange={onChange.bind(setState)} 
               state={state}
               minMenuWidth={460}
               options={[
@@ -65,26 +65,26 @@ export function SettingsTeamMember ({ showModal, setShowModal }) {
           </div>
           <div class="col">
             <label for="email">Email Address</label>
-            <Input 
+            <Field 
               name="email" type="email" placeholder="Your email address..." state={state} 
-              onChange={onChange(setState)} 
+              onChange={onChange.bind(setState)} 
             />
           </div>
           <div class="col">
             <label for="firstName">First Name</label>
-            <Input name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange(setState)} />
+            <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange.bind(setState)} />
           </div>
           <div class="col">
             <label for="lastName">Last Name</label>
-            <Input name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange(setState)} />
+            <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange.bind(setState)} />
           </div>
           <div class="col-12">
             <label for="message">Invitation Message</label>
-            <Input 
+            <Field 
               name="message" 
               type="textarea" 
               placeholder={`${user.firstName} is inviting you to collaborate on Nitro.`} 
-              state={state} onChange={onChange(setState)} 
+              state={state} onChange={onChange.bind(setState)} 
             />
           </div>
         </div>

@@ -1,56 +1,56 @@
-// @ts-nocheck
-// todo: finish tailwind conversion
-import { css } from 'twin.macro'
-import { DayPicker } from 'react-day-picker'
 import { format, isValid, parse } from 'date-fns'
-import { getCurrencyPrefixWidth } from 'nitro-web/util'
-import { Dropdown } from 'nitro-web'
-import 'react-day-picker/dist/style.css'
+import { getPrefixWidth } from 'nitro-web/util'
+import { Calendar, Dropdown } from 'nitro-web'
 
-export function InputDate({ className, prefix, id, onChange, mode='single', value, ...props }) {
-  /**
-   * @param {string} mode - 'single'|'range'|'multiple' - an array is returned for non-single modes
-   */
+type Mode = 'single' | 'multiple' | 'range'
+type DropdownRef = {
+  setIsActive: (value: boolean) => void
+}
+export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  name: string
+  id?: string 
+  mode?: Mode
+  // an array is returned for non-single modes
+  onChange?: (e: { target: { id: string, value: null|number|(null|number)[] } }) => void
+  prefix?: string
+  value?: null|number|string|(null|number|string)[]
+  numberOfMonths?: number
+  Icon?: React.ReactNode
+}
+
+export function FieldDate({ mode='single', onChange, prefix='', value, numberOfMonths, Icon, ...props }: FieldDateProps) {
   const localePattern = 'd MMM yyyy'
-  const isInvalid = className?.includes('is-invalid') ? 'is-invalid' : ''
-  const [prefixWidth, setPrefixWidth] = useState()
-  const ref = useRef(null)
+  const [prefixWidth, setPrefixWidth] = useState(0)
+  const dropdownRef = useRef<DropdownRef>(null)
+  const id = props.id || props.name
+  const [month, setMonth] = useState<number|undefined>()
 
+  // Convert the value to an array of valid* dates
   const dates = useMemo(() => {
-    // Convert the value to an array of valid* dates
     const _dates = Array.isArray(value) ? value : [value]
-    return _dates.map(date => isValid(date) ? new Date(date) : undefined)
+    return _dates.map(date => isValid(date) ? new Date(date as number) : null) /// change to null
   }, [value])
-
-  // Hold the month in state to control the calendar when the input changes
-  const [month, setMonth] = useState(dates[0])
 
   // Hold the input value in state
   const [inputValue, setInputValue] = useState(() => getInputValue(dates))
 
+  // Get the prefix content width
   useEffect(() => {
-    // Get the prefix content width
-    setPrefixWidth(getCurrencyPrefixWidth(prefix, 4))
+    setPrefixWidth(getPrefixWidth(prefix, 4))
   }, [prefix])
 
-  function handleDayPickerSelect(newDate) {
-    if (mode == 'single') {
-      ref.current.setIsActive(false) // close the dropdown
-      callOnChange(newDate?.getTime() || null)
-      setInputValue(getInputValue([newDate]))
-
-    } else if (mode == 'range') {
-      const {from, to} = newDate || {} // may not exist
-      callOnChange(from ? [from?.getTime() || null, to?.getTime() || null] : null)
-      setInputValue(getInputValue(from ? [from, to] : []))
-
-    } else {
-      callOnChange(newDate.filter(o => o).map(d => d.getTime()))
-      setInputValue(getInputValue(newDate.filter(o => o)))
-    }
+  function onCalendarChange(mode: Mode, value: null|number|(null|number)[]) {
+    if (mode == 'single') dropdownRef.current?.setIsActive(false) // Close the dropdown
+    setInputValue(getInputValue(value))
+    if (onChange) onChange({ target: { id: id, value: value }})
   }
 
-  function handleInputChange(e) {
+  function getInputValue(dates: Date|number|null|(Date|number|null)[]) {
+    const _dates = Array.isArray(dates) ? dates : [dates]
+    return _dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
+  }
+
+  function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     setInputValue(e.target.value) // keep the input value in sync
 
     let split = e.target.value.split(/-|,/).map(o => {
@@ -63,162 +63,50 @@ export function InputDate({ className, prefix, id, onChange, mode='single', valu
     else if (mode == 'multiple') split = split.filter(o => o) // remove invalid dates
 
     // Swap dates if needed
-    if (mode == 'range' && split[0] > split[1]) split = [split[0], split[0]]
+    if (mode == 'range' && (split[0] || 0) > (split[1] || 0)) split = [split[0], split[0]]
 
     // Set month
     for (let i=split.length; i--;) {
-      if (split[i]) setMonth(split[i])
+      if (split[i]) setMonth((split[i] as Date).getTime())
       break
     }
     
-    // Set dates
-    callOnChange(mode == 'single' ? split[0] : split)
-  }
-
-  function getInputValue(dates) {
-    return dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
-  }
-
-  function callOnChange(value) {
-    if (onChange) onChange({ target: { id: id, value: value }}) // timestamp|[timestamp]
+    // Update 
+    const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
+    if (onChange) onChange({ target: { id, value }})
   }
 
   return (
     <Dropdown
-      ref={ref}
-      css={style}
+      ref={dropdownRef}
       menuToggles={false}
       animate={false}
       // menuIsOpen={true}
+      minWidth={0}
       menuChildren={
-        <DayPicker 
-          mode={mode}
-          month={month}
-          onMonthChange={setMonth}
-          numberOfMonths={mode == 'range' ? 2 : 1}
-          selected={mode === 'single' ? dates[0] : mode == 'range' ? { from: dates[0], to: dates[1] } : dates}
-          onSelect={handleDayPickerSelect}
-        />
+        <Calendar {...{ mode, value, numberOfMonths, month }} onChange={onCalendarChange} className="px-3 pt-1 pb-2" />
       }
     > 
-      <div>
-        {prefix && <span class={`input-prefix ${inputValue ? 'has-value' : ''}`}>{prefix}</span>}
+      <div className="grid grid-cols-1">
+        {Icon}
+        {
+          prefix && 
+          // Similar classNames to the input.tsx:IconWrapper()
+          <span className="relative col-start-1 row-start-1 self-center select-none z-[1] justify-self-start text-sm ml-3">{prefix}</span>
+        }
         <input 
           {...props}
-          key={'k'+prefixWidth}
+          key={'k' + prefixWidth}
           id={id}
           autoComplete="off" 
-          className={
-            className + ' ' + isInvalid
-          } 
+          className={(props.className||'')}// + props.className?.includes('is-invalid') ? ' is-invalid' : ''} 
           value={inputValue}
-          onChange={handleInputChange}
+          onChange={onInputChange}
           onBlur={() => setInputValue(getInputValue(dates))}
           style={{ textIndent: prefixWidth + 'px' }}
+          type="text"
         />
       </div>
     </Dropdown>
   )
 }
-
-const style = css`
-  .rdp {
-    --rdp-cell-size: 34px;
-    --rdp-caption-font-size: 12px;
-    --rdp-accent-color: blue; /* theme('colors.primary') */
-    font-size: 13px;
-    margin: 0 12px 11px;
-    svg {
-      width: 13px;
-      height: 13px;
-    }
-    .rdp-caption_label {
-      height: var(--rdp-cell-size);
-    }
-    .rdp-head_cell {
-      text-align: center !important;
-    }
-    tr {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      th,
-      td {
-        display: flex;
-        align-items: center;
-        margin-left: -1px;
-        margin-top: -1px;
-        .rdp-day {
-          border: 0 !important;
-          position: relative;
-          border-radius: 0 !important;
-          color: inherit;
-          background-color: transparent !important;
-          &:before {
-            content: '';
-            position: absolute;
-            display: block;
-            left: 0px;
-            top: 0px;
-            bottom: 0px;
-            right: 0px;
-            z-index: -1;
-          }
-        }
-        .rdp-day:focus,
-        .rdp-day:hover,
-        .rdp-day:active {
-          &:not([disabled]):not(.rdp-day_selected) {
-            &:before {
-              left: 1px;
-              top: 1px;
-              bottom: 1px;
-              right: 1px;
-              border-radius: 50%;
-              background-color: #e7edff;
-            }
-            &:active {
-              color: white;
-              &:before {
-                background-color: blue; /* theme('colors.primary') */
-              }
-            }
-          }
-        }
-        .rdp-day_selected {
-          color: white;
-          :before {
-            border-radius: 50%;
-            background-color: blue; /* theme('colors.primary') */
-          }
-        }
-        .rdp-day_range_middle {
-          color: black; /* theme('colors.dark') */
-          :before {
-            border-radius: 0;
-            border: 1px solid rgb(151 133 185);
-            background-color:  blue; /* theme('colors.primary-light') */
-          }
-        }
-        .rdp-day_range_start,
-        .rdp-day_range_end {
-          position: relative;
-          z-index: 1;
-          &.rdp-day_range_start:before {
-            border-top-right-radius: 0px;
-            border-bottom-right-radius: 0px;
-          }
-          &.rdp-day_range_end:before {
-            border-top-left-radius: 0px;
-            border-bottom-left-radius: 0px;
-          }
-          &.rdp-day_range_start.rdp-day_range_end:before {
-            border-radius: 50%;
-          }
-        }
-      }
-    }
-  }
-`
-
-

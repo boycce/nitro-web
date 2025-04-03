@@ -2,7 +2,7 @@
 // todo: finish tailwind conversion
 import * as util from 'nitro-web/util'
 import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
-import { Button, FormError, Input, Modal, Topbar, Tabbar } from 'nitro-web'
+import { Button, FormError, Field, Modal, Topbar, Tabbar } from 'nitro-web'
 
 export function SettingsAccount() {
   const isLoading = useState('')
@@ -48,21 +48,21 @@ export function SettingsAccount() {
           <div class="cols cols-6 cols-gap-3">
             <div class="col">
               <label for="firstName">First Name(s)</label>
-              <Input name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange(setState)} />
+              <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <label for="lastName">Last Name</label>
-              <Input name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange(setState)} />
+              <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <label for="email">Email Address</label>
-              <Input name="email" type="email" placeholder="Your email address..." state={state} 
-                onChange={onChange(setState)} />
+              <Field name="email" type="email" placeholder="Your email address..." state={state} 
+                onChange={onChange.bind(setState)} />
             </div>
             <div class="col">
               <Link to="/reset" class="label-right link2 underline2 is-active">Reset Password?</Link>
               <label for="password">Password</label>
-              <Input name="password" placeholder="•••••••••••" disabled={true} />
+              <Field name="password" placeholder="•••••••••••" disabled={true} />
             </div>
           </div>
           

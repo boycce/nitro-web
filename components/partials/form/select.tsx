@@ -2,7 +2,7 @@ import { css } from 'twin.macro'
 import { twMerge } from 'tailwind-merge'
 import ReactSelect, { components, ControlProps, createFilter, OptionProps, SingleValueProps } from 'react-select'
 import { ClearIndicatorProps, DropdownIndicatorProps, MultiValueRemoveProps } from 'react-select'
-import { ChevronDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { ChevronUpDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { util } from 'nitro-web'
 import { Errors } from 'types'
 
@@ -203,7 +203,7 @@ function Option(props: OptionProps) {
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronDownIcon className="size-6 -my-0.5 -mx-1" />
+      <ChevronUpDownIcon className="text-gray-400 size-[17px] -my-0.5 -mx-0.5" />
     </components.DropdownIndicator>
   )
 }
@@ -237,7 +237,7 @@ const selectStyles = {
   // Based off https://www.jussivirtanen.fi/writing/styling-react-select-with-tailwind
   // Input container
   control: {
-    base: 'rounded-md bg-white hover:cursor-pointer text-sm sm:text-sm/6 outline outline-1 -outline-offset-1 outline-input-border',
+    base: 'rounded-md bg-white hover:cursor-pointer text-sm leading-[1.65] outline outline-1 -outline-offset-1 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-primary',
     error: 'outline-danger',
   },
@@ -249,7 +249,7 @@ const selectStyles = {
   },
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: '',
-  multiValueRemove: 'border border-primary-dark bg-white rounded-md text-dark hover:bg-red-50',
+  multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-dark hover:bg-red-50',
   placeholder: 'text-input-placeholder',
   singleValue: {
     base: 'text-input',

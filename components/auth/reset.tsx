@@ -1,4 +1,4 @@
-import { Topbar, Input, FormError, Button, util } from 'nitro-web'
+import { Topbar, Field, FormError, Button, util } from 'nitro-web'
 import { Errors } from 'types'
 
 export function ResetInstructions() {
@@ -24,7 +24,7 @@ export function ResetInstructions() {
       <form onSubmit={onSubmit}>
         <div>
           <label for="email">Email Address</label>
-          <Input name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
         </div>
         
         <div class="mb-14">
@@ -67,11 +67,11 @@ export function ResetPassword() {
       <form onSubmit={onSubmit}>
         <div>
           <label for="password">Your New Password</label>
-          <Input name="password" type="password" state={state} onChange={onChange.bind(setState)} />
+          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)} />
         </div>
         <div>
           <label for="password2">Repeat Your New Password</label>
-          <Input name="password2" type="password" state={state} onChange={onChange.bind(setState)} />
+          <Field name="password2" type="password" state={state} onChange={onChange.bind(setState)} />
         </div>
 
         <div class="mb-14">

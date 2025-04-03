@@ -3,21 +3,21 @@ import Saturation from '@uiw/react-color-saturation'
 import Hue from '@uiw/react-color-hue'
 import { Dropdown, util } from 'nitro-web'
 
-type InputColorProps = {
-  className?: string
+export type FieldColorProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  name: string
+  id?: string 
   defaultColor?: string
-  iconEl?: React.ReactNode
-  id?: string
-  onChange?: (e: { target: { id: string, value: string } }) => void
-  value?: string
-  [key: string]: unknown
+  Icon?: React.ReactNode
+  onChange?: (event: { target: { id: string, value: string|null } }) => void
+  value?: string|null
 }
 
-export function InputColor({ className, defaultColor='#333', iconEl, id, onChange, value, ...props }: InputColorProps) {
+export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...props }: FieldColorProps) {
   const [lastChanged, setLastChanged] = useState(() => `ic-${Date.now()}`)
-  const isInvalid = className?.includes('is-invalid') ? 'is-invalid' : ''
+  const isInvalid = props.className?.includes('is-invalid') ? 'is-invalid' : ''
+  const id = props.id || props.name
 
-  function onInputChange(e: { target: { id: string, value: string } }) {
+  function onInputChange(e: { target: { id: string, value: string|null } }) {
     setLastChanged(`ic-${Date.now()}`)
     if (onChange) onChange(e)
   }
@@ -27,26 +27,27 @@ export function InputColor({ className, defaultColor='#333', iconEl, id, onChang
       dir="bottom-left"
       menuToggles={false}
       menuChildren={
-        <ColorPicker key={lastChanged} defaultColor={defaultColor} id={id} value={value} onChange={onChange} />
+        <ColorPicker key={lastChanged} defaultColor={defaultColor} id={id} name={props.name} value={value} onChange={onChange} />
       }
     >
       <div className="grid grid-cols-1">
-        {iconEl}
-        <input 
-          {...props} 
-          className={className + ' ' + isInvalid} 
-          id={id} 
-          value={value} 
+        {Icon}
+        <input
+          {...props}
+          className={(props.className || '') + ' ' + isInvalid}
+          id={id}
+          value={value}
           onChange={onInputChange}
-          onBlur={() => !validHex(value||'') && onInputChange({ target: { id: id || '', value: '' }})}
-          autoComplete="off" 
+          onBlur={() => !validHex(value||'') && onInputChange({ target: { id: id, value: '' }})}
+          autoComplete="off"
+          type="text"
         />
       </div>
     </Dropdown>
   )
 }
 
-function ColorPicker({ id='', onChange, value='', defaultColor='' }: InputColorProps) {
+function ColorPicker({ id='', onChange, value='', defaultColor='' }: FieldColorProps) {
   const [hsva, setHsva] = useState(() => hexToHsva(validHex(value) ? value : defaultColor))
   const [debounce] = useState(() => util.throttle(callOnChange, 50))
 

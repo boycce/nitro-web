@@ -4,6 +4,7 @@ import path from 'path'
 import Color from 'color'
 
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
+const darken = (clr, val) => Color(clr).darken(val).rgb().string()
 const nitroDir = path.dirname(require.resolve('nitro-web'))
 
 export default {
@@ -25,13 +26,11 @@ export default {
       },
       colors: {
         // Main colors
-        'primary': colors.indigo[500],
-        'primary-dark': colors.indigo[600],
-        'primary-light': colors.indigo[400],
-        'primary-hover': lighten(colors.indigo[500], 0.05),
+        'primary': '#4c50f9',
+        'primary-dark': darken('#4c50f9', 0.05),
+        'primary-hover': lighten('#4c50f9', 0.05),
         'secondary': colors.green[500],
         'secondary-dark': colors.green[600],
-        'secondary-light': colors.green[400],
         'secondary-hover': lighten(colors.green[500], 0.05),
         'label': colors.gray[900],
         'link': colors.black,
@@ -40,6 +39,7 @@ export default {
         'light': colors.gray[100],
         'dark': colors.gray[900],
         // Alert colors
+        'critical': '#ff0000',
         'danger': '#ff0000',
         'danger-dark': colors.red[800],
         'info': colors.blue[500],
@@ -54,15 +54,15 @@ export default {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
-        '2xs': ['0.77rem', { lineHeight: '1.5' }],
-        'xs': ['0.83rem', { lineHeight: '1.5' }],
-        'sm-label': ['0.87rem', { lineHeight: '1.5' }],
-        'sm': ['0.90rem', { lineHeight: '1.5' }],
-        'base': ['1rem', { lineHeight: '1.5' }],
-        'lg': ['1.16rem', { lineHeight: '1.75' }],
-        'xl': ['1.29rem', { lineHeight: '1.75' }],
-        '2xl': ['1.45rem', { lineHeight: '1.75' }],
-        '3xl': ['1.94rem', { lineHeight: '1.75' }],
+        '2xs': ['12px', { lineHeight: '1.5' }],
+        'xs': ['13px', { lineHeight: '1.5' }],
+        'sm': ['13.5px', { lineHeight: '1.5' }],
+        'md': ['14px', { lineHeight: '1.5' }],
+        'base': ['15.5px', { lineHeight: '1.5' }],
+        'lg': ['18px', { lineHeight: '1.75' }],
+        'xl': ['20px', { lineHeight: '1.75' }],
+        '2xl': ['22.5px', { lineHeight: '1.75' }],
+        '3xl': ['30px', { lineHeight: '1.75' }],
       },
       spacing: {
         'input-before': '0.625rem',

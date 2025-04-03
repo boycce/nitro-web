@@ -78,7 +78,13 @@ export function getCurrencyOptions(currencies: any): {
     value: string;
     label: any;
 }[];
-export function getCurrencyPrefixWidth(prefix: any, paddingRight?: number): number;
+/**
+ * Get the width of a prefix
+ * @param {string} prefix
+ * @param {number} paddingRight
+ * @returns {number}
+ */
+export function getPrefixWidth(prefix: string, paddingRight?: number): number;
 export function getDirectories(path: any, pwd: any): {
     clientDir: any;
     componentsDir: any;
@@ -99,7 +105,12 @@ export function isEmpty(obj: any, truthyValuesOnly: any): boolean;
 export function isFunction(variable: any): boolean;
 export function isHex24(value: any): boolean;
 export function isNumber(variable: any): boolean;
-export function isObject(variable: any): boolean;
+/**
+ * Checks if a variable is an object
+ * @param {unknown} variable
+ * @returns {boolean}
+ */
+export function isObject(variable: unknown): boolean;
 export function isRegex(variable: any): boolean;
 export function isString(variable: any): boolean;
 export function lcFirst(string: any): any;
@@ -135,16 +146,14 @@ export function objectMap(object: any, fn: any): {};
 export function omit(obj: any, fields: any): any;
 /**
  * Updates state from an input event, you can also update deep state properties
- * @param {Function} setState
- * @param {Empty | Event | Array[{string}, {string|number|fn}]}
- *   {Empty} - pass undefined to return a reusable function, e.g. const _onChange = onChange(setState)
- *   {Event} - pass the event object,                        e.g. <input onChange={_onChange}>
- *   {Array} - pass an array with [path, value],             e.g. <input onChange={() => _onChange(['name', 'Joe'])}>
+ * @param {Event|Array[{string},{string|number|fn}]}
+ *   {Event} - pass the event object            e.g. <input onChange={(e) => onChange.call(setState, e)}>
+ *   {Array} - pass an array with [path, value] e.g. <input onChange={(e) => onChange.call(setState, e, ['name', 'Joe'])}>
  * @param {Function} [beforeSetState] - optional function to run before setting the state
- *
- * @return {Function | Promise({state, chunks, target})}
+ * @this {Function} setState
+ * @return {Promise({state, chunks, target})}
  */
-export function onChange(setState: Function, event: any, beforeSetState?: Function): Function | Promise<any>;
+export function onChange(this: Function, event: any, beforeSetState?: Function): Promise<any>;
 export function pad(num: any, padLeft: any, fixedRight: any): any;
 export function pick(obj: any, keys: any): {};
 export function queryObject(search: any, assignTrue: any): any;

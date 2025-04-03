@@ -3,8 +3,9 @@ export type Config = {
   clientUrl: string
   env: string
   awsUrl?: string
-  currencies?: object
-  countries?: object
+  // needed for input-currency.tsx
+  currencies: { [key: string]: { symbol: string, digits: number } }
+  countries: { [key: string]: { numberFormats: { currency: string } } }
   googleMapsApiKey?: string
   isStatic?: boolean
   placeholderEmail?: string
@@ -22,7 +23,8 @@ export type User = {
   avatar?: MonasteryImage
 }
 
-export type Errors = Array<{ title: string, detail: string }> | null
+export type Error = { title: string, detail: string }
+export type Errors = Array<Error> | null
 
 export type MonasteryImage = {
   url: string

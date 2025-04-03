@@ -479,8 +479,14 @@ export function getCurrencyOptions (currencies) {
   return output
 }
 
-export function getCurrencyPrefixWidth (prefix, paddingRight=0) {
-  if (!prefix) return
+/**
+ * Get the width of a prefix
+ * @param {string} prefix
+ * @param {number} paddingRight
+ * @returns {number}
+ */
+export function getPrefixWidth (prefix, paddingRight=0) {
+  if (!prefix) return 0
   const span = document.createElement('span')
   span.classList.add('input-prefix')
   span.style.visibility = 'hidden'
@@ -614,6 +620,11 @@ export function isNumber (variable) {
   return !isNaN(parseFloat(variable)) && isFinite(variable)
 }
 
+/**
+ * Checks if a variable is an object
+ * @param {unknown} variable
+ * @returns {boolean}
+ */
 export function isObject (variable) {
   // Excludes null and array's
   return variable !== null && typeof variable === 'object' && !(variable instanceof Array) ? true : false
@@ -769,19 +780,16 @@ export function omit (obj, fields) {
 
 /**
  * Updates state from an input event, you can also update deep state properties
- * @param {Function} setState
- * @param {Empty | Event | Array[{string}, {string|number|fn}]}
- *   {Empty} - pass undefined to return a reusable function, e.g. const _onChange = onChange(setState)
- *   {Event} - pass the event object,                        e.g. <input onChange={_onChange}>
- *   {Array} - pass an array with [path, value],             e.g. <input onChange={() => _onChange(['name', 'Joe'])}>
+ * @param {Event|Array[{string},{string|number|fn}]}
+ *   {Event} - pass the event object            e.g. <input onChange={(e) => onChange.call(setState, e)}>
+ *   {Array} - pass an array with [path, value] e.g. <input onChange={(e) => onChange.call(setState, e, ['name', 'Joe'])}>
  * @param {Function} [beforeSetState] - optional function to run before setting the state
- * 
- * @return {Function | Promise({state, chunks, target})}
+ * @this {Function} setState
+ * @return {Promise({state, chunks, target})}
  */
-/////////////////////////////////////////////////////////////////////convert to bind
-export function onChange (setState, event, beforeSetState) {
-  if (typeof event === 'undefined') {
-    return onChange.bind(this, setState)
+export function onChange (event, beforeSetState) {
+  if (!isFunction(this)) {
+    throw new Error('Missing setState, please either call or bind setState to the function. E.g. onChange.call(setState, e)')
   }
   let elem = event.target ? event.target : { id: event[0], value: event[1] }
   let chunks = (elem.id || elem.name).split('.')
@@ -800,7 +808,7 @@ export function onChange (setState, event, beforeSetState) {
 
   // Update state
   return new Promise((resolve) => {
-    setState((state) => {
+    this((state) => {
       const newState = { ...state, ...(elem.files ? { hasFiles: true } : {}) }
       let target = newState
       for (var i = 0, l = chunks.length; i < l; i++) {

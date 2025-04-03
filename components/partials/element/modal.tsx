@@ -1,111 +1,84 @@
-// @ts-nocheck
-// todo: finish tailwind conversion
-import { css } from 'twin.macro'
 import { IsFirstRender } from 'nitro-web'
 import SvgX1 from 'nitro-web/client/imgs/icons/x1.svg'
 
-export function Modal({ show, setShow, children, className, maxWidth, minHeight, dismissable = true }) {
-  const [state, setState] = useState()
-  const containerEl = useRef()
+type ModalProps = {
+  show: boolean
+  setShow: (show: boolean) => void
+  children: React.ReactNode
+  maxWidth?: string
+  minHeight?: string
+  dismissable?: boolean
+  [key: string]: unknown
+}
+
+export function Modal({ show, setShow, children, maxWidth, minHeight, dismissable = true, ...props }: ModalProps) {
+  const [state, setState] = useState(show ? 'open' : 'close')
+  const containerEl = useRef<HTMLDivElement>(null)
   const isFirst = IsFirstRender()
 
-  useEffect(() => {
-    createScrollbarClasses()
-    return () => {
-      elementWithScrollbar().classList.remove('scrollbarPadding')
-    } // cleanup
-  }, [])
+  const states = {
+    'close': { 
+      root: 'left-[-100vw] transition-[left] duration-0 delay-200',
+      bg: 'opacity-0',
+      container: 'opacity-0 scale-[0.97]',
+    },
+    'close-now': { 
+      root: '',
+      bg: '',
+      container: 'opacity-0 !transition-none',
+    },
+    'open': { 
+      root: 'left-0 transition-none model-open',
+      bg: 'opacity-100 duration-200',
+      container: 'opacity-100 scale-[1] duration-200',
+    },
+  }
+  const _state = states[state as keyof typeof states]
+
 
   useEffect(() => {
+    if (isFirst) return
     if (show) {
-      elementWithScrollbar().classList.add('scrollbarPadding')
-      setState('modal-open')
-    } else if (!isFirst) {
-      // Dont close if first render (forgot what use case this was needed for)
+      setState('open')
+    } else {
       setTimeout(() => {
         // If another modal is being opened, force close the container for a smoother transition
         if (document.getElementsByClassName('modal-open').length > 1) {
-          setState('modal-close-immediately')
+          setState('close-now')
         } else {
-          setState('')
-          elementWithScrollbar().classList.remove('scrollbarPadding')
+          setState('close')
         }
       }, 10)
     }
   // There is a bug during hot-reloading where the modal does't open if we don't ensure 
   // the same truthy/falsey type is used.
   }, [!!show])
-
-  function elementWithScrollbar() {
-    // this needs to be non-body element otherwise the Modal.jsx doesn't open/close smoothly
-    //document.getElementsByTagName('body')[0] // document.getElementsByClassName('page')[0]
-    return document.getElementById('app')
-  }
   
-  function onClick(e) {
-    let clickedOnContainer = containerEl.current && containerEl.current.contains(e.target)
-    if (!clickedOnContainer && dismissable) {
+  function onClick(e: React.MouseEvent) {
+    const clickedOnModal = containerEl.current && containerEl.current.contains(e.target as Node)
+    if (!clickedOnModal && dismissable) {
       setShow(false)
     }
   }
 
-  function createScrollbarClasses() {
-    /**
-     *  Creates reusable margin and padding classes containing the scrollbar width and
-     *  sets window.scrollbarWidth
-     *  @return width
-     */
-    if (typeof window.scrollbarWidth !== 'undefined') return
-
-    var outer = document.createElement('div')
-    outer.style.visibility = 'hidden'
-    outer.style.width = '100px'
-    outer.style.margin = '0px'
-    outer.style.padding = '0px'
-    outer.style.border = '0'
-    document.body.appendChild(outer)
-
-    var widthNoScroll = outer.offsetWidth
-    // force scrollbars
-    outer.style.overflow = 'scroll'
-
-    // add innerdiv
-    var inner = document.createElement('div')
-    inner.style.width = '100%'
-    outer.appendChild(inner)
-
-    var widthWithScroll = inner.offsetWidth
-
-    // Remove divs
-    outer.parentNode.removeChild(outer)
-    let width = (window.scrollbarWidth = widthNoScroll - widthWithScroll)
-
-    // Create new inline stylesheet and append to the head
-    let style = document.createElement('style')
-    let css = (
-      '.scrollbarPadding {padding-right:' + width + 'px !important; overflow:hidden !important;}' +
-      '.scrollbarMargin {margin-right:' + width + 'px !important; overflow:hidden !important;}'
-    )
-    style.type = 'text/css'
-    if (style.styleSheet) style.styleSheet.cssText = css //<=IE8
-    else style.appendChild(document.createTextNode(css))
-    document.getElementsByTagName('head')[0].appendChild(style)
-
-    return width
-  }
-
   return (
-    <div css={style} class={`${state}`} onClick={(e) => e.stopPropagation()}>
-      <div class="modal-bg wrapper scrollbarPadding"></div>
-      <div class="modal-container">
-        {/* we also need to be able to scroll without closing */}
-        <div onMouseDown={onClick}> 
+    <div 
+      onClick={(e) => e.stopPropagation()} 
+      class={`fixed top-0 w-[100vw] h-[100vh] z-[700] ${_state.root}`}
+    >
+      <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${_state.bg}`}></div>
+      <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${_state.container}`}>
+        <div class="flex items-center justify-center min-h-full" onMouseDown={onClick}> 
           <div 
             ref={containerEl} 
-            style={{ maxWidth: maxWidth || '740px', minHeight: typeof minHeight == 'undefined' ? '487px' : minHeight }} 
-            class={`modal1 ${className}`}
+            style={{ maxWidth: maxWidth || '550px', minHeight: minHeight }} 
+            class={`relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg ${props.className}`}
           >
-            <div class="modal-close" onClick={() => { if (dismissable) { setShow(false) }}}><SvgX1 /></div>
+            <div 
+              class="absolute top-0 right-0 p-3 m-1 cursor-pointer" 
+              onClick={() => { if (dismissable) { setShow(false) }}}>
+                <SvgX1 />
+            </div>
             {children}
           </div>
         </div>
@@ -113,118 +86,3 @@ export function Modal({ show, setShow, children, className, maxWidth, minHeight,
     </div>
   )
 }
-
-const style = css`
-  /* Modal structure */
-  & {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: calc(100vh);
-    z-index: 699;
-    .modal-bg {
-      position: absolute !important;
-      display: flex;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      box-sizing: content-box;
-      &:before {
-        content: '';
-        display: block;
-        flex: 1;
-        background: rgba(255, 255, 255, 0.82);
-        /* backdrop-filter: blur(1px);
-        -webkit-backdrop-filter: blur(1px); */
-      }
-    }
-    .modal-container {
-      position: relative;
-      height: calc(100vh);
-      // horisontal centering
-      > div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100%;
-        // vertical centering
-        > div {
-          margin: 30px 20px 90px;
-          width: 100%;
-        }
-      }
-    }
-    &.modal-close-immediately {
-      .modal-container > div > div {
-        transition: none !important;
-      }
-    }
-  }
-
-  /* Animation */
-
-  & {
-    left: -100%;
-    transition: left 0s 0.2s;
-  }
-  .modal-bg {
-    opacity: 0;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-  }
-  .modal-container {
-    /*overflow: hidden;*/
-    overflow-y: scroll;
-    overflow-x: auto;
-  }
-  .modal-container > div > div {
-    opacity: 0;
-    transform: scale(0.97);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-  }
-  &.modal-open {
-    left: 0;
-    transition: none;
-    .modal-bg {
-      opacity: 1;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    .modal-container {
-      overflow-y: scroll;
-      overflow-x: auto;
-    }
-    .modal-container > div > div {
-      opacity: 1;
-      transform: scale(1);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-  }
-
-  /* Modal customisations */
-
-  .modal1 {
-    background: white;
-    border: 2px solid #27242C;
-    box-shadow: 0px 1px 29px rgba(31, 29, 36, 0.07);
-    border-radius: 8px;
-    .subtitle {
-      margin-bottom: 34px; // same as form pages
-    }
-    .modal-close {
-      position: absolute;
-      margin: 10px;
-      padding: 15px 20px;
-      top: 0;
-      right: 0;
-      cursor: pointer;
-      line {
-        transition: all 0.1s;
-      }
-      &:hover {
-        line {
-          /* stroke: theme'colors.primary-dark'; */
-        }
-      }
-    }
-  }
-`
