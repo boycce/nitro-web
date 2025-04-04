@@ -1249,6 +1249,9 @@ label, .label {
 .w-\[40px\] {
   width: 40px;
 }
+.w-\[60px\] {
+  width: 60px;
+}
 .w-\[72\.1875rem\] {
   width: 72.1875rem;
 }
@@ -1546,6 +1549,9 @@ label, .label {
 .border-b {
   border-bottom-width: 1px;
 }
+.border-l {
+  border-left-width: 1px;
+}
 .border-dashed {
   border-style: dashed;
 }
@@ -1555,6 +1561,10 @@ label, .label {
 .border-dropdown-ul-border {
   --tw-border-opacity: 1;
   border-color: rgb(229 231 235 / var(--tw-border-opacity, 1));
+}
+.border-gray-100 {
+  --tw-border-opacity: 1;
+  border-color: rgb(243 244 246 / var(--tw-border-opacity, 1));
 }
 .border-gray-200 {
   --tw-border-opacity: 1;
@@ -1586,6 +1596,10 @@ label, .label {
 .\!bg-gray-100 {
   --tw-bg-opacity: 1 !important;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1)) !important;
+}
+.\!bg-primary-dark {
+  --tw-bg-opacity: 1 !important;
+  background-color: rgb(60 65 249 / var(--tw-bg-opacity, 1)) !important;
 }
 .bg-\[\#F3F3F3\] {
   --tw-bg-opacity: 1;
@@ -2463,6 +2477,9 @@ html {
 .hover\:cursor-pointer:hover {
   cursor: pointer;
 }
+.hover\:overflow-y-auto:hover {
+  overflow-y: auto;
+}
 .hover\:bg-gray-100:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
@@ -2576,6 +2593,10 @@ html {
   --tw-border-opacity: 1;
   border-color: rgb(79 70 229 / var(--tw-border-opacity, 1));
 }
+.group:hover .group-hover\:bg-gray-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(243 244 246 / var(--tw-bg-opacity, 1));
+}
 .group:hover .group-hover\:text-indigo-600 {
   --tw-text-opacity: 1;
   color: rgb(79 70 229 / var(--tw-text-opacity, 1));
@@ -2661,6 +2682,9 @@ html {
   }
   .sm\:mt-20 {
     margin-top: 5rem;
+  }
+  .sm\:grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .sm\:items-start {
     -webkit-box-align: start;
