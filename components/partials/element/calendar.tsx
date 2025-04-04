@@ -17,9 +17,10 @@ export type CalendarProps = {
   numberOfMonths?: number
   month?: number // the value may be updated from an outside source, thus the month may have changed
   className?: string
+  preserveTime?: boolean
 }
 
-export function Calendar({ mode='single', onChange, value, numberOfMonths, month: monthProp, className }: CalendarProps) {
+export function Calendar({ mode='single', onChange, value, numberOfMonths, month: monthProp, className, preserveTime }: CalendarProps) {
   const isFirstRender = IsFirstRender()
   const isRange = mode == 'range'
 
@@ -41,6 +42,7 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
     switch (mode as T) {
       case 'single': {
         const date = newDate as ModeSelection<'single'>
+        preserveTimeFn(date)
         onChange?.(mode, date?.getTime() ?? null)
         break
       }
@@ -54,6 +56,19 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
         onChange?.(mode, dates.map((d) => d.getTime()))
         break
       }
+    }
+  }
+
+  function preserveTimeFn(date?: Date) {      
+    // Preserve time from the original date if needed
+    if (preserveTime && dates[0] && date) {
+      const originalDate = dates[0]
+      date.setHours(
+        originalDate.getHours(),
+        originalDate.getMinutes(),
+        originalDate.getSeconds(),
+        originalDate.getMilliseconds()
+      )
     }
   }
   

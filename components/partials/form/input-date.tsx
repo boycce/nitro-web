@@ -10,6 +10,7 @@ export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
   name: string
   id?: string 
   mode?: Mode
+  showTime?: boolean
   // an array is returned for non-single modes
   onChange?: (e: { target: { id: string, value: null|number|(null|number)[] } }) => void
   prefix?: string
@@ -18,8 +19,8 @@ export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
   Icon?: React.ReactNode
 }
 
-export function FieldDate({ mode='single', onChange, prefix='', value, numberOfMonths, Icon, ...props }: FieldDateProps) {
-  const localePattern = 'd MMM yyyy'
+export function FieldDate({ mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, ...props }: FieldDateProps) {
+  const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' HH:mm aa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
   const id = props.id || props.name
@@ -40,7 +41,7 @@ export function FieldDate({ mode='single', onChange, prefix='', value, numberOfM
   }, [prefix])
 
   function onCalendarChange(mode: Mode, value: null|number|(null|number)[]) {
-    if (mode == 'single') dropdownRef.current?.setIsActive(false) // Close the dropdown
+    if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
     if (onChange) onChange({ target: { id: id, value: value }})
   }
@@ -80,11 +81,19 @@ export function FieldDate({ mode='single', onChange, prefix='', value, numberOfM
     <Dropdown
       ref={dropdownRef}
       menuToggles={false}
-      animate={false}
+      // animate={false}
       // menuIsOpen={true}
       minWidth={0}
       menuChildren={
-        <Calendar {...{ mode, value, numberOfMonths, month }} onChange={onCalendarChange} className="px-3 pt-1 pb-2" />
+        <div className="flex">
+          <Calendar 
+            {...{ mode, value, numberOfMonths, month }} 
+            preserveTime={!!showTime} 
+            onChange={onCalendarChange} 
+            className="pt-1 pb-2  px-3" 
+          />
+          {!!showTime && mode == 'single' && <TimePicker date={dates?.[0]} onChange={onCalendarChange} />}
+        </div>
       }
     > 
       <div className="grid grid-cols-1">
@@ -108,5 +117,79 @@ export function FieldDate({ mode='single', onChange, prefix='', value, numberOfM
         />
       </div>
     </Dropdown>
+  )
+}
+
+type TimePickerProps = {
+  date: Date|null
+  onChange: (mode: Mode, value: number|null) => void
+}
+
+function TimePicker({ date, onChange }: TimePickerProps) {
+  const lists = [
+    [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // hours
+    [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55], // minutes
+    ['AM', 'PM'], // AM/PM
+  ]
+  
+  // Get current values from date or use defaults
+  const hour = date ? parseInt(format(date, 'h')) : undefined
+  const minute = date ? parseInt(format(date, 'm')) : undefined
+  const period = date ? format(date, 'a') : undefined
+  
+  const handleTimeChange = (type: 'hour' | 'minute' | 'period', value: string | number) => {
+    // Create a new date object from the current date or current time
+    const newDate = new Date(date || new Date())
+    
+    if (type === 'hour') {
+      // Parse the time with the new hour value
+      const timeString = `${value}:${format(newDate, 'mm')} ${format(newDate, 'a')}`
+      const updatedDate = parse(timeString, 'h:mm a', newDate)
+      newDate.setHours(updatedDate.getHours(), updatedDate.getMinutes())
+    } else if (type === 'minute') {
+      // Parse the time with the new minute value
+      const timeString = `${format(newDate, 'h')}:${value} ${format(newDate, 'a')}`
+      const updatedDate = parse(timeString, 'h:mm a', newDate)
+      newDate.setMinutes(updatedDate.getMinutes())
+    } else if (type === 'period') {
+      // Parse the time with the new period value
+      const timeString = `${format(newDate, 'h')}:${format(newDate, 'mm')} ${value}`
+      const updatedDate = parse(timeString, 'h:mm a', newDate)
+      newDate.setHours(updatedDate.getHours())
+    }
+    
+    onChange('single', newDate.getTime())
+  }
+
+  return (
+    lists.map((list, i) => {
+      const type = i === 0 ? 'hour' : i === 1 ? 'minute' : 'period'
+      const currentValue = i === 0 ? hour : i === 1 ? minute : period
+
+      return (
+        <div key={i} className="w-[60px] py-1 relative overflow-hidden hover:overflow-y-auto border-l border-gray-100">
+          <div className="w-[60px] absolute flex flex-col items-center">
+            {list.map(item => (
+              <div 
+                className="py-1 flex group cursor-pointer"
+                key={item}
+                onClick={() => handleTimeChange(type, item)}
+              >
+                <button 
+                  key={item}
+                  className={
+                    'size-[33px] rounded-full flex justify-center items-center group-hover:bg-gray-100 '
+                    + (item === currentValue ? '!bg-primary-dark text-white' : '')
+                  }
+                  onClick={() => handleTimeChange(type, item)}
+                >
+                  {item.toString().padStart(2, '0').toLowerCase()}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )
+    })
   )
 }

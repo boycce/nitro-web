@@ -104,7 +104,7 @@ export const Dropdown = forwardRef(function Dropdown({
           return cloneElement(el, { key, onMouseDown, onKeyDown }) // adds onClick
         })
       }
-      <ul 
+      <ul
         style={{ minWidth }}
         class={`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1]`}
       >
@@ -132,7 +132,9 @@ export const Dropdown = forwardRef(function Dropdown({
 
 const style = css`
   ul {
-    transition: transform 0.15s ease, opacity 0.15s ease, visibility 0s 0.15s ease;
+    transition: transform 0.15s ease, opacity 0.15s ease, visibility 0s 0.15s ease, max-width 0s 0.15s ease, max-height 0s 0.15s ease;
+    max-width: 0; // handy if the dropdown ul exceeds the viewport width
+    max-height: 0; // handy if the dropdown ul exceeds the viewport height
   }
   &.is-bottom-right,
   &.is-top-right {
@@ -166,6 +168,8 @@ const style = css`
       opacity: 1;
       visibility: visible;
       transition: transform 0.15s ease, opacity 0.15s ease;
+      max-width: 1000px;
+      max-height: 1000px;
     }
     &.is-bottom-left > ul,
     &.is-bottom-right > ul {

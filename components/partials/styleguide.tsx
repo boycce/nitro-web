@@ -14,6 +14,7 @@ export function Styleguide({ config }: { config: Config }) {
     currency: 'nzd', // can be commented too
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
+    'date-time': Date.now(),
     calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
     firstName: 'Bruce',
     errors: [
@@ -251,14 +252,18 @@ export function Styleguide({ config }: { config: Config }) {
       </div>
 
       <h2 class="h3">Date Inputs</h2>
-      <div class="grid grid-cols-3 gap-x-6 mb-4">
+      <div class="grid grid-cols-1 gap-x-6 mb-4 sm:grid-cols-3">
         <div>
-          <label for="date">Date</label>
-          <Field name="date" type="date" state={state} onChange={onInputChange} />
+          <label for="date">Date with time</label>
+          <Field name="date-time" type="date" showTime={true} state={state} onChange={onInputChange} />
         </div>
         <div>
           <label for="date-range">Date range with prefix</label>
           <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={onInputChange} />
+        </div>
+        <div>
+          <label for="date">Date</label>
+          <Field name="date" type="date" state={state} onChange={onInputChange} />
         </div>
       </div>
 
