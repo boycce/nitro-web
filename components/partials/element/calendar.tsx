@@ -17,7 +17,7 @@ export type CalendarProps = {
   numberOfMonths?: number
   month?: number // the value may be updated from an outside source, thus the month may have changed
   className?: string
-  preserveTime?: boolean
+  preserveTime?: boolean // just for single mode
 }
 
 export function Calendar({ mode='single', onChange, value, numberOfMonths, month: monthProp, className, preserveTime }: CalendarProps) {

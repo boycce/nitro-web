@@ -19,8 +19,13 @@ export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
   Icon?: React.ReactNode
 }
 
+type TimePickerProps = {
+  date: Date|null
+  onChange: (mode: Mode, value: number|null) => void
+}
+
 export function FieldDate({ mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, ...props }: FieldDateProps) {
-  const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' HH:mm aa' : ''}`
+  const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
   const id = props.id || props.name
@@ -118,11 +123,6 @@ export function FieldDate({ mode='single', onChange, prefix='', value, numberOfM
       </div>
     </Dropdown>
   )
-}
-
-type TimePickerProps = {
-  date: Date|null
-  onChange: (mode: Mode, value: number|null) => void
 }
 
 function TimePicker({ date, onChange }: TimePickerProps) {
