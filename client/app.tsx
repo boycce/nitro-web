@@ -30,7 +30,7 @@ type Route = {
   redirect?: string
 }
 
-export async function setupApp(config: Config, layouts: React.FC[]) {
+export async function setupApp(config: Config, layouts: React.FC<LayoutProps>[]) {
   // Fetch state and init app
   const settings: Settings = {
     beforeApp: config.beforeApp || beforeApp,
