@@ -24,70 +24,70 @@ export const SigninPage = () => <Signin config={config} />
 SigninPage.route = {
   '/signin': true,
   '/signout': true,
-  'meta': { 'title': 'Sign In - Nitro', layout: 2 },
+  'meta': { 'title': 'Sign In', layout: 2 },
 }
 
 // Signup page
 export const SignupPage = () => <Signup config={config} />
 SignupPage.route = {
   '/signup': true,
-  'meta': { 'title': 'Sign Up - Nitro', layout: 2 },
+  'meta': { 'title': 'Sign Up', layout: 2 },
 }
 
 // Reset instructions page
 export const ResetInstructionsPage = () => <ResetInstructions />
 ResetInstructionsPage.route = {
   '/reset': true,
-  'meta': { 'title': 'Reset password - Nitro', layout: 2 },
+  'meta': { 'title': 'Reset password', layout: 2 },
 }
 
 // Reset password page
 export const ResetPasswordPage = () => <ResetPassword />
 ResetPasswordPage.route = {
   '/reset/:token': true,
-  'meta': { 'title': 'Reset password - Nitro', layout: 2 },
+  'meta': { 'title': 'Reset password', layout: 2 },
 }
 
 // // Settings Account page
 // export const SettingsAccountPage = () => <SettingsAccount />
 // SettingsAccountPage.route = {
 //   '/settings/account': ['isUser'],
-//   'meta': { 'title': 'Account Settings - Nitro', layout: 1 },
+//   'meta': { 'title': 'Account Settings', layout: 1 },
 // }
 
 // // Settings Business page
 // export const SettingsBusinessPage = () => <SettingsBusiness config={config} />
 // SettingsBusinessPage.route = {
 //   '/settings/business': ['isUser'],
-//   'meta': { 'title': 'Business Settings - Nitro', layout: 1 },
+//   'meta': { 'title': 'Business Settings', layout: 1 },
 // }
 
 // // Settings Team page
 // export const SettingsTeamPage = () => <SettingsTeam config={config} />
 // SettingsTeamPage.route = {
 //   '/settings/team': ['isUser'],
-//   'meta': { 'title': 'Team Settings - Nitro', layout: 1 },
+//   'meta': { 'title': 'Team Settings', layout: 1 },
 // }
 
 // Dashboard page
 export const DashboardPage = () => <Dashboard config={config} />
 DashboardPage.route = {
   '/': true,
-  'meta': { 'title': 'Dashboard - Nitro', layout: 1 },
+  'meta': { 'title': 'Dashboard', layout: 1 },
 }
 
 // Styleguide page
 export const StyleguidePage = () => <Styleguide config={config} />
 StyleguidePage.route = {
   '/styleguide': true,
-  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'} - Nitro`, layout: 1 },
+  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
 }
 
 // Not found page
 export const NotFoundPage = () => <NotFound />
 NotFoundPage.route = {
   '*': true,
-  'meta': { 'title': 'Nothing found - Nitro', layout: 1 },
+  'meta': { 'title': 'Nothing found', layout: 1 },
 }
 
 // Custom Tailwind UI page example
@@ -226,5 +226,5 @@ const style = css`
 `
 PricingPage.route = {
   '/pricing': true,
-  'meta': { 'title': 'Pricing - Nitro', layout: 1 },
+  'meta': { 'title': 'Pricing', layout: 1 },
 }

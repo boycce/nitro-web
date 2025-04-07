@@ -87,7 +87,7 @@
     "extends": "../.eslintrc.json"
   },
   "engines": {
-    "node": "^18"
+    "node": ">=18"
   },
   "browserslist": [
     "> 1%",

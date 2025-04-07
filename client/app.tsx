@@ -6,13 +6,19 @@ import { beforeCreate, Provider, exposedData } from './store'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
 import { Config, Store } from 'types'
 
+type LayoutProps = {
+  config: Config;
+}
+
 type Settings = {
   afterApp?: () => void
-  middleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
   beforeApp: (config: Config) => Promise<object>
   beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
   isStatic?: boolean
-  layouts: React.FC[]
+  layouts: React.FC<LayoutProps>[]
+  middleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
+  name: string
+  titleSeparator?: string
 }
 
 type Route = {
@@ -27,23 +33,25 @@ type Route = {
 export async function setupApp(config: Config, layouts: React.FC[]) {
   // Fetch state and init app
   const settings: Settings = {
-    middleware: Object.assign(defaultMiddleware, config.middleware || {}),
     beforeApp: config.beforeApp || beforeApp,
     beforeStoreUpdate: config.beforeStoreUpdate || beforeStoreUpdate,
     isStatic: config.isStatic,
     layouts: layouts,
+    middleware: Object.assign(defaultMiddleware, config.middleware || {}),
+    name: config.name,
+    titleSeparator: config.titleSeparator,
   }
   if (!settings.layouts) throw new Error('layouts are required')
   const initData = (await settings.beforeApp(config)) || {}
   beforeCreate(initData, settings.beforeStoreUpdate)
 
   const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement)
-  root.render(<App settings={settings} />)
+  root.render(<App settings={settings} config={config} />)
 }
 
-function App({ settings }: { settings: Settings }): ReactNode {
+function App({ settings, config }: { settings: Settings, config: Config }): ReactNode {
   // const themeNormalised = theme
-  const router = getRouter(settings)
+  const router = getRouter({ settings, config })
   // const theme = pick(themeNormalised, []) // e.g. 'topPanelHeight'
 
   useEffect(() => {
@@ -82,7 +90,7 @@ function AfterApp({ settings }: { settings: Settings }) {
   return (null)
 }
 
-function getRouter(settings: Settings) {
+function getRouter({ settings, config }: { settings: Settings, config: Config }) {
   /**
    * Get all routes from components folder
    * @return {array} routes for for creatingBrowserRouter
@@ -145,6 +153,7 @@ function getRouter(settings: Settings) {
             meta: {
               ...(route.meta || {}),
               layout: layoutNum,
+              title: `${route.meta?.title ? `${route.meta.title}${settings.titleSeparator || ' - '}` : ''}${settings.name}`,
             },
             middleware: middleware,
             name: componentName,
@@ -166,7 +175,7 @@ function getRouter(settings: Settings) {
       // path: '/', // (disbaled: page component with path:'/' doesnt work)
       element: (
         <Fragment> 
-          <Layout />
+          <Layout config={config} />
           <RestoreScroll />
         </Fragment>
       ),

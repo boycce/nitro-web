@@ -2,6 +2,7 @@
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
 import { isDemo } from 'nitro-web'
+import { Config } from 'types'
 import {
   Bars3Icon,
   HomeIcon,
@@ -10,20 +11,20 @@ import {
   ArrowLeftCircleIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
-
 const sidebarWidth = 'lg:w-80'
 
 export type SidebarProps = {
   Logo: React.FC<{ width?: string, height?: string, alt?: string }>;
   menu?: { name: string; to: string; Icon: React.FC<{ className?: string }> }[]
   links?: { name: string; to: string; initial: string }[]
+  config?: Config
 }
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Sidebar({ Logo, menu, links }: SidebarProps) {
+export function Sidebar({ Logo, menu, links, config }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <>
@@ -46,14 +47,14 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
                 </button>
               </div>
             </TransitionChild>
-            <SidebarContents Logo={Logo} menu={menu} links={links} />
+            <SidebarContents Logo={Logo} menu={menu} links={links} config={config} />
           </DialogPanel>
         </div>
       </Dialog>
 
       {/* Static sidebar for desktop */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
-        <SidebarContents Logo={Logo} menu={menu} links={links} />
+        <SidebarContents Logo={Logo} menu={menu} links={links} config={config} />
       </div>
       
       {/* mobile sidebar closed */}
@@ -72,7 +73,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   )
 }
 
-function SidebarContents ({ Logo, menu, links }: SidebarProps) {
+function SidebarContents ({ Logo, menu, links, config }: SidebarProps) {
   const location = useLocation()
   const [store] = useTracked()
   const user = store.user
@@ -100,7 +101,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
     <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white py-5 px-10 lg:border-r lg:border-gray-200">
       <div className="flex h-16 shrink-0 items-center">
         <Link to="/">
-          <Logo alt="Nitro" width="70" height={undefined} />
+          <Logo alt={config?.name || 'Nitro'} width="70" height={undefined} />
         </Link>
       </div>
       <nav className="flex flex-1 flex-col">

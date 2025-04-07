@@ -284,7 +284,7 @@ export const getConfig = (config) => {
       }),
       new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.css` }),
       new HtmlWebpackPlugin({ template: clientDir + 'index.html', filename: distDir + 'index.html' }),
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPath }),
+      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPath, NAME: config.name }),
       new CleanTerminalPlugin({ skipFirstRun: true }),
       // !isBuild && new ReactRefreshWebpackPlugin({ overlay: false }),
     ].filter(Boolean),

@@ -1,9 +1,10 @@
 import { css } from 'twin.macro'
 import { Outlet } from 'react-router-dom'
 import { Message } from 'nitro-web'
+import { Config } from 'types'
 
 // Signin, reset password, etc
-export function Layout2({ Logo }: { Logo: React.ComponentType<{ alt: string; width: string }> }) {
+export function Layout2({ Logo, config }: { Logo: React.ComponentType<{ alt: string; width: string }>, config: Config }) {
   return (
     <div css={style} class="bg-[#F3F3F3]">
       <Message />
@@ -11,7 +12,7 @@ export function Layout2({ Logo }: { Logo: React.ComponentType<{ alt: string; wid
         <div class="flex-1 w-full wrapper-2 px-5 py-10">
           <div class="border-b mb-6">
             <Link to="/signin" class="logo relative block -ml-1 -mt-1 p-1">
-              <Logo alt="Nitro" width="60" />
+              <Logo alt={config?.name || 'Nitro'} width="60" />
             </Link>
           </div>
           <Outlet />
@@ -24,7 +25,7 @@ export function Layout2({ Logo }: { Logo: React.ComponentType<{ alt: string; wid
             <li><Link class="underline1" to="/support">Support</Link></li>
           </ul>
           <div>
-            2025 © Nitro
+            2025 © {config?.name || 'Nitro'}
           </div>
         </div>
 
