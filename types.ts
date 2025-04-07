@@ -45,3 +45,5 @@ export type Store = {
   user?: User | null,
   apiAvailable?: boolean
 }
+
+export type Svg = React.FC<React.SVGProps<SVGElement>>

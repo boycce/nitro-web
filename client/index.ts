@@ -45,10 +45,6 @@ export { Location } from '../components/partials/form/location'
 export { Select, getSelectStyle } from '../components/partials/form/select'
 export { Toggle } from '../components/partials/form/toggle'
 
-// Component Layouts
-export { Layout1 } from '../components/partials/layout/layout1'
-export { Layout2 } from '../components/partials/layout/layout2'
-
 // Component Other
 export { IsFirstRender } from '../components/partials/is-first-render'
 
