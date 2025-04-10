@@ -14,6 +14,10 @@
     "major": "npm run major -w core",
     "minor": "npm run minor -w core",
     "patch": "npm run patch -w core",
+    "start": "npm run start -w example",
     "types": "npm run types -w core"
+  },
+  "engines": {
+    "node": ">=18 <21"
   }
 }

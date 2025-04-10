@@ -78,6 +78,6 @@
     "extends": "../core/.eslintrc.json"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18 <21"
   }
 }

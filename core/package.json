@@ -54,7 +54,7 @@
   },
   "_peers-are-packages-that-will-be-used-in-the-host-repo-too": "",
   "engines": {
-    "node": ">=18"
+    "node": ">=18 <21"
   },
   "standard-version": {
     "releaseCommitMessageFormat": "{{currentTag}}",
