@@ -1,6 +1,6 @@
 {
   "name": "nitro-web",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
@@ -22,9 +22,9 @@
     }
   },
   "scripts": {
-    "major": "npm run types && standard-version --release-as major",
-    "minor": "npm run types && standard-version --release-as minor",
-    "patch": "npm run types && standard-version --release-as patch",
+    "major": "npm run types && standard-version --release-as major && npm publish && cd ../webpack && npm publish",
+    "minor": "npm run types && standard-version --release-as minor && npm publish && cd ../webpack && npm publish",
+    "patch": "npm run types && standard-version --release-as patch && npm publish && cd ../webpack && npm publish",
     "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types"
   },
   "dependencies": {
