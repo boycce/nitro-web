@@ -336,19 +336,21 @@ class InterpolateHtmlPlugin {
 
 function getPublicPath(env, homepage, publicPath) {
   /**
-   * Returns public path used for webapck (we can't use relative paths)
+   * Returns public path used for webpack, used in the relative asset paths
    * @param {string} env - 'development', 'staging', 'production'
-   * @param {string} publicPath - proces.env.publicPath
    * @param {string} homepage - package.json homepage
+   * @param {string} <publicPath> - process.env.publicPath
    */
   if (publicPath) {
     const publicPathObj = new URL(publicPath, 'https://domain.com')
+    if (env !== 'development') console.info(`Public path: ${publicPathObj.pathname}`)
     return publicPathObj.pathname
 
   } else if (homepage) {
     const homepageObj = new URL(homepage, 'https://domain.com')
-    if (env === 'development') return '/'
-    else return homepageObj.pathname
+    if (env !== 'development') console.info(`Public path, from package homepage: ${homepageObj.pathname}`)
+    if (env !== 'development') return homepageObj.pathname
+    else return '/'
 
   } else {
     return '/'
