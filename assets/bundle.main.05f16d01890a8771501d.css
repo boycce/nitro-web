@@ -1888,6 +1888,9 @@ label, .label {
 .text-\[11px\] {
   font-size: 11px;
 }
+.text-\[9px\] {
+  font-size: 9px;
+}
 .text-base {
   font-size: 15.5px;
   line-height: 1.5;
