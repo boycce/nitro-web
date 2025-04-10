@@ -5,6 +5,7 @@ export type Config = {
   currencies: { [key: string]: { symbol: string, digits: number } } // for input-currency.tsx
   env: string
   name: string
+  version: string
 
   awsUrl?: string
   beforeApp?: () => Promise<object>

@@ -16,13 +16,14 @@ export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
   menu?: { name: string; to: string; Icon: React.FC<{ className?: string }> }[]
   links?: { name: string; to: string; initial: string }[]
+  version?: string
 }
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Sidebar({ Logo, menu, links }: SidebarProps) {
+export function Sidebar({ Logo, menu, links, version }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <>
@@ -45,14 +46,14 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
                 </button>
               </div>
             </TransitionChild>
-            <SidebarContents Logo={Logo} menu={menu} links={links} />
+            <SidebarContents Logo={Logo} menu={menu} links={links} version={version} />
           </DialogPanel>
         </div>
       </Dialog>
 
       {/* Static sidebar for desktop */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
-        <SidebarContents Logo={Logo} menu={menu} links={links} />
+        <SidebarContents Logo={Logo} menu={menu} links={links} version={version} />
       </div>
       
       {/* mobile sidebar closed */}
@@ -71,7 +72,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   )
 }
 
-function SidebarContents ({ Logo, menu, links }: SidebarProps) {
+function SidebarContents ({ Logo, menu, links, version }: SidebarProps) {
   const location = useLocation()
   const [store] = useTracked()
   const user = store.user
@@ -97,10 +98,11 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
   return (
     <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white py-5 px-10 lg:border-r lg:border-gray-200">
       {Logo && (
-        <div className="flex h-16 shrink-0 items-center">
+        <div className="flex h-16 shrink-0 items-center gap-2 justify-bedtween">
           <Link to="/">
             <Logo width="70" height={undefined} />
           </Link>
+          <span className="text-[9px] text-gray-900 font-semibold mt-4">{version}</span>
         </div>
       )}
       <nav className="flex flex-1 flex-col">
@@ -169,7 +171,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
               className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
             >
               <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
-              <span aria-hidden="true" class="truncate1">{user?.name || 'Guest'}</span>
+              <span aria-hidden="true" class="truncate1 flex-1">{user?.name || 'Guest'}</span>
             </Link>
           </li>
         </ul>

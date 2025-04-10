@@ -4,13 +4,13 @@ import { Message, Sidebar } from 'nitro-web'
 import Logo from '../../client/imgs/logo/logo.svg'
 
 // Dashboard, app screens (only the <Outlet/> receives `params` and `location`)
-export function Layout1() {
+export function Layout1({ config }: { config: Config }) {
   return (
     <div class="bg-[#F3F3F3]">
       <Message />
       <div class="flex-1">
         <div class="max-w-[1800px] mx-auto lg:flex min-h-[100%] w-[100%] bg-[#FDFDFD] shadow-[0_0_40px_0_rgb(237_237_237)]">
-          <Sidebar Logo={Logo} />
+          <Sidebar Logo={Logo} version={config.version} />
           <div class="py-10 px-14 flex-1">
             <Outlet />
           </div>

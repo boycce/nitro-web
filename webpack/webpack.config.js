@@ -21,6 +21,7 @@ import { getDirectories } from 'nitro-web/util'
 const _require = createRequire(import.meta.url)
 const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
 const isBuild = process.env.NODE_ENV == 'production'
+const nitroVersion = _require('./package.json').version
 
 // axiosRetry(axios, {
 //   retries: 10,
@@ -274,8 +275,9 @@ export const getConfig = (config) => {
       }),
       new webpack.DefinePlugin({
         ISDEMO: !!process.env.isDemo,
-        INJECTED: JSON.stringify({
+        INJECTED_CONFIG: JSON.stringify({
           ...pick(config, config.inject ? config.inject.split(' ') : []),
+          version: process.env.isDemo ? nitroVersion : config.version,
         }),
       }),
       new ESLintPlugin({
