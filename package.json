@@ -1,115 +1,19 @@
 {
-  "name": "nitro-web",
-  "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
-  "repository": "github:boycce/nitro-web",
-  "homepage": "https://boycce.github.io/nitro-web/",
-  "version": "0.0.22",
-  "main": "./client/index.ts",
-  "type": "module",
-  "keywords": [
-    "express",
-    "javascript",
-    "monastery",
-    "mongodb",
-    "react",
-    "tailwind",
+  "private": true,
+  "workspaces": [
+    "core",
+    "example",
     "webpack"
   ],
-  "workspaces": [
-    "_example"
-  ],
-  "exports": {
-    ".": "./client/index.ts",
-    "./client/imgs/*": "./client/imgs/*",
-    "./client/globals": "./client/globals.ts",
-    "./server": "./server/index.js",
-    "./types": "./types.ts",
-    "./.eslintrc.json": "./.eslintrc.json",
-    "./tsconfig.json": "./tsconfig.json",
-    "./webpack.config.js": "./webpack.config.js",
-    "./util": {
-      "require": "./util.js",
-      "import": "./util.js",
-      "types": "./types/util.d.ts"
-    }
-  },
   "scripts": {
     "dev": "npm run dev -w example",
     "dev:client": "isDemo=true npm run dev:client -w example",
     "dev:client-only": "isDemo=true isStatic=true npm run dev:client -w example",
     "dev:server": "npm run dev:server -w example",
     "build": "isDemo=true isStatic=true npm run build -w example",
-    "major": "npm run types && standard-version --release-as major && npm publish",
-    "minor": "npm run types && standard-version --release-as minor && npm publish",
-    "patch": "npm run types && standard-version --release-as patch && npm publish",
-    "start": "npm run start -w example",
-    "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --outDir types"
-  },
-  "dependencies": {
-    "@uiw/color-convert": "^2.3.0",
-    "@uiw/react-color-hue": "^2.3.0",
-    "@uiw/react-color-saturation": "^2.3.0",
-    "bcrypt": "^5.0.0",
-    "body-parser": "^1.19.0",
-    "compression": "^1.7.4",
-    "connect-mongo": "^5.1.0",
-    "date-fns": "^3.6.0",
-    "dateformat": "^3.0.3",
-    "dotenv": "^14.3.2",
-    "express": "^4.17.1",
-    "express-fileupload": "^1.1.6",
-    "express-session": "^1.17.0",
-    "inline-css": "^4.0.2",
-    "nanoid": "^4.0.0",
-    "nodemailer": "^6.5.0",
-    "nodemailer-mailgun-transport": "^2.0.2",
-    "nunjucks": "^3.2.2",
-    "passport": "^0.4.1",
-    "passport-local": "^1.0.0",
-    "react-currency-input-field": "^3.8.0",
-    "react-day-picker": "^9.6.4",
-    "react-number-format": "^5.4.0",
-    "react-router-dom": "6.24.1",
-    "react-select": "^5.9.0",
-    "react-tracked": "^1.3.0",
-    "sort-route-addresses-nodeps": "0.0.4"
-  },
-  "peerDependencies": {
-    "@headlessui/react": "^2.2.0",
-    "@heroicons/react": "^2.2.0",
-    "@hokify/axios": "^0.19.1",
-    "@stripe/stripe-js": "^1.34.0",
-    "axios-retry": "^3.3.1",
-    "monastery": "^3.5.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "stripe": "^9.16.0",
-    "tailwindcss": "^3.4.17",
-    "twin.macro": "^3.4.1"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "standard-version": {
-    "releaseCommitMessageFormat": "{{currentTag}}",
-    "sign": true,
-    "skip": {
-      "changelog": true,
-      "tag": true
-    },
-    "bumpFiles": [
-      "package.json",
-      "package-lock.json",
-      {
-        "filename": "readme.md",
-        "updater": "./semver-updater.cjs"
-      }
-    ]
-  },
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "@types/lodash": "^4.17.15",
-    "lodash": "^4.17.21"
+    "major": "npm run major -w core",
+    "minor": "npm run minor -w core",
+    "patch": "npm run patch -w core",
+    "types": "npm run types -w core"
   }
 }

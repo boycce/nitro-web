@@ -5,15 +5,16 @@
 Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀
 
 ```bash
-npm i nitro-web
+npm i nitro-web -D @nitro-web/webpack
 ```
 
 ### Install
 
-1. Copy ./_example into your project
-2. In package.json, replace `"nitro-web": "file:.."` with `"nitro-web": "~0.0.22"`
-3. In package.json, replace `"../.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
-4. Run `npm i`
+1. Copy ./example into your project
+2. In package.json, replace `"nitro-web": "workspace:*" with `"nitro-web": "~0.0.22"`
+3. In package.json, replace `"@nitro-web/webpack": "workspace:*" with `"@nitro-web/webpack": "~0.0.22"`
+4. In package.json, replace `"../core/.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
+5. Run `npm i`
 
 ### Usage
 
@@ -67,8 +68,3 @@ If util.js is updated, you must run `npm run types` to update the types file.
 - `jest: ^29.7.0`
 - `migrate-mongo: ^10.0.0`
 - `eslint-plugin-jest: ^28.9.0`
-
-### Package notes
-
-- Added twin.macro is required as a peer dependency to ./. 
-- Added tailwindcss^3 as a peer dependency to ./ to stop tailwind^4.0.0 from being installed
