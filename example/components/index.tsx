@@ -1,15 +1,11 @@
 /*
- * Any component with a .route property is called a page component. Any page component found under /components 
- * will be automatically imported and setup by the client router, we're just listing them all here for the sake of example.
+ * Any component with a .route property is called a page component. Any page component found under /components will
+ * be automatically imported and setup by the client router, you can have multiple page compoennts in the same file, like this one.
  */
 import { css, theme } from 'twin.macro'
 import config from '../client/config'
 import { isDemo } from 'nitro-web'
-import { 
-  Signin, 
-  Signup, 
-  ResetInstructions, 
-  ResetPassword, 
+import {
   Dashboard,
   Styleguide, 
   NotFound,
@@ -18,34 +14,25 @@ import {
   // SettingsTeam, 
 } from 'nitro-web'
 
-
-// Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
-export const SigninPage = () => <Signin config={config} />
-SigninPage.route = {
-  '/signin': true,
-  '/signout': true,
-  'meta': { 'title': 'Sign In', layout: 2 },
+// Dashboard page
+export const DashboardPage = () => <Dashboard config={config} />
+DashboardPage.route = {
+  '/': true,
+  'meta': { 'title': 'Dashboard', layout: 1 },
 }
 
-// Signup page
-export const SignupPage = () => <Signup config={config} />
-SignupPage.route = {
-  '/signup': true,
-  'meta': { 'title': 'Sign Up', layout: 2 },
+// Styleguide page
+export const StyleguidePage = () => <Styleguide config={config} />
+StyleguidePage.route = {
+  '/styleguide': true,
+  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
 }
 
-// Reset instructions page
-export const ResetInstructionsPage = () => <ResetInstructions />
-ResetInstructionsPage.route = {
-  '/reset': true,
-  'meta': { 'title': 'Reset password', layout: 2 },
-}
-
-// Reset password page
-export const ResetPasswordPage = () => <ResetPassword />
-ResetPasswordPage.route = {
-  '/reset/:token': true,
-  'meta': { 'title': 'Reset password', layout: 2 },
+// Not found page
+export const NotFoundPage = () => <NotFound />
+NotFoundPage.route = {
+  '*': true,
+  'meta': { 'title': 'Nothing found', layout: 1 },
 }
 
 // // Settings Account page
@@ -68,27 +55,6 @@ ResetPasswordPage.route = {
 //   '/settings/team': ['isUser'],
 //   'meta': { 'title': 'Team Settings', layout: 1 },
 // }
-
-// Dashboard page
-export const DashboardPage = () => <Dashboard config={config} />
-DashboardPage.route = {
-  '/': true,
-  'meta': { 'title': 'Dashboard', layout: 1 },
-}
-
-// Styleguide page
-export const StyleguidePage = () => <Styleguide config={config} />
-StyleguidePage.route = {
-  '/styleguide': true,
-  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
-}
-
-// Not found page
-export const NotFoundPage = () => <NotFound />
-NotFoundPage.route = {
-  '*': true,
-  'meta': { 'title': 'Nothing found', layout: 1 },
-}
 
 // Custom Tailwind UI page example
 export function PricingPage() {
@@ -228,3 +194,4 @@ PricingPage.route = {
   '/pricing': true,
   'meta': { 'title': 'Pricing', layout: 1 },
 }
+
