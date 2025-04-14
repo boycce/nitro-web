@@ -29,15 +29,8 @@ export default {
     global.passport = passport
 
     // Set config values
-    config = {
-      env: _config.env,
-      masterPassword: _config.masterPassword,
-    }
-    for (let key in config) {
-      if (!config[key] && key != 'masterPassword') {
-        throw new Error(`Missing config value for stripe.api.js: ${key}`)
-      }
-    }
+    config = { env: _config.env, masterPassword: _config.masterPassword }
+    if (!config.env) throw new Error('Missing config value for: config.env')
 
     // After successful login, serialize the user into a session object
     passport.serializeUser((user, next) => {
@@ -68,29 +61,6 @@ export default {
         }
       )
     )
-
-    // https://medium.com/swlh/everything-you-need-to-know-about-the-passport-jwt-passport-js-strategy-8b69f39014b0
-    // https://github.com/mikenicholson/passport-jwt
-    //
-    //   passport.use(new JwtStrategy.Strategy({
-    //     jwtFromRequest: JwtStrategy.ExtractJwt.fromAuthHeaderAsBearerToken(),
-    //     secretOrKey: '1fjw3h3jkdJD8sjA12dw53llapA2sjAjsv3nxaxzNBzz',
-    //   }, function(jwtPayload, done) {
-    //
-    //     this._findUserFromProvider('email', { email: email, password: password }, done)
-    //     console.log(jwtPayload)
-    //       User.findOne({id: jwt_payload.sub}, function(err, user) {
-    //           if (err) {
-    //               return done(err, false);
-    //           }
-    //           if (user) {
-    //               return done(null, user);
-    //           } else {
-    //               return done(null, false);
-    //               // or you could create a new account
-    //           }
-    //       });
-    //   }));
 
     // Add session middleware
     middleware.order.splice(3, 0, 'session', 'passport', 'passportSession', 'passportError', 'blocked')

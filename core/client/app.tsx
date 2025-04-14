@@ -22,7 +22,7 @@ type Settings = {
 }
 
 type Route = {
-  component: React.FC<{ route?: Route; params?: object; location?: object }>
+  component: React.FC<{ route?: Route; params?: object; location?: object; config?: Config }>
   meta?: { title?: string }
   middleware: string[]
   name: string
@@ -182,7 +182,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
       children: layout.map((route) => {
         return {
           element: (
-            <RouteComponent route={route} />
+            <RouteComponent route={route} config={config} />
           ),
           path: route.path,
           loader: async () => { // request
@@ -230,13 +230,13 @@ function RestoreScroll() {
   return (null)
 }
 
-function RouteComponent({ route }: { route: Route }) {
+function RouteComponent({ route, config }: { route: Route, config: Config }) {
   const Component = route.component
   const params = useParams()
   const location = useLocation()
   document.title = route.meta?.title || ''
   return (
-    <Component route={route} params={params} location={location} />
+    <Component route={route} params={params} location={location} config={config} />
   )
 }
 

@@ -8,6 +8,7 @@ node_modules
 .env
 resources/me
 migrate-mongo-config-*
+img
 
 # Thumbnail and view configuration files
 ._*
