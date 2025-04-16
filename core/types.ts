@@ -1,21 +1,25 @@
-// Expected config to be available
-export type Config = {
+type InjectedConfig = {
+  awsUrl?: string
   clientUrl: string
   countries: { [key: string]: { numberFormats: { currency: string } } } // for input-currency.tsx
   currencies: { [key: string]: { symbol: string, digits: number } } // for input-currency.tsx
   env: string
-  name: string
-  version: string
-
-  awsUrl?: string
-  beforeApp?: () => Promise<object>
-  beforeStoreUpdate?: (prevStore: Store | null, newData: Store) => Store
   googleMapsApiKey?: string
-  isStatic?: boolean
-  middleware?: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
+  isDemo: boolean // implicitly defined by webpack
+  isStatic: boolean // implicitly defined by webpack
+  jwtName: string // implicitly defined by webpack
+  name: string
   placeholderEmail?: string
   stripePublishableKey?: string
   titleSeparator?: string
+  version: string
+}
+
+export type Config = InjectedConfig & {
+  // Non-injectable config on the client
+  beforeApp?: () => Promise<object>
+  beforeStoreUpdate?: (prevStore: Store | null, newData: Store) => Store
+  middleware?: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
 }
 
 export type User = {
@@ -45,6 +49,7 @@ export type Store = {
   message?: MessageObject | string | null
   user?: User | null,
   apiAvailable?: boolean
+  jwt?: string
 }
 
 export type Svg = React.FC<React.SVGProps<SVGElement>>

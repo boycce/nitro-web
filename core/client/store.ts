@@ -1,7 +1,6 @@
 import { createContainer } from 'react-tracked'
 import { Store } from 'nitro-web/types'
 
-
 export type BeforeUpdate = (prevStore: Store | null, newData: Store) => Store
 
 let initData: Store

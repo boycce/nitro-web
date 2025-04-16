@@ -1,4 +1,4 @@
-import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, isDemo, Modal, Calendar } from 'nitro-web'
+import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { Config } from 'nitro-web/types'
@@ -55,7 +55,7 @@ export function Styleguide({ config }: { config: Config }) {
     <div class="mb-10 text-left max-w-[1100px]">
       <GithubLink filename={__filename} />
       <div class="mb-7">
-        <h1 class="h1">{isDemo ? 'Design System' : 'Style Guide'}</h1>
+        <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
         <p>
           Components are styled using&nbsp;
           <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 

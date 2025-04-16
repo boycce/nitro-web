@@ -1,15 +1,15 @@
 // @ts-nocheck
-import MongoStore from 'connect-mongo'
 import crypto from 'crypto'
-import expressSession from 'express-session'
 import passport from 'passport'
 import passportLocal from 'passport-local'
+import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import db from 'monastery'
+import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
 import * as util from 'nitro-web/util'
-// import stripeController from '../billing/stripe.api.js'
 
 let config = {}
+const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 
 export default {
 
@@ -24,7 +24,6 @@ export default {
   },
 
   setup: function (middleware, _config) {
-    // Setup passport handlers for reading and writing to req.session
     const that = this
     global.passport = passport
 
@@ -32,28 +31,12 @@ export default {
     config = { env: _config.env, masterPassword: _config.masterPassword }
     if (!config.env) throw new Error('Missing config value for: config.env')
 
-    // After successful login, serialize the user into a session object
-    passport.serializeUser((user, next) => {
-      next(null, { _id: user._id })
-    })
-
-    // After session read, get the user from the session object
-    passport.deserializeUser(async (sessionObject, next) => {
-      try {
-        const user = await that._findUserFromProvider('deserialize', sessionObject)
-        next(null, user)
-      } catch (err) {
-        next(err.message)
-      }
-    })
-    
-    // Setup passport local signin strategy
     passport.use(
       new passportLocal.Strategy(
-        { usernameField: 'email' }, 
+        { usernameField: 'email' },
         async (email, password, next) => {
           try {
-            const user = await that._findUserFromProvider('email', { email: email, password: password })
+            const user = await that._findUserFromProvider('email', { email, password })
             next(null, user)
           } catch (err) {
             next(err.message)
@@ -62,35 +45,45 @@ export default {
       )
     )
 
-    // Add session middleware
-    middleware.order.splice(3, 0, 'session', 'passport', 'passportSession', 'passportError', 'blocked')
+    passport.use(
+      new JwtStrategy(
+        {
+          jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+          secretOrKey: JWT_SECRET,
+        },
+        async (payload, done) => {
+          try {
+            const user = await that._findUserFromProvider('deserialize', { _id: payload._id })
+            if (!user) return done(null, false)
+            return done(null, user)
+          } catch (err) {
+            return done(err, false)
+          }
+        }
+      )
+    )
+
+    middleware.order.splice(3, 0, 'passport', 'passportError', 'jwtAuth', 'blocked')
+
     Object.assign(middleware, {
       blocked: function (req, res, next) {
         if (req.user && req.user.loginActive === false) {
-          req.logout()
-          res.error('This user is not available.')
+          res.status(403).error('This user is not available.')
         } else {
           next()
         }
       },
+      jwtAuth: function(req, res, next) {
+        passport.authenticate('jwt', { session: false }, function(err, user) {
+          if (user) req.user = user
+          next()
+        })(req, res, next)
+      },
       passport: passport.initialize(),
       passportError: function (err, req, res, next) {
         if (!err) return next()
-        req.logout()
         res.error(err)
       },
-      passportSession: passport.session(),
-      session: expressSession({
-        secret: '092720e5ffc1237266b8517239cd81b6', // Changing invalidates cookies
-        cookie: { maxAge: 7 * 24 * 60 * 60 * 1000  },
-        resave: false,
-        saveUninitialized: false,
-        store: MongoStore.create({
-          clientPromise: db.onOpen((manager) => {
-            return manager.client 
-          }),
-        }),
-      }),
     })
   },
 
@@ -101,31 +94,26 @@ export default {
   signup: async function (req, res) {
     try {
       let user = await this._userCreate(req.body)
-      // Welcome email
       sendEmail({
         config: config,
         template: 'welcome',
         to: `${util.ucFirst(user.firstName)}<${user.email}>`,
-      }).catch(err => {
-        console.error(err)
-      })
-      // Login
-      res.send(await this._signinAndGetState(req, user))
+      }).catch(console.error)
+      res.send(await this._signinAndGetState(user, req.query.desktop))
     } catch (err) {
       res.error(err)
     }
   },
 
   signin: function (req, res) {
-    // console.log('api: signin')
-    // console.log(req.body)
     if (!req.body.email) return res.error('email', 'The email you entered is incorrect.')
     if (!req.body.password) return res.error('password', 'The password you entered is incorrect.')
+
     passport.authenticate('local', { session: false }, async (err, user, info) => {
-      if (err) return console.log(err) || res.error(err)
+      if (err) return res.error(err)
       if (!user && info) return res.error('email', info.message)
       try {
-        const response = await this._signinAndGetState(req, user)
+        const response = await this._signinAndGetState(user, req.query.desktop)
         res.send(response)
       } catch (err) {
         res.error(err)
@@ -134,35 +122,29 @@ export default {
   },
 
   signout: function (req, res) {
-    req.logout()
     res.json('{}')
   },
 
   resetInstructions: async function (req, res) {
     try {
-      let email = (req.body.email||'').trim().toLowerCase()
-      if (!email || !util.isString(email)) {
-        throw { title: 'email', detail: 'The email you entered is incorrect.' }
-      }
-      // Find matching user and create new reset token
-      let user = await db.user.findOne({ query: { email: email }, _privateData: true })
+      let email = (req.body.email || '').trim().toLowerCase()
+      if (!email || !util.isString(email)) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+
+      let user = await db.user.findOne({ query: { email }, _privateData: true })
       if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-      // Create token
-      let token = await this._tokenCreate(user._id)
-      // Update user with token
-      await db.user.update({ query: { email: email }, $set: { resetToken: token }})
-      // Email.
+
+      let resetToken = await this._tokenCreate(user._id)
+      await db.user.update({ query: { email }, $set: { resetToken }})
+
       res.json({})
       sendEmail({
         config: config,
         template: 'reset-password',
         to: `${util.ucFirst(user.firstName)}<${email}>`,
         data: {
-          token: token + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
+          token: resetToken + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
         },
-      }).catch(err => {
-        console.error('sendEmail(..) mailgun error', err)
-      })
+      }).catch(err => console.error('sendEmail(..) mailgun error', err))
     } catch (err) {
       res.error(err)
     }
@@ -172,18 +154,11 @@ export default {
     try {
       const { token, password, password2 } = req.body
       const id = this._tokenParse(token)
-      // Validate password
       this._validatePassword(password, password2)
-      // Find matching user
-      let user = await db.user.findOne({
-        query: id,
-        blacklist: ['-resetToken'],
-        _privateData: true,
-      })
-      if (!user || user.resetToken !== token) {
-        throw new Error('Sorry your email token is invalid or has already been used verify your email.')
-      }
-      // Update user with new password
+
+      let user = await db.user.findOne({ query: id, blacklist: ['-resetToken'], _privateData: true })
+      if (!user || user.resetToken !== token) throw new Error('Sorry your email token is invalid or has already been used.')
+
       await db.user.update({
         query: user._id,
         data: {
@@ -192,7 +167,7 @@ export default {
         },
         blacklist: ['-resetToken', '-password'],
       })
-      res.send(await this._signinAndGetState(req, { ...user, resetToken: undefined }))
+      res.send(await this._signinAndGetState({ ...user, resetToken: undefined }, req.query.desktop))
     } catch (err) {
       res.error(err)
     }
@@ -234,27 +209,19 @@ export default {
   /* ---- Private fns ---------------- */
 
   _getState: async function (user) {
-    // Format the initial state
-    return { 
+    // Initial state
+    return {
       user: user || null,
-      // stripeProducts: await stripeController._getProducts(),
     }
   },
 
-  _signinAndGetState: function (req, user) {
-    // @return state
-    return new Promise((resolve, reject) => {
-      user.desktop = req.query.hasOwnProperty('desktop')
-      if (user.loginActive !== false) {
-        req.login(user, async (err) => {
-          if (err) return reject(err)
-          resolve(await this._getState(user))
-        })
-      } else {
-        return reject('This user is not available.')
-        // this._getState().then((state) => resolve(state))
-      }
-    })
+  _signinAndGetState: async function (user, isDesktop) {
+    if (user.loginActive === false) throw 'This user is not available.'
+    user.desktop = isDesktop
+
+    const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
+    const state = await this._getState(user)
+    return { ...state, jwt }
   },
 
   _tokenCreate: function (id) {

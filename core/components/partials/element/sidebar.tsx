@@ -1,7 +1,7 @@
 // Component: https://tailwindui.com/components/application-ui/application-shells/sidebar#component-a69d85b6237ea2ad506c00ef1cd39a38
 import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
-import { isDemo } from 'nitro-web'
+import { injectedConfig } from 'nitro-web'
 import {
   Bars3Icon,
   HomeIcon,
@@ -85,7 +85,7 @@ function SidebarContents ({ Logo, menu, links, version }: SidebarProps) {
 
   const _menu = menu || [
     { name: 'Dashboard', to: '/', Icon: HomeIcon },
-    { name: isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: PaintBrushIcon }, 
+    { name: injectedConfig.isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: PaintBrushIcon }, 
     { name: 'Pricing', to: '/pricing', Icon: UsersIcon },
     { name: 'Signout', to: '/signout', Icon: ArrowLeftCircleIcon },
   ]

@@ -4,7 +4,7 @@
  */
 import { css, theme } from 'twin.macro'
 import config from '../client/config'
-import { isDemo } from 'nitro-web'
+import { injectedConfig } from 'nitro-web'
 import {
   Dashboard,
   Styleguide, 
@@ -25,7 +25,7 @@ DashboardPage.route = {
 export const StyleguidePage = () => <Styleguide config={config} />
 StyleguidePage.route = {
   '/styleguide': true,
-  'meta': { title: `${isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
+  'meta': { title: `${injectedConfig.isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
 }
 
 // Not found page

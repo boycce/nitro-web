@@ -1,15 +1,15 @@
-import { Button, Field, FormError, Topbar, util } from 'nitro-web'
-import { Config, Errors } from 'nitro-web/types'
+import { Button, Field, FormError, Topbar, util, injectedConfig } from 'nitro-web'
+import { Errors } from 'nitro-web/types'
 
-export function Signup({ config }: { config: Config}) {
+export function Signup() {
   const navigate = useNavigate()
   const isLoading = useState('')
   const [, setStore] = useTracked()
   const [state, setState] = useState({
-    email: config.env === 'development' ? config.placeholderEmail : '',
-    name: config.env === 'development' ? 'Bruce Wayne' : '',
-    business: { name: config.env === 'development' ? 'Wayne Enterprises' : '' },
-    password: config.env === 'development' ? '1234' : '',
+    email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
+    name: injectedConfig.env === 'development' ? 'Bruce Wayne' : '',
+    business: { name: injectedConfig.env === 'development' ? 'Wayne Enterprises' : '' },
+    password: injectedConfig.env === 'development' ? '1234' : '',
     errors: [] as Errors,
   })
 

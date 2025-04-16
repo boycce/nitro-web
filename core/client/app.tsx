@@ -5,6 +5,7 @@ import { AxiosRequestConfig } from '@hokify/axios'
 import { beforeCreate, Provider, exposedData } from './store'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
 import { Config, Store } from 'nitro-web/types'
+import { injectedConfig } from './index'
 
 type LayoutProps = {
   config: Config;
@@ -41,12 +42,24 @@ export async function setupApp(config: Config, layouts: React.FC<LayoutProps>[])
     name: config.name,
     titleSeparator: config.titleSeparator,
   }
+
+  // Setup the jwt token
+  updateJwt(localStorage.getItem(injectedConfig.jwtName))
+
   if (!settings.layouts) throw new Error('layouts are required')
   const initData = (await settings.beforeApp(config)) || {}
   beforeCreate(initData, settings.beforeStoreUpdate)
 
   const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement)
   root.render(<App settings={settings} config={config} />)
+}
+
+export function updateJwt(token?: string | null) {
+  // Update the jwt token in local storage and axios headers
+  const key = injectedConfig.jwtName
+  localStorage.setItem(key, token || '')
+  if (token) axios().defaults.headers.Authorization = `Bearer ${token}`
+  else delete axios().defaults.headers.Authorization
 }
 
 function App({ settings, config }: { settings: Settings, config: Config }): ReactNode {
@@ -280,6 +293,13 @@ function beforeStoreUpdate(prevStore: Store | null, newData: Store) {
    * @return {object} store
    */
   if (!newData) return newData
+
+  // If newData.jwt is present, update the jwt token
+  if (newData.jwt) {
+    updateJwt(newData.jwt)
+    delete newData.jwt
+  }
+
   const store = {
     ...(prevStore || {
       message: undefined,
@@ -288,9 +308,8 @@ function beforeStoreUpdate(prevStore: Store | null, newData: Store) {
     ...(newData || {}),
   }
 
-  // Used to verify if the current cookie belongs to this user
-  // E.g. signout > signin (to a different user on another tab)
-  axios().defaults.headers.userid = store?.user?._id
+  // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
+  axios().defaults.headers.authid = store?.user?._id
   return store
 }
 

@@ -19,7 +19,6 @@ import { createRequire } from 'module'
 import { getDirectories } from 'nitro-web/util'
 
 const _require = createRequire(import.meta.url)
-const pick = (object, list) => list.reduce((o, e) => ((o[e] = object[e]), o), {})
 const isBuild = process.env.NODE_ENV == 'production'
 const nitroVersion = _require('./package.json').version
 
@@ -274,9 +273,11 @@ export const getConfig = (config) => {
         ],
       }),
       new webpack.DefinePlugin({
-        ISDEMO: !!process.env.isDemo,
         INJECTED_CONFIG: JSON.stringify({
-          ...pick(config, config.inject ? config.inject.split(' ') : []),
+          ...config.client,
+          isDemo: !!process.env.isDemo,
+          isStatic: !!process.env.isStatic,
+          jwtName: 'nitro-jwt' + (isBuild ? '' : '-' + formatSlug(config.name)),
           version: process.env.isDemo ? nitroVersion : config.version,
         }),
       }),
@@ -357,4 +358,15 @@ function getPublicPath(env, homepage, publicPath) {
   } else {
     return '/'
   }
+}
+
+function formatSlug (string) {
+  return string
+    .toString()
+    .toLowerCase()
+    .replace(/^[^a-zA-Z]+/, '') // Allow only letters at start.
+    .replace(/\s+/g, '-') // Spaces to -
+    .replace(/[^a-zA-Z0-9-_]+/g, '') // Remove bad characters.
+    .replace(/-+/g, '-') // Replace multiple - with single -
+    .replace(/-+$/, '') // Remove trailing -
 }

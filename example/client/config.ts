@@ -1,2 +1,3 @@
-export type Config = import('types').Config & {}
-export default { ...INJECTED_CONFIG } as Config
+export default { 
+  ...INJECTED_CONFIG,
+} as import('types').Config & {}

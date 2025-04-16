@@ -48,5 +48,5 @@ export { Toggle } from '../components/partials/form/toggle'
 // Component Other
 export { IsFirstRender } from '../components/partials/is-first-render'
 
-// IsDemo environment variable
-export const isDemo = ISDEMO
+// Expose the injected config
+export const injectedConfig = { ...INJECTED_CONFIG } as import('types').Config

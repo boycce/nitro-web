@@ -4,31 +4,17 @@ const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'
 
-export default {
-  inject: 
-    'awsUrl clientUrl currencies countries env googleMapsApiKey isStatic name placeholderEmail ' +
-    'stripePublishableKey titleSeparator version',
-
-  clientUrl: process.env.originUrl || 'http://localhost:3000',
+const config = {
   emailFrom: process.env.emailFrom,
   emailReplyTo: process.env.emailReplyTo,
   emailTestMode: process.env.emailTestMode,
-  env: env,
   homepage: _require(pwd + 'package.json').homepage,
-  isStatic: process.env.isStatic,
-  masterPassword: process.env.masterPassword,
-  mongoUrl: process.env.mongoUrl,
-  name: 'Nitro',
-  placeholderEmail: process.env.placeholderEmail,
-  publicPath: process.env.publicPath,
-  pwd: pwd, // change to rootDir
-  version: _require(pwd + 'package.json').version,
-
-  awsUrl: process.env.awsUrl,
-  googleMapsApiKey: process.env.googleMapsApiKey,
   mailgunDomain: process.env.mailgunDomain,
   mailgunKey: process.env.mailgunKey,
-  stripePublishableKey: process.env.stripePublishableKey,
+  masterPassword: process.env.masterPassword,
+  mongoUrl: process.env.mongoUrl,
+  publicPath: process.env.publicPath,
+  pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
 
@@ -49,45 +35,55 @@ export default {
     serverSelectionTimeoutMS: env == 'development' ? 3000 : undefined,
   },
 
-  countries: {
-    nz: {
-      currency: 'nzd',
-      name: 'New Zealand',
-      numberFormats: {
-        currency: '¤#,##0.00',
-        percentage: '¤#,##0.00%',
+  client: {
+    // injected into the client via webpack
+    awsUrl: process.env.awsUrl,
+    clientUrl: process.env.originUrl || 'http://localhost:3000',
+    env: env,
+    googleMapsApiKey: process.env.googleMapsApiKey,
+    name: 'Nitro',
+    placeholderEmail: process.env.placeholderEmail,
+    stripePublishableKey: process.env.stripePublishableKey,
+    version: _require(pwd + 'package.json').version,
+    countries: {
+      nz: {
+        currency: 'nzd',
+        name: 'New Zealand',
+        numberFormats: {
+          currency: '¤#,##0.00',
+          percentage: '¤#,##0.00%',
+        },
+        dateFormats: {
+          full: 'dddd, D MMMM YYYY',
+          long: 'D MMMM YYYY',
+          medium: 'D/MM/YYYY',
+          short: 'D/MM/YY',
+        },
       },
-      dateFormats: {
-        full: 'dddd, D MMMM YYYY',
-        long: 'D MMMM YYYY',
-        medium: 'D/MM/YYYY',
-        short: 'D/MM/YY',
+      au: {
+        currency: 'aud',
+        name: 'Australia',
+        numberFormats: {
+          currency: '¤#,##0.00',
+          percentage: '¤#,##0.00%',
+        },
+        dateFormats: {
+          full: 'dddd, D MMMM YYYY',
+          long: 'D MMMM YYYY',
+          medium: 'D/MM/YYYY',
+          short: 'D/MM/YY',
+        },
       },
     },
-    au: {
-      currency: 'aud',
-      name: 'Australia',
-      numberFormats: {
-        currency: '¤#,##0.00',
-        percentage: '¤#,##0.00%',
+    currencies: {
+      nzd: {
+        name: 'New Zealand Dollar',
+        symbol: '$',
       },
-      dateFormats: {
-        full: 'dddd, D MMMM YYYY',
-        long: 'D MMMM YYYY',
-        medium: 'D/MM/YYYY',
-        short: 'D/MM/YY',
+      aud: {
+        name: 'Australian Dollar',
+        symbol: '$',
       },
-    },
-  },
-
-  currencies: {
-    nzd: {
-      name: 'New Zealand Dollar',
-      symbol: '$',
-    },
-    aud: {
-      name: 'Australian Dollar',
-      symbol: '$',
     },
   },
 
@@ -95,7 +91,7 @@ export default {
     isAdmin: (req, res, next) => {
       // Still need to remove cookie matching in favour of uid..
       // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
-      let cookieMatch = req.user && (!req.headers.userid || req.user._id.toString() == req.headers.userid)
+      let cookieMatch = req.user && (!req.headers.authid || req.user._id.toString() == req.headers.authid)
       if (cookieMatch && req.user.type.match(/admin/)) next()
       else if (req.user && req.user.type.match(/admin/)) res.unauthorized('Invalid cookie, please refresh your browser')
       else if (req.user) res.unauthorized('You are not authorised to make this request.')
@@ -128,3 +124,5 @@ export default {
     },
   },
 }
+
+export default { ...config.client, ...config }

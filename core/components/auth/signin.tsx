@@ -1,15 +1,15 @@
-import { Topbar, Field, Button, FormError, util } from 'nitro-web'
-import { Config, Errors } from 'nitro-web/types'
+import { Topbar, Field, Button, FormError, util, injectedConfig, updateJwt } from 'nitro-web'
+import { Errors } from 'nitro-web/types'
 
-export function Signin({ config }: { config: Config }) {
+export function Signin() {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
   const isLoading = useState(isSignout ? 'is-loading' : '')
   const [, setStore] = useTracked()
   const [state, setState] = useState({
-    email: config.env == 'development' ? config.placeholderEmail : '',
-    password: config.env == 'development' ? '1234' : '',
+    email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
+    password: injectedConfig.env == 'development' ? '1234' : '',
     errors: [] as Errors,
   })
 
@@ -22,8 +22,10 @@ export function Signin({ config }: { config: Config }) {
   useEffect(() => {
     if (isSignout) {
       setStore(() => ({ user: null }))
-      util.axios().get('/api/signout')
+      // util.axios().get('/api/signout')
+      Promise.resolve()
         .then(() => isLoading[1](''))
+        .then(() => updateJwt())
         .then(() => navigate({ pathname: '/signin', search: location.search }, { replace: true }))
         .catch(err => (console.error(err), isLoading[1]('')))
     }

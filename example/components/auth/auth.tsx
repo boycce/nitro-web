@@ -1,4 +1,3 @@
-import config from '../../client/config'
 import { 
   Signin, 
   Signup, 
@@ -7,7 +6,7 @@ import {
 } from 'nitro-web'
 
 // Signin page (can be saved onto a seperate .jsx/.tsx file under the components folder)
-export const SigninPage = () => <Signin config={config} />
+export const SigninPage = () => <Signin />
 SigninPage.route = {
   '/signin': true,
   '/signout': true,
@@ -15,7 +14,7 @@ SigninPage.route = {
 }
 
 // Signup page
-export const SignupPage = () => <Signup config={config} />
+export const SignupPage = () => <Signup />
 SignupPage.route = {
   '/signup': true,
   'meta': { 'title': 'Sign Up', layout: 2 },
