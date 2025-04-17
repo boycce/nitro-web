@@ -88,12 +88,12 @@ export function Styleguide({ config }: { config: Config }) {
             minWidth="330px" 
             options={[{ label: <><b>New Customer</b> / Add <b>Bruce Lee</b></>, className: 'border-bottom-with-space' }, ...options]}
           >
-            <Button type="white" IconRight2="v" class="gap-x-3">Dropdown bottom-right</Button>
+            <Button color="white" IconRight="v" class="gap-x-3">Dropdown bottom-right</Button>
           </Dropdown>
         </div>
         <div>
           <Dropdown options={options} dir="top-left" minWidth="250px">
-            <Button type="white" IconRight2="v" class="gap-x-3">Dropdown top-left</Button>
+            <Button color="white" IconRight="v" class="gap-x-3">Dropdown top-left</Button>
           </Dropdown>
         </div>
       </div>
@@ -107,9 +107,11 @@ export function Styleguide({ config }: { config: Config }) {
         <div><Button color="primary" size="sm">*-sm button</Button></div>
         <div><Button color="primary">*-md (default)</Button></div>
         <div><Button color="primary" size="lg">*-lg button</Button></div>
-        <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />}>IconLeft=Element</Button></div>
-        <div><Button IconRight="v">IconRight=&quot;v&quot;</Button></div>
-        <div><Button IconRight2="v" className="w-[200px]">IconRight2=&quot;v&quot;</Button></div>
+        <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />}>IconLeft</Button></div>
+        <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />} className="w-[160px]">IconLeft 160px</Button></div>
+        <div><Button IconLeftEnd={<CheckIcon class="size-5 -my-5 -mx-0.5" />} className="w-[190px]">IconLeftEnd 190px</Button></div>
+        <div><Button IconRight="v">IconRight</Button></div>
+        <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>
         <div><Button color="primary" IconRight="v" isLoading>primary isLoading</Button></div>
       </div>
 

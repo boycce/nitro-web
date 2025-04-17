@@ -1,16 +1,15 @@
-import { Config } from 'types'
 import { Outlet } from 'react-router-dom'
-import { Message, Sidebar } from 'nitro-web'
+import { injectedConfig, Message, Sidebar } from 'nitro-web'
 import Logo from '../../client/imgs/logo/logo.svg'
 
 // Dashboard, app screens (only the <Outlet/> receives `params` and `location`)
-export function Layout1({ config }: { config: Config }) {
+export function Layout1() {
   return (
     <div class="bg-[#F3F3F3]">
       <Message />
       <div class="flex-1">
         <div class="max-w-[1800px] mx-auto lg:flex min-h-[100%] w-[100%] bg-[#FDFDFD] shadow-[0_0_40px_0_rgb(237_237_237)]">
-          <Sidebar Logo={Logo} version={config.version} />
+          <Sidebar Logo={Logo} />
           <div class="py-10 px-14 flex-1">
             <Outlet />
           </div>
@@ -21,7 +20,7 @@ export function Layout1({ config }: { config: Config }) {
 }
 
 // Signin, reset password, etc
-export function Layout2({ config }: { config: Config }) {
+export function Layout2() {
   return (
     <div class="bg-[#F3F3F3]">
       <Message />
@@ -42,7 +41,7 @@ export function Layout2({ config }: { config: Config }) {
             <li><Link class="underline1" to="/support">Support</Link></li>
           </ul>
           <div>
-            2025 © {config?.name || 'Nitro'}
+            2025 © {injectedConfig?.name || 'Nitro'}
           </div>
         </div>
 

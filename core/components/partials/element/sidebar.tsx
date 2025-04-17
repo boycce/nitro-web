@@ -16,14 +16,13 @@ export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
   menu?: { name: string; to: string; Icon: React.FC<{ className?: string }> }[]
   links?: { name: string; to: string; initial: string }[]
-  version?: string
 }
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Sidebar({ Logo, menu, links, version }: SidebarProps) {
+export function Sidebar({ Logo, menu, links }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <>
@@ -46,14 +45,14 @@ export function Sidebar({ Logo, menu, links, version }: SidebarProps) {
                 </button>
               </div>
             </TransitionChild>
-            <SidebarContents Logo={Logo} menu={menu} links={links} version={version} />
+            <SidebarContents Logo={Logo} menu={menu} links={links} />
           </DialogPanel>
         </div>
       </Dialog>
 
       {/* Static sidebar for desktop */}
       <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
-        <SidebarContents Logo={Logo} menu={menu} links={links} version={version} />
+        <SidebarContents Logo={Logo} menu={menu} links={links} />
       </div>
       
       {/* mobile sidebar closed */}
@@ -72,7 +71,7 @@ export function Sidebar({ Logo, menu, links, version }: SidebarProps) {
   )
 }
 
-function SidebarContents ({ Logo, menu, links, version }: SidebarProps) {
+function SidebarContents ({ Logo, menu, links }: SidebarProps) {
   const location = useLocation()
   const [store] = useTracked()
   const user = store.user
@@ -102,7 +101,7 @@ function SidebarContents ({ Logo, menu, links, version }: SidebarProps) {
           <Link to="/">
             <Logo width="70" height={undefined} />
           </Link>
-          <span className="text-[9px] text-gray-900 font-semibold mt-4">{version}</span>
+          <span className="text-[9px] text-gray-900 font-semibold mt-4">{injectedConfig.version}</span>
         </div>
       )}
       <nav className="flex flex-1 flex-col">
