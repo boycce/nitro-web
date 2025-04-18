@@ -5,7 +5,7 @@ import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
 import { Button, FormError, Field, Modal, Topbar, Tabbar } from 'nitro-web'
 
 export function SettingsAccount() {
-  const isLoading = useState('')
+  const isLoading = useState(false)
   const [removeModal, setRemoveModal] = useState()
   const [{user}, setStore] = sharedStore.useTracked()
   const [state, setState] = useState({
@@ -17,7 +17,7 @@ export function SettingsAccount() {
 
   async function onSubmit (e) {
     try {
-      const res = await util.request(e, `put /api/user/${user._id}?files=true`, state, isLoading)
+      const res = await util.request(`put /api/user/${user._id}?files=true`, state, e, isLoading)
       setStore((s) => ({ ...s, user: { ...s.user, ...res }, message: 'Saved successfully 👍️' }))
     } catch (errors) {
       return setState({ ...state, errors })
@@ -92,7 +92,7 @@ export function RemoveModal ({ show, setShow }) {
 
   async function onSubmit (e) {
     try {
-      await util.request(e, `delete /api/account/${state._id}`, null, isLoading)
+      await util.request(`delete /api/account/${state._id}`, null, e, isLoading)
       close()
       setStore(o => ({ ...o, message: 'Data deleted successfully, Goodbye 👋...' }))
       setTimeout(() => navigate('/signout'), 6000) // wait for setStore

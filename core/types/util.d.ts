@@ -158,7 +158,7 @@ export function pad(num: any, padLeft: any, fixedRight: any): any;
 export function pick(obj: any, keys: any): {};
 export function queryObject(search: any, assignTrue: any): any;
 export function queryString(obj: any): string;
-export function request(event: any, route: any, data: any, isLoading: any): Promise<any>;
+export function request(route: any, data: any, event: any, isLoading: any): Promise<any>;
 export function removeUndefined(variable: any): any;
 export function s3Image(awsUrl: any, image: any, size: string, i: any): any;
 export function sanitizeHTML(string: any): string;

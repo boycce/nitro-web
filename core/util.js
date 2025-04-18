@@ -908,12 +908,12 @@ export function queryString (obj) {
   return qs ? `?${qs}` : ''
 }
 
-export async function request (event, route, data, isLoading) {
+export async function request (route, data, event, isLoading) {
   /**
    * Axios request to the route
-   * @param {Event} event - event to prevent default
    * @param {string} route - e.g. 'post /api/user'
    * @param {object} <data> - payload
+   * @param {Event} <event> - event to prevent default
    * @param {array} <isLoading> - [isLoading, setIsLoading]
    * @return {promise}
    */
@@ -925,7 +925,7 @@ export async function request (event, route, data, isLoading) {
     // show loading
     if (isLoading) {
       if (isLoading[0]) return
-      else isLoading[1](' is-loading')
+      else isLoading[1](true)
     }
 
     // warning, not persisting through re-renders, but should be fine until loading is finished
@@ -950,7 +950,7 @@ export async function request (event, route, data, isLoading) {
     ])
 
     // success
-    if (isLoading) isLoading[1]('')
+    if (isLoading) isLoading[1](false)
     if (res.status == 'rejected') throw res.reason
     return res.value.data
 

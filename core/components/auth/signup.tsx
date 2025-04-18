@@ -3,7 +3,7 @@ import { Errors } from 'nitro-web/types'
 
 export function Signup() {
   const navigate = useNavigate()
-  const isLoading = useState('')
+  const isLoading = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
     email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
@@ -15,8 +15,8 @@ export function Signup() {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request(e, 'post /api/signup', state, isLoading)
-      isLoading[1]('is-loading')
+      const data = await util.request('post /api/signup', state, e, isLoading)
+      isLoading[1](true)
       setStore(() => data)
       setTimeout(() => navigate('/'), 0) // wait for setStore
     } catch (e) {
@@ -53,7 +53,7 @@ export function Signup() {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={!!isLoading[0]} type="submit">Create Account</Button>
+        <Button class="w-full" isLoading={isLoading[0]} type="submit">Create Account</Button>
       </form>
     </div>
   )

@@ -5,7 +5,7 @@ import SvgPlus from 'nitro-web/client/imgs/icons/plus.svg'
 import { Button, Table, Avatar, Tabbar, Topbar, SettingsTeamMember } from 'nitro-web'
 
 export function SettingsTeam({ config }) {
-  const isLoading = useState('')
+  const isLoading = useState(false)
   const [showModal, setShowModal] = useState()
   const [{ user }] = sharedStore.useTracked()
   const [state] = useState({

@@ -5,7 +5,7 @@ export function Signin() {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
-  const isLoading = useState(isSignout ? 'is-loading' : '')
+  const isLoading = useState(isSignout)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
     email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
@@ -24,17 +24,17 @@ export function Signin() {
       setStore(() => ({ user: null }))
       // util.axios().get('/api/signout')
       Promise.resolve()
-        .then(() => isLoading[1](''))
+        .then(() => isLoading[1](false))
         .then(() => updateJwt())
         .then(() => navigate({ pathname: '/signin', search: location.search }, { replace: true }))
-        .catch(err => (console.error(err), isLoading[1]('')))
+        .catch(err => (console.error(err), isLoading[1](false)))
     }
   }, [isSignout])
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request(e, 'post /api/signin', state, isLoading)
-      isLoading[1]('is-loading')
+      const data = await util.request('post /api/signin', state, e, isLoading)
+      isLoading[1](true)
       setStore(() => data)
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
@@ -67,7 +67,7 @@ export function Signin() {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={!!isLoading[0]} type="submit">Sign In</Button>
+        <Button class="w-full" isLoading={isLoading[0]} type="submit">Sign In</Button>
       </form>
     </div>
   )

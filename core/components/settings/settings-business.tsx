@@ -7,7 +7,7 @@ import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
 import { Button, Field, Select, Topbar, Tabbar } from 'nitro-web'
 
 export function SettingsBusiness({ config }) {
-  const isLoading = useState('')
+  const isLoading = useState(false)
   const [{ user }, setStore] = sharedStore.useTracked()
   const [state, setState] = useState(() => {
     const company = user.company
@@ -26,7 +26,7 @@ export function SettingsBusiness({ config }) {
 
   async function onSubmit (e) {
     try {
-      const company = await util.request(e, `put /api/company/${user.company._id}`, state, isLoading)
+      const company = await util.request(`put /api/company/${user.company._id}`, state, e, isLoading)
       setStore((s) => ({ ...s, user: { ...s.user, company }, message: 'Saved successfully 👍️' }))
     } catch (errors) {
       console.log(errors)

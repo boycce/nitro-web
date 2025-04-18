@@ -3,13 +3,13 @@ import { Errors } from 'nitro-web/types'
 
 export function ResetInstructions() {
   const navigate = useNavigate()
-  const isLoading = useState('')
+  const isLoading = useState()
   const [, setStore] = useTracked()
   const [state, setState] = useState({ email: '', errors: [] as Errors })
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      await util.request(event, 'post /api/reset-instructions', state, isLoading)
+      await util.request('post /api/reset-instructions', state, event, isLoading)
       setStore(s => ({ ...s, message: 'Done! Please check your email.' }))
       navigate('/signin')
     } catch (e) {
@@ -32,7 +32,7 @@ export function ResetInstructions() {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button className="w-full" isLoading={!!isLoading[0]} type="submit">Email me a reset password link</Button>
+        <Button className="w-full" isLoading={isLoading[0]} type="submit">Email me a reset password link</Button>
       </form>
     </div>
   )
@@ -41,7 +41,7 @@ export function ResetInstructions() {
 export function ResetPassword() {
   const navigate = useNavigate()
   const params = useParams()
-  const isLoading = useState('')
+  const isLoading = useState()
   const [, setStore] = useTracked()
   const [state, setState] = useState(() => ({
     password: '',
@@ -52,7 +52,7 @@ export function ResetPassword() {
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request(event, 'post /api/reset-password', state, isLoading)
+      const data = await util.request('post /api/reset-password', state, event, isLoading)
       setStore(() => data)
       navigate('/')
     } catch (e) {
@@ -79,7 +79,7 @@ export function ResetPassword() {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={!!isLoading[0]} type="submit">Reset Password</Button>
+        <Button class="w-full" isLoading={isLoading[0]} type="submit">Reset Password</Button>
       </form>
     </div>
   )

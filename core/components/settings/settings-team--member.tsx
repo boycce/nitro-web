@@ -13,7 +13,7 @@ type SettingsTeamMemberProps = {
 export function SettingsTeamMember ({ showModal, setShowModal, config }: SettingsTeamMemberProps) {
   // @param {object} showModal - user
   const [{ user }] = sharedStore.useTracked()
-  const [isLoading] = useState('')
+  const [isLoading] = useState(false)
   const [state, setState] = useState({
     business: {
       name: '',
