@@ -1,1 +1,1 @@
-export type { Config, Errors, User } from 'nitro-web/types'
+export type { Config, Errors, Store, User } from 'nitro-web/types'

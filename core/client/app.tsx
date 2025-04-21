@@ -2,10 +2,13 @@ import { createBrowserRouter, createHashRouter, redirect, useParams, RouterProvi
 import { Fragment, ReactNode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AxiosRequestConfig } from '@hokify/axios'
-import { beforeCreate, Provider, exposedData } from './store'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
+import { injectedConfig, preloadedStoreData, exposedStoreData } from './index'
 import { Config, Store } from 'nitro-web/types'
-import { injectedConfig } from './index'
+
+type StoreContainer = { 
+  Provider: React.FC<{ children: ReactNode }> 
+}
 
 type LayoutProps = {
   config: Config;
@@ -14,7 +17,7 @@ type LayoutProps = {
 type Settings = {
   afterApp?: () => void
   beforeApp: (config: Config) => Promise<object>
-  beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
+  // beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
   isStatic?: boolean
   layouts: React.FC<LayoutProps>[]
   middleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
@@ -31,11 +34,11 @@ type Route = {
   redirect?: string
 }
 
-export async function setupApp(config: Config, layouts: React.FC<LayoutProps>[]) {
+export async function setupApp(config: Config, storeContainer: StoreContainer, layouts: React.FC<LayoutProps>[]) {
+  if (!layouts) throw new Error('layouts are required')
   // Fetch state and init app
   const settings: Settings = {
     beforeApp: config.beforeApp || beforeApp,
-    beforeStoreUpdate: config.beforeStoreUpdate || beforeStoreUpdate,
     isStatic: config.isStatic,
     layouts: layouts,
     middleware: Object.assign(defaultMiddleware, config.middleware || {}),
@@ -46,12 +49,13 @@ export async function setupApp(config: Config, layouts: React.FC<LayoutProps>[])
   // Setup the jwt token
   updateJwt(localStorage.getItem(injectedConfig.jwtName))
 
-  if (!settings.layouts) throw new Error('layouts are required')
-  const initData = (await settings.beforeApp(config)) || {}
-  beforeCreate(initData, settings.beforeStoreUpdate)
+  // Fetch the store/state
+  const data = (await settings.beforeApp(config)) || {}
+  // Make the store data available to the store
+  Object.assign(preloadedStoreData, data)
 
   const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement)
-  root.render(<App settings={settings} config={config} />)
+  root.render(<App settings={settings} config={config} storeContainer={storeContainer} />)
 }
 
 export function updateJwt(token?: string | null) {
@@ -62,7 +66,7 @@ export function updateJwt(token?: string | null) {
   else delete axios().defaults.headers.Authorization
 }
 
-function App({ settings, config }: { settings: Settings, config: Config }): ReactNode {
+function App({ settings, config, storeContainer }: { settings: Settings, config: Config, storeContainer: StoreContainer }): ReactNode {
   // const themeNormalised = theme
   const router = getRouter({ settings, config })
   // const theme = pick(themeNormalised, []) // e.g. 'topPanelHeight'
@@ -89,12 +93,12 @@ function App({ settings, config }: { settings: Settings, config: Config }): Reac
   }, [!!router])
 
   return (
-    <Provider>
+    <storeContainer.Provider>
       {/* <ThemeProvider theme={themeNormalised}> */}
         { router && <RouterProvider router={router} /> }
         <AfterApp settings={settings} />
       {/* </ThemeProvider> */}
-    </Provider>
+    </storeContainer.Provider>
   )
 }
 
@@ -199,10 +203,10 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
           ),
           path: route.path,
           loader: async () => { // request
-            // wait for container/exposedData to be setup
+            // wait for container/exposedStoreData to be setup
             if (!nonce) nonce = true && await setTimeoutPromise(() => {}, 0) // eslint-disable-line
             for (const key of route.middleware) {
-              const error = settings.middleware[key](route, exposedData || {})
+              const error = settings.middleware[key](route, exposedStoreData || {})
               if (error && error.redirect) {
                 return redirect(error.redirect)
               }
@@ -274,7 +278,7 @@ async function beforeApp(config: Config) {
     //   sharedStoreCache = window.prehot.sharedStoreCache
     //   delete window.prehot
     // }
-    if (!exposedData && !config.isStatic) {
+    if (!config.isStatic) {
       stateData = (await axios().get('/api/state', { 'axios-retry': { retries: 3 }, timeout: 4000 } as AxiosRequestConfig)).data
       apiAvailable = true
     }
@@ -282,35 +286,7 @@ async function beforeApp(config: Config) {
     console.error('We had trouble connecting to the API, please refresh')
     console.log(err)
   }
-  return { ...(stateData || exposedData), apiAvailable }
-}
-
-function beforeStoreUpdate(prevStore: Store | null, newData: Store) {
-  /**
-   * Get store object (called on signup/signin/signout/state)
-   * @param {object} store - existing store
-   * @param {object} <newStoreData> - pass to override store with /login or /state request data
-   * @return {object} store
-   */
-  if (!newData) return newData
-
-  // If newData.jwt is present, update the jwt token
-  if (newData.jwt) {
-    updateJwt(newData.jwt)
-    delete newData.jwt
-  }
-
-  const store = {
-    ...(prevStore || {
-      message: undefined,
-      user: undefined, // defined if user is signed in
-    }),
-    ...(newData || {}),
-  }
-
-  // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
-  axios().defaults.headers.authid = store?.user?._id
-  return store
+  return { ...stateData, apiAvailable }
 }
 
 const defaultMiddleware = {

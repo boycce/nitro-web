@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { onChange } from 'nitro-web'
-import { useTracked } from './store'
 
 declare global {
   // Common application globals
   const onChange: typeof import('nitro-web').onChange
-  /** Global shared store, a react-tracked container initialized in `setupApp()` */
-  let useTracked: typeof import('./store').useTracked
 
   // Common aependency globals
   /** The public API for rendering a history-aware `<a>`. */
@@ -26,8 +23,6 @@ declare global {
 Object.assign(window, {
   // application globals
   onChange: onChange,
-  useTracked: useTracked,
-
   // dependency globals
   Link: Link,
   useCallback: useCallback,

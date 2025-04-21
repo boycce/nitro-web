@@ -2,9 +2,14 @@
 import '../types/required-globals.d.ts'
 
 // export const pi = parseFloat(3.142)
-export * from './app'
+// Utility functions
 export * from '../util.js'
 export * as util from '../util.js'
+export * from '../types'
+
+// Main app functions
+export { setupApp, updateJwt } from './app'
+export { createStore, exposedStoreData, preloadedStoreData, setStoreWrapper } from './store'
 
 // Component Pages
 export { Signin } from '../components/auth/signin'
