@@ -4,8 +4,8 @@ import { axios, isObject } from 'nitro-web/util'
 import { updateJwt } from 'nitro-web'
 import { Store } from 'nitro-web/types'
 
-export let preloadedStoreData: Store
-export let exposedStoreData: Store
+export const preloadedStoreData: Store = {}
+export let exposedStoreData: Store = preloadedStoreData
 
 export function createStore<T extends Store>(store: T) {
   const container = createContainer(() => {

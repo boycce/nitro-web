@@ -6,7 +6,7 @@ import config from './config'
 import { Layout1, Layout2 } from '../components/partials/layouts'
 
 // Create store, and expose `useTracked` globally
-const store = createStore({ user: null, message: null, apple: 'hello' } as Store)
+const store = createStore({} as Store)
 declare global { const useTracked: typeof store.useTracked }
 Object.assign(window, { useTracked: store.useTracked })
 

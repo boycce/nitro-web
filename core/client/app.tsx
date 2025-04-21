@@ -49,9 +49,8 @@ export async function setupApp(config: Config, storeContainer: StoreContainer, l
   // Setup the jwt token
   updateJwt(localStorage.getItem(injectedConfig.jwtName))
 
-  // Fetch the store/state
-  const data = (await settings.beforeApp(config)) || {}
-  // Make the store data available to the store
+  // Fetch the store data, and make it available to the store
+  const data = await settings.beforeApp(config)
   Object.assign(preloadedStoreData, data)
 
   const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement)
@@ -270,8 +269,8 @@ async function beforeApp(config: Config) {
    * Gets called once before React is initialised
    * @return {promise} - newStoreData which is used for sharedStore, later merged with the config.store() defaults
    */
-  let apiAvailable
-  let stateData
+  let apiAvailable = false
+  let storeData = {}
   try {
     // Unload prehot data
     // if (window.prehot) {
@@ -279,14 +278,14 @@ async function beforeApp(config: Config) {
     //   delete window.prehot
     // }
     if (!config.isStatic) {
-      stateData = (await axios().get('/api/state', { 'axios-retry': { retries: 3 }, timeout: 4000 } as AxiosRequestConfig)).data
+      storeData = (await axios().get('/api/store', { 'axios-retry': { retries: 3 }, timeout: 4000 } as AxiosRequestConfig)).data
       apiAvailable = true
     }
   } catch (err) {
     console.error('We had trouble connecting to the API, please refresh')
     console.log(err)
   }
-  return { ...stateData, apiAvailable }
+  return { ...storeData, apiAvailable }
 }
 
 const defaultMiddleware = {

@@ -14,7 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secre
 export default {
 
   routes: {
-    'get     /api/state': ['state'],
+    'get     /api/store': ['store'],
     'get     /api/signout': ['signout'],
     'post    /api/signin': ['signin'],
     'post    /api/signup': ['signup'],
@@ -87,8 +87,8 @@ export default {
     })
   },
 
-  state: async function (req, res) {
-    res.json(await this._getState(req.user))
+  store: async function (req, res) {
+    res.json(await this._getStore(req.user))
   },
 
   signup: async function (req, res) {
@@ -208,10 +208,10 @@ export default {
 
   /* ---- Private fns ---------------- */
 
-  _getState: async function (user) {
-    // Initial state
+  _getStore: async function (user) {
+    // Initial store
     return {
-      user: user || null,
+      user: user || undefined,
     }
   },
 
@@ -220,8 +220,8 @@ export default {
     user.desktop = isDesktop
 
     const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-    const state = await this._getState(user)
-    return { ...state, jwt }
+    const store = await this._getStore(user)
+    return { ...store, jwt }
   },
 
   _tokenCreate: function (id) {

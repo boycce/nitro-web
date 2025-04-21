@@ -7,6 +7,7 @@ export function Signin() {
   const isSignout = location.pathname == '/signout'
   const isLoading = useState(isSignout)
   const [, setStore] = useTracked()
+  
   const [state, setState] = useState({
     email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
     password: injectedConfig.env == 'development' ? '1234' : '',
@@ -21,7 +22,7 @@ export function Signin() {
 
   useEffect(() => {
     if (isSignout) {
-      setStore(() => ({ user: null }))
+      setStore((s) => ({ ...s, user: undefined }))
       // util.axios().get('/api/signout')
       Promise.resolve()
         .then(() => isLoading[1](false))
@@ -35,7 +36,7 @@ export function Signin() {
     try {
       const data = await util.request('post /api/signin', state, e, isLoading)
       isLoading[1](true)
-      setStore(() => data)
+      setStore((s) => ({ ...s, ...data }))
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
         else navigate('/')

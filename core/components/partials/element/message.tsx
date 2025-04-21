@@ -74,7 +74,7 @@ export function Message() {
 
   function hide() {
     setVisible(false)
-    setTimeout(() => setStore(s => ({ ...s, message: null })), 250)
+    setTimeout(() => setStore(s => ({ ...s, message: undefined })), 250)
   }
 
   return (

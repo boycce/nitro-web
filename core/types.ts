@@ -46,10 +46,10 @@ export type MessageObject = {
 }
 
 export type Store = {
-  message?: MessageObject | string | null
-  user?: User | null,
   apiAvailable?: boolean
   jwt?: string
+  message?: MessageObject | string
+  user?: User,
 }
 
 export type Svg = React.FC<React.SVGProps<SVGElement>>

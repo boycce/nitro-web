@@ -17,7 +17,7 @@ export function Signup() {
     try {
       const data = await util.request('post /api/signup', state, e, isLoading)
       isLoading[1](true)
-      setStore(() => data)
+      setStore((s) => ({ ...s, ...data }))
       setTimeout(() => navigate('/'), 0) // wait for setStore
     } catch (e) {
       return setState({ ...state, errors: e as Errors })

@@ -31,6 +31,7 @@
     "client",
     "components/**/*.tsx",
     "components/**/*.ts",
-    "types"
+    "types",
+    "./types/core-only-globals.d.ts"
   ]
 }
