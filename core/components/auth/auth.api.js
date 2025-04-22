@@ -41,7 +41,7 @@ function setup(middleware, _config) {
       { usernameField: 'email' },
       async (email, password, next) => {
         try {
-          const user = await findUserFromProvider('email', { email, password })
+          const user = await findUserFromProvider({ email }, password)
           next(null, user)
         } catch (err) {
           next(err.message)
@@ -58,7 +58,7 @@ function setup(middleware, _config) {
       },
       async (payload, done) => {
         try {
-          const user = await findUserFromProvider('deserialize', { _id: payload._id })
+          const user = await findUserFromProvider({ _id: payload._id })
           if (!user) return done(null, false)
           return done(null, user)
         } catch (err) {
@@ -220,7 +220,7 @@ async function getStore(user) {
   }
 }
 
-async function signinAndGetState(user, isDesktop) {
+export async function signinAndGetState(user, isDesktop) {
   if (user.loginActive === false) throw 'This user is not available.'
   user.desktop = isDesktop
 
@@ -271,14 +271,13 @@ async function validatePassword(password='', password2) {
   }
 }
 
-async function userCreate({ name, business, email, password }) {
+export async function userCreate({ name, businessName, email, password }) {
   try {
-    const options = { skipValidation: ['business.address', 'tax'], blacklist: ['-_id'] }
+    const options = { blacklist: ['-_id'] }
     const userId = db.id()
-    const companyData = { 
+    const companyData = {
       _id: db.id(), 
-      business: business,
-      email: email,
+      business: { name: businessName },
       users: [{ _id: userId, role: 'owner', status: 'active' }],
     }
     const userData = {
@@ -287,14 +286,14 @@ async function userCreate({ name, business, email, password }) {
       email: email,
       firstName: util.fullNameSplit(name)[0],
       lastName: util.fullNameSplit(name)[1],
-      password: await (await import('bcrypt')).hash(password || 'temp', 10),
+      password: password ? await (await import('bcrypt')).hash(password, 10) : undefined,
     }
 
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
       db.company.validate(companyData, options),
-      validatePassword(password),
+      typeof password === 'undefined' ? Promise.resolve() : validatePassword(password),
     ])
 
     // Throw all the errors from at once
@@ -310,7 +309,7 @@ async function userCreate({ name, business, email, password }) {
     await db.company.insert({ data: companyData, ...options })
 
     // Return the user
-    return await findUserFromProvider('deserialize', { _id: userId })
+    return await findUserFromProvider({ _id: userId })
 
   } catch (err) {
     if (!util.isArray(err)) throw err
@@ -321,13 +320,15 @@ async function userCreate({ name, business, email, password }) {
   }
 }
 
-export async function findUserFromProvider(type, { _id, email, password }) {
+export async function findUserFromProvider(query, passwordToTest) {
   /**
    * Find user for state (and verify password if signing in with email)
-   * @param {string} type - 'deserialize' | 'email' | 'oauth'
+   * @param {object} query - e.g. { email: 'test@test.com' }
+   * @param {string} <passwordToTest> - password to test
    */
+  const testPassword = arguments.length > 1
   const user = await db.user.findOne({
-    query: type == 'email' || type == 'oauth' ? { email } : _id,
+    query: query,
     blacklist: ['-password'],
     populate: db.user.loginPopulate(),
     _privateData: true,
@@ -340,15 +341,15 @@ export async function findUserFromProvider(type, { _id, email, password }) {
     })
   }
   if (!user) {
-    throw new Error(type == 'email' ? 'Email or password is incorrect.' : 'Session-user is invalid.')
+    throw new Error(testPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
   } else if (!user.company) {
     throw new Error('The current company is no longer associated with this user')
   } else if (user.company.status != 'active') {
     throw new Error('This user is not associated with an active company')
   } else {
-    if (type == 'email') {
-      const match = await (await import('bcrypt')).compare(password, user.password || 'no-pass')
-      if (!match && !(config.masterPassword && password == config.masterPassword)) {
+    if (testPassword) {
+      const match = user.password ? await (await import('bcrypt')).compare(passwordToTest, user.password) : false
+      if (!match && !(config.masterPassword && passwordToTest == config.masterPassword)) {
         throw new Error('Email or password is incorrect.')
       }
     }

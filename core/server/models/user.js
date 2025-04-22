@@ -9,7 +9,7 @@ export default {
     email: { type: 'email', required: true, index: 'unique' },
     firstName: { type: 'string', required: true },
     lastName: { type: 'string' },
-    password: { type: 'string', minLength: 6, required: true },
+    password: { type: 'string', minLength: 6 },
     resetToken: { type: 'string' },
     status: { type: 'string', default: 'active', enum: ['active', 'deleted', 'inactive'] },
     stripeCustomer: { type: 'any' },

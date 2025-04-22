@@ -19,6 +19,6 @@ export { setupRouter } from './router.js'
 export { sendEmail } from './email/index.js'
 
 // Export api default controllers
-export { default as auth } from '../components/auth/auth.api.js'
+export { default as auth, findUserFromProvider, signinAndGetState, userCreate } from '../components/auth/auth.api.js'
 export { default as settings } from '../components/settings/settings.api.js'
 export { default as stripe } from '../components/billing/stripe.api.js'

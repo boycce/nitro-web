@@ -35,8 +35,8 @@ export function Signup() {
             <Field name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={onChange.bind(setState)} />
           </div>
           <div>
-            <label for="business.name">Company Name</label>
-            <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
+            <label for="businessName">Company Name</label>
+            <Field name="businessName" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
           </div>
         </div>
         <div>
