@@ -5,7 +5,7 @@ node_modules
 *.log
 
 # User files
-.env
+# .env
 resources/me
 migrate-mongo-config-*
 
