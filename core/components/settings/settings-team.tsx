@@ -2,9 +2,9 @@
 // todo: finish tailwind conversion
 import * as util from 'nitro-web/util'
 import SvgPlus from 'nitro-web/client/imgs/icons/plus.svg'
-import { Button, Table, Avatar, Tabbar, Topbar, SettingsTeamMember } from 'nitro-web'
+import { Button, Table, Avatar, Tabbar, Topbar, SettingsTeamMember, injectedConfig } from 'nitro-web'
 
-export function SettingsTeam({ config }) {
+export function SettingsTeam() {
   const isLoading = useState(false)
   const [showModal, setShowModal] = useState()
   const [{ user }] = sharedStore.useTracked()
@@ -48,7 +48,7 @@ export function SettingsTeam({ config }) {
             key: user._id,
             name: (
               <>
-                <Avatar awsUrl={config.awsUrl} user={user} isRound={true} class="mt--1 mb--1" />
+                <Avatar awsUrl={injectedConfig.awsUrl} user={user} isRound={true} class="mt--1 mb--1" />
                 <b>{util.ucFirst(user.name)}</b>
                 {user.status != 'invited' && <span class="text-grey">(Invitation pending)</span>}
               </>

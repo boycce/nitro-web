@@ -1,16 +1,14 @@
 // @ts-nocheck
 // todo: finish tailwind conversion
-import { Button, FormError, Field, Modal, Select } from 'nitro-web'
+import { Button, FormError, Field, Modal, Select, injectedConfig } from 'nitro-web'
 import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
-import { Config } from 'nitro-web/types'
 
 type SettingsTeamMemberProps = {
   showModal: boolean
   setShowModal: (showModal: boolean) => void
-  config?: Config
 }
 
-export function SettingsTeamMember ({ showModal, setShowModal, config }: SettingsTeamMemberProps) {
+export function SettingsTeamMember ({ showModal, setShowModal }: SettingsTeamMemberProps) {
   // @param {object} showModal - user
   const [{ user }] = sharedStore.useTracked()
   const [isLoading] = useState(false)
@@ -34,7 +32,7 @@ export function SettingsTeamMember ({ showModal, setShowModal, config }: Setting
     <Modal show={showModal} setShow={setShowModal} class="p-modal">
 
       <h2 class="h2"><em>Add</em> Team Member</h2>
-      <p class="subtitle">Invite a new team member to collaborate with you on {config?.name || 'Nitro'}.</p>
+      <p class="subtitle">Invite a new team member to collaborate with you on {injectedConfig?.name || 'Nitro'}.</p>
       
       <form class="form" onSubmit={onSubmit}>
         <div class="cols cols-6 cols-gap-2-5">
@@ -89,7 +87,7 @@ export function SettingsTeamMember ({ showModal, setShowModal, config }: Setting
             <Field 
               name="message" 
               type="textarea" 
-              placeholder={`${user.firstName} is inviting you to collaborate on ${config?.name || 'Nitro'}.`} 
+              placeholder={`${user.firstName} is inviting you to collaborate on ${injectedConfig?.name || 'Nitro'}.`} 
               state={state} onChange={onChange.bind(setState)} 
             />
           </div>

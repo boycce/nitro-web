@@ -4,9 +4,9 @@
 ////// look at the select type error below
 import * as util from 'nitro-web/util'
 import SvgTick from 'nitro-web/client/imgs/icons/tick.svg'
-import { Button, Field, Select, Topbar, Tabbar } from 'nitro-web'
+import { Button, Field, Select, Topbar, Tabbar, injectedConfig } from 'nitro-web'
 
-export function SettingsBusiness({ config }) {
+export function SettingsBusiness() {
   const isLoading = useState(false)
   const [{ user }, setStore] = sharedStore.useTracked()
   const [state, setState] = useState(() => {
@@ -64,7 +64,7 @@ export function SettingsBusiness({ config }) {
                 name="business.country" 
                 type="country" 
                 state={state} 
-                options={useMemo(() => util.getCountryOptions(config.countries), [])} 
+                options={useMemo(() => util.getCountryOptions(injectedConfig.countries), [])} 
                 onChange={onChange.bind(setState)}
               />
             </div>
@@ -74,7 +74,7 @@ export function SettingsBusiness({ config }) {
                 name="business.currency" 
                 type="country" 
                 state={state} 
-                options={useMemo(() => util.getCurrencyOptions(config.currencies), [])}
+                options={useMemo(() => util.getCurrencyOptions(injectedConfig.currencies), [])}
                 onChange={onChange.bind(setState)}
               />
             </div>

@@ -3,26 +3,18 @@
  * be automatically imported and setup by the client router, you can have multiple page compoennts in the same file, like this one.
  */
 import { css, theme } from 'twin.macro'
-import config from '../client/config'
 import { injectedConfig } from 'nitro-web'
-import {
-  Dashboard,
-  Styleguide, 
-  NotFound,
-  // SettingsAccount, 
-  // SettingsBusiness, 
-  // SettingsTeam, 
-} from 'nitro-web'
+import { Dashboard, Styleguide, NotFound } from 'nitro-web'
 
 // Dashboard page
-export const DashboardPage = () => <Dashboard config={config} />
-DashboardPage.route = {
-  '/': true,
+export const DashboardPage = () => <Dashboard />
+DashboardPage.route = { 
+  '/': true, 
   'meta': { 'title': 'Dashboard', layout: 1 },
 }
 
 // Styleguide page
-export const StyleguidePage = () => <Styleguide config={config} />
+export const StyleguidePage = () => <Styleguide />
 StyleguidePage.route = {
   '/styleguide': true,
   'meta': { title: `${injectedConfig.isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
@@ -34,27 +26,6 @@ NotFoundPage.route = {
   '*': true,
   'meta': { 'title': 'Nothing found', layout: 1 },
 }
-
-// // Settings Account page
-// export const SettingsAccountPage = () => <SettingsAccount />
-// SettingsAccountPage.route = {
-//   '/settings/account': ['isUser'],
-//   'meta': { 'title': 'Account Settings', layout: 1 },
-// }
-
-// // Settings Business page
-// export const SettingsBusinessPage = () => <SettingsBusiness config={config} />
-// SettingsBusinessPage.route = {
-//   '/settings/business': ['isUser'],
-//   'meta': { 'title': 'Business Settings', layout: 1 },
-// }
-
-// // Settings Team page
-// export const SettingsTeamPage = () => <SettingsTeam config={config} />
-// SettingsTeamPage.route = {
-//   '/settings/team': ['isUser'],
-//   'meta': { 'title': 'Team Settings', layout: 1 },
-// }
 
 // Custom Tailwind UI page example
 export function PricingPage() {
@@ -185,13 +156,13 @@ export function PricingPage() {
     </div>
   )
 }
+PricingPage.route = {
+  '/pricing': true,
+  'meta': { 'title': 'Pricing', layout: 1 },
+}
 const style = css`
   .example-usage-of-tailwind-variable {
     color: ${theme('colors.dark')};
   }
 `
-PricingPage.route = {
-  '/pricing': true,
-  'meta': { 'title': 'Pricing', layout: 1 },
-}
 

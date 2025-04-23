@@ -1,9 +1,8 @@
 import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { CheckIcon } from '@heroicons/react/20/solid'
-import { Config } from 'nitro-web/types'
 
-export function Styleguide({ config }: { config: Config }) {
+export function Styleguide() {
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -167,7 +166,7 @@ export function Styleguide({ config }: { config: Config }) {
             name="country" 
             type="country" 
             state={state} 
-            options={useMemo(() => getCountryOptions(config.countries), [])} 
+            options={useMemo(() => getCountryOptions(injectedConfig.countries), [])} 
             onChange={onInputChange}
           />
         </div>
@@ -204,7 +203,7 @@ export function Styleguide({ config }: { config: Config }) {
           <Select 
             name="currency"
             state={state} 
-            options={useMemo(() => getCurrencyOptions(config.currencies), [])} 
+            options={useMemo(() => getCurrencyOptions(injectedConfig.currencies), [])} 
             onChange={onInputChange}
           />
         </div>
@@ -249,7 +248,8 @@ export function Styleguide({ config }: { config: Config }) {
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
-          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={onInputChange} config={config} />
+          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={onInputChange} 
+            config={injectedConfig} />
         </div>
       </div>
 
@@ -273,7 +273,7 @@ export function Styleguide({ config }: { config: Config }) {
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="avatar">Avatar</label>
-          <Drop class="is-small" name="avatar" state={state} onChange={onInputChange} awsUrl={config.awsUrl} />
+          <Drop class="is-small" name="avatar" state={state} onChange={onInputChange} awsUrl={injectedConfig.awsUrl} />
         </div>
         <div>
           <label for="calendar">Calendar</label>
