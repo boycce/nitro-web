@@ -46,7 +46,7 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
   const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
 
   if (!props.name) {
-    throw new Error('Input component requires a `name` prop')
+    throw new Error('Field component requires a `name` prop')
   }
   
   // Input type
@@ -58,7 +58,7 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
   if (props.value) value = props.value as string
   else if (typeof state == 'object') value = util.deepFind(state, props.name) ?? ''
 
-  // Errors: find any that match this input path
+  // Errors: find any that match this field path
   for (const item of (state?.errors || [])) {
     if (util.isRegex(props.name) && (item.title || '').match(props.name)) error = item
     else if (item.title == props.name) error = item
