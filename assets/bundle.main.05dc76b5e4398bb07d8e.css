@@ -803,11 +803,31 @@ video {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
+.h4, .content h4 {
+  margin-bottom: 0.5rem;
+  font-size: 15.5px;
+  line-height: 1.5;
+  font-weight: 700;
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+}
+.h5, .content h5 {
+  margin-bottom: 0.5rem;
+  font-size: 13.5px;
+  line-height: 1.5;
+  font-weight: 700;
+  --tw-text-opacity: 1;
+  color: rgb(17 24 39 / var(--tw-text-opacity, 1));
+}
 label, .label {
   font-size: 13.5px;
   line-height: 1.5;
   font-weight: 500;
 }
+/* Extend Nitro components */
+/* .nitro-error {
+    @apply !text-sm;
+  } */
 .container {
   width: 100%;
 }
@@ -1042,9 +1062,6 @@ label, .label {
 .mb-8 {
   margin-bottom: 2rem;
 }
-.mb-input-after {
-  margin-bottom: 1.5rem;
-}
 .ml-2 {
   margin-left: 0.5rem;
 }
@@ -1081,6 +1098,9 @@ label, .label {
 .mt-2 {
   margin-top: 0.5rem;
 }
+.mt-2\.5 {
+  margin-top: 0.625rem;
+}
 .mt-4 {
   margin-top: 1rem;
 }
@@ -1098,9 +1118,6 @@ label, .label {
 }
 .mt-auto {
   margin-top: auto;
-}
-.mt-input-before {
-  margin-top: 0.625rem;
 }
 .box-content {
   -webkit-box-sizing: content-box;
@@ -1975,7 +1992,7 @@ label, .label {
   --tw-text-opacity: 1;
   color: rgb(255 0 0 / var(--tw-text-opacity, 1));
 }
-.text-dark {
+.text-foreground {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
@@ -2747,15 +2764,6 @@ html {
   }
   .sm\:pl-8 {
     padding-left: 2rem;
-  }
-  .sm\:pl-9 {
-    padding-left: 2.25rem;
-  }
-  .sm\:pr-8 {
-    padding-right: 2rem;
-  }
-  .sm\:pr-9 {
-    padding-right: 2.25rem;
   }
   .sm\:text-5xl {
     font-size: 3rem;
