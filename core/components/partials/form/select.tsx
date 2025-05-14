@@ -249,7 +249,7 @@ const selectStyles = {
   },
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: '',
-  multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-dark hover:bg-red-50',
+  multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-foreground hover:bg-red-50',
   placeholder: 'text-input-placeholder',
   singleValue: {
     base: 'text-input',

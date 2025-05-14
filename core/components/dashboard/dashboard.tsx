@@ -27,6 +27,6 @@ export function Dashboard() {
 
 const style = css`
   .example-usage-of-tailwind-variable {
-    color: ${theme('colors.dark')};
+    color: ${theme('colors.primary')};
   }
 `

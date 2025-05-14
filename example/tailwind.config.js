@@ -25,7 +25,7 @@ export default {
         'dropdown-ul': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
       },
       colors: {
-        // Main colors
+        // Nitro colors
         'primary': '#4c50f9',
         'primary-dark': darken('#4c50f9', 0.05),
         'primary-hover': lighten('#4c50f9', 0.05),
@@ -36,15 +36,14 @@ export default {
         'link': colors.black,
         'link-hover': colors.blue[200],
         'link-focus': colors.blue[200],
-        'light': colors.gray[100],
-        'dark': colors.gray[900],
-        // Alert colors
+        'foreground': colors.gray[900],
+        // Nitro error & alert colors
         'critical': '#ff0000',
         'danger': '#ff0000',
         'danger-dark': colors.red[800],
         'info': colors.blue[500],
         'success': colors.green[500],
-        // Element colors
+        // Nitro element colors
         'input': colors.gray[900],
         'input-placeholder': colors.gray[400],
         'input-border': colors.gray[300],
@@ -54,6 +53,7 @@ export default {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
+        // Nitro font sizes
         '2xs': ['12px', { lineHeight: '1.5' }],
         'xs': ['13px', { lineHeight: '1.5' }],
         'sm': ['13.5px', { lineHeight: '1.5' }],
@@ -65,6 +65,7 @@ export default {
         '3xl': ['30px', { lineHeight: '1.75' }],
       },
       spacing: {
+        // Nitro input spacing
         'input-before': '0.625rem',
         'input-after': '1.5rem',
       },
