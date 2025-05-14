@@ -20,6 +20,7 @@ export function Initials({ icon, isBig, isMedium, isSmall, isRound, className }:
         (isSmall ? ' is-small' : '') + 
         (isRound ? ' is-round' : '') + 
         (icon ? '' : ' is-empty') + 
+        ' nitro-initials' +
         (className ? ' ' + className : '')
       }
       style={icon ? {backgroundColor: icon?.hex + '15', color: icon?.hex} : {}}

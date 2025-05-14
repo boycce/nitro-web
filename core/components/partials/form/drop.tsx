@@ -99,7 +99,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
   // }
 
   return (
-    <div class={`mt-input-before mb-input-after ${className || ''}`}>
+    <div class={`mt-2.5 mb-6 mt-input-before mb-input-after nitro-field nitro-drop ${className || ''}`}>
       <input 
         {...props}
         id={inputId}

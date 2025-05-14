@@ -80,7 +80,7 @@ export function Accordion({ children, className, expanded, onChange }: Accordion
   return (
     <div
       ref={el}
-      class={['accordion', className, state ? 'is-expanded' : ''].filter(o => o).join(' ')}
+      class={['accordion', className, state ? 'is-expanded' : ''].filter(o => o).join(' nitro-accordion')}
       onClick={onClick}
       css={style}
     >

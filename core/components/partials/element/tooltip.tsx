@@ -11,7 +11,7 @@ type TooltipProps = {
 
 export function Tooltip({ text, children, className, classNamePopup, isSmall }: TooltipProps) {
   return (
-    <div class={`${className} relative inline-block align-middle`} css={style}>
+    <div class={`${className} relative inline-block align-middle nitro-tooltip`} css={style}>
       {
         text
         ? <>

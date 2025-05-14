@@ -58,7 +58,7 @@ export function Select({ inputId, minMenuWidth, name, prefix='', onChange, optio
   }
 
   return (
-    <div css={style} class="mt-input-before mb-input-after">
+    <div css={style} class="mt-2.5 mb-6 mt-input-before mb-input-after nitro-select">
       <ReactSelect
         /**
          * react-select prop quick reference (https://react-select.com/props#api):
@@ -241,7 +241,7 @@ const selectStyles = {
     focus: 'outline-2 -outline-offset-2 outline-primary',
     error: 'outline-danger',
   },
-  valueContainer: 'py-2 px-3 gap-1',
+  valueContainer: 'py-2 px-3 py-input-y px-input-x gap-1',
   // Input container objects
   input: {
     base: 'text-input',

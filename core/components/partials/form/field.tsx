@@ -126,22 +126,26 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
 
 function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
   return (
-    <div css={style} className={`mt-input-before mb-input-after grid grid-cols-1 ${className || ''}`}>
+    <div css={style} className={`mt-2.5 mb-6 mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`}>
       {children}
-      {error && <div class="mt-1.5 text-xs text-danger">{error.detail}</div>}
+      {error && <div class="mt-1.5 text-xs text-danger nitro-error">{error.detail}</div>}
     </div>
   )
 }
 
 function getInputClasses({ error, Icon, iconPos, type }: { error: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
-  const paddingLeft = type == 'color' ? 'sm:pl-9 pl-9' : 'sm:pl-8 pl-8'
-  const paddingRight = type == 'color' ? 'sm:pr-9 pr-9' : 'sm:pr-8 pr-8'
+  const pl = 'pl-3 pl-input-x'
+  const pr = 'pr-3 pr-input-x'
+  const py = 'py-2 py-input-y'
+  const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
+  const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    'col-start-1 row-start-1 block w-full rounded-md bg-white py-2 text-sm leading-[1.65] outline outline-1 -outline-offset-1 ' +
+    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm leading-[1.65] outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
-    (iconPos == 'right' && Icon ? `${paddingRight} pl-3 ` : (Icon ? `${paddingLeft} pr-3 ` : 'px-3 ')) +
+    (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error ? 'text-red-900 outline-danger focus:outline-danger ' : 'text-input outline-input-border focus:outline-primary ') + 
-    (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ')
+    (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ') + 
+    'nitro-input'
   )
 }
 

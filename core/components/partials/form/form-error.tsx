@@ -18,7 +18,7 @@ export function FormError({ state, fields, className }: FormError) {
   return (
     <>
       {error ? (
-        <div class={`text-danger mt-1 text-sm ${className||''}`}>
+        <div class={`text-danger mt-1 text-sm nitro-error ${className||''}`}>
           {error.detail}
         </div>
       ) : null}

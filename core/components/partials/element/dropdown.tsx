@@ -91,6 +91,7 @@ export const Dropdown = forwardRef(function Dropdown({
         (isHoverable ? ' is-hoverable' : '') +
         (isActive ? ' is-active' : '') +
         (!animate ? ' no-animation' : '') +
+        ' nitro-dropdown' +
         (className ? ` ${className}` : '')
       }
       onClick={(e) => e.stopPropagation()} // required for dropdowns inside row links

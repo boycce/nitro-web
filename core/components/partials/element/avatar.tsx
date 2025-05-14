@@ -13,7 +13,7 @@ type AvatarProps = {
 }
 
 export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className }: AvatarProps) {
-  const classes = 'rounded-full w-[30px] h-[30px] object-cover transition-all duration-150 ease ' + (className || '')
+  const classes = 'rounded-full w-[30px] h-[30px] object-cover transition-all duration-150 ease nitro-avatar ' + (className || '')
 
   function getInitials(user: User) {
     const text = (user.firstName ? [user.firstName, user.lastName] : (user?.name||'').split(' ')).map((o) => o?.charAt(0))

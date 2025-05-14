@@ -83,7 +83,7 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
       range_middle: `${d.range_middle} rangemiddle`,
     },
     classNames: {
-      root: `${d.root} flex`,
+      root: `${d.root} flex nitro-calendar`,
       months: `${d.months} flex-nowrap`,
       month_caption: `${d.month_caption} text-2xs pl-2`,
       caption_label: `${d.caption_label} z-auto`,

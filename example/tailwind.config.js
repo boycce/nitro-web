@@ -65,9 +65,13 @@ export default {
         '3xl': ['30px', { lineHeight: '1.75' }],
       },
       spacing: {
-        // Nitro input spacing
-        'input-before': '0.625rem',
-        'input-after': '1.5rem',
+        // Nitro field spacing (defaults listed below)
+        // 'input-before': '0.625rem',
+        // 'input-after': '1.5rem',
+        // 'input-x': '0.75rem',
+        // 'input-y': '0.5rem',
+        // 'button-x': '0.75rem',
+        // 'button-y': '0.5rem',
       },
     },
   },

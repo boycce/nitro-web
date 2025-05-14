@@ -41,10 +41,10 @@ export function Button({
 
   // Button sizes
   const sizes = {
-    xs: 'px-2 py-1 text-xs rounded',
-    sm: 'px-2.5 py-1.5 text-sm rounded-md',
-    md: 'px-3 py-2 text-sm rounded-md',
-    lg: 'px-3.5 py-2.5 text-sm rounded-md',
+    xs: 'px-2 py-1 px-button-x-xs py-button-y-xs text-xs rounded',
+    sm: 'px-2.5 py-1.5 px-button-x-sm py-button-y-sm text-sm rounded-md',
+    md: 'px-3 py-2 px-button-x py-button-y text-sm rounded-md',
+    lg: 'px-3.5 py-2.5 px-button-x-lg py-button-y-lg text-sm rounded-md',
   }
 
   const contentLayout = `w-full gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`
@@ -57,7 +57,7 @@ export function Button({
   }
   
   return (
-    <button class={twMerge(`${base} ${colors[color]} ${sizes[size]} ${contentLayout} ${loading} ${className||''}`)} {...props}>
+    <button class={twMerge(`${base} ${colors[color]} ${sizes[size]} ${contentLayout} ${loading} nitro-button ${className||''}`)} {...props}>
       {IconLeft && getIcon(IconLeft)}
       {IconLeftEnd && getIcon(IconLeftEnd)}
       <span class={`${iconPosition == 'leftEnd' || iconPosition == 'rightEnd' ? 'flex-1' : ''}`}>{children}</span>

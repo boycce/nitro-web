@@ -19,15 +19,19 @@
   .h3, .content h3 {
     @apply text-foreground mb-2 text-lg font-bold;
   }
-  .h4 {
+  .h4, .content h4 {
     @apply text-foreground mb-2 text-base font-bold;
   }
-  .h5 {
+  .h5, .content h5 {
     @apply text-foreground mb-2 text-sm font-bold;
   }
   label, .label {
     @apply text-sm font-medium;
   }
+  /* Extend Nitro components */
+  /* .nitro-error {
+    @apply !text-sm;
+  } */
 }
 
 html {

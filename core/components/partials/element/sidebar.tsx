@@ -27,7 +27,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   return (
     <>
       {/* mobile sidebar opened */}
-      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden">
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden nitro-sidebar">
         <DialogBackdrop
           transition
           className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"

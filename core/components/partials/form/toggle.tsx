@@ -11,7 +11,7 @@ export function Toggle({ name, id, subtext, text, type='checkbox', ...props }: T
   id = id || name
   // https://tailwindui.com/components/application-ui/forms/checkboxes#component-744ed4fa65ba36b925701eb4da5c6e31
   return (
-    <div className={`mt-input-before mb-input-after flex gap-3 ${props.className || ''}`}>
+    <div className={`mt-2.5 mb-6 mt-input-before mb-input-after flex gap-3 nitro-toggle ${props.className || ''}`}>
       <div className="flex h-6 shrink-0 items-center">
         <div className="group grid size-4 grid-cols-1">
           <input

@@ -9,7 +9,7 @@ export function GithubLink({ filename }: { filename: string }) {
   
   return (
     // <a href={link}>Go to Github</a>
-    <a href={link} className="fixed top-0 right-0">
+    <a href={link} className="fixed top-0 right-0 nitro-github">
       <GithubIcon />
     </a>
   )
