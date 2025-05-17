@@ -238,7 +238,7 @@ const selectStyles = {
   // Input container
   control: {
     base: 'rounded-md bg-white hover:cursor-pointer text-sm leading-[1.65] outline outline-1 -outline-offset-1 outline-input-border',
-    focus: 'outline-2 -outline-offset-2 outline-primary',
+    focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
   },
   valueContainer: 'py-2 px-3 py-input-y px-input-x gap-1',

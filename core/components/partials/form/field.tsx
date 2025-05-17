@@ -143,7 +143,9 @@ function getInputClasses({ error, Icon, iconPos, type }: { error: Error, Icon?: 
     `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm leading-[1.65] outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
-    (error ? 'text-red-900 outline-danger focus:outline-danger ' : 'text-input outline-input-border focus:outline-primary ') + 
+    (error 
+      ? 'text-red-900 outline-danger focus:outline-danger ' 
+      : 'text-input outline-input-border focus:outline-input-border-focus ') + 
     (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ') + 
     'nitro-input'
   )

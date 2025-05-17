@@ -10,6 +10,12 @@
 
 /* Typography */
 @layer base {
+  html {
+    font-size: 15.5px;
+  }
+  body {
+    @apply text-base text-foreground;
+  }
   .h1, .content h1 {
     @apply text-foreground mb-2 text-2xl font-bold;
   }
@@ -32,8 +38,4 @@
   /* .nitro-error {
     @apply !text-sm;
   } */
-}
-
-html {
-  font-size: 15.5px;
 }

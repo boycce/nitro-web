@@ -42,7 +42,13 @@ export function Checkbox({ name, id, size='sm', subtext, text, type='checkbox', 
                 id={id}
                 name={name}
                 type={type}
-                className={`${type === 'radio' ? 'rounded-full' : 'rounded'} col-start-1 row-start-1 appearance-none border border-gray-300 bg-white checked:border-primary checked:bg-primary indeterminate:border-primary indeterminate:bg-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto`}
+                className={
+                  `${type === 'radio' ? 'rounded-full' : 'rounded'} col-start-1 row-start-1 appearance-none border border-gray-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto ` + 
+                  // Default
+                  'checked:border-blue-600 checked:bg-blue-600 indeterminate:border-blue-600 indeterminate:bg-blue-600 focus-visible:outline-blue-600 ' +
+                  // Variable-selected color defined?
+                  'checked:!border-variable-selected checked:!bg-variable-selected indeterminate:!border-variable-selected indeterminate:!bg-variable-selected focus-visible:!outline-variable-selected'
+                }
               />
               <svg
                 fill="none"
@@ -89,7 +95,15 @@ export function Checkbox({ name, id, size='sm', subtext, text, type='checkbox', 
               />
               <label 
                 for={id}
-                className={`col-start-1 row-start-1 relative ${_size.toggleWidth} ${_size.toggleHeight} bg-gray-200 peer-focus-visible:outline-none peer-focus-visible:ring-4 peer-focus-visible:ring-blue-300 dark:peer-focus-visible:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full ${_size.toggleAfterSize} after:transition-all dark:border-gray-600 peer-checked:bg-blue-600`}
+                className={
+                  `col-start-1 row-start-1 relative ${_size.toggleWidth} ${_size.toggleHeight} bg-gray-200 peer-focus-visible:outline-none peer-focus-visible:ring-4 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full ${_size.toggleAfterSize} after:transition-all ` +
+                  // Default
+                  'peer-focus-visible:ring-blue-300 peer-checked:bg-blue-600 ' +
+                  // Variable-selected color defined?
+                  'peer-focus-visible:!ring-variable-selected peer-checked:!bg-variable-selected '
+                  // Dark mode not used yet...
+                  // 'dark:peer-focus-visible:ring-blue-800 dark:bg-gray-700 dark:border-gray-600 '
+                }
               />
             </div>
         }

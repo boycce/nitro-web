@@ -48,7 +48,6 @@ export { FieldCurrency, type FieldCurrencyProps } from '../components/partials/f
 export { FieldDate, type FieldDateProps } from '../components/partials/form/field-date'
 export { Location } from '../components/partials/form/location'
 export { Select, getSelectStyle } from '../components/partials/form/select'
-export { Toggle } from '../components/partials/form/toggle'
 
 // Component Other
 export { IsFirstRender } from '../components/partials/is-first-render'

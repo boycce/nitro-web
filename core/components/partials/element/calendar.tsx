@@ -87,8 +87,8 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
       months: `${d.months} flex-nowrap`,
       month_caption: `${d.month_caption} text-2xs pl-2`,
       caption_label: `${d.caption_label} z-auto`,
-      button_previous: `${d.button_previous} size-8`,// [&:hover>svg]:fill-primary-dark`,
-      button_next: `${d.button_next} size-8`,// [&:hover>svg]:fill-primary-dark`,
+      button_previous: `${d.button_previous} size-8`,// [&:hover>svg]:fill-input-border-focus`,
+      button_next: `${d.button_next} size-8`,// [&:hover>svg]:fill-input-border-focus`,
       chevron: `${d.chevron} fill-black size-[18px]`,
 
       // Days
@@ -98,12 +98,12 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
 
       // States
       focused: `${d.focused} [&>button]:bg-gray-200 [&>button]:border-gray-200`,
-      range_start: `${d.range_start} [&>button]:!bg-primary-dark [&>button]:!border-primary-dark`,
-      range_end: `${d.range_end} [&>button]:!bg-primary-dark [&>button]:!border-primary-dark`,
+      range_start: `${d.range_start} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
+      range_end: `${d.range_end} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
       selected: `${d.selected} font-normal `
         + '[&:not(.rangemiddle)>button]:!text-white '
-        + '[&:not(.rangemiddle)>button]:!bg-primary-dark '
-        + '[&:not(.rangemiddle)>button]:!border-primary-dark ',
+        + '[&:not(.rangemiddle)>button]:!bg-input-border-focus '
+        + '[&:not(.rangemiddle)>button]:!border-input-border-focus ',
     },
   }
 

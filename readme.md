@@ -22,7 +22,7 @@ npm i nitro-web -D @nitro-web/webpack
 On the client, you can import components and page-components as you would normally. See ./example for further info.
 
 ```javascript
-import { SigninPage, Toggle, util } from 'nitro-web'
+import { SigninPage, Field, util } from 'nitro-web'
 ```
 
 On the server, you can import the express router, default models, and controllers. See ./example for further info.

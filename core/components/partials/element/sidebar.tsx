@@ -10,6 +10,7 @@ import {
   ArrowLeftCircleIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
+
 const sidebarWidth = 'lg:w-80'
 
 export type SidebarProps = {
