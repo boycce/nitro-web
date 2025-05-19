@@ -1,8 +1,13 @@
 import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { CheckIcon } from '@heroicons/react/20/solid'
+import Table, { tableProps } from './element/table'
+
+const mainContentsClass = 'main-contents'
 
 export function Styleguide() {
+  const mainContentsRef = useRef(null)
+  const [mainContentsWidth, setMainContentsWidth] = useState(0)
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -50,8 +55,12 @@ export function Styleguide() {
     setCustomerSearch(search || '')
   }
 
+  useEffect(() => {
+    if (mainContentsRef.current) setMainContentsWidth((mainContentsRef.current as HTMLDivElement).offsetWidth)
+  }, [])
+
   return (
-    <div class="mb-10 text-left max-w-[1100px]">
+    <div ref={mainContentsRef} class={`${mainContentsClass} mb-10 text-left max-w-[1100px]`}>
       <GithubLink filename={__filename} />
       <div class="mb-7">
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
@@ -281,6 +290,14 @@ export function Styleguide() {
             onInputChange({ target: { id: 'calendar', value: value } })
           }} />
         </div>
+      </div>
+
+      <h2 class="h3">Table</h2>
+      <div class="mb-4">
+        <Table props={{
+          ...tableProps,
+          mainContentsWidth: mainContentsWidth,
+        }} />
       </div>
 
       <Modal show={showModal1} setShow={setShowModal1} class="p-9">

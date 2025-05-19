@@ -10,7 +10,7 @@ export function Layout1() {
       <div class="flex-1">
         <div class="max-w-[1800px] mx-auto lg:flex min-h-[100%] w-[100%] bg-[#FDFDFD] shadow-[0_0_40px_0_rgb(237_237_237)]">
           <Sidebar Logo={Logo} />
-          <div class="py-10 px-14 flex-1">
+          <div class="py-10 px-14 flex-1"> 
             <Outlet />
           </div>
         </div>

@@ -11,7 +11,7 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
 
-const sidebarWidth = 'lg:w-80'
+export const sidebarWidth = 310
 
 export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
@@ -28,7 +28,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   return (
     <>
       {/* mobile sidebar opened */}
-      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden nitro-sidebar">
+      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className='relative z-50 lg:hidden nitro-sidebar'>
         <DialogBackdrop
           transition
           className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
@@ -52,7 +52,9 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
       </Dialog>
 
       {/* Static sidebar for desktop */}
-      <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
+      <div style={{
+        width: `${sidebarWidth}px`,
+      }} className='hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col'>
         <SidebarContents Logo={Logo} menu={menu} links={links} />
       </div>
       
@@ -67,7 +69,9 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
         </Link>
       </div>
       
-      <div class={`${sidebarWidth}`} />
+      <div style={{
+        width: `${sidebarWidth}px`,
+      }} />
     </>
   )
 }
