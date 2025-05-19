@@ -1632,10 +1632,6 @@ label, .label {
   --tw-border-opacity: 1;
   border-color: rgb(76 80 249 / var(--tw-border-opacity, 1));
 }
-.border-white {
-  --tw-border-opacity: 1;
-  border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
-}
 .\!border-t-transparent {
   border-top-color: transparent !important;
 }
@@ -2926,6 +2922,10 @@ label, .label {
 .\[\&\>\.loader\]\:border-black>.loader {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
+}
+.\[\&\>\.loader\]\:border-white>.loader {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
 }
 .\[\&\>button\]\:\!border-input-border-focus>button {
   --tw-border-opacity: 1 !important;
