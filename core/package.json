@@ -66,6 +66,7 @@
     },
     "bumpFiles": [
       "package.json",
+      "package-lock.json",
       "../webpack/package.json",
       {
         "filename": "../readme.md",
