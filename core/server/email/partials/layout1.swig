@@ -31,7 +31,7 @@
                               <tr>
                                 <td width="180px" align="left">
                                   <a href="%recipient.domain%" target="_blank">
-                                    <img src="%recipient.domain%/assets/imgs/logo/logo-white.svg" width="auto" height="22" border="0">
+                                    <img src="%recipient.domain%/assets/imgs/logo/logo.svg" width="auto" height="22" border="0">
                                   </a>
                                 </td>
                                 <td align="right">

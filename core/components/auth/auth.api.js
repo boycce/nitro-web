@@ -6,7 +6,7 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import db from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
-import * as util from 'nitro-web/util'
+import { isArray, pick, isString, ucFirst, fullNameSplit } from 'nitro-web/util'
 
 let config = {}
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
@@ -32,9 +32,13 @@ export default {
 }
 
 function setup(middleware, _config) {
+  // Setup is called automatically when the server starts
   // Set config values
-  config = { env: _config.env, masterPassword: _config.masterPassword }
-  if (!config.env) throw new Error('Missing config value for: config.env')
+  const configKeys = ['clientUrl', 'emailFrom', 'env', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'name']
+  config = pick(_config, configKeys)
+  for (const key of configKeys) {
+    if (!config[key]) throw new Error(`Missing config value for: config.${key}`)
+  }
 
   passport.use(
     new passportLocal.Strategy(
@@ -102,7 +106,7 @@ async function signup(req, res) {
     sendEmail({
       config: config,
       template: 'welcome',
-      to: `${util.ucFirst(user.firstName)}<${user.email}>`,
+      to: `${ucFirst(user.firstName)}<${user.email}>`,
     }).catch(console.error)
     res.send(await signinAndGetState(user, req.query.desktop))
   } catch (err) {
@@ -133,7 +137,7 @@ function signout(req, res) {
 async function resetInstructions(req, res) {
   try {
     let email = (req.body.email || '').trim().toLowerCase()
-    if (!email || !util.isString(email)) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+    if (!email || !isString(email)) throw { title: 'email', detail: 'The email you entered is incorrect.' }
 
     let user = await db.user.findOne({ query: { email }, _privateData: true })
     if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
@@ -145,7 +149,7 @@ async function resetInstructions(req, res) {
     sendEmail({
       config: config,
       template: 'reset-password',
-      to: `${util.ucFirst(user.firstName)}<${email}>`,
+      to: `${ucFirst(user.firstName)}<${email}>`,
       data: {
         token: resetToken + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
       },
@@ -271,21 +275,21 @@ async function validatePassword(password='', password2) {
   }
 }
 
-export async function userCreate({ name, businessName, email, password }) {
+export async function userCreate({ name, business, email, password }) {
   try {
     const options = { blacklist: ['-_id'] }
     const userId = db.id()
     const companyData = {
       _id: db.id(), 
-      business: { name: businessName },
+      ...(business ? { business } : {}),
       users: [{ _id: userId, role: 'owner', status: 'active' }],
     }
     const userData = {
       _id: userId, 
       company: companyData._id,
       email: email,
-      firstName: util.fullNameSplit(name)[0],
-      lastName: util.fullNameSplit(name)[1],
+      firstName: fullNameSplit(name)[0],
+      lastName: fullNameSplit(name)[1],
       password: password ? await (await import('bcrypt')).hash(password, 10) : undefined,
     }
 
@@ -298,7 +302,7 @@ export async function userCreate({ name, businessName, email, password }) {
 
     // Throw all the errors from at once
     const errors = results.filter(o => o.status == 'rejected').reduce((acc, o) => {
-      if (util.isArray(o.reason)) acc.push(...o.reason)
+      if (isArray(o.reason)) acc.push(...o.reason)
       else throw o.reason
       return acc
     }, [])
@@ -312,7 +316,7 @@ export async function userCreate({ name, businessName, email, password }) {
     return await findUserFromProvider({ _id: userId })
 
   } catch (err) {
-    if (!util.isArray(err)) throw err
+    if (!isArray(err)) throw err
     throw err.map((o) => {
       if (o.title == 'firstName') o.title = 'name'
       return o

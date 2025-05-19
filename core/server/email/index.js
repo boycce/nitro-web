@@ -7,21 +7,21 @@ import inlineCss from 'inline-css'
 import { dirname, join } from 'path'
 import { fileURLToPath } from 'url'
 import path from 'path'
-import { getDirectories } from 'nitro-web/util'
+import { getDirectories, ucFirst } from 'nitro-web/util'
 
 let templates = {}
 let nodemailerMailgun = undefined
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
-export async function sendEmail({ template, to, bcc, data={}, from, replyTo, recipientVariables, subject, test, skipCssInline, config }) {
+export async function sendEmail({ template, to, bcc, data, from, replyTo, recipientVariables, subject, test, skipCssInline, config }) {
   /**
    * Email recipient a predefined template with data and/or recipientVariables
    *
    * @param {string} template = e.g. 'reset-password' or html
-   * @param {string} to - e.g. "Bruce Lee<bruce@gmail.com>, ..."
-   * @param {object} config - e.g. { mailgunKey, mailgunDomain, emailFrom, clientUrl }
+   * @param {string} to - e.g. "Bruce Wayne<bruce@wayneenterprises.com>, ..."
+   * @param {object} config - e.g. { mailgunKey, mailgunDomain, emailFrom, clientUrl, name }
    * @param {string} <bcc> - e.g. "Chuck Norris<chuck@gmail.com>" (not sent in development)
-   * @param {object} <data> - recipientVariables[to] shorthand
+   * @param {object} <data> - recipientVariables[to] shorthand, data is copied to all recipients
    * @param {string} <from> - e.g. "Chuck Norris<chuck@gmail.com>"
    * @param {string} <replyTo> - e.g. "Chuck Norris<chuck@gmail.com>"
    * @param {object} <recipientVariables> - mailgun recipient-variables for batch sending
@@ -32,8 +32,12 @@ export async function sendEmail({ template, to, bcc, data={}, from, replyTo, rec
    */
   if (!config) {
     throw new Error('sendEmail: `config` missing')
-  } else if (!config.emailFrom || !config.clientUrl) {
-    throw new Error('sendEmail: `config.emailFrom` or `config.clientUrl` is missing')
+  } else if (!config.emailFrom) {
+    throw new Error('sendEmail: `config.emailFrom` is missing')
+  } else if (!config.clientUrl) {
+    throw new Error('sendEmail: `config.clientUrl` is missing')
+  } else if (!config.name) {
+    throw new Error('sendEmail: `config.name` is missing')
   } else if (!test && (!config.mailgunKey || !config.mailgunDomain)) {
     throw new Error('sendEmail: `config.mailgunKey` or `config.mailgunDomain` is missing')
   } else if (!template) {
@@ -52,27 +56,30 @@ export async function sendEmail({ template, to, bcc, data={}, from, replyTo, rec
   // From, replayTo
   from = from || config.emailFrom
   replyTo = replyTo || config.emailReplyTo || from
-
-  // Data is recipientVariables[to] shorthand
-  if (data) {
-    recipientVariables = { [getNameEmail(to)[1]]: data }
-  }
+  const toSplit = to.split(',')
 
   // Add default recipientVariables
-  for (let toEmail in recipientVariables) {
+  if (!recipientVariables) recipientVariables = {}
+
+  // Add default values to recipientVariables
+  for (let toNameEmail of toSplit) {
+    const [toName, toEmail] = getNameEmail(toNameEmail)
     recipientVariables[toEmail] = {
+      ...(data || {}),
+      configName: ucFirst(config.name),
       domain: config.clientUrl,
-      email: toEmail,
-      greet: data.name || getNameEmail(to)[0]? 'Hi ' + (data.name || getNameEmail(to)[0]) : 'Hello',
-      name: getNameEmail(to)[0],
       replyToEmail: getNameEmail(replyTo)[1],
       replyToName: getNameEmail(replyTo)[0],
-      ...recipientVariables[toEmail],
+      email: toEmail,
+      greet: toName ? 'Hi ' + toName : 'Hello',
+      name: toName,
+      ...(recipientVariables[toEmail] || {}),
     }
   }
 
   let settings = {
     bcc: bcc,
+    emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
     isDev: config.clientUrl.match(/:/), // possibly use config.env here
     recipientVariables: recipientVariables,
@@ -83,7 +90,6 @@ export async function sendEmail({ template, to, bcc, data={}, from, replyTo, rec
     test: config.emailTestMode || test,
     to: to,
     url: config.clientUrl,
-    emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
   }
 
   // Grab html and send

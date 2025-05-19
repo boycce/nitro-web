@@ -19,6 +19,7 @@ export default {
     optimizeUniversalDefaults: true, // remove undesired variables from universal selectors
   },
   theme: {
+    // Note: No class order is guaranteed when using mulitple extension classes below on an element.
     // Full list: https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
     extend: {
       boxShadow: {

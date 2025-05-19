@@ -29,16 +29,16 @@ export function Button({
   const iconPosition = IconLeft ? 'left' : IconLeftEnd ? 'leftEnd' : IconRight ? 'right' : IconRightEnd ? 'rightEnd' : 'none'
   const base = 
     'relative inline-block text-center font-medium shadow-sm focus-visible:outline focus-visible:outline-2 ' +
-    'focus-visible:outline-offset-2 text-white'
+    'focus-visible:outline-offset-2 text-white [&>.loader]:border-white'
 
   // Button colors, you can use custom colors by using className instead
   const colors = {
     primary: 'bg-primary hover:bg-primary-hover',
     secondary: 'bg-secondary hover:bg-secondary-hover',
     black: 'bg-black hover:bg-gray-700',
-    white: 'bg-white text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 [&>.loader]:border-black',
+    white: 'bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-gray-900 [&>.loader]:border-black',
   }
-
+  
   // Button sizes
   const sizes = {
     xs: 'px-2 py-1 px-button-x-xs py-button-y-xs text-xs rounded',
@@ -67,7 +67,7 @@ export function Button({
         isLoading &&
         <span className={
           'loader !opacity-100 absolute top-[50%] left-[50%] w-[1rem] h-[1rem] ml-[-0.5rem] mt-[-0.5rem] ' +
-          'rounded-full animate-spin border-2 !border-t-transparent border-white'
+          'rounded-full animate-spin border-2 !border-t-transparent'
         } />
       }
     </button>

@@ -41,7 +41,7 @@ const config = {
     clientUrl: process.env.originUrl || 'http://localhost:3000',
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
-    name: 'Nitro',
+    name: process.env.name,
     placeholderEmail: process.env.placeholderEmail,
     stripePublishableKey: process.env.stripePublishableKey,
     version: _require(pwd + 'package.json').version,
