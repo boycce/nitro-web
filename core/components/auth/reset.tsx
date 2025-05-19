@@ -3,7 +3,7 @@ import { Errors } from 'nitro-web/types'
 
 export function ResetInstructions() {
   const navigate = useNavigate()
-  const isLoading = useState()
+  const isLoading = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({ email: '', errors: [] as Errors })
 
@@ -41,7 +41,7 @@ export function ResetInstructions() {
 export function ResetPassword() {
   const navigate = useNavigate()
   const params = useParams()
-  const isLoading = useState()
+  const isLoading = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState(() => ({
     password: '',

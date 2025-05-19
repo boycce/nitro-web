@@ -324,13 +324,13 @@ export async function userCreate({ name, business, email, password }) {
   }
 }
 
-export async function findUserFromProvider(query, passwordToTest) {
+export async function findUserFromProvider(query, passwordToCheck) {
   /**
    * Find user for state (and verify password if signing in with email)
    * @param {object} query - e.g. { email: 'test@test.com' }
-   * @param {string} <passwordToTest> - password to test
+   * @param {string} <passwordToCheck> - password to test
    */
-  const testPassword = arguments.length > 1
+  const checkPassword = arguments.length > 1
   const user = await db.user.findOne({
     query: query,
     blacklist: ['-password'],
@@ -345,15 +345,18 @@ export async function findUserFromProvider(query, passwordToTest) {
     })
   }
   if (!user) {
-    throw new Error(testPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
+    throw new Error(checkPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
   } else if (!user.company) {
     throw new Error('The current company is no longer associated with this user')
   } else if (user.company.status != 'active') {
     throw new Error('This user is not associated with an active company')
   } else {
-    if (testPassword) {
-      const match = user.password ? await (await import('bcrypt')).compare(passwordToTest, user.password) : false
-      if (!match && !(config.masterPassword && passwordToTest == config.masterPassword)) {
+    if (checkPassword) {
+      if (!user.password) {
+        throw new Error('There is no password associated with this account, please try signing in with another method.')
+      }
+      const match = user.password ? await (await import('bcrypt')).compare(passwordToCheck, user.password) : false
+      if (!match && !(config.masterPassword && passwordToCheck == config.masterPassword)) {
         throw new Error('Email or password is incorrect.')
       }
     }

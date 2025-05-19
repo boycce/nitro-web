@@ -955,6 +955,7 @@ export async function request (route, data, event, isLoading) {
     return res.value.data
 
   } catch (errs) {
+    if (isLoading) isLoading[1](false)
     throw getResponseErrors(errs)
   }
 }
