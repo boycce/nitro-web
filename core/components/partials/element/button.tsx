@@ -1,5 +1,5 @@
 import { twMerge } from 'tailwind-merge'
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/20/solid'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   color?: 'primary'|'secondary'|'black'|'white'
@@ -51,8 +51,8 @@ export function Button({
   const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
   function getIcon(Icon: React.ReactNode | 'v') {
-    if (Icon == 'v' || Icon == 'down') return <ChevronDownIcon className="size-5 -my-6 -mx-1" />
-    if (Icon == '^' || Icon == 'up') return <ChevronUpIcon className="size-5 -my-6 -mx-1" />
+    if (Icon == 'v' || Icon == 'down') return <ChevronDown size={16.5} className="mt-[-1.4rem] mb-[-1.5rem] -mx-0.5" />
+    if (Icon == '^' || Icon == 'up') return <ChevronUp size={16.5} className="mt-[-1.4rem] mb-[-1.5rem] -mx-0.5" />
     else return Icon
   }
   

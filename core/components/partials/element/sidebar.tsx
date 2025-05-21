@@ -1,5 +1,5 @@
 // Component: https://tailwindui.com/components/application-ui/application-shells/sidebar#component-a69d85b6237ea2ad506c00ef1cd39a38
-import { Dialog, DialogBackdrop, DialogPanel, TransitionChild } from '@headlessui/react'
+import { css } from 'twin.macro'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
 import { injectedConfig } from 'nitro-web'
 import {
@@ -11,7 +11,7 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
 
-const sidebarWidth = 'lg:w-80'
+const sidebarWidth = 'w-80'
 
 export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
@@ -27,36 +27,41 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <>
-      {/* mobile sidebar opened */}
-      <Dialog open={sidebarOpen} onClose={setSidebarOpen} className="relative z-50 lg:hidden nitro-sidebar">
-        <DialogBackdrop
-          transition
-          className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
-        />
-        <div className="fixed inset-0 flex">
-          <DialogPanel
-            transition
-            className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out 
-            data-[closed]:-translate-x-full"
-          >
-            <TransitionChild>
-              <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
-                <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
-                  <XMarkIcon aria-hidden="true" className="size-6 text-white" />
-                </button>
-              </div>
-            </TransitionChild>
-            <SidebarContents Logo={Logo} menu={menu} links={links} />
-          </DialogPanel>
+      {/* desktop sidebar */}
+      <div css={style} className={
+        'fixed inset-y-0 z-50 flex flex-col ease-in-out lg:left-0 lg:translate-x-0 lg:!delay-0 lg:!duration-0 ' +
+        (
+          sidebarOpen 
+          ? 'left-0 translate-x-[0px] sidebar-transition ' 
+          : 'left-[-100%] translate-x-[-100%]  sidebar-transition-delay '
+        ) + 
+        sidebarWidth
+      }>
+        <div className={
+          'absolute left-full top-0 flex w-16 justify-center pt-5 lg:hidden duration-300 ease ' +
+          (sidebarOpen ? 'opacity-100' : 'opacity-0')
+        }>
+          <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
+            <XMarkIcon aria-hidden="true" className="size-6 text-white" />
+          </button>
         </div>
-      </Dialog>
-
-      {/* Static sidebar for desktop */}
-      <div className={`hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col ${sidebarWidth}`}>
         <SidebarContents Logo={Logo} menu={menu} links={links} />
       </div>
+
+      {/* mobile backdrop */}
+      <div 
+        css={style} 
+        onClick={() => setSidebarOpen(false)}
+        className={'fixed w-full z-[49] inset-0 bg-gray-900/70 ease-linear lg:hidden ' + 
+          (
+            sidebarOpen 
+            ? 'left-0 opacity-100 sidebar-transition ' 
+            : 'left-[-100%] opacity-0 sidebar-transition-delay '
+          )
+        }
+      />
       
-      {/* mobile sidebar closed */}
+      {/* mobile sidebar topbar */}
       <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
         <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
           <Bars3Icon aria-hidden="true" className="size-6" />
@@ -179,3 +184,12 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
     </div>
   )
 }
+
+const style = css`
+  &.sidebar-transition-delay {
+    transition: transform 300ms, opacity 300ms, left 0ms 300ms;
+  }
+  &.sidebar-transition {
+    transition: transform 300ms, opacity 300ms, left 0ms 0ms;
+  }
+`

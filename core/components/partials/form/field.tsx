@@ -10,6 +10,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from '@heroicons/react/20/solid'
+// Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>

@@ -1,6 +1,6 @@
 import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
-import { CheckIcon } from '@heroicons/react/20/solid'
+import { Check } from 'lucide-react'
 
 export function Styleguide() {
   const [customerSearch, setCustomerSearch] = useState('')
@@ -106,9 +106,11 @@ export function Styleguide() {
         <div><Button color="primary" size="sm">*-sm button</Button></div>
         <div><Button color="primary">*-md (default)</Button></div>
         <div><Button color="primary" size="lg">*-lg button</Button></div>
-        <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />}>IconLeft</Button></div>
-        <div><Button IconLeft={<CheckIcon class="size-5 -my-5 -mx-0.5" />} className="w-[160px]">IconLeft 160px</Button></div>
-        <div><Button IconLeftEnd={<CheckIcon class="size-5 -my-5 -mx-0.5" />} className="w-[190px]">IconLeftEnd 190px</Button></div>
+        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />}>IconLeft</Button></div>
+        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />} 
+          className="w-[160px]">IconLeft 160px</Button></div>
+        <div><Button IconLeftEnd={<Check size={19} className="-my-5 -mx-0.5" />} 
+          className="w-[190px]">IconLeftEnd 190px</Button></div>
         <div><Button IconRight="v">IconRight</Button></div>
         <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>
         <div><Button color="primary" IconRight="v" isLoading>primary isLoading</Button></div>

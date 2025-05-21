@@ -24,10 +24,10 @@
     "stripe": "^9.16.0"
   },
   "devDependencies": {
-    "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
     "@nitro-web/webpack": "file:../webpack",
     "color": "^4.2.3",
+    "lucide-react": "^0.511.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "standard-version": "^9.3.2",

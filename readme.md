@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/nitro-web.svg)](https://www.npmjs.com/package/nitro-web)
 
-Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀
+Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind and Lucide icons 🚀
 
 ```bash
 npm i nitro-web -D @nitro-web/webpack
