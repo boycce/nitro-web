@@ -11,8 +11,8 @@ npm i nitro-web -D @nitro-web/webpack
 ### Install
 
 1. Copy ./example into your project
-2. In package.json, replace `"nitro-web": "workspace:*"` with `"nitro-web": "~0.0.36"`
-3. In package.json, replace `"@nitro-web/webpack": "workspace:*"` with `"@nitro-web/webpack": "~0.0.36"`
+2. In package.json, replace `"nitro-web": "workspace:*"` with `"nitro-web": "~0.0.37"`
+3. In package.json, replace `"@nitro-web/webpack": "workspace:*"` with `"@nitro-web/webpack": "~0.0.37"`
 4. In package.json, replace `"../core/.eslintrc.json"` with `"./node_modules/nitro-web/.eslintrc.json"`
 5. Uncomment `# .env` in `./gitignore`  
 5. Run `npm i`
