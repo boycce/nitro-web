@@ -334,7 +334,6 @@ const trStyle = ({ rolecolor }: { rolecolor: string }) => css`
         background-color: ${rolecolor};
       }
     }
-    
 `
 
 /**

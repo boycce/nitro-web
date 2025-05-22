@@ -3,8 +3,6 @@ import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import Table, { tableProps } from './element/table'
 
-const mainContentsClass = 'main-contents'
-
 export function Styleguide() {
   const mainContentsRef = useRef(null)
   const [mainContentsWidth, setMainContentsWidth] = useState(0)
@@ -60,7 +58,7 @@ export function Styleguide() {
   }, [])
 
   return (
-    <div ref={mainContentsRef} class={`${mainContentsClass} mb-10 text-left max-w-[1100px]`}>
+    <div ref={mainContentsRef} class='mb-10 text-left max-w-[1100px]'>
       <GithubLink filename={__filename} />
       <div class="mb-7">
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
