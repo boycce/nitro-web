@@ -19,7 +19,7 @@ type FieldExtraProps = {
   name: string
   id?: string
   // state object to get the value, and check errors against
-  state?: { errors: Errors, [key: string]: unknown }
+  state?: { errors?: Errors, [key: string]: unknown }
   type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'

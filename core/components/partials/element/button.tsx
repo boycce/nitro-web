@@ -47,7 +47,7 @@ export function Button({
     lg: 'px-3.5 py-2.5 px-button-x-lg py-button-y-lg text-sm rounded-md',
   }
 
-  const contentLayout = `w-full gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`
+  const contentLayout = `gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`
   const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
   function getIcon(Icon: React.ReactNode | 'v') {
