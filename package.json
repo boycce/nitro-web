@@ -1,9 +1,7 @@
 {
   "private": true,
   "workspaces": [
-    "core",
-    "example",
-    "webpack"
+    "packages/*"
   ],
   "scripts": {
     "dev": "npm run dev -w example",
