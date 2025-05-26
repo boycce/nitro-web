@@ -4,16 +4,16 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w example",
-    "dev:client": "isDemo=true npm run dev:client -w example",
-    "dev:client-only": "isDemo=true isStatic=true npm run dev:client -w example",
-    "dev:server": "npm run dev:server -w example",
-    "build": "isDemo=true isStatic=true npm run build -w example",
-    "major": "npm run major -w core",
-    "minor": "npm run minor -w core",
-    "patch": "npm run patch -w core",
-    "start": "npm run start -w example",
-    "types": "npm run types -w core"
+    "dev": "npm run dev -w packages/example",
+    "dev:client": "isDemo=true npm run dev:client -w packages/example",
+    "dev:client-only": "isDemo=true isStatic=true npm run dev:client -w packages/example",
+    "dev:server": "npm run dev:server -w packages/example",
+    "build": "isDemo=true isStatic=true npm run build -w packages/example",
+    "major": "npm run major -w packages/core",
+    "minor": "npm run minor -w packages/core",
+    "patch": "npm run patch -w packages/core",
+    "start": "npm run start -w packages/example",
+    "types": "npm run types -w packages/core"
   },
   "engines": {
     "node": ">=18 <21"
