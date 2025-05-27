@@ -2,6 +2,8 @@ import { Outlet } from 'react-router-dom'
 import { injectedConfig, Message, Sidebar } from 'nitro-web'
 import Logo from '../../client/imgs/logo/logo.svg'
 
+const contentsPadding = 35
+
 // Dashboard, app screens (only the <Outlet/> receives `params` and `location`)
 export function Layout1() {
   return (
@@ -10,9 +12,12 @@ export function Layout1() {
       <div class="flex-1">
         <div class="max-w-[1800px] mx-auto lg:flex min-h-[100%] w-[100%] bg-[#FDFDFD] shadow-[0_0_40px_0_rgb(237_237_237)]">
           <Sidebar Logo={Logo} />
-          <div class="py-10 px-14 flex-1">
-            <Outlet />
-          </div>
+          <div style={{
+          paddingLeft: `${contentsPadding}px`,
+          paddingRight: `${contentsPadding}px`,
+        }} class="flex-1 py-10 ">
+          <Outlet />
+        </div>
         </div>
       </div>
     </div>

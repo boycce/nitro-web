@@ -11,7 +11,7 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
 
-const sidebarWidth = 'w-80'
+export const sidebarWidth = 310
 
 export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
@@ -28,14 +28,15 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   return (
     <>
       {/* desktop sidebar */}
-      <div css={style} className={
-        'fixed inset-y-0 z-50 flex flex-col ease-in-out lg:left-0 lg:translate-x-0 lg:!delay-0 lg:!duration-0 ' +
+      <div css={style} style={{
+        width: `${sidebarWidth}px`,
+      }} className={ 
+        ' fixed inset-y-0 z-50 flex flex-col ease-in-out lg:left-0 lg:translate-x-0 lg:!delay-0 lg:!duration-0 ' +
         (
           sidebarOpen 
           ? 'left-0 translate-x-[0px] sidebar-transition ' 
           : 'left-[-100%] translate-x-[-100%]  sidebar-transition-delay '
-        ) + 
-        sidebarWidth
+        )
       }>
         <div className={
           'absolute left-full top-0 flex w-16 justify-center pt-5 lg:hidden duration-300 ease ' +
@@ -62,7 +63,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
       />
       
       {/* mobile sidebar topbar */}
-      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+      <div className={'sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden'}>
         <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
           <Bars3Icon aria-hidden="true" className="size-6" />
         </button>
@@ -71,8 +72,10 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
           <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
         </Link>
       </div>
-      
-      <div class={`${sidebarWidth}`} />
+
+      <div style={{
+        width: `${sidebarWidth}px`,
+      }} />
     </>
   )
 }

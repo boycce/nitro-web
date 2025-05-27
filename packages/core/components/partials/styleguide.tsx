@@ -1,6 +1,12 @@
 import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { Check } from 'lucide-react'
+import Table, { tableProps } from './element/table'
+import { sidebarWidth } from './element/sidebar'
+
+const contentsPadding = 35 // must be same with /packages/example/components/partials/layouts.tsx
+const scrollbarWidth = 15
+const tableWidth = 1100
 
 export function Styleguide() {
   const [customerSearch, setCustomerSearch] = useState('')
@@ -38,7 +44,7 @@ export function Styleguide() {
     { label: 'Delete' },
   ]
 
-  function onInputChange (e: { target: { id: string, value: unknown } }) {
+  function onInputChange(e: { target: { id: string, value: unknown } }) {
     if ((e.target.id == 'customer' || e.target.id == 'customer2') && e.target.value == '') {
       setCustomerSearch('')
       e.target.value = null // clear the selected value
@@ -46,7 +52,7 @@ export function Styleguide() {
     setState(s => ({ ...s, [e.target.id]: e.target.value }))
   }
 
-  function onCustomerSearch (search: string) {
+  function onCustomerSearch(search: string) {
     setCustomerSearch(search || '')
   }
 
@@ -57,7 +63,7 @@ export function Styleguide() {
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
         <p>
           Components are styled using&nbsp;
-          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
+          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>.
         </p>
       </div>
 
@@ -81,10 +87,10 @@ export function Styleguide() {
           </Dropdown>
         </div>
         <div>
-          <Dropdown 
+          <Dropdown
             // menuIsOpen={true}
             dir="bottom-right"
-            minWidth="330px" 
+            minWidth="330px"
             options={[{ label: <><b>New Customer</b> / Add <b>Bruce Lee</b></>, className: 'border-bottom-with-space' }, ...options]}
           >
             <Button color="white" IconRight="v" class="gap-x-3">Dropdown bottom-right</Button>
@@ -107,9 +113,9 @@ export function Styleguide() {
         <div><Button color="primary">*-md (default)</Button></div>
         <div><Button color="primary" size="lg">*-lg button</Button></div>
         <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />}>IconLeft</Button></div>
-        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />} 
+        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />}
           className="w-[160px]">IconLeft 160px</Button></div>
-        <div><Button IconLeftEnd={<Check size={19} className="-my-5 -mx-0.5" />} 
+        <div><Button IconLeftEnd={<Check size={19} className="-my-5 -mx-0.5" />}
           className="w-[190px]">IconLeftEnd 190px</Button></div>
         <div><Button IconRight="v">IconRight</Button></div>
         <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>
@@ -120,12 +126,12 @@ export function Styleguide() {
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="input2">Label</label>
-          <Checkbox name="input2" type="toggle" text="Toggle sm" subtext="some additional text here." class="!mb-0"  defaultChecked />
+          <Checkbox name="input2" type="toggle" text="Toggle sm" subtext="some additional text here." class="!mb-0" defaultChecked />
           <Checkbox name="input3" type="toggle" text="Toggle md" size="md" subtext="some additional text here." />
         </div>
         <div>
           <label for="input1">Label</label>
-          <Checkbox name="input1" type="radio" text="Radio 1" subtext="some additional text here 1." id="input1-1" class="!mb-0" 
+          <Checkbox name="input1" type="radio" text="Radio 1" subtext="some additional text here 1." id="input1-1" class="!mb-0"
             defaultChecked />
           <Checkbox name="input1" type="radio" text="Radio 2" subtext="some additional text here 2." id="input1-2" class="!mt-0" />
         </div>
@@ -139,7 +145,7 @@ export function Styleguide() {
       <div class="grid grid-cols-3 lg:grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="action">Default</label>
-          <Select 
+          <Select
             // menuIsOpen={true}
             name="action"
             isSearchable={false}
@@ -151,7 +157,7 @@ export function Styleguide() {
         </div>
         <div>
           <label for="multi">Mutli Select</label>
-          <Select 
+          <Select
             name="multi"
             isMulti={true}
             options={[
@@ -165,10 +171,10 @@ export function Styleguide() {
           <label for="country">Countries</label>
           <Select
             // https://github.com/lipis/flag-icons
-            name="country" 
-            type="country" 
-            state={state} 
-            options={useMemo(() => getCountryOptions(injectedConfig.countries), [])} 
+            name="country"
+            type="country"
+            state={state}
+            options={useMemo(() => getCountryOptions(injectedConfig.countries), [])}
             onChange={onInputChange}
           />
         </div>
@@ -177,35 +183,35 @@ export function Styleguide() {
           <Select
             // menuIsOpen={true}
             placeholder="Select or add customer..."
-            name="customer" 
+            name="customer"
             type="customer"
             state={state}
             onChange={onInputChange}
             onInputChange={onCustomerSearch}
-            options={[ 
-              { 
-                className: 'bb', 
+            options={[
+              {
+                className: 'bb',
                 fixed: true,
-                value: '', 
+                value: '',
                 label: (
                   <>
                     <b>New Customer</b>
                     {customerSearch ? <> / Add <b>{ucFirst(customerSearch)}</b></> : ''}
                   </>
-                ), 
+                ),
               },
               { value: '1', label: 'Iron Man Industries' },
               { value: '2', label: 'Captain America' },
               { value: '3', label: 'Thor Limited' },
-            ]} 
+            ]}
           />
         </div>
         <div>
           <label for="currency">Currencies (Error)</label>
-          <Select 
+          <Select
             name="currency"
-            state={state} 
-            options={useMemo(() => getCurrencyOptions(injectedConfig.currencies), [])} 
+            state={state}
+            options={useMemo(() => getCurrencyOptions(injectedConfig.currencies), [])}
             onChange={onInputChange}
           />
         </div>
@@ -219,14 +225,14 @@ export function Styleguide() {
         </div>
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" placeholder="Your email address..."/>
+          <Field name="email" type="email" placeholder="Your email address..." />
         </div>
         <div>
-          <div class="flex justify-between"> 
+          <div class="flex justify-between">
             <label for="password">Password</label>
             <a href="#" class="label">Forgot?</a>
           </div>
-          <Field name="password" type="password"/>
+          <Field name="password" type="password" />
         </div>
         <div>
           <label for="search">Search</label>
@@ -234,7 +240,7 @@ export function Styleguide() {
         </div>
         <div>
           <label for="filter">Filter by Code</label>
-          <Field name="filter" type="filter" iconPos="left"  />
+          <Field name="filter" type="filter" iconPos="left" />
         </div>
         <div>
           <label for="address">Input Error</label>
@@ -250,7 +256,7 @@ export function Styleguide() {
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
-          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={onInputChange} 
+          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={onInputChange}
             config={injectedConfig} />
         </div>
       </div>
@@ -285,6 +291,15 @@ export function Styleguide() {
         </div>
       </div>
 
+      <h2 class="h3">Table</h2>
+      <div class="gap-x-6 mb-4">
+        <Table props={{
+          ...tableProps,
+          tableWidth: tableWidth,
+          parentWidth: `calc(100vw - ${sidebarWidth}px - ${contentsPadding * 2}px - ${scrollbarWidth}px)`,
+        }} />
+      </div>
+
       <Modal show={showModal1} setShow={setShowModal1} class="p-9">
         <h3 class="h3">Edit Profile</h3>
         <p class="mb-5">An example modal containing a basic form for editing profiles.</p>
@@ -295,7 +310,7 @@ export function Styleguide() {
           </div>
           <div>
             <label for="email2">Email Address</label>
-            <Field name="email2" type="email" placeholder="Your email address..."/>
+            <Field name="email2" type="email" placeholder="Your email address..." />
           </div>
         </form>
         <div class="flex justify-end">
