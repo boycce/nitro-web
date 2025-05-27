@@ -14,6 +14,7 @@ export function Styleguide() {
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
     'date-time': Date.now(),
+    time: '0',
     calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
     firstName: 'Bruce',
     errors: [
@@ -39,12 +40,29 @@ export function Styleguide() {
   ]
 
   function onInputChange (e: { target: { id: string, value: unknown } }) {
-    if ((e.target.id == 'customer' || e.target.id == 'customer2') && e.target.value == '') {
+    const {id} = e.target
+    let {value} = e.target
+    if ((id == 'customer' || id == 'customer2') && value == '') {
       setCustomerSearch('')
-      e.target.value = null // clear the selected value
+      value = null // clear the selected value
     }
-    setState(s => ({ ...s, [e.target.id]: e.target.value }))
+    const newValue = value
+    console.dir('newValue')
+    console.dir(newValue)
+    setState(s => ({ ...s, [id]: newValue }))
   }
+
+    /**
+   * handleTimeChange
+   */
+    const handleTimeChange = () => ({ id, value }: { id: string, value: number | number[] }) => {
+      if (Array.isArray(value)) return
+
+      setState((state) => ({
+        ...state,
+        [id]: value,
+      }))
+    }
 
   function onCustomerSearch (search: string) {
     setCustomerSearch(search || '')
@@ -268,6 +286,10 @@ export function Styleguide() {
         <div>
           <label for="date">Date (right aligned)</label>
           <Field name="date" type="date" state={state} onChange={onInputChange} dir="bottom-right" />
+        </div>
+        <div>
+          <label for="time">Time</label>
+          <Field name="time" type="time" state={state} value={state.time} onChange={handleTimeChange} />
         </div>
       </div>
 

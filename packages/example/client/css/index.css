@@ -39,3 +39,11 @@
     @apply !text-sm;
   } */
 }
+
+/*
+ * Custom
+ */
+.hide-time-icon::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}

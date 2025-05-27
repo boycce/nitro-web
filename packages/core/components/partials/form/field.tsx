@@ -11,6 +11,8 @@ import {
   EyeSlashIcon,
 } from '@heroicons/react/20/solid'
 // Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
+import FieldTime, { FieldTimeProps } from './field-time'
+import ClockIcon from '../icons/clock'
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
@@ -20,7 +22,7 @@ type FieldExtraProps = {
   id?: string
   // state object to get the value, and check errors against
   state?: { errors?: Errors, [key: string]: unknown }
-  type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+  type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'time' | 'color'
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'
 }
@@ -36,6 +38,7 @@ export type FieldProps = (
   | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
   | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
+  | ({ type: 'time' } & FieldTimeProps & FieldExtraProps)
 )
 
 export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
@@ -86,6 +89,8 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <ColorSvg hex={value}/>} className="size-[17px]" />
   } else if (type == 'date') {
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-4" />
+  } else if (type == 'time') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <ClockIcon />} className="size-4" />
   } else {
     Icon = <IconWrapper iconPos={iconPos} icon={icon} />
   }
@@ -123,6 +128,12 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
     return (
       <FieldContainer error={error} className={props.className}>
         <FieldDate {...props} {...commonProps} Icon={Icon} />
+      </FieldContainer>
+    )
+  } else if (type == 'time') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        <FieldTime {...props} {...commonProps} Icon={Icon} />
       </FieldContainer>
     )
   }
