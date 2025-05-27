@@ -17,6 +17,7 @@ export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
   value?: null|number|string|(null|number|string)[]
   numberOfMonths?: number
   Icon?: React.ReactNode
+  dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
 }
 
 type TimePickerProps = {
@@ -24,7 +25,8 @@ type TimePickerProps = {
   onChange: (mode: Mode, value: number|null) => void
 }
 
-export function FieldDate({ mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, ...props }: FieldDateProps) {
+export function FieldDate({ 
+  mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props }: FieldDateProps) {
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
@@ -100,6 +102,7 @@ export function FieldDate({ mode='single', onChange, prefix='', value, numberOfM
           {!!showTime && mode == 'single' && <TimePicker date={dates?.[0]} onChange={onCalendarChange} />}
         </div>
       }
+      dir={dir}
     > 
       <div className="grid grid-cols-1">
         {Icon}
