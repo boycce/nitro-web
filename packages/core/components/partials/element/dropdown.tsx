@@ -1,6 +1,5 @@
 import { css } from 'twin.macro'
 import { forwardRef, cloneElement } from 'react'
-import { toArray } from 'nitro-web/util'
 import { getSelectStyle } from 'nitro-web'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
@@ -99,7 +98,7 @@ export const Dropdown = forwardRef(function Dropdown({
       css={style}
     >
       {
-        toArray(children).map((el, key) => {
+        (Array.isArray(children) ? children : [children]).map((el, key) => {
           const onKeyDown = onMouseDown 
           if (!el.type) throw new Error('Dropdown component requires a valid child element')
           return cloneElement(el, { key, onMouseDown, onKeyDown }) // adds onClick

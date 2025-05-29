@@ -1,8 +1,8 @@
 type InjectedConfig = {
   awsUrl?: string
   clientUrl: string
-  countries: { [key: string]: { numberFormats: { currency: string } } } // for input-currency.tsx
-  currencies: { [key: string]: { symbol: string, digits: number } } // for input-currency.tsx
+  countries: { [key: string]: { name: string, numberFormats: { currency: string } } } // for input-currency.tsx
+  currencies: { [key: string]: { name: string, symbol: string, digits: number } } // for input-currency.tsx
   env: string
   googleMapsApiKey?: string
   isDemo: boolean // implicitly defined by webpack
@@ -36,6 +36,9 @@ export type Errors = Array<Error> | null
 export type MonasteryImage = {
   url: string
   filename: string
+  path: string
+  bucket: string
+  date?: number
 }
 
 export type MessageObject = {

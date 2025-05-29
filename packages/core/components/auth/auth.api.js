@@ -34,9 +34,9 @@ export default {
 function setup(middleware, _config) {
   // Setup is called automatically when the server starts
   // Set config values
-  const configKeys = ['clientUrl', 'emailFrom', 'env', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'name']
+  const configKeys = ['clientUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword']
   config = pick(_config, configKeys)
-  for (const key of configKeys) {
+  for (const key of ['clientUrl', 'emailFrom', 'env', 'name']) {
     if (!config[key]) throw new Error(`Missing config value for: config.${key}`)
   }
 

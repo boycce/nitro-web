@@ -1,7 +1,6 @@
 import { createBrowserRouter, createHashRouter, redirect, useParams, RouterProvider } from 'react-router-dom' 
 import { Fragment, ReactNode } from 'react'
 import ReactDOM from 'react-dom/client'
-import { AxiosRequestConfig } from '@hokify/axios'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
 import { injectedConfig, preloadedStoreData, exposedStoreData } from './index'
 import { Config, Store } from 'nitro-web/types'
@@ -27,11 +26,16 @@ type Settings = {
 
 type Route = {
   component: React.FC<{ route?: Route; params?: object; location?: object; config?: Config }>
-  meta?: { title?: string }
   middleware: string[]
   name: string
   path: string
   redirect?: string
+  meta?: { title?: string; layout?: number }
+}
+
+type RouteWithPolicies = Route & {
+  // Route policies, e.g. { 'get /signin' : ['isUser'] }
+  [key: string]: true | string | (string | true)[]
 }
 
 export async function setupApp(config: Config, storeContainer: StoreContainer, layouts: React.FC<LayoutProps>[]) {
@@ -137,7 +141,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
     for (const key in file) {
       const isReactFnComponentOrFnRef = typeof file[key] === 'function' || !!file[key]?.render
       if (!file.hasOwnProperty(key) || key.match(/route/i) || !isReactFnComponentOrFnRef) continue
-      const componentRoutes = toArray(file[key].route || file.route || file.Route)
+      const componentRoutes = toArray(file[key].route || file.route || file.Route) as RouteWithPolicies[]
       const componentName = key || camelCase(key.replace(/^.*[\\\/]|\.jsx$/g, '')) as string // eslint-disable-line
       // console.log(file)
       // Todo: need to retrieve the original function name for default exports during minification.
@@ -153,13 +157,13 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
         const routePaths = Object.keys(pick(route, /^(get\s+)?\/|^\*$/))
         
         for (const routePath of routePaths) {
-          const layoutNum = (route.meta?.layout || 1) - 1
+          const layoutNum = (parseInt(String(route.meta?.layout || '1')) || 1) - 1
 
           // get the routes middleware
-          const middleware = toArray(route[routePath]).filter(o => {
-            if (o === true) return // ignore true
-            else if (settings.middleware[o]) return true
-            else console.error(`No middleware named '${o}' defined under config.middleware, skipping..`)
+          const middleware = toArray(route[routePath]).filter((policyNameOrTrue) => {
+            if (policyNameOrTrue === true) return // ignore true
+            else if (policyNameOrTrue in settings.middleware) return true
+            else console.error(`No middleware named '${policyNameOrTrue}' defined under config.middleware, skipping..`)
           })
 
           // Push route to layout
@@ -171,7 +175,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
               layout: layoutNum,
               title: `${route.meta?.title ? `${route.meta.title}${settings.titleSeparator || ' - '}` : ''}${settings.name}`,
             },
-            middleware: middleware,
+            middleware: middleware as string[],
             name: componentName,
             path: routePath,
             redirect: route.redirect,
@@ -203,7 +207,10 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
           path: route.path,
           loader: async () => { // request
             // wait for container/exposedStoreData to be setup
-            if (!nonce) nonce = true && await setTimeoutPromise(() => {}, 0) // eslint-disable-line
+            if (!nonce) {
+              nonce = true 
+              await setTimeoutPromise(() => {}, 0)
+            }
             for (const key of route.middleware) {
               const error = settings.middleware[key](route, exposedStoreData || {})
               if (error && error.redirect) {
@@ -278,7 +285,7 @@ async function beforeApp(config: Config) {
     //   delete window.prehot
     // }
     if (!config.isStatic) {
-      storeData = (await axios().get('/api/store', { 'axios-retry': { retries: 3 }, timeout: 4000 } as AxiosRequestConfig)).data
+      storeData = (await axios().get('/api/store', { 'axios-retry': { retries: 3 }, timeout: 4000 })).data
       apiAvailable = true
     }
   } catch (err) {

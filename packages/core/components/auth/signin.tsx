@@ -17,7 +17,7 @@ export function Signin() {
   useEffect(() => {
     // Autofill the email input from ?email=
     const query = util.queryObject(location.search, true)
-    if (query.email) setState({ ...state, email: query.email })
+    if (query.email) setState({ ...state, email: query.email as string })
   }, [location.search])
 
   useEffect(() => {

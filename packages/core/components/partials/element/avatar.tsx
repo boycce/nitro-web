@@ -1,6 +1,5 @@
 import { Initials } from 'nitro-web'
 import { s3Image } from 'nitro-web/util'
-import noImage from 'nitro-web/client/imgs/no-image.svg'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
 import { User } from 'nitro-web/types'
 
@@ -32,7 +31,7 @@ export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className 
 
   return (
     user.avatar 
-    ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small') || noImage} /> 
+    ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small')} /> 
     : showPlaceholderImage ? <img class={classes} src={avatarImg} width="30px" /> 
     : <Initials className={classes} icon={{ initials: getInitials(user), hex: getHex(user) }} isRound={isRound} isMedium={true} />
   )

@@ -40,6 +40,8 @@ function beforeUpdate<T extends Store>(newStore: T) {
   }
 
   // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
-  axios().defaults.headers.authid = newStore?.user?._id
+  if (newStore?.user?._id) {
+    axios().defaults.headers.authid = newStore?.user?._id
+  }
   return newStore
 }

@@ -57,7 +57,10 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
   
   // Value: Input is always controlled if state is passed in
   if (props.value) value = props.value as string
-  else if (typeof state == 'object') value = util.deepFind(state, props.name) ?? ''
+  else if (typeof state == 'object') {
+    const v = util.deepFind(state, props.name) as string | undefined
+    value = v ?? ''
+  }
 
   // Errors: find any that match this field path
   for (const item of (state?.errors || [])) {
