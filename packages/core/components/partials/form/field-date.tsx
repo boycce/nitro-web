@@ -26,7 +26,8 @@ type TimePickerProps = {
 }
 
 export function FieldDate({ 
-  mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props }: FieldDateProps) {
+  mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props 
+}: FieldDateProps) {
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)

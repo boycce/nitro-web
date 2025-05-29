@@ -266,8 +266,8 @@ export function Styleguide() {
           <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={onInputChange} />
         </div>
         <div>
-          <label for="date">Date</label>
-          <Field name="date" type="date" state={state} onChange={onInputChange} />
+          <label for="date">Date (right aligned)</label>
+          <Field name="date" type="date" state={state} onChange={onInputChange} dir="bottom-right" />
         </div>
       </div>
 
