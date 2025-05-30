@@ -1100,25 +1100,23 @@ export function omit (obj, fields) {
 
 /**
  * Updates state from an input event, you can also update deep state properties
- * @param {(
- *   ChangeEvent | // e.g. <input onChange={(e) => onChange.call(setState, e)}>
- *   PathValue     // e.g. <input onChange={(e) => onChange.call(setState, e, ['address.name', 'Joe'])}> // [id, value]
- * )} eventOrPathValue
+ * @param {ChangeEvent|PathValue} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<object>}
  * @this {function}
  * 
+ * @example
+ *   - <input onChange={onChange.bind(setState)} />
+ *   - <input onChange={(e) => onChange.call(setState, e)} />
+ *   - <input onChange={() => onChange.call(setState, ['address.name', 'Joe'])} />
+ * 
  * @typedef {import('react').ChangeEvent} ChangeEvent
- * @typedef {[
- *   string,           // can be a path (e.g. 'name.first')
- *   function|unknown, // value or function to set the value to
- * ]} PathValue
+ * @typedef {[string, function|unknown]} PathValue - e.g. ['name.first', (state) => state.myNameHere]
  */
 export function onChange (eventOrPathValue, beforeSetState) {
   if (!isFunction(this)) {
     throw new Error('Missing setState, please either call or bind setState to the function. E.g. onChange.call(setState, e)')
   }
-  
   /** @type {unknown|function} */
   let value
   /** @type {string[]} */
