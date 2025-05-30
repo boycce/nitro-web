@@ -461,22 +461,20 @@ export function omit(obj: {
 };
 /**
  * Updates state from an input event, you can also update deep state properties
- * @param {(
- *   ChangeEvent | // e.g. <input onChange={(e) => onChange.call(setState, e)}>
- *   PathValue     // e.g. <input onChange={(e) => onChange.call(setState, e, ['address.name', 'Joe'])}> // [id, value]
- * )} eventOrPathValue
+ * @param {ChangeEvent|PathValue} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<object>}
  * @this {function}
  *
+ * @example
+ *   - <input onChange={onChange.bind(setState)} />
+ *   - <input onChange={(e) => onChange.call(setState, e)} />
+ *   - <input onChange={() => onChange.call(setState, ['address.name', 'Joe'])} />
+ *
  * @typedef {import('react').ChangeEvent} ChangeEvent
- * @typedef {[
- *   string,           // can be a path (e.g. 'name.first')
- *   function|unknown, // value or function to set the value to
- * ]} PathValue
+ * @typedef {[string, function|unknown]} PathValue - e.g. ['name.first', (state) => state.myNameHere]
  */
-export function onChange(this: Function, eventOrPathValue: (ChangeEvent | // e.g. <input onChange={(e) => onChange.call(setState, e)}>
-PathValue), beforeSetState?: Function): Promise<object>;
+export function onChange(this: Function, eventOrPathValue: ChangeEvent | PathValue, beforeSetState?: Function): Promise<object>;
 /**
  * Pads a number
  * @param {number} [num=0]
@@ -673,10 +671,9 @@ export type Box = {
  */
 export type ChangeEvent = import("react").ChangeEvent;
 /**
- * Updates state from an input event, you can also update deep state properties
+ * - e.g. ['name.first', (state) => state.myNameHere]
  */
-export type PathValue = [string, // can be a path (e.g. 'name.first')
-Function | unknown];
+export type PathValue = [string, Function | unknown];
 /**
  * Build image URL from image array or object
  */
