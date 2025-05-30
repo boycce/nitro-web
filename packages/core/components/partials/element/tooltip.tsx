@@ -14,11 +14,11 @@ export function Tooltip({ text, children, className, classNamePopup, isSmall }: 
     <div class={`${className} relative inline-block align-middle nitro-tooltip`} css={style}>
       {
         text
-        ? <>
-            <div class="tooltip-trigger ">{children}</div>
-            <div class={`tooltip-popup ${classNamePopup||''} ${isSmall ? 'is-small' : ''}`}>{text}</div>
-          </>
-        : children
+          ? <>
+              <div class="tooltip-trigger ">{children}</div>
+              <div class={`tooltip-popup ${classNamePopup||''} ${isSmall ? 'is-small' : ''}`}>{text}</div>
+            </>
+          : children
       }
     </div>
   )

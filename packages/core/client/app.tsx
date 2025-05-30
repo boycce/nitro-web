@@ -98,8 +98,8 @@ function App({ settings, config, storeContainer }: { settings: Settings, config:
   return (
     <storeContainer.Provider>
       {/* <ThemeProvider theme={themeNormalised}> */}
-        { router && <RouterProvider router={router} /> }
-        <AfterApp settings={settings} />
+      { router && <RouterProvider router={router} /> }
+      <AfterApp settings={settings} />
       {/* </ThemeProvider> */}
     </storeContainer.Provider>
   )

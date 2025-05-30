@@ -130,7 +130,7 @@ async function webhookSubUpdated(req, res, event) {
   // Update the subscription on the company
   try {
     const subData = event.data.object
-      // webhook from deleting a company?
+    // webhook from deleting a company?
     if (subData.cancellation_details.comment == 'company deleted') {
       return res.json({})
     }

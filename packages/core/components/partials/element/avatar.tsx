@@ -31,9 +31,10 @@ export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className 
 
   return (
     user.avatar 
-    ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small')} /> 
-    : showPlaceholderImage ? <img class={classes} src={avatarImg} width="30px" /> 
-    : <Initials className={classes} icon={{ initials: getInitials(user), hex: getHex(user) }} isRound={isRound} isMedium={true} />
+      ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small')} /> 
+      : showPlaceholderImage 
+        ? <img class={classes} src={avatarImg} width="30px" /> 
+        : <Initials className={classes} icon={{ initials: getInitials(user), hex: getHex(user) }} isRound={isRound} isMedium={true} />
   )
 }
 

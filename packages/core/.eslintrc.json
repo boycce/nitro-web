@@ -40,7 +40,7 @@
       "allowArray": true, 
       "allowObject": true 
     }],
-    "indent": ["error", 2],
+    "indent": ["error", 2, { "SwitchCase": 1, "offsetTernaryExpressions": true }],
     "max-len": ["error", { "code": 140, "ignorePattern": "^\\s*(<(rect|path|line)\\s|class=|className=|'|`)" }],
     "no-var": "off",
     "no-prototype-builtins": "off",

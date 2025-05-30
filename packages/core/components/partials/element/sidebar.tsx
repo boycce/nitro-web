@@ -32,8 +32,8 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
         'fixed inset-y-0 z-50 flex flex-col ease-in-out lg:left-0 lg:translate-x-0 lg:!delay-0 lg:!duration-0 ' +
         (
           sidebarOpen 
-          ? 'left-0 translate-x-[0px] sidebar-transition ' 
-          : 'left-[-100%] translate-x-[-100%]  sidebar-transition-delay '
+            ? 'left-0 translate-x-[0px] sidebar-transition ' 
+            : 'left-[-100%] translate-x-[-100%]  sidebar-transition-delay '
         ) + 
         sidebarWidth
       }>
@@ -55,8 +55,8 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
         className={'fixed w-full z-[49] inset-0 bg-gray-900/70 ease-linear lg:hidden ' + 
           (
             sidebarOpen 
-            ? 'left-0 opacity-100 sidebar-transition ' 
-            : 'left-[-100%] opacity-0 sidebar-transition-delay '
+              ? 'left-0 opacity-100 sidebar-transition ' 
+              : 'left-[-100%] opacity-0 sidebar-transition-delay '
           )
         }
       />

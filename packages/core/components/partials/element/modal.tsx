@@ -76,8 +76,9 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
           >
             <div 
               class="absolute top-0 right-0 p-3 m-1 cursor-pointer" 
-              onClick={() => { if (dismissable) { setShow(false) }}}>
-                <SvgX1 />
+              onClick={() => { if (dismissable) { setShow(false) }}}
+            >
+              <SvgX1 />
             </div>
             {children}
           </div>

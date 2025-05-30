@@ -356,10 +356,10 @@ export function debounce(func, wait = 0, options) {
         return leadingEdge(lastCallTime)
       }
       if (maxing) {
-      // Handle invocations in a tight loop.
-      clearTimeout(timerId)
-      timerId = setTimeout(timerExpired, wait)
-      return invokeFunc(lastCallTime)
+        // Handle invocations in a tight loop.
+        clearTimeout(timerId)
+        timerId = setTimeout(timerExpired, wait)
+        return invokeFunc(lastCallTime)
       }
     }
     if (timerId === undefined) {
@@ -1281,8 +1281,8 @@ export async function request (route, data, event, isLoading) {
     const uri = route.replace(/^(post|put|delete|get) /, '')
     const method =
       /** @type {'post'|'put'|'delete'|'get'} */ (
-      (route.match(/^(post|put|delete|get) /)?.[1] || 'post').trim()
-    )
+        (route.match(/^(post|put|delete|get) /)?.[1] || 'post').trim()
+      )
 
     // show loading
     if (isLoading) {
