@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
 import { twMerge } from 'tailwind-merge'
 import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
@@ -19,7 +20,7 @@ type FieldExtraProps = {
   name: string
   id?: string
   // state object to get the value, and check errors against
-  state?: { errors?: Errors, [key: string]: unknown }
+  state?: { errors?: Errors, [key: string]: any }
   type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'
