@@ -65,7 +65,7 @@ export function SettingsBusiness() {
                 type="country" 
                 state={state} 
                 options={useMemo(() => util.getCountryOptions(injectedConfig.countries), [])} 
-                onChange={onChange.bind(setState)}
+                onChange={(e) => onChange(setState, e)}
               />
             </div>
             <div class="col">
@@ -75,37 +75,37 @@ export function SettingsBusiness() {
                 type="country" 
                 state={state} 
                 options={useMemo(() => util.getCurrencyOptions(injectedConfig.currencies), [])}
-                onChange={onChange.bind(setState)}
+                onChange={(e) => onChange(setState, e)}
               />
             </div>
             <div class="col">
               <label for="business.name">Trading Name</label>
-              <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
+              <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">Custom Address</Link>
               <label for="business.address">Address (Start Typing...)</label>
-              <Field name="business.address.full" placeholder="" state={state} onChange={onChange.bind(setState)} />
+              <Field name="business.address.full" placeholder="" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <label for="business.website">Website</label>
-              <Field name="business.website" placeholder="https://" state={state} onChange={onChange.bind(setState)} />
+              <Field name="business.website" placeholder="https://" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <label for="business.phone">Mobile Number</label>
-              <Field name="business.phone" placeholder="" state={state} onChange={onChange.bind(setState)} />
+              <Field name="business.phone" placeholder="" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">What&apos;s this for?</Link>
               <label for="tax.number">GST Number</label>
               <Field class="mb-0" name="tax.number" placeholder="Appears on your documents" state={state} 
-                onChange={onChange.bind(setState)} />
+                onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <Link to="#" class="label-right link2 underline2 is-active">What&apos;s this for?</Link>
               <label for="business.number">NZBN</label>
               <Field class="mb-0" name="business.number" type="text" rows="23" placeholder="Appears on your documents" state={state} 
-                onChange={onChange.bind(setState)} />
+                onChange={(e) => onChange(setState, e)} />
             </div>
           </div>
         </form>

@@ -24,7 +24,7 @@ export function ResetInstructions() {
       <form onSubmit={onSubmit}>
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)} placeholder="Your email address..." />
         </div>
         
         <div class="mb-14">
@@ -67,11 +67,11 @@ export function ResetPassword() {
       <form onSubmit={onSubmit}>
         <div>
           <label for="password">Your New Password</label>
-          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)} />
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="password2">Repeat Your New Password</label>
-          <Field name="password2" type="password" state={state} onChange={onChange.bind(setState)} />
+          <Field name="password2" type="password" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
 
         <div class="mb-14">

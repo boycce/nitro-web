@@ -48,16 +48,16 @@ export function SettingsAccount() {
           <div class="cols cols-6 cols-gap-3">
             <div class="col">
               <label for="firstName">First Name(s)</label>
-              <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange.bind(setState)} />
+              <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <label for="lastName">Last Name</label>
-              <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange.bind(setState)} />
+              <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <label for="email">Email Address</label>
               <Field name="email" type="email" placeholder="Your email address..." state={state} 
-                onChange={onChange.bind(setState)} />
+                onChange={(e) => onChange(setState, e)} />
             </div>
             <div class="col">
               <Link to="/reset" class="label-right link2 underline2 is-active">Reset Password?</Link>

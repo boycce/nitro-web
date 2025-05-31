@@ -42,7 +42,7 @@ export function SettingsTeamMember ({ showModal, setShowModal }: SettingsTeamMem
               name="role"
               isSearchable={false}
               placeholder="Select a role"
-              onChange={onChange.bind(setState)} 
+              onChange={(e) => onChange(setState, e)} 
               state={state}
               minMenuWidth={460}
               options={[
@@ -71,16 +71,16 @@ export function SettingsTeamMember ({ showModal, setShowModal }: SettingsTeamMem
             <label for="email">Email Address</label>
             <Field 
               name="email" type="email" placeholder="Your email address..." state={state} 
-              onChange={onChange.bind(setState)} 
+              onChange={(e) => onChange(setState, e)} 
             />
           </div>
           <div class="col">
             <label for="firstName">First Name</label>
-            <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={onChange.bind(setState)} />
+            <Field name="firstName" placeholder="E.g. Bruce" state={state} onChange={(e) => onChange(setState, e)} />
           </div>
           <div class="col">
             <label for="lastName">Last Name</label>
-            <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={onChange.bind(setState)} />
+            <Field name="lastName" placeholder="E.g. Wayne" state={state} onChange={(e) => onChange(setState, e)} />
           </div>
           <div class="col-12">
             <label for="message">Invitation Message</label>
@@ -88,7 +88,8 @@ export function SettingsTeamMember ({ showModal, setShowModal }: SettingsTeamMem
               name="message" 
               type="textarea" 
               placeholder={`${user.firstName} is inviting you to collaborate on ${injectedConfig?.name || 'Nitro'}.`} 
-              state={state} onChange={onChange.bind(setState)} 
+              state={state} 
+              onChange={(e) => onChange(setState, e)} 
             />
           </div>
         </div>

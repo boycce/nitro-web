@@ -9,7 +9,7 @@ export function Styleguide() {
     address: '',
     amount: 100,
     brandColor: '#F3CA5F',
-    country: 'us',
+    country: 'nz',
     currency: 'nzd', // can be commented too
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
@@ -38,12 +38,13 @@ export function Styleguide() {
     { label: 'Delete' },
   ]
 
-  function onInputChange (e: { target: { id: string, value: unknown } }) {
-    if ((e.target.id == 'customer' || e.target.id == 'customer2') && e.target.value == '') {
+  function onCustomerInputChange (e: { target: { id: string, value: unknown } }) {
+    if (e.target.id == 'customer' && e.target.value == '0') {
       setCustomerSearch('')
-      e.target.value = null // clear the selected value
+      e.target.value = null // clear the select's selected value
+      setTimeout(() => alert('Adding new customer...'), 0)
     }
-    setState(s => ({ ...s, [e.target.id]: e.target.value }))
+    onChange(setState, e)
   }
 
   function onCustomerSearch (search: string) {
@@ -169,7 +170,7 @@ export function Styleguide() {
             type="country" 
             state={state} 
             options={useMemo(() => getCountryOptions(injectedConfig.countries), [])} 
-            onChange={onInputChange}
+            onChange={(e) => onChange(setState, e)}
           />
         </div>
         <div>
@@ -180,16 +181,16 @@ export function Styleguide() {
             name="customer" 
             type="customer"
             state={state}
-            onChange={onInputChange}
+            onChange={onCustomerInputChange}
             onInputChange={onCustomerSearch}
             options={[ 
               { 
                 className: 'bb', 
                 fixed: true,
-                value: '', 
+                value: '0',
                 label: (
                   <>
-                    <b>New Customer</b>
+                    <b>New Customer</b> (and clear select)
                     {customerSearch ? <> / Add <b>{ucFirst(customerSearch)}</b></> : ''}
                   </>
                 ), 
@@ -206,7 +207,7 @@ export function Styleguide() {
             name="currency"
             state={state} 
             options={useMemo(() => getCurrencyOptions(injectedConfig.currencies), [])} 
-            onChange={onInputChange}
+            onChange={(e) => onChange(setState, e)}
           />
         </div>
       </div>
@@ -215,7 +216,7 @@ export function Styleguide() {
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="firstName">First Name</label>
-          <Field name="firstName" state={state} onChange={onInputChange} />
+          <Field name="firstName" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="email">Email Address</label>
@@ -238,7 +239,7 @@ export function Styleguide() {
         </div>
         <div>
           <label for="address">Input Error</label>
-          <Field name="address" placeholder="Address..." state={state} onChange={onInputChange} />
+          <Field name="address" placeholder="Address..." state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="description">Description</label>
@@ -246,11 +247,11 @@ export function Styleguide() {
         </div>
         <div>
           <label for="brandColor">Brand Color</label>
-          <Field name="brandColor" type="color" state={state} iconPos="left" onChange={onInputChange} />
+          <Field name="brandColor" type="color" state={state} iconPos="left" onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
-          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={onInputChange} 
+          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(setState, e)} 
             config={injectedConfig} />
         </div>
       </div>
@@ -259,15 +260,15 @@ export function Styleguide() {
       <div class="grid grid-cols-1 gap-x-6 mb-4 sm:grid-cols-3">
         <div>
           <label for="date">Date with time</label>
-          <Field name="date-time" type="date" showTime={true} state={state} onChange={onInputChange} />
+          <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="date-range">Date range with prefix</label>
-          <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={onInputChange} />
+          <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="date">Date (right aligned)</label>
-          <Field name="date" type="date" state={state} onChange={onInputChange} dir="bottom-right" />
+          <Field name="date" type="date" mode="single" state={state} onChange={(e) => onChange(setState, e)} dir="bottom-right" />
         </div>
       </div>
 
@@ -275,13 +276,15 @@ export function Styleguide() {
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="avatar">Avatar</label>
-          <Drop class="is-small" name="avatar" state={state} onChange={onInputChange} awsUrl={injectedConfig.awsUrl} />
+          <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />
         </div>
         <div>
           <label for="calendar">Calendar</label>
-          <Calendar mode="range" value={state.calendar} numberOfMonths={1} onChange={(mode, value) => {
-            onInputChange({ target: { id: 'calendar', value: value } })
-          }} />
+          <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
+            onChange={(mode, value) => {
+              onChange(setState, { target: { id: 'calendar', value: value } })
+            }} 
+          />
         </div>
       </div>
 
@@ -291,7 +294,7 @@ export function Styleguide() {
         <form class="mb-8 text-left">
           <div>
             <label for="firstName2">First Name</label>
-            <Field name="firstName2" state={state} onChange={onInputChange} />
+            <Field name="firstName2" state={state} onChange={(e) => onChange(setState, e)} />
           </div>
           <div>
             <label for="email2">Email Address</label>

@@ -53,14 +53,15 @@ export function Signin() {
       <form onSubmit={onSubmit}>
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)}
+            placeholder="Your email address..." />
         </div>
         <div>
           <div class="flex justify-between"> 
             <label for="password">Password</label>
             <Link to="/reset" class="label underline2">Forgot?</Link>
           </div>
-          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)}/>
         </div>
         
         <div class="mb-14">

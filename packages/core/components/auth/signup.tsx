@@ -32,20 +32,20 @@ export function Signup() {
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>
-            <Field name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={onChange.bind(setState)} />
+            <Field name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={(e) => onChange(setState, e)} />
           </div>
           <div>
             <label for="businessName">Company Name</label>
-            <Field name="businessName" placeholder="E.g. Wayne Enterprises" state={state} onChange={onChange.bind(setState)} />
+            <Field name="businessName" placeholder="E.g. Wayne Enterprises" state={state} onChange={(e) => onChange(setState, e)} />
           </div>
         </div>
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={onChange.bind(setState)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)} placeholder="Your email address..." />
         </div>
         <div>
           <label for="password">Password</label>
-          <Field name="password" type="password" state={state} onChange={onChange.bind(setState)}/>
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)}/>
         </div>
         
         <div class="mb-14">

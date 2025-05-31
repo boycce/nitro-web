@@ -12,7 +12,7 @@ type DropProps = {
   /** Field name or path on state (used to match errors), e.g. 'avatar', 'company.avatar' */
   name: string
   /** Called when file is selected or dropped */
-  onChange?: any // (event: { target: { id: string, value: File|FileList } }) => void
+  onChange?: (event: { target: { id: string, value: File|FileList } }) => void
   /** Whether to allow multiple file selection */
   multiple?: boolean
   /** State object to get the value and check errors against */

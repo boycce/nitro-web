@@ -1099,24 +1099,20 @@ export function omit (obj, fields) {
 }
 
 /**
- * Updates state from an input event, you can also update deep state properties
- * @param {ChangeEvent|PathValue} eventOrPathValue
+ * Updates state from an input event (deep state properties are supported)
+ * E.g. setState(s => ({ ...s, [e.target.id]: e.target.value }))
+ * 
+ * @template T
+ * @param {React.Dispatch<React.SetStateAction<T>>} setState
+ * @param {{target: {id: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
- * @returns {Promise<object>}
- * @this {function}
+ * @returns {Promise<T>}
  * 
  * @example
- *   - <input onChange={onChange.bind(setState)} />
- *   - <input onChange={(e) => onChange.call(setState, e)} />
- *   - <input onChange={() => onChange.call(setState, ['address.name', 'Joe'])} />
- * 
- * @typedef {import('react').ChangeEvent} ChangeEvent
- * @typedef {[string, function|unknown]} PathValue - e.g. ['name.first', (state) => state.myNameHere]
+ *   - <input onChange={(e) => onChange(setState, e)} />
+ *   - <input onChange={() => onChange(setState, ['address.name', 'Joe'])} />
  */
-export function onChange (eventOrPathValue, beforeSetState) {
-  if (!isFunction(this)) {
-    throw new Error('Missing setState, please either call or bind setState to the function. E.g. onChange.call(setState, e)')
-  }
+export function onChange (setState, eventOrPathValue, beforeSetState) {
   /** @type {unknown|function} */
   let value
   /** @type {string[]} */
@@ -1124,7 +1120,7 @@ export function onChange (eventOrPathValue, beforeSetState) {
   /** @type {boolean} */
   let hasFiles
   
-  if (eventOrPathValue instanceof Event && eventOrPathValue.target) {
+  if (typeof eventOrPathValue === 'object' && 'target' in eventOrPathValue) {
     const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target) // we need to assume this is an input
     chunks = (element.id || element.name).split('.')
     hasFiles = !!element.files
@@ -1148,7 +1144,7 @@ export function onChange (eventOrPathValue, beforeSetState) {
 
   // Update state
   return new Promise((resolve) => {
-    this((/** @type object */ state) => {
+    setState((state) => {
       /** @type {{[key: string]: any}} */
       const newState = { ...state, ...(hasFiles ? { hasFiles } : {}) }
       let target = newState
@@ -1165,8 +1161,8 @@ export function onChange (eventOrPathValue, beforeSetState) {
       if (beforeSetState) {
         beforeSetState({ newState: newState, fieldName: chunks[i], parent: target })
       }
-      resolve(newState)
-      return newState
+      resolve(/** @type {T} */(newState))
+      return /** @type {T} */(newState)
     })
   })
 }
@@ -1553,46 +1549,3 @@ export function ucFirst (string) {
   if (!string) return ''
   return string.charAt(0).toUpperCase() + string.slice(1)
 }
-
-
-
-
-//--------------------------------
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
-// const axios2 = axios()
-// const addressSchema2 = addressSchema()
-// const url = buildUrl('https://example.com', { param1: 'value1', param2: 'value2' })
-// const camelCase2 = camelCase('camelCase')
-// const camelCaseToTitle2 = camelCaseToTitle('camelCase')
-// const camelCaseToHypen2 = camelCaseToHypen('camelCase')
-// const capitalise2 = capitalise()
-// const currency2 = currency(1234)
-// const currencyToCents2 = currencyToCents('$12.34')
-// const date2 = date(1234567890)
-// const debounce2 = debounce(() => {}, 1000)
-// const deepCopy2 = deepCopy([])
-// const deepFind2 = deepFind({})
-// const deepSave2 = deepSave({})
-// const each2 = each({})
-// const fileDownload2 = fileDownload('data', 'filename.txt')
-// const formatName2 = formatName('John Smith')
-// const formatSlug2 = formatSlug('John Smith')
-// const formData2 = formData({})
-// const fullName2 = fullName({ firstName: 'John', lastName: 'Smith' })
-// const [firstName, lastName] = fullNameSplit('name')
-// const countries2 = getCountryOptions({ US: { name: 'United States' }, GB: { name: 'United Kingdom' } })
-// const currencies2 = getCurrencyOptions({ USD: { name: 'United States Dollar' }, GBP: { name: 'British Pound' } })
-// const width = getPrefixWidth('£')
-// const directories2 = getDirectories({ join: (...args) => args.join('/') }, 'pwd')
-// const stripeClient = getStripeClientPromise('pk_test')
-// const getResponseErrors2 = getResponseErrors(new Error('test'))
-// const inArray2 = inArray([1, 2, 3], 's')
-// const isArray2 = isArray([1, 2, 3])
-
-// const isObject2 = isObject({})
-
-// const onChange2 = onChange.call(() => {}, { target: {} })
-
-// const queryObject2 = queryObject('?page=1&perPage=10')
-// const queryString2 = queryString({ page: 1, perPage: 10 })

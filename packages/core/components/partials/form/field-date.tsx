@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, isValid, parse } from 'date-fns'
 import { getPrefixWidth } from 'nitro-web/util'
 import { Calendar, Dropdown } from 'nitro-web'
@@ -6,19 +7,29 @@ type Mode = 'single' | 'multiple' | 'range'
 type DropdownRef = {
   setIsActive: (value: boolean) => void
 }
-export type FieldDateProps = React.InputHTMLAttributes<HTMLInputElement> & {
+
+type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
   name: string
+  mode: Mode
   id?: string 
-  mode?: Mode
   showTime?: boolean
-  // an array is returned for non-single modes
-  onChange?: (e: { target: { id: string, value: null|number|(null|number)[] } }) => void
   prefix?: string
-  value?: null|number|string|(null|number|string)[]
   numberOfMonths?: number
   Icon?: React.ReactNode
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
 }
+
+// An array is returned for mode = 'multiple' or 'range'
+export type FieldDateProps = (
+  | ({ mode: 'single' } & PreFieldDateProps & {
+      onChange?: (e: { target: { id: string, value: null|number } }) => void
+      value?: null|number|string
+    })
+  | ({ mode: 'multiple' | 'range' } & PreFieldDateProps & { 
+      onChange: (e: { target: { id: string, value: (null|number)[] } }) => void 
+      value?: null|number|string|(null|number|string)[]
+    })
+)
 
 type TimePickerProps = {
   date: Date|null
@@ -26,7 +37,7 @@ type TimePickerProps = {
 }
 
 export function FieldDate({ 
-  mode='single', onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props 
+  mode, onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props 
 }: FieldDateProps) {
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
@@ -51,7 +62,7 @@ export function FieldDate({
   function onCalendarChange(mode: Mode, value: null|number|(null|number)[]) {
     if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
-    if (onChange) onChange({ target: { id: id, value: value }})
+    if (onChange) onChange({ target: { id: id, value: value as any } })
   }
 
   function getInputValue(dates: Date|number|null|(Date|number|null)[]) {
@@ -82,8 +93,8 @@ export function FieldDate({
     
     // Update 
     const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
-    if (onChange) onChange({ target: { id, value }})
-  }
+    if (onChange) onChange({ target: { id: id, value: value as any }})
+  } 
 
   return (
     <Dropdown
