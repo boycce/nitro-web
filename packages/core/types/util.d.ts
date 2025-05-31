@@ -460,21 +460,25 @@ export function omit(obj: {
     [key: string]: unknown;
 };
 /**
- * Updates state from an input event, you can also update deep state properties
- * @param {ChangeEvent|PathValue} eventOrPathValue
+ * Updates state from an input event (deep state properties are supported)
+ * E.g. setState(s => ({ ...s, [e.target.id]: e.target.value }))
+ *
+ * @template T
+ * @param {React.Dispatch<React.SetStateAction<T>>} setState
+ * @param {{target: {id: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
- * @returns {Promise<object>}
- * @this {function}
+ * @returns {Promise<T>}
  *
  * @example
- *   - <input onChange={onChange.bind(setState)} />
- *   - <input onChange={(e) => onChange.call(setState, e)} />
- *   - <input onChange={() => onChange.call(setState, ['address.name', 'Joe'])} />
- *
- * @typedef {import('react').ChangeEvent} ChangeEvent
- * @typedef {[string, function|unknown]} PathValue - e.g. ['name.first', (state) => state.myNameHere]
+ *   - <input onChange={(e) => onChange(setState, e)} />
+ *   - <input onChange={() => onChange(setState, ['address.name', 'Joe'])} />
  */
-export function onChange(this: Function, eventOrPathValue: ChangeEvent | PathValue, beforeSetState?: Function): Promise<object>;
+export function onChange<T>(setState: React.Dispatch<React.SetStateAction<T>>, eventOrPathValue: {
+    target: {
+        id: string;
+        value: unknown;
+    };
+} | [string, Function | unknown], beforeSetState?: Function): Promise<T>;
 /**
  * Pads a number
  * @param {number} [num=0]
@@ -666,14 +670,6 @@ export type Box = {
     bottomLeft: Point;
     topRight: Point;
 };
-/**
- * Updates state from an input event, you can also update deep state properties
- */
-export type ChangeEvent = import("react").ChangeEvent;
-/**
- * - e.g. ['name.first', (state) => state.myNameHere]
- */
-export type PathValue = [string, Function | unknown];
 /**
  * Build image URL from image array or object
  */
