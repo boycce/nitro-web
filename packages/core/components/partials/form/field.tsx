@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { twMerge } from 'tailwind-merge'
 import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
 import { Errors, type Error } from 'nitro-web/types'
 import {
@@ -141,11 +140,11 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
 function getInputClasses({ error, Icon, iconPos, type }: { error: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
   const pl = 'pl-3 pl-input-x'
   const pr = 'pr-3 pr-input-x'
-  const py = 'py-2 py-input-y'
+  const py = 'py-[0.58rem] py-input-y'
   const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
   const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm leading-[1.65] outline outline-1 -outline-offset-1 ` +
+    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm text-sm-input outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error 
@@ -161,11 +160,11 @@ function IconWrapper({ icon, iconPos, ...props }: IconWrapperProps) {
     !!icon && 
     <div
       {...props}
-      className={twMerge(
-        'relative size-[14px] col-start-1 row-start-1 self-center text-[#c6c8ce] select-none z-[1] ' +
+      className={
+        'z-[0] size-[14px] col-start-1 row-start-1 self-center text-[#c6c8ce] select-none ' +
         (iconPos == 'right' ? 'justify-self-end mr-3 ' : 'justify-self-start ml-3 ') + 
         props.className || ''
-      )}
+      }
     >{icon}</div>
   )
 }

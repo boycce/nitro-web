@@ -56,7 +56,7 @@ export default {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
-        // Nitro font sizes
+        // Nitro font sizes 
         '2xs': ['12px', { lineHeight: '1.5' }],
         'xs': ['13px', { lineHeight: '1.5' }],
         'sm': ['13.5px', { lineHeight: '1.5' }],
@@ -66,15 +66,17 @@ export default {
         'xl': ['20px', { lineHeight: '1.75' }],
         '2xl': ['22.5px', { lineHeight: '1.75' }],
         '3xl': ['30px', { lineHeight: '1.75' }],
+        // 'sm-button': ['13.5px', { lineHeight: '1.5' }], // defaults to text-sm
+        // 'sm-input': ['13.5px', { lineHeight: '1.5' }], // defaults to text-sm
       },
       spacing: {
         // Nitro field spacing (defaults listed below)
         // 'input-before': '0.625rem',
         // 'input-after': '1.5rem',
         // 'input-x': '0.75rem',
-        // 'input-y': '0.5rem',
-        // 'button-x': '0.75rem',
-        // 'button-y': '0.5rem',
+        // 'input-y': '0.58rem',
+        // 'button-x-md': '0.75rem',
+        // 'button-y-md': '0.58rem',
       },
     },
   },

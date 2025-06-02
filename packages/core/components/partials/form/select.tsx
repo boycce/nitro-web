@@ -1,5 +1,5 @@
 import { css } from 'twin.macro'
-import { twMerge } from 'tailwind-merge'
+import { twMerge } from 'nitro-web'
 import ReactSelect, { components, ControlProps, createFilter, OptionProps, SingleValueProps } from 'react-select'
 import { ClearIndicatorProps, DropdownIndicatorProps, MultiValueRemoveProps } from 'react-select'
 import { ChevronUpDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -237,11 +237,11 @@ const selectStyles = {
   // Based off https://www.jussivirtanen.fi/writing/styling-react-select-with-tailwind
   // Input container
   control: {
-    base: 'rounded-md bg-white hover:cursor-pointer text-sm leading-[1.65] outline outline-1 -outline-offset-1 outline-input-border',
+    base: 'rounded-md bg-white hover:cursor-pointer text-sm text-sm-input outline outline-1 -outline-offset-1 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
   },
-  valueContainer: 'py-2 px-3 py-input-y px-input-x gap-1',
+  valueContainer: 'py-[0.58rem] px-3 py-input-y px-input-x gap-1',
   // Input container objects
   input: {
     base: 'text-input',
@@ -261,8 +261,8 @@ const selectStyles = {
   indicatorsContainer: 'p-1 px-2 gap-1',
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
   // Dropdown menu
-  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-sm overflow-hidden shadow-dropdown-ul',
-  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-sm',
+  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-sm text-sm-input overflow-hidden shadow-dropdown-ul',
+  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-sm text-sm-input',
   noOptionsMessage: 'm-1 text-gray-500 p-2 bg-gray-50 border border-dashed border-gray-200 rounded-sm',
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',

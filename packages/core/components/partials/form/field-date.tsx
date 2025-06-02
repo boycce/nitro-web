@@ -121,7 +121,9 @@ export function FieldDate({
         {
           prefix && 
           // Similar classNames to the input.tsx:IconWrapper()
-          <span className="relative col-start-1 row-start-1 self-center select-none z-[1] justify-self-start text-sm ml-3">{prefix}</span>
+          <span className="z-[0] col-start-1 row-start-1 self-center select-none justify-self-start text-sm text-sm-input ml-3">
+            {prefix}
+          </span>
         }
         <input 
           {...props}

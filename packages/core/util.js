@@ -2,6 +2,7 @@ import _axios from 'axios'
 import axiosRetry from 'axios-retry'
 import dateformat from 'dateformat'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
+import { twMerge as _twMerge } from 'tailwind-merge'
 
 /** @type {{[key: string]: {[key: string]: string|true}}} */
 let queryObjectCache = {}
@@ -1538,6 +1539,26 @@ export function toArray (variable) {
 export function trim (string) {
   if (!string || !isString(string)) return ''
   return string.trim().replace(/\n\s+\n/g, '\n\n')
+}
+
+/**
+ * Merge tailwind classes, but ignore classes that shouldn't be merged, and intended as an override
+ * @param  {...string} args 
+ * @returns {string}
+ */
+export function twMerge(...args) {
+  const ignoredClasses = /** @type {string[]} */([])
+  const ignoreClasses = ['text-sm-button', 'text-sm-input']
+  const classes = args.filter(Boolean).join(' ').split(' ')
+
+  const filteredClasses = classes.filter(c => {
+    if (ignoreClasses.includes(c)) {
+      ignoredClasses.push(c)
+      return false
+    }
+    return true
+  })
+  return _twMerge(...filteredClasses) + ' ' + ignoredClasses.join(' ')
 }
 
 /**

@@ -148,7 +148,7 @@ export function FieldCurrency({ config, currency='nzd', onChange, value, default
         defaultValue={defaultValue}
       />
       <span
-        class={`absolute top-[1px] bottom-0 left-3 inline-flex items-center select-none text-gray-500 text-sm sm:text-sm/6 ${dollars !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
+        class={`absolute top-0 bottom-0 left-3 inline-flex items-center select-none text-gray-500 text-sm text-sm-input ${dollars !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
       >
         {settings.prefix || settings.suffix}
       </span>

@@ -1,4 +1,4 @@
-import { twMerge } from 'tailwind-merge'
+import { twMerge } from 'nitro-web'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -42,9 +42,9 @@ export function Button({
   // Button sizes
   const sizes = {
     xs: 'px-2 py-1 px-button-x-xs py-button-y-xs text-xs rounded',
-    sm: 'px-2.5 py-1.5 px-button-x-sm py-button-y-sm text-sm rounded-md',
-    md: 'px-3 py-2 px-button-x py-button-y text-sm rounded-md',
-    lg: 'px-3.5 py-2.5 px-button-x-lg py-button-y-lg text-sm rounded-md',
+    sm: 'px-2.5 py-1.5 px-button-x-sm py-button-y-sm text-sm text-sm-button rounded-md',
+    md: 'px-3 py-[0.58rem] px-button-x-md py-button-y-md text-sm text-sm-button rounded-md', // default
+    lg: 'px-3.5 py-2.5 px-button-x-lg py-button-y-lg text-sm text-sm-button rounded-md',
   }
 
   const contentLayout = `gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`
