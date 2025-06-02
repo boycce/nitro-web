@@ -972,9 +972,6 @@ label, .label {
 .top-0 {
   top: 0px;
 }
-.top-\[1px\] {
-  top: 1px;
-}
 .top-\[50\%\] {
   top: 50%;
 }
@@ -992,6 +989,9 @@ label, .label {
 }
 .z-50 {
   z-index: 50;
+}
+.z-\[0\] {
+  z-index: 0;
 }
 .z-\[1\] {
   z-index: 1;
@@ -1917,6 +1917,10 @@ label, .label {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
+.py-\[0\.58rem\] {
+  padding-top: 0.58rem;
+  padding-bottom: 0.58rem;
+}
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -2038,9 +2042,6 @@ label, .label {
 }
 .uppercase {
   text-transform: uppercase;
-}
-.leading-\[1\.65\] {
-  line-height: 1.65;
 }
 .tracking-tight {
   letter-spacing: -0.025em;
@@ -2808,10 +2809,6 @@ label, .label {
   .sm\:text-5xl {
     font-size: 3rem;
     line-height: 1;
-  }
-  .sm\:text-sm\/6 {
-    font-size: 13.5px;
-    line-height: 1.5rem;
   }
   .sm\:text-xl\/8 {
     font-size: 20px;
