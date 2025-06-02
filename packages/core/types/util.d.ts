@@ -623,6 +623,12 @@ export function toArray<T>(variable: T | undefined): (T extends any[] ? T : T[])
  */
 export function trim(string: string): string;
 /**
+ * Merge tailwind classes, but ignore classes that shouldn't be merged, and intended as an override
+ * @param  {...string} args
+ * @returns {string}
+ */
+export function twMerge(...args: string[]): string;
+/**
  * Capitalize the first letter of a string
  * @param {string} string
  * @returns {string}
