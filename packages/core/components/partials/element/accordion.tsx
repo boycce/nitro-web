@@ -3,21 +3,16 @@ import { css } from 'twin.macro'
 import { IsFirstRender } from 'nitro-web'
 
 type AccordionProps = {
-  children: React.ReactNode
+  ariaControls?: string // pass to add aria-controls attribute to the accordion
+  children: React.ReactNode // first child is the header, second child is the contents
   className?: string
-  expanded?: boolean
-  onChange?: (event: React.MouseEvent<HTMLDivElement>, index: number) => void
+  classNameWhenExpanded?: string // handy for group styling
+  expanded?: boolean // initial value (or controlled value if onChange is passed)
+  onChange?: (event: React.MouseEvent<HTMLDivElement> | React.KeyboardEvent<HTMLDivElement>, index: number) => void 
+    // called when the header is clicked
 }
 
-export function Accordion({ children, className, expanded, onChange }: AccordionProps) {
-  /**
-   * @param {rxjs} children - first child is the header, second child is the contents
-   *   <Accordion>
-   *     <div>Header</div><div>Contents</div>
-   *   </Accordion>
-   * @param {boolean} <expanded> - initial value (or controlled value if onChange is passed)
-   * @param {function} <onChange> - called when the header is clicked
-   */
+export function Accordion({ ariaControls, children, className, classNameWhenExpanded, expanded, onChange }: AccordionProps) {
   const [preState, setPreState] = useState(expanded)
   const [state, setState] = useState(expanded)
   const [height, setHeight] = useState('auto')
@@ -28,9 +23,17 @@ export function Accordion({ children, className, expanded, onChange }: Accordion
       height: 0;
       overflow: hidden;
       transition: height ease 0.2s;
+      a, button {
+        visibility: hidden;   /* removes from tab order */
+        transition: visibility 0s 0.2s;
+      }
     }
-    &.is-expanded > div:last-child {
+    &.is-expanded > *:last-child {
       height: ${height.replace('-', '')};
+      a, button {
+        visibility: visible;
+        transition: visibility 0s;
+      }
     }
   `
 
@@ -60,9 +63,9 @@ export function Accordion({ children, className, expanded, onChange }: Accordion
     return () => timeout && clearTimeout(timeout)
   }, [height])
 
-  const onClick = function(e: React.MouseEvent<HTMLDivElement>) {
+  const onClick = function(e: React.MouseEvent<HTMLDivElement>|React.KeyboardEvent<HTMLDivElement>) {
     // Click came from inside the accordion header/summary
-    if (e.currentTarget.children[0].contains(e.target as Node) || e.currentTarget.children[0] == e.target) {
+    if (e.currentTarget.children[0].contains(e.target as HTMLElement) || e.currentTarget.children[0] == e.target) {
       if (onChange) {
         onChange(e, getElementIndex(e.currentTarget))
       } else {
@@ -77,11 +80,20 @@ export function Accordion({ children, className, expanded, onChange }: Accordion
     return index
   }
 
+  const onKeyDown = function(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      onClick(e)
+    }
+  }
+
   return (
     <div
       ref={el}
-      class={['accordion', className, state ? 'is-expanded' : ''].filter(o => o).join(' nitro-accordion')}
+      aria-controls={ariaControls}
+      aria-expanded={ariaControls ? state : undefined}
+      class={['accordion', className, state ? `is-expanded ${classNameWhenExpanded}` : '', 'nitro-accordion'].filter(o => o).join(' ')}
       onClick={onClick}
+      onKeyDown={onKeyDown}
       css={style}
     >
       {children}
