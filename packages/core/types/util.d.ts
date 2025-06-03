@@ -117,30 +117,31 @@ export function currencyToCents(currency: string): string;
  */
 export function date(date: number | Date, format?: string, timezone?: string): string;
 /**
+ * @template {(...args: any[]) => any} T
  * Creates a debounced function that delays invoking `func` until after `wait`
  * milliseconds have elapsed since the last time the debounced function was invoked.
  *
- * @param {Function} func - The function to debounce.
+ * @param {T} func - The function to debounce.
  * @param {number} [wait=0] - Number of milliseconds to delay.
  * @param {{
  *   leading?: boolean,  // invoke on the leading edge of the timeout (default: false)
  *   maxWait?: number,   // maximum time `func` is allowed to be delayed before it's invoked
  *   trailing?: boolean, // invoke on the trailing edge of the timeout (default: true)
  * }} [options] - Options to control behavior.
- * @returns {(...args: any[]) => any & {
- *   cancel: () => void,
- *   flush: () => any
- * }} - A new debounced function with `cancel` and `flush` methods.
+ * @returns {((...args: Parameters<T>) => ReturnType<T>) & {
+ *     cancel: () => void;
+ *     flush: () => ReturnType<T>
+ * }}
  *
  * @see https://lodash.com/docs/4.17.15#debounce
  */
-export function debounce(func: Function, wait?: number, options?: {
+export function debounce<T extends (...args: any[]) => any>(func: T, wait?: number, options?: {
     leading?: boolean;
     maxWait?: number;
     trailing?: boolean;
-}): (...args: any[]) => any & {
+}): ((...args: Parameters<T>) => ReturnType<T>) & {
     cancel: () => void;
-    flush: () => any;
+    flush: () => ReturnType<T>;
 };
 /**
  * Deep clones an object or array, preserving its type
@@ -509,6 +510,12 @@ export function queryObject(searchString: string, trueDefaults?: boolean): {
     [key: string]: string | true;
 };
 /**
+ * Parses a query string into an array of objects
+ * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @returns {object[]} - e.g. [{ page: '1' }]
+ */
+export function queryArray(searchString: string): object[];
+/**
  * Parses an object and returns a query string
  * @param {{[key: string]: unknown}} [obj] - query object
  * @returns {string}
@@ -595,7 +602,7 @@ export function sortByKey(collection: {
 }[], key: string): object[];
 /**
    * Creates a throttled function that only invokes `func` at most once per every `wait` milliseconds
- * @param {function} func
+ * @param {(...args: any[]) => any} func
  * @param {number} [wait=0] - the number of milliseconds to throttle invocations to
  * @param {{
  *    leading?: boolean, // invoke on the leading edge of the timeout
@@ -605,7 +612,7 @@ export function sortByKey(collection: {
  * @example const throttled = util.throttle(updatePosition, 100)
  * @see lodash
  */
-export function throttle(func: Function, wait?: number, options?: {
+export function throttle(func: (...args: any[]) => any, wait?: number, options?: {
     leading?: boolean;
     trailing?: boolean;
 }): Function;
