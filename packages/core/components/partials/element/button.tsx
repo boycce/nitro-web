@@ -2,7 +2,7 @@ import { twMerge } from 'nitro-web'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  color?: 'primary'|'secondary'|'black'|'white'
+  color?: 'primary'|'secondary'|'black'|'white'|'clear'
   size?: 'xs'|'sm'|'md'|'lg'
   className?: string
   isLoading?: boolean
@@ -37,6 +37,7 @@ export function Button({
     secondary: 'bg-secondary hover:bg-secondary-hover',
     black: 'bg-black hover:bg-gray-700',
     white: 'bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-gray-900 [&>.loader]:border-black',
+    clear: 'ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   
   // Button sizes

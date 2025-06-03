@@ -44,7 +44,8 @@ export function FieldDate({
   const dropdownRef = useRef<DropdownRef>(null)
   const id = props.id || props.name
   const [month, setMonth] = useState<number|undefined>()
-
+  const [lastUpdated, setLastUpdated] = useState(0)
+  
   // Convert the value to an array of valid* dates
   const dates = useMemo(() => {
     const _dates = Array.isArray(value) ? value : [value]
@@ -54,6 +55,11 @@ export function FieldDate({
   // Hold the input value in state
   const [inputValue, setInputValue] = useState(() => getInputValue(dates))
 
+  // Update the date's inputValue (text) when the value changes outside of the component
+  useEffect(() => {
+    if (new Date().getTime() > lastUpdated + 100) setInputValue(getInputValue(dates))
+  }, [value])
+
   // Get the prefix content width
   useEffect(() => {
     setPrefixWidth(getPrefixWidth(prefix, 4))
@@ -62,7 +68,11 @@ export function FieldDate({
   function onCalendarChange(mode: Mode, value: null|number|(null|number)[]) {
     if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
-    if (onChange) onChange({ target: { id: id, value: value as any } })
+    // Update the value
+    if (onChange) {
+      onChange({ target: { id: id, value: value as any } })
+      setLastUpdated(new Date().getTime())
+    }
   }
 
   function getInputValue(dates: Date|number|null|(Date|number|null)[]) {
@@ -79,7 +89,7 @@ export function FieldDate({
     })
     
     // For single/range we need limit the array
-    if (mode == 'range') split.length = 2
+    if (mode == 'range' && split.length > 1) split.length = 2
     else if (mode == 'multiple') split = split.filter(o => o) // remove invalid dates
 
     // Swap dates if needed
@@ -91,9 +101,12 @@ export function FieldDate({
       break
     }
     
-    // Update 
+    // Update the value
     const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
-    if (onChange) onChange({ target: { id: id, value: value as any }})
+    if (onChange) {
+      onChange({ target: { id: id, value: value as any }})
+      setLastUpdated(new Date().getTime())
+    }
   } 
 
   return (
@@ -103,7 +116,7 @@ export function FieldDate({
       // animate={false}
       // menuIsOpen={true}
       minWidth={0}
-      menuChildren={
+      menuContent={
         <div className="flex">
           <Calendar 
             {...{ mode, value, numberOfMonths, month }} 

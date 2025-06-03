@@ -1,8 +1,12 @@
-import { Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig } from 'nitro-web'
+import { 
+  Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
+  Filters, FiltersHandleType,
+  FilterType,
+} from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { Check } from 'lucide-react'
 
-export function Styleguide() {
+export function Styleguide({ className }: { className?: string }) {
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -20,6 +24,29 @@ export function Styleguide() {
       { title: 'address', detail: 'Address is required' },
     ],
   })
+  const [filterState, setFilterState] = useState({})
+  const filtersRef = useRef<FiltersHandleType>(null)
+  const filters: FilterType[] = [
+    { 
+      name: 'dateRange',
+      type: 'date',
+    },
+    { 
+      name: 'search',
+      type: 'search',
+      label: 'Keyword Search',
+      placeholder: 'Job, employee name...',
+    },
+    { 
+      name: 'status', 
+      type: 'select',
+      enums: [
+        { label: 'Pending', value: 'pending' }, 
+        { label: 'Approved', value: 'approved' }, 
+        { label: 'Rejected', value: 'rejected' },
+      ],
+    },
+  ]
 
   // Example of updating state
   // useEffect(() => {
@@ -52,7 +79,7 @@ export function Styleguide() {
   }
 
   return (
-    <div class="mb-10 text-left max-w-[1100px]">
+    <div class={`text-left max-w-[1100px] ${className}`}>
       <GithubLink filename={__filename} />
       <div class="mb-7">
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
@@ -96,6 +123,31 @@ export function Styleguide() {
             <Button color="white" IconRight="v" class="gap-x-3">Dropdown top-left</Button>
           </Dropdown>
         </div>
+      </div>
+
+      <h2 class="h3">Filters</h2>
+      <div class="flex flex-wrap gap-x-6 gap-y-4 mb-10">
+        {/* Filter dropdown */}
+        <Filters 
+          ref={filtersRef} 
+          filters={filters} 
+          state={filterState} 
+          setState={setFilterState}
+          dropdownProps={{ dir: 'bottom-left' }}
+        />
+        {/* Search bar */}
+        <Field
+          class="!my-0 min-w-[242px]" 
+          type="search" 
+          name="search" 
+          iconPos="left" 
+          state={filterState}
+          onChange={(e) => {
+            onChange(setFilterState, e)
+            filtersRef.current?.submit()
+          }}
+          placeholder="Linked search bar..."
+        />
       </div>
 
       <h2 class="h3">Buttons</h2>
@@ -273,7 +325,7 @@ export function Styleguide() {
       </div>
 
       <h2 class="h3">File Inputs & Calendar</h2>
-      <div class="grid grid-cols-3 gap-x-6 mb-4">
+      <div class="grid grid-cols-3 gap-x-6">
         <div>
           <label for="avatar">Avatar</label>
           <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />

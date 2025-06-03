@@ -31,7 +31,7 @@ type SelectProps = {
   /** The options to display in the dropdown **/
   options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, [key: string]: unknown }[]
   /** The state object to get the value and check errors from **/
-  state?: { errors: Errors, [key: string]: unknown }
+  state?: { errors?: Errors, [key: string]: unknown }
   /** Select variations **/
   type?: 'country'|'customer'|''
   /** All other props are passed to react-select **/
@@ -58,7 +58,7 @@ export function Select({ inputId, minMenuWidth, name, prefix='', onChange, optio
   }
 
   return (
-    <div css={style} class="mt-2.5 mb-6 mt-input-before mb-input-after nitro-select">
+    <div css={style} class={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after nitro-select ${props.className||''}`)}>
       <ReactSelect
         /**
          * react-select prop quick reference (https://react-select.com/props#api):

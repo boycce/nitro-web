@@ -192,20 +192,21 @@ export function date (date, format, timezone) {
 }
 
 /**
+ * @template {(...args: any[]) => any} T
  * Creates a debounced function that delays invoking `func` until after `wait`
  * milliseconds have elapsed since the last time the debounced function was invoked.
  *
- * @param {Function} func - The function to debounce.
+ * @param {T} func - The function to debounce.
  * @param {number} [wait=0] - Number of milliseconds to delay.
  * @param {{
  *   leading?: boolean,  // invoke on the leading edge of the timeout (default: false)
  *   maxWait?: number,   // maximum time `func` is allowed to be delayed before it's invoked 
  *   trailing?: boolean, // invoke on the trailing edge of the timeout (default: true)
  * }} [options] - Options to control behavior.
- * @returns {(...args: any[]) => any & {
- *   cancel: () => void, 
- *   flush: () => any
- * }} - A new debounced function with `cancel` and `flush` methods.
+ * @returns {((...args: Parameters<T>) => ReturnType<T>) & {
+ *     cancel: () => void;
+ *     flush: () => ReturnType<T>
+ * }}
  *
  * @see https://lodash.com/docs/4.17.15#debounce
  */
@@ -1246,6 +1247,18 @@ export function queryObject (searchString, trueDefaults) {
 }
 
 /**
+ * Parses a query string into an array of objects
+ * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @returns {object[]} - e.g. [{ page: '1' }]
+ */
+export function queryArray (searchString) {
+  const query = queryObject(searchString)
+  return Object.keys(query).map((key) => {
+    return { [key]: query[key] }
+  })
+}
+
+/**
  * Parses an object and returns a query string
  * @param {{[key: string]: unknown}} [obj] - query object
  * @returns {string}
@@ -1489,7 +1502,7 @@ export function sortByKey (collection, key) {
 
 /**
    * Creates a throttled function that only invokes `func` at most once per every `wait` milliseconds
- * @param {function} func
+ * @param {(...args: any[]) => any} func
  * @param {number} [wait=0] - the number of milliseconds to throttle invocations to
  * @param {{
  *    leading?: boolean, // invoke on the leading edge of the timeout

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
+import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps, twMerge } from 'nitro-web'
 import { Errors, type Error } from 'nitro-web/types'
 import {
   EnvelopeIcon,
@@ -130,7 +130,7 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
 
 function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
   return (
-    <div css={style} className={`mt-2.5 mb-6 mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`}>
+    <div css={style} className={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`)}>
       {children}
       {error && <div class="mt-1.5 text-xs text-danger nitro-error">{error.detail}</div>}
     </div>

@@ -26,7 +26,7 @@ export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...prop
     <Dropdown 
       dir="bottom-left"
       menuToggles={false}
-      menuChildren={
+      menuContent={
         <ColorPicker key={lastChanged} defaultColor={defaultColor} id={id} name={props.name} value={value} onChange={onChange} />
       }
     >

@@ -16,7 +16,8 @@ type DropdownProps = {
   /** The minimum width of the menu **/
   minWidth?: number | string
   /** The content to render inside the top of the dropdown **/
-  menuChildren?: React.ReactNode
+  menuContent?: React.ReactNode
+  menuClassName?: string
   menuIsOpen?: boolean
   menuToggles?: boolean
   toggleCallback?: (isActive: boolean) => void
@@ -30,7 +31,8 @@ export const Dropdown = forwardRef(function Dropdown({
   options, 
   isHoverable,
   minWidth, 
-  menuChildren, 
+  menuClassName,
+  menuContent, 
   menuIsOpen, 
   menuToggles=true,
   toggleCallback,
@@ -39,7 +41,7 @@ export const Dropdown = forwardRef(function Dropdown({
   isHoverable = isHoverable && !menuIsOpen
   const dropdownRef = useRef<HTMLDivElement|null>(null)
   const [isActive, setIsActive] = useState(!!menuIsOpen)
-  const menuStyle = getSelectStyle({ name: 'menu', usePrefixes: true })
+  const menuStyle = getSelectStyle({ name: 'menu' })
 
   // Expose the setIsActive function to the parent component
   useImperativeHandle(ref, () => ({ setIsActive }))
@@ -106,9 +108,9 @@ export const Dropdown = forwardRef(function Dropdown({
       }
       <ul
         style={{ minWidth }}
-        class={`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1]`}
+        class={`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName}`}
       >
-        {menuChildren}
+        {menuContent}
         {
           options && options.map((option, i) => {
             const optionStyle = getSelectStyle({ name: 'option', usePrefixes: true, isSelected: option.isSelected })
@@ -131,10 +133,12 @@ export const Dropdown = forwardRef(function Dropdown({
 })
 
 const style = css`
-  ul {
+  &>ul {
     transition: transform 0.15s ease, opacity 0.15s ease, visibility 0s 0.15s ease, max-width 0s 0.15s ease, max-height 0s 0.15s ease;
     max-width: 0; // handy if the dropdown ul exceeds the viewport width
     max-height: 0; // handy if the dropdown ul exceeds the viewport height
+    /* overflow: visible !important; // override menustyle  */
+    pointer-events: none; 
   }
   &.is-bottom-right,
   &.is-top-right {
@@ -145,14 +149,14 @@ const style = css`
   }
   &.is-bottom-left,
   &.is-bottom-right {
-    ul {
+    &>ul {
       top: 100%;
       transform: translateY(6px);
     }
   }
   &.is-top-left,
   &.is-top-right {
-    ul {
+    &>ul {
       bottom: 100%;
       transform: translateY(-10px);
     }
@@ -161,15 +165,17 @@ const style = css`
   &.is-hoverable:hover,
   &:focus,
   &.is-active,
-  li:hover,
-  li:focus,
-  li.is-active {
-    ul {
+  &>ul>li:hover,
+  &>ul>li:focus,
+  &>ul>li.is-active {
+    &>ul {
       opacity: 1;
       visibility: visible;
       transition: transform 0.15s ease, opacity 0.15s ease;
       max-width: 1000px;
       max-height: 1000px;
+      pointer-events: auto;
+      overflow: visible;
     }
     &.is-bottom-left > ul,
     &.is-bottom-right > ul {
@@ -182,7 +188,7 @@ const style = css`
   }
   // no animation
   &.no-animation {
-    ul {
+    &>ul {
       transition: none;
     }
   }
