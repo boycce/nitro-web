@@ -175,7 +175,7 @@ export function currencyToCents (currency) {
  * return unexpected result (it may ignore daylight saving).
  */
 export function date (date, format, timezone) {
-  if (!date || (!isNumber(date) && !isDate(date))) return 'Date?'
+  if (!date) return 'Date?'
 
   // Get the milliseconds
   let milliseconds = 0

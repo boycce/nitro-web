@@ -233,7 +233,7 @@ export async function signinAndGetState(user, isDesktop) {
   return { ...store, jwt }
 }
 
-function tokenCreate(id) {
+export function tokenCreate(id) {
   return new Promise((resolve) => {
     crypto.randomBytes(16, (err, buff) => {
       let hash = buff.toString('hex') // 32 chars
@@ -242,7 +242,7 @@ function tokenCreate(id) {
   })
 }
 
-function tokenParse(token) {
+export function tokenParse(token) {
   let split = (token  ||  '').split(':')
   let hash = split[0].slice(0, 32)
   let userId = split[0].slice(32)
