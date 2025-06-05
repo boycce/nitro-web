@@ -1,6 +1,6 @@
 type CheckboxProps = {  
   name: string
-  /** The id of the checkbox (used for radios) **/
+  /** name is applied if not provided. Used for radios */
   id?: string 
   size?: 'md' | 'sm'
   subtext?: string|React.ReactNode

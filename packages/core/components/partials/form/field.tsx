@@ -17,6 +17,7 @@ type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
   // field name or path on state (used to match errors), e.g. 'date', 'company.email'
   name: string
+  // name is applied if id is not provided
   id?: string
   // state object to get the value, and check errors against
   state?: { errors?: Errors, [key: string]: any }
@@ -92,7 +93,7 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
 
   // Classname
   const inputClassName = getInputClasses({ error, Icon, iconPos, type })
-  const commonProps = { id: props.name || props.id, value: value, className: inputClassName }
+  const commonProps = { id: props.id || props.name, value: value, className: inputClassName }
 
   // Type has to be referenced as props.type for TS to be happy
   if (!type || type == 'text' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {

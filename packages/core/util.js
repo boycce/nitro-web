@@ -1106,7 +1106,7 @@ export function omit (obj, fields) {
  * 
  * @template T
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {{target: {id: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
+ * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  * 
@@ -1124,7 +1124,7 @@ export function onChange (setState, eventOrPathValue, beforeSetState) {
   
   if (typeof eventOrPathValue === 'object' && 'target' in eventOrPathValue) {
     const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target) // we need to assume this is an input
-    chunks = (element.id || element.name).split('.')
+    chunks = (element.name || element.id).split('.')
     hasFiles = !!element.files
     value = element.files
       ? element.files[0]

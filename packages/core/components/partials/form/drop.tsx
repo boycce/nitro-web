@@ -7,12 +7,12 @@ import { Errors, MonasteryImage } from 'nitro-web/types'
 type DropProps = {
   awsUrl?: string
   className?: string
-  /** Optional ID for the input element. Defaults to name if not provided */
-  id?: string
   /** Field name or path on state (used to match errors), e.g. 'avatar', 'company.avatar' */
   name: string
+  /** Optional ID for the input element. Defaults to name if not provided */
+  id?: string
   /** Called when file is selected or dropped */
-  onChange?: (event: { target: { id: string, value: File|FileList } }) => void
+  onChange?: (event: { target: { name: string, value: File|FileList } }) => void
   /** Whether to allow multiple file selection */
   multiple?: boolean
   /** State object to get the value and check errors against */
@@ -30,7 +30,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
   if (!name) throw new Error('Drop component requires a `name` prop')
   let value: Image = null
   let error: Error | unknown
-  const inputId = id ||name
+  const inputId = id || name
   const [urls, setUrls] = useState([])
   const stateRef = useRef(state)
   stateRef.current = state
@@ -59,7 +59,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
       const errors = (stateRef?.current?.errors || []).filter((e: Errors[]) => e?.title != name)
       onChange({
         // remove file from state
-        target: { id: name, value: null },
+        target: { name: name, value: null },
         // reset (server) errors
         errors: errors.length ? errors : undefined,
       })
@@ -68,7 +68,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
 
   async function onFileAttach (files: FileList) { 
     // files is a FileList object
-    if (onChange) onChange({ target: { id: name, value: multiple ? files : files[0] } })
+    if (onChange) onChange({ target: { name: name, value: multiple ? files : files[0] } })
   }
 
   async function getUrls(objectOrFileListItem: File | FileList | MonasteryImage | null) {

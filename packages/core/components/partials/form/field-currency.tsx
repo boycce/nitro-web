@@ -17,6 +17,7 @@ type NumericFormatProps = React.InputHTMLAttributes<HTMLInputElement> & {
 
 export type FieldCurrencyProps = NumericFormatProps & {
   name: string
+  /** name is applied if id is not provided */
   id?: string 
   /** e.g. { currencies: { nzd: { symbol: '$', digits: 2 } } } (check out the nitro example for more info) */
   config: {
@@ -25,7 +26,7 @@ export type FieldCurrencyProps = NumericFormatProps & {
   }
   /** currency iso, e.g. 'nzd' */
   currency: string
-  onChange?: (event: { target: { id: string, value: string|number|null } }) => void
+  onChange?: (event: { target: { name: string, value: string|number|null } }) => void
   /** value should be in cents */
   value?: string|number|null
   defaultValue?: number | string | null
@@ -138,7 +139,7 @@ export function FieldCurrency({ config, currency='nzd', onChange, value, default
         onValueChange={!onChange ? undefined : ({ floatValue }, e) => {
           // console.log('onValueChange', floatValue, e)
           if (e.source === 'event') setDontFix(true)
-          onChange({ target: { id: id, value: toCents(floatValue) }})
+          onChange({ target: { name: props.name, value: toCents(floatValue) }})
         }}
         onBlur={() => { setDollars(toDollars(value, true))}}
         placeholder={props.placeholder || '0.00'}

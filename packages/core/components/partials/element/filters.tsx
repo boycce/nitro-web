@@ -84,7 +84,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     debouncedSubmit()
   }
 
-  async function _onChange(e: {target: {id: string, value: unknown}}) {
+  async function _onChange(e: {target: {name: string, value: unknown}}) {
     await onChange(setState, e)
     debouncedSubmit()
   }

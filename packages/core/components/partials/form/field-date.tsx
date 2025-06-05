@@ -11,7 +11,8 @@ type DropdownRef = {
 type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
   name: string
   mode: Mode
-  id?: string 
+  // name is applied if id is not provided
+  id?: string
   showTime?: boolean
   prefix?: string
   numberOfMonths?: number
@@ -22,11 +23,11 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
 // An array is returned for mode = 'multiple' or 'range'
 export type FieldDateProps = (
   | ({ mode: 'single' } & PreFieldDateProps & {
-      onChange?: (e: { target: { id: string, value: null|number } }) => void
+      onChange?: (e: { target: { name: string, value: null|number } }) => void
       value?: null|number|string
     })
   | ({ mode: 'multiple' | 'range' } & PreFieldDateProps & { 
-      onChange: (e: { target: { id: string, value: (null|number)[] } }) => void 
+      onChange: (e: { target: { name: string, value: (null|number)[] } }) => void 
       value?: null|number|string|(null|number|string)[]
     })
 )
@@ -42,9 +43,9 @@ export function FieldDate({
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
-  const id = props.id || props.name
   const [month, setMonth] = useState<number|undefined>()
   const [lastUpdated, setLastUpdated] = useState(0)
+  const id = props.id || props.name
   
   // Convert the value to an array of valid* dates
   const dates = useMemo(() => {
@@ -70,7 +71,7 @@ export function FieldDate({
     setInputValue(getInputValue(value))
     // Update the value
     if (onChange) {
-      onChange({ target: { id: id, value: value as any } })
+      onChange({ target: { name: props.name, value: value as any } })
       setLastUpdated(new Date().getTime())
     }
   }
@@ -104,7 +105,7 @@ export function FieldDate({
     // Update the value
     const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
     if (onChange) {
-      onChange({ target: { id: id, value: value as any }})
+      onChange({ target: { name: props.name, value: value as any }})
       setLastUpdated(new Date().getTime())
     }
   } 
@@ -144,11 +145,11 @@ export function FieldDate({
           id={id}
           autoComplete="off" 
           className={(props.className||'')}// + props.className?.includes('is-invalid') ? ' is-invalid' : ''} 
-          value={inputValue}
-          onChange={onInputChange}
           onBlur={() => setInputValue(getInputValue(dates))}
+          onChange={onInputChange}
           style={{ textIndent: prefixWidth + 'px' }}
           type="text"
+          value={inputValue}
         />
       </div>
     </Dropdown>

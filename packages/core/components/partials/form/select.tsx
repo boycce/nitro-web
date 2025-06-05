@@ -27,7 +27,7 @@ type SelectProps = {
   /** The prefix to add to the input **/
   prefix?: string
   /** The onChange handler **/
-  onChange?: (event: { target: { id: string, value: unknown } }) => void
+  onChange?: (event: { target: { name: string, value: unknown } }) => void
   /** The options to display in the dropdown **/
   options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, [key: string]: unknown }[]
   /** The state object to get the value and check errors from **/
@@ -83,7 +83,7 @@ export function Select({ inputId, minMenuWidth, name, prefix='', onChange, optio
         }}
         menuPlacement="auto"
         minMenuHeight={250}
-        onChange={!onChange ? undefined : (o) => onChange({ target: { id: inputId || name, value: (o as {value?: unknown})?.value || o }})}
+        onChange={!onChange ? undefined : (o) => onChange({ target: { name: name, value: (o as {value?: unknown})?.value || o }})}
         options={options}
         value={value}
         classNames={{

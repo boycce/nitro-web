@@ -466,7 +466,7 @@ export function omit(obj: {
  *
  * @template T
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {{target: {id: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
+ * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  *
@@ -476,7 +476,7 @@ export function omit(obj: {
  */
 export function onChange<T>(setState: React.Dispatch<React.SetStateAction<T>>, eventOrPathValue: {
     target: {
-        id: string;
+        name: string;
         value: unknown;
     };
 } | [string, Function | unknown], beforeSetState?: Function): Promise<T>;

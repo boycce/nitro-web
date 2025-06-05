@@ -65,8 +65,8 @@ export function Styleguide({ className }: { className?: string }) {
     { label: 'Delete' },
   ]
 
-  function onCustomerInputChange (e: { target: { id: string, value: unknown } }) {
-    if (e.target.id == 'customer' && e.target.value == '0') {
+  function onCustomerInputChange (e: { target: { name: string, value: unknown } }) {
+    if (e.target.name == 'customer' && e.target.value == '0') {
       setCustomerSearch('')
       e.target.value = null // clear the select's selected value
       setTimeout(() => alert('Adding new customer...'), 0)
@@ -139,7 +139,8 @@ export function Styleguide({ className }: { className?: string }) {
         <Field
           class="!my-0 min-w-[242px]" 
           type="search" 
-          name="search" 
+          name="search"
+          id="search2"
           iconPos="left" 
           state={filterState}
           onChange={(e) => {
@@ -282,8 +283,8 @@ export function Styleguide({ className }: { className?: string }) {
           <Field name="password" type="password"/>
         </div>
         <div>
-          <label for="search">Search</label>
-          <Field name="search" type="search" placeholder="Search..." />
+          <label for="search3">Search</label>
+          <Field name="search" id="search3" type="search" placeholder="Search..." />
         </div>
         <div>
           <label for="filter">Filter by Code</label>
@@ -334,7 +335,7 @@ export function Styleguide({ className }: { className?: string }) {
           <label for="calendar">Calendar</label>
           <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
             onChange={(mode, value) => {
-              onChange(setState, { target: { id: 'calendar', value: value } })
+              onChange(setState, { target: { name: 'calendar', value: value } })
             }} 
           />
         </div>

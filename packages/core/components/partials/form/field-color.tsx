@@ -5,10 +5,11 @@ import { Dropdown, util } from 'nitro-web'
 
 export type FieldColorProps = React.InputHTMLAttributes<HTMLInputElement> & {
   name: string
+  /** name is applied if id is not provided */
   id?: string 
   defaultColor?: string
   Icon?: React.ReactNode
-  onChange?: (event: { target: { id: string, value: string|null } }) => void
+  onChange?: (event: { target: { name: string, value: string|null } }) => void
   value?: string|null
 }
 
@@ -17,7 +18,7 @@ export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...prop
   const isInvalid = props.className?.includes('is-invalid') ? 'is-invalid' : ''
   const id = props.id || props.name
 
-  function onInputChange(e: { target: { id: string, value: string|null } }) {
+  function onInputChange(e: { target: { name: string, value: string|null } }) {
     setLastChanged(`ic-${Date.now()}`)
     if (onChange) onChange(e)
   }
@@ -27,7 +28,7 @@ export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...prop
       dir="bottom-left"
       menuToggles={false}
       menuContent={
-        <ColorPicker key={lastChanged} defaultColor={defaultColor} id={id} name={props.name} value={value} onChange={onChange} />
+        <ColorPicker key={lastChanged} defaultColor={defaultColor} name={props.name} value={value} onChange={onChange} />
       }
     >
       <div className="grid grid-cols-1">
@@ -38,7 +39,7 @@ export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...prop
           id={id}
           value={value}
           onChange={onInputChange}
-          onBlur={() => !validHex(value||'') && onInputChange({ target: { id: id, value: '' }})}
+          onBlur={() => !validHex(value||'') && onInputChange({ target: { name: props.name, value: '' }})}
           autoComplete="off"
           type="text"
         />
@@ -47,12 +48,12 @@ export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...prop
   )
 }
 
-function ColorPicker({ id='', onChange, value='', defaultColor='' }: FieldColorProps) {
+function ColorPicker({ name='', onChange, value='', defaultColor='' }: FieldColorProps) {
   const [hsva, setHsva] = useState(() => hexToHsva(validHex(value) ? value : defaultColor))
   const [debounce] = useState(() => util.throttle(callOnChange, 50))
 
   function callOnChange(newHsva: HsvaColor) {
-    if (onChange) onChange({ target: { id: id, value: hsvaToHex(newHsva) }})
+    if (onChange) onChange({ target: { name: name, value: hsvaToHex(newHsva) }})
   }
 
   return (
