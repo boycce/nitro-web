@@ -31,16 +31,16 @@ export function Button({
   const iconPosition = IconLeft ? 'left' : IconLeftEnd ? 'leftEnd' : IconRight ? 'right' : IconRightEnd ? 'rightEnd' : 'none'
   const base = 
     'relative inline-block text-center font-medium shadow-sm focus-visible:outline focus-visible:outline-2 ' +
-    'focus-visible:outline-offset-2 text-white [&>.loader]:border-white ring-inset ring-1'
+    'focus-visible:outline-offset-2 ring-inset ring-1'
 
   // Button colors, you can use custom colors by using className instead
   const colors = {
-    'primary': 'bg-primary hover:bg-primary-hover ring-transparent !ring-button-primary-ring',
-    'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent !ring-button-secondary-ring',
-    'black': 'bg-black hover:bg-gray-700 ring-transparent !ring-button-black-ring',
-    'dark': 'bg-gray-800 !bg-button-dark hover:bg-gray-700 hover:!bg-button-dark-hover ring-transparent !ring-button-dark-ring',
-    'white': 'bg-white ring-gray-300 !ring-button-white-ring hover:bg-gray-50 text-gray-900 [&>.loader]:border-black',
-    'clear': 'ring-gray-300 !ring-button-clear-ring hover:bg-gray-50 text-foreground [&>.loader]:border-foreground !shadow-none',
+    'primary': 'bg-primary hover:bg-primary-hover ring-transparent text-white [&>.loader]:border-white',
+    'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.loader]:border-white',
+    'black': 'bg-black hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
+    'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
+    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black',
+    'clear': 'hover:bg-gray-50 ring-gray-300 text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   
   // Button sizes (px is better for height consistency)

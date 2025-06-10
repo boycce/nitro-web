@@ -51,8 +51,6 @@ export default {
         'input-border-focus': '#4c50f9',
         'dropdown-ul-border': colors.gray[200],
         'variable-selected': '#4c50f9',
-        // Nitro button colors
-        // 'button-primary-ring': darken('#4c50f9', 0.25),
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],

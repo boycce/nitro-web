@@ -4,6 +4,7 @@
  */
 import { injectedConfig } from 'nitro-web'
 import { Dashboard, Styleguide, NotFound } from 'nitro-web'
+import { Button } from './element'
 
 // Dashboard page
 export const DashboardPage = () => <Dashboard />
@@ -13,7 +14,18 @@ DashboardPage.route = {
 }
 
 // Styleguide page
-export const StyleguidePage = () => <Styleguide />
+export const StyleguidePage = () => {
+  return (
+    <Styleguide elements={{ Button: Button }}>
+      <div>
+        <h3 className="h3">Custom Buttons</h3>
+        <div className="flex flex-wrap gap-x-6 gap-y-4">
+          <div><Button color="blue-light">blue-light button</Button></div>
+        </div>
+      </div>
+    </Styleguide>
+  )
+}
 StyleguidePage.route = {
   '/styleguide': true,
   'meta': { title: `${injectedConfig.isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
@@ -25,4 +37,3 @@ NotFoundPage.route = {
   '*': true,
   'meta': { 'title': 'Nothing found', layout: 1 },
 }
-
