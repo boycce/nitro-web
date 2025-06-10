@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { isRegex, deepFind, s3Image } from 'nitro-web/util'
+import { deepFind, s3Image, getErrorFromState } from 'nitro-web/util'
 import { DropHandler } from 'nitro-web'
 import noImage from 'nitro-web/client/imgs/no-image.svg'
 import { Errors, MonasteryImage } from 'nitro-web/types'
@@ -29,7 +29,7 @@ type Image = File | FileList | MonasteryImage | null
 export function Drop({ awsUrl, className, id, name, onChange, multiple, state, ...props }: DropProps) {
   if (!name) throw new Error('Drop component requires a `name` prop')
   let value: Image = null
-  let error: Error | unknown
+  const error = getErrorFromState(state, name)
   const inputId = id || name
   const [urls, setUrls] = useState([])
   const stateRef = useRef(state)
@@ -39,12 +39,6 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
   if (props.value) value = props.value as Image
   else if (typeof state == 'object') value = deepFind(state, name) as Image
   if (typeof value == 'undefined') value = null
-
-  // An error matches this input path
-  for (const item of (state?.errors as Errors[] || [])) {
-    if (isRegex(name) && (item.title||'').match(name)) error = item
-    else if (item.title == name) error = item
-  }
 
   useEffect(() => {
     (async () => setUrls(await getUrls(value as File | FileList | MonasteryImage | null)))()

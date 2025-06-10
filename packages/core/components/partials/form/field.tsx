@@ -1,15 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { util, FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps, twMerge } from 'nitro-web'
+import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
+import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
 import { Errors, type Error } from 'nitro-web/types'
-import {
-  EnvelopeIcon,
-  CalendarIcon,
-  FunnelIcon,
-  MagnifyingGlassIcon,
-  EyeIcon,
-  EyeSlashIcon,
-} from '@heroicons/react/20/solid'
+import { EnvelopeIcon, CalendarIcon, FunnelIcon, MagnifyingGlassIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'
+import { memo } from 'react'
 // Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
@@ -24,6 +19,8 @@ type FieldExtraProps = {
   type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'
+  /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
+  deps?: unknown[]
 }
 type IconWrapperProps = {
   iconPos: string
@@ -38,12 +35,21 @@ export type FieldProps = (
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
   | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
 )
+type IsFieldCachedProps = {
+  name: string
+  state?: FieldProps['state']
+  deps?: FieldProps['deps']
+}
 
-export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
+export const Field = memo(FieldBase, (prev, next) => {
+  return isFieldCached(prev, next)
+})
+
+function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
   // type must be kept as props.type for TS to be happy and follow the conditions below
-  let error!: Error
   let value!: string
   let Icon!: React.ReactNode
+  const error = getErrorFromState(state, props.name)
   const type = props.type
   const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
 
@@ -59,14 +65,8 @@ export function Field({ state, icon, iconPos: ip, ...props }: FieldProps) {
   // Value: Input is always controlled if state is passed in
   if (props.value) value = props.value as string
   else if (typeof state == 'object') {
-    const v = util.deepFind(state, props.name) as string | undefined
+    const v = deepFind(state, props.name) as string | undefined
     value = v ?? ''
-  }
-
-  // Errors: find any that match this field path
-  for (const item of (state?.errors || [])) {
-    if (util.isRegex(props.name) && (item.title || '').match(props.name)) error = item
-    else if (item.title == props.name) error = item
   }
 
   // Icon
@@ -174,6 +174,36 @@ function ColorSvg({ hex }: { hex?: string }) {
   return (
     <span class="block size-full rounded-md" style={{ backgroundColor: hex ? hex : '#f1f1f1' }}></span>
   )
+}
+
+export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps) {
+  const path = prev.name
+  const state = prev.state || {}
+  // If state/satte-error values have changed, re-render!
+  if (deepFind(state, path) !== deepFind(next.state || {}, path)) {
+    // console.log(1, 'state changed', path)
+    return false
+  }
+  if (getErrorFromState(state, path) !== getErrorFromState(next.state || {}, path)) {
+    // console.log(2, 'error changed', path)
+    return false
+  }
+  // If deps have changed, re-render!
+  if ((next.deps?.length !== prev.deps?.length) || next.deps?.some((v, i) => v !== prev.deps?.[i])) {
+    // console.log(3, 'deps changed', path)
+    return false
+  }
+  // If any other props have changed, except onChange/onInputChange, re-render!
+  // In most cases, onChange/onInputChange remain the same and reference the same function...
+  for (const k in prev) {
+    if (k === 'state' || k === 'onChange' || k === 'onInputChange') continue
+    if (prev[k as keyof typeof prev] !== next[k as keyof typeof next]) {
+      // console.log(4, 'changed', path, k)
+      return false
+    }
+  }
+  // All good, use cached version
+  return true
 }
 
 const style = css`

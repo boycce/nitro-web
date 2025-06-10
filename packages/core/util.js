@@ -682,6 +682,20 @@ export function getCurrencyOptions (currencies) {
 }
 
 /**
+ * Returns an error from a state object matching the path
+ * @param {{ errors?: { title: string, detail: string }[] }|undefined} state
+ * @param {string} path
+ * @returns {{ title: string, detail: string }|undefined}
+ */
+export function getErrorFromState (state, path) {
+  if (!state || !state.errors) return undefined
+  for (const item of state.errors) {
+    if (isRegex(path) && (item.title || '').match(path)) return item
+    else if (item.title == path) return item
+  }
+}
+
+/**
  * Get the width of a prefix
  * @param {string} prefix
  * @param {number} [paddingRight=0]

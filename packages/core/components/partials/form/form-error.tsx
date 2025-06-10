@@ -1,7 +1,7 @@
 import { Errors } from 'nitro-web/types'
 
 type FormError = {
-  state: { errors: Errors },
+  state: { errors?: Errors },
   // display all errors except these field titles, e.g. ['name', 'address']
   fields?: Array<string>,
   className?: string,

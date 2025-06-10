@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { twMerge } from 'nitro-web'
-import ReactSelect, { components, ControlProps, createFilter, OptionProps, SingleValueProps } from 'react-select'
-import { ClearIndicatorProps, DropdownIndicatorProps, MultiValueRemoveProps } from 'react-select'
+import { memo } from 'react'
+import ReactSelect, { components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
+  DropdownIndicatorProps, MultiValueRemoveProps } from 'react-select'
 import { ChevronUpDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
-import { util } from 'nitro-web'
+import { isFieldCached } from 'nitro-web'
+import { getErrorFromState, deepFind, twMerge } from 'nitro-web/util'
 import { Errors } from 'nitro-web/types'
 
 const filterFn = createFilter()
@@ -31,31 +33,34 @@ type SelectProps = {
   /** The options to display in the dropdown **/
   options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, [key: string]: unknown }[]
   /** The state object to get the value and check errors from **/
-  state?: { errors?: Errors, [key: string]: unknown }
+  state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
   /** Select variations **/
   type?: 'country'|'customer'|''
+  /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
+  deps?: unknown[]
   /** All other props are passed to react-select **/
   [key: string]: unknown
 }
 
-export function Select({ inputId, minMenuWidth, name, prefix='', onChange, options, state, type='', ...props }: SelectProps) {
-  let value: unknown
-  let hasError: { title: string, detail: string } | null = null
+export const Select = memo(SelectBase, (prev, next) => {
+  return isFieldCached(prev, next)
+})
+
+function SelectBase({ inputId, minMenuWidth, name, prefix='', onChange, options, state, type='', ...props }: SelectProps) {
+  let value: unknown|unknown[]
+  const error = getErrorFromState(state, name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
 
+  // Get value from value or state
+  if ('value' in props) value = props.value
+  else if (typeof state == 'object') value = deepFind(state, name)
+
+  // If multi-select, filter options by value
+  if (Array.isArray(value)) value = options.filter(o => (value as unknown[]).includes(o.value))
+  else value = options.find(o => value === o.value)
+
   // Input is always controlled if state is passed in
-  if (props.value) {
-    value = props.value
-  } else if (typeof state == 'object') {
-    value = options.find(o => o.value == util.deepFind(state, name))
-    if (typeof value == 'undefined') value = ''
-  }
-  
-  // An error matches this input path
-  for (const item of (state?.errors || [])) {
-    if (util.isRegex(name) && (item.title||'').match(name)) hasError = item
-    else if (item.title == name) hasError = item
-  }
+  if (typeof state == 'object' && typeof value == 'undefined') value = ''
 
   return (
     <div css={style} class={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after nitro-select ${props.className||''}`)}>
@@ -83,20 +88,26 @@ export function Select({ inputId, minMenuWidth, name, prefix='', onChange, optio
         }}
         menuPlacement="auto"
         minMenuHeight={250}
-        onChange={!onChange ? undefined : (o) => onChange({ target: { name: name, value: (o as {value?: unknown})?.value || o }})}
+        onChange={!onChange ? undefined : (o) => {
+          // Array returned for multi-select
+          const value = Array.isArray(o) 
+            ? o.map(v => typeof v == 'object' && v !== null && 'value' in v ? v.value : v) 
+            : (typeof o == 'object' && o !== null && 'value' in o ? o.value : o)
+          return onChange({ target: { name: name, value: value }})
+        }}
         options={options}
         value={value}
         classNames={{
           // Input container
-          control: (p) => getSelectStyle({ name: 'control', hasError: !!hasError, ...p }),
+          control: (p) => getSelectStyle({ name: 'control', hasError: !!error, ...p }),
           valueContainer: () => getSelectStyle({ name: 'valueContainer' }),
           // Input container objects
-          input: () => getSelectStyle({ name: 'input', hasError: !!hasError }),
+          input: () => getSelectStyle({ name: 'input', hasError: !!error }),
           multiValue: () => getSelectStyle({ name: 'multiValue' }),
           multiValueLabel: () => '',
           multiValueRemove: () => getSelectStyle({ name: 'multiValueRemove' }),
           placeholder: () => getSelectStyle({ name: 'placeholder' }),
-          singleValue: () => getSelectStyle({ name: 'singleValue', hasError: !!hasError }),
+          singleValue: () => getSelectStyle({ name: 'singleValue', hasError: !!error }),
           // Indicators
           clearIndicator: () => getSelectStyle({ name: 'clearIndicator' }),
           dropdownIndicator: () => getSelectStyle({ name: 'dropdownIndicator' }),
@@ -140,7 +151,7 @@ export function Select({ inputId, minMenuWidth, name, prefix='', onChange, optio
         // isDisabled={true}
         // maxMenuHeight={200}
       />
-      {hasError && <div class="mt-1.5 text-xs text-danger">{hasError.detail}</div>}
+      {error && <div class="mt-1.5 text-xs text-danger">{error.detail}</div>}
     </div>
   )
 }

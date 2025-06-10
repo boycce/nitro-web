@@ -1,18 +1,25 @@
 import { 
-  Drop, Dropdown, Field, Select, Button, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
-  Filters, FiltersHandleType,
-  FilterType,
+  Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
+  Filters, FiltersHandleType, FilterType,
 } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
 import { Check } from 'lucide-react'
 
-export function Styleguide({ className }: { className?: string }) {
+type StyleguideProps = {
+  className?: string
+  elements?: {
+    Button?: typeof ButtonNitro
+  }
+}
+
+export function Styleguide({ className, elements }: StyleguideProps) {
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
     address: '',
     amount: 100,
     brandColor: '#F3CA5F',
+    colorsMulti: ['blue', 'green'],
     country: 'nz',
     currency: 'nzd', // can be commented too
     date: Date.now(),
@@ -26,7 +33,7 @@ export function Styleguide({ className }: { className?: string }) {
   })
   const [filterState, setFilterState] = useState({})
   const filtersRef = useRef<FiltersHandleType>(null)
-  const filters: FilterType[] = [
+  const filters: FilterType[] = useMemo(() => [
     { 
       name: 'dateRange',
       type: 'date',
@@ -46,7 +53,7 @@ export function Styleguide({ className }: { className?: string }) {
         { label: 'Rejected', value: 'rejected' },
       ],
     },
-  ]
+  ], [])
 
   // Example of updating state
   // useEffect(() => {
@@ -55,7 +62,7 @@ export function Styleguide({ className }: { className?: string }) {
   //   }, 2000)
   // }, [])
 
-  const options = [
+  const options = useMemo(() => [
     { label: 'Open customer preview' },
     { label: 'Add a payment', isSelected: true },
     { label: 'Email invoice' },
@@ -63,7 +70,9 @@ export function Styleguide({ className }: { className?: string }) {
     { label: 'Edit' },
     { label: 'Copy' },
     { label: 'Delete' },
-  ]
+  ], [])
+
+  const Button = elements?.Button || ButtonNitro
 
   function onCustomerInputChange (e: { target: { name: string, value: unknown } }) {
     if (e.target.name == 'customer' && e.target.value == '0') {
@@ -197,22 +206,31 @@ export function Styleguide({ className }: { className?: string }) {
             // menuIsOpen={true}
             name="action"
             isSearchable={false}
-            options={[
+            options={useMemo(() => [
               { value: 'edit', label: 'Edit' },
               { value: 'delete', label: 'Delete' },
-            ]}
+            ], [])}
           />
         </div>
         <div>
-          <label for="multi">Mutli Select</label>
+          <label for="colorsMulti">Mutli Select</label>
           <Select 
-            name="multi"
+            name="colorsMulti"
             isMulti={true}
-            options={[
+            state={state}
+            options={useMemo(() => [
               { value: 'blue', label: 'Blue' },
               { value: 'green', label: 'Green' },
               { value: 'yellow', label: 'Yellow' },
-            ]}
+              { value: 'red', label: 'Red' },
+              { value: 'orange', label: 'Orange' },
+              { value: 'purple', label: 'Purple' },
+              { value: 'pink', label: 'Pink' },
+              { value: 'gray', label: 'Gray' },
+              { value: 'black', label: 'Black' },
+              { value: 'white', label: 'White' },
+            ], [])}
+            onChange={(e) => onChange(setState, e)}
           />
         </div>
         <div>
@@ -236,7 +254,7 @@ export function Styleguide({ className }: { className?: string }) {
             state={state}
             onChange={onCustomerInputChange}
             onInputChange={onCustomerSearch}
-            options={[ 
+            options={useMemo(() => [ 
               { 
                 className: 'bb', 
                 fixed: true,
@@ -251,7 +269,7 @@ export function Styleguide({ className }: { className?: string }) {
               { value: '1', label: 'Iron Man Industries' },
               { value: '2', label: 'Captain America' },
               { value: '3', label: 'Thor Limited' },
-            ]} 
+            ], [customerSearch])}
           />
         </div>
         <div>
