@@ -22,6 +22,7 @@ export type User = BaseEntity & {
   lastName?: string
   name?: string
   avatar?: MonasteryImage
+  type: 'user' | 'admin'
 }
 export type Store = NitroStore & {
   user?: User

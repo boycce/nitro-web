@@ -51,6 +51,8 @@ export default {
         'input-border-focus': '#4c50f9',
         'dropdown-ul-border': colors.gray[200],
         'variable-selected': '#4c50f9',
+        // Nitro button colors
+        // 'button-primary-ring': darken('#4c50f9', 0.25),
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -66,8 +68,8 @@ export default {
         'sm': ['13.5px', { lineHeight: '20px' }],
         'xs': ['13px', { lineHeight: '19px' }],
         '2xs': ['12px', { lineHeight: '18px' }],
-        // 'button-size': ['13.5px', { lineHeight: '20px' }], // defaults to text-sm
-        // 'input-size': ['13.5px', { lineHeight: '20px' }], // defaults to text-sm
+        'button-size': ['13.5px', { lineHeight: '20px' }],
+        'input-size': ['13.5px', { lineHeight: '20px' }],
       },
       spacing: {
         // Nitro field spacing (defaults listed below)

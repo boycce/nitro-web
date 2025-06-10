@@ -222,7 +222,7 @@ const DropdownIndicator = (props: DropdownIndicatorProps) => {
 const ClearIndicator = (props: ClearIndicatorProps) => {
   return (
     <components.ClearIndicator {...props}>
-      <XMarkIcon className="size-4 my-0.5" />
+      <XMarkIcon className="size-4" />
     </components.ClearIndicator>
   )
 }
@@ -248,7 +248,7 @@ const selectStyles = {
   // Based off https://www.jussivirtanen.fi/writing/styling-react-select-with-tailwind
   // Input container
   control: {
-    base: 'rounded-md bg-white hover:cursor-pointer text-sm text-input-size outline outline-1 -outline-offset-1 '
+    base: 'rounded-md bg-white hover:cursor-pointer text-input-size outline outline-1 -outline-offset-1 '
       + '!min-h-0 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
@@ -273,8 +273,8 @@ const selectStyles = {
   indicatorsContainer: 'p-1 px-2 gap-1',
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
   // Dropdown menu
-  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-sm text-input-size overflow-hidden shadow-dropdown-ul',
-  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-sm text-input-size',
+  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-size overflow-hidden shadow-dropdown-ul',
+  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-input-size',
   noOptionsMessage: 'm-1 text-gray-500 p-2 bg-gray-50 border border-dashed border-gray-200 rounded-sm',
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',

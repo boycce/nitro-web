@@ -10,9 +10,10 @@ type StyleguideProps = {
   elements?: {
     Button?: typeof ButtonNitro
   }
+  children?: React.ReactNode
 }
 
-export function Styleguide({ className, elements }: StyleguideProps) {
+export function Styleguide({ className, elements, children }: StyleguideProps) {
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -164,7 +165,10 @@ export function Styleguide({ className, elements }: StyleguideProps) {
       <div class="flex flex-wrap gap-x-6 gap-y-4 mb-10">
         <div><Button color="primary">primary (default)</Button></div>
         <div><Button color="secondary">secondary button</Button></div>
+        <div><Button color="black">black button</Button></div>
+        <div><Button color="dark">dark button</Button></div>
         <div><Button color="white">white button</Button></div>
+        <div><Button color="clear">clear button</Button></div>
         <div><Button color="primary" size="xs">*-xs button</Button></div>
         <div><Button color="primary" size="sm">*-sm button</Button></div>
         <div><Button color="primary">*-md (default)</Button></div>
@@ -343,22 +347,6 @@ export function Styleguide({ className, elements }: StyleguideProps) {
         </div>
       </div>
 
-      <h2 class="h3">File Inputs & Calendar</h2>
-      <div class="grid grid-cols-3 gap-x-6">
-        <div>
-          <label for="avatar">Avatar</label>
-          <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />
-        </div>
-        <div>
-          <label for="calendar">Calendar</label>
-          <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
-            onChange={(mode, value) => {
-              onChange(setState, { target: { name: 'calendar', value: value } })
-            }} 
-          />
-        </div>
-      </div>
-
       <Modal show={showModal1} setShow={setShowModal1} class="p-9">
         <h3 class="h3">Edit Profile</h3>
         <p class="mb-5">An example modal containing a basic form for editing profiles.</p>
@@ -376,6 +364,24 @@ export function Styleguide({ className, elements }: StyleguideProps) {
           <Button color="primary" onClick={() => setShowModal1(false)}>Save</Button>
         </div>
       </Modal>
+
+      <h2 class="h3">File Inputs & Calendar</h2>
+      <div class="grid grid-cols-3 gap-x-6 mb-4 last:mb-0">
+        <div>
+          <label for="avatar">Avatar</label>
+          <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />
+        </div>
+        <div>
+          <label for="calendar">Calendar</label>
+          <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
+            onChange={(mode, value) => {
+              onChange(setState, { target: { name: 'calendar', value: value } })
+            }} 
+          />
+        </div>
+      </div>
+
+      {children}
     </div>
   )
 }

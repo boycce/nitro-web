@@ -2,8 +2,9 @@ import { twMerge } from 'nitro-web'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  color?: 'primary'|'secondary'|'black'|'white'|'clear'
+  color?: 'primary'|'secondary'|'black'|'dark'|'white'|'clear'|'custom'
   size?: 'xs'|'sm'|'md'|'lg'
+  customColor?: string
   className?: string
   isLoading?: boolean
   IconLeft?: React.ReactNode|'v'
@@ -13,9 +14,10 @@ type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   children?: React.ReactNode|'v'
 }
 
-export function Button({ 
+export function Button({
   size='md', 
   color='primary',
+  customColor,
   className, 
   isLoading, 
   IconLeft, 
@@ -29,25 +31,27 @@ export function Button({
   const iconPosition = IconLeft ? 'left' : IconLeftEnd ? 'leftEnd' : IconRight ? 'right' : IconRightEnd ? 'rightEnd' : 'none'
   const base = 
     'relative inline-block text-center font-medium shadow-sm focus-visible:outline focus-visible:outline-2 ' +
-    'focus-visible:outline-offset-2 text-white [&>.loader]:border-white'
+    'focus-visible:outline-offset-2 text-white [&>.loader]:border-white ring-inset ring-1'
 
   // Button colors, you can use custom colors by using className instead
   const colors = {
-    primary: 'bg-primary hover:bg-primary-hover',
-    secondary: 'bg-secondary hover:bg-secondary-hover',
-    black: 'bg-black hover:bg-gray-700',
-    white: 'bg-white ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-gray-900 [&>.loader]:border-black',
-    clear: 'ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-foreground [&>.loader]:border-foreground !shadow-none',
+    'primary': 'bg-primary hover:bg-primary-hover ring-transparent !ring-button-primary-ring',
+    'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent !ring-button-secondary-ring',
+    'black': 'bg-black hover:bg-gray-700 ring-transparent !ring-button-black-ring',
+    'dark': 'bg-gray-800 !bg-button-dark hover:bg-gray-700 hover:!bg-button-dark-hover ring-transparent !ring-button-dark-ring',
+    'white': 'bg-white ring-gray-300 !ring-button-white-ring hover:bg-gray-50 text-gray-900 [&>.loader]:border-black',
+    'clear': 'ring-gray-300 !ring-button-clear-ring hover:bg-gray-50 text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   
   // Button sizes (px is better for height consistency)
   const sizes = {
     xs: 'px-[6px] py-[3px] px-button-x-xs py-button-y-xs text-xs rounded',
-    sm: 'px-[12px] py-[9px] px-button-x-sm py-button-y-sm text-sm text-button-size rounded-md',
-    md: 'px-[12px] py-[9px] px-button-x-md py-button-y-md text-sm text-button-size rounded-md', // default
-    lg: 'px-[18px] py-[11px] px-button-x-lg py-button-y-lg text-sm text-button-size rounded-md',
+    sm: 'px-[10px] py-[6px] px-button-x-sm py-button-y-sm text-button-size rounded-md',
+    md: 'px-[12px] py-[9px] px-button-x-md py-button-y-md text-button-size rounded-md', // default
+    lg: 'px-[18px] py-[11px] px-button-x-lg py-button-y-lg text-button-size rounded-md',
   }
-
+  
+  const appliedColor = color === 'custom' ? customColor : colors[color]
   const contentLayout = `gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`
   const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
@@ -58,7 +62,7 @@ export function Button({
   }
   
   return (
-    <button class={twMerge(`${base} ${colors[color]} ${sizes[size]} ${contentLayout} ${loading} nitro-button ${className||''}`)} {...props}>
+    <button class={twMerge(`${base} ${sizes[size]} ${appliedColor} ${contentLayout} ${loading} nitro-button ${className||''}`)} {...props}>
       {IconLeft && getIcon(IconLeft)}
       {IconLeftEnd && getIcon(IconLeftEnd)}
       <span class={`${iconPosition == 'leftEnd' || iconPosition == 'rightEnd' ? 'flex-1' : ''}`}>{children}</span>

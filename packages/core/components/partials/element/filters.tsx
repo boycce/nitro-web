@@ -169,9 +169,9 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
           {
             !!count && 
             <span 
-              class={twMerge(`inline-flex items-center justify-center rounded-full text-xs text-white bg-primary w-[19px] h-[19px] ${buttonCounterClassName || ''}`)}
+              class={twMerge(`inline-flex items-center justify-center rounded-full text-white bg-primary box-content w-[1em] h-[1em] p-[2px] ${buttonCounterClassName || ''}`)}
             >
-              {count}
+              <span class="text-xs">{count}</span>
             </span>
           }
         </span>

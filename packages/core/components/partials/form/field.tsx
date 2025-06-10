@@ -145,7 +145,7 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
   const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
   const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm text-input-size outline outline-1 -outline-offset-1 ` +
+    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-input-size outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error 
