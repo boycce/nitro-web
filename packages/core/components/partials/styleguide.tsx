@@ -55,13 +55,6 @@ export function Styleguide({ className, elements }: StyleguideProps) {
     },
   ], [])
 
-  // Example of updating state
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setState({ ...state, amount: 123456, currency: 'usd', brandColor: '#8656ED' })
-  //   }, 2000)
-  // }, [])
-
   const options = useMemo(() => [
     { label: 'Open customer preview' },
     { label: 'Add a payment', isSelected: true },
@@ -86,6 +79,13 @@ export function Styleguide({ className, elements }: StyleguideProps) {
   function onCustomerSearch (search: string) {
     setCustomerSearch(search || '')
   }
+
+  // Example of updating state
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setState({ ...state, amount: 123456, currency: 'usd', brandColor: '#8656ED' })
+  //   }, 2000)
+  // }, [])
 
   return (
     <div class={`text-left max-w-[1100px] ${className}`}>

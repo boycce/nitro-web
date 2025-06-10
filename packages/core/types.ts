@@ -31,7 +31,7 @@ export type User = {
 }
 
 export type Error = { title: string, detail: string }
-export type Errors = Array<Error> | null
+export type Errors = Error[]
 
 export type MonasteryImage = {
   url: string
