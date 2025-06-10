@@ -258,6 +258,21 @@ export function getCurrencyOptions(currencies: {
     label: string;
 }[];
 /**
+ * Returns an error from a state object matching the path
+ * @param {{ errors?: { title: string, detail: string }[] }|undefined} state
+ * @param {string} path
+ * @returns {{ title: string, detail: string }|undefined}
+ */
+export function getErrorFromState(state: {
+    errors?: {
+        title: string;
+        detail: string;
+    }[];
+} | undefined, path: string): {
+    title: string;
+    detail: string;
+} | undefined;
+/**
  * Get the width of a prefix
  * @param {string} prefix
  * @param {number} [paddingRight=0]
