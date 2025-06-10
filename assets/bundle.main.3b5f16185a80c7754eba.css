@@ -809,14 +809,14 @@ html {
   }
 body {
   font-size: 15.5px;
-  line-height: 1.5;
+  line-height: 23px;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
 .h1, .content h1 {
   margin-bottom: 0.5rem;
   font-size: 22.5px;
-  line-height: 1.75;
+  line-height: 39px;
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
@@ -824,7 +824,7 @@ body {
 .h2, .content h2 {
   margin-bottom: 0.5rem;
   font-size: 20px;
-  line-height: 1.75;
+  line-height: 35px;
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
@@ -832,7 +832,7 @@ body {
 .h3, .content h3 {
   margin-bottom: 0.5rem;
   font-size: 18px;
-  line-height: 1.75;
+  line-height: 31px;
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
@@ -840,7 +840,7 @@ body {
 .h4, .content h4 {
   margin-bottom: 0.5rem;
   font-size: 15.5px;
-  line-height: 1.5;
+  line-height: 23px;
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
@@ -848,14 +848,14 @@ body {
 .h5, .content h5 {
   margin-bottom: 0.5rem;
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 20px;
   font-weight: 700;
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity, 1));
 }
 label, .label {
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 20px;
   font-weight: 500;
 }
 /* Extend Nitro components */
@@ -1057,10 +1057,6 @@ label, .label {
   margin-left: auto;
   margin-right: auto;
 }
-.my-0\.5 {
-  margin-top: 0.125rem;
-  margin-bottom: 0.125rem;
-}
 .\!mb-0 {
   margin-bottom: 0px !important;
 }
@@ -1249,6 +1245,10 @@ label, .label {
   width: 18px;
   height: 18px;
 }
+.size-\[1em\] {
+  width: 1em;
+  height: 1em;
+}
 .size-\[22px\] {
   width: 22px;
   height: 22px;
@@ -1276,8 +1276,8 @@ label, .label {
 .h-\[18px\] {
   height: 18px;
 }
-.h-\[19px\] {
-  height: 19px;
+.h-\[1em\] {
+  height: 1em;
 }
 .h-\[1rem\] {
   height: 1rem;
@@ -1287,6 +1287,9 @@ label, .label {
 }
 .h-\[30px\] {
   height: 30px;
+}
+.\!min-h-0 {
+  min-height: 0px !important;
 }
 .min-h-12 {
   min-height: 3rem;
@@ -1324,8 +1327,8 @@ label, .label {
 .w-\[190px\] {
   width: 190px;
 }
-.w-\[19px\] {
-  width: 19px;
+.w-\[1em\] {
+  width: 1em;
 }
 .w-\[1rem\] {
   width: 1rem;
@@ -1743,6 +1746,10 @@ label, .label {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity, 1));
 }
+.bg-blue-100 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(219 234 254 / var(--tw-bg-opacity, 1));
+}
 .bg-gray-200 {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
@@ -1753,6 +1760,10 @@ label, .label {
 }
 .bg-gray-500\/70 {
   background-color: rgb(107 114 128 / 0.7);
+}
+.bg-gray-800 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
 }
 .bg-gray-900 {
   --tw-bg-opacity: 1;
@@ -1855,6 +1866,9 @@ label, .label {
 .p-\[20px\] {
   padding: 20px;
 }
+.p-\[2px\] {
+  padding: 2px;
+}
 .px-1\.5 {
   padding-left: 0.375rem;
   padding-right: 0.375rem;
@@ -1870,10 +1884,6 @@ label, .label {
 .px-2 {
   padding-left: 0.5rem;
   padding-right: 0.5rem;
-}
-.px-2\.5 {
-  padding-left: 0.625rem;
-  padding-right: 0.625rem;
 }
 .px-3 {
   padding-left: 0.75rem;
@@ -1903,6 +1913,30 @@ label, .label {
   padding-left: 2rem;
   padding-right: 2rem;
 }
+.px-\[10px\] {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.px-\[12px\] {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.px-\[18px\] {
+  padding-left: 18px;
+  padding-right: 18px;
+}
+.px-\[6px\] {
+  padding-left: 6px;
+  padding-right: 6px;
+}
+.px-button-x-md {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+.px-input-x {
+  padding-left: 12px;
+  padding-right: 12px;
+}
 .py-0\.5 {
   padding-top: 0.125rem;
   padding-bottom: 0.125rem;
@@ -1910,10 +1944,6 @@ label, .label {
 .py-1 {
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
-}
-.py-1\.5 {
-  padding-top: 0.375rem;
-  padding-bottom: 0.375rem;
 }
 .py-10 {
   padding-top: 2.5rem;
@@ -1951,9 +1981,29 @@ label, .label {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
 }
-.py-\[0\.58rem\] {
-  padding-top: 0.58rem;
-  padding-bottom: 0.58rem;
+.py-\[11px\] {
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+.py-\[3px\] {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.py-\[6px\] {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.py-\[9px\] {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.py-button-y-md {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.py-input-y {
+  padding-top: 9px;
+  padding-bottom: 9px;
 }
 .pb-2 {
   padding-bottom: 0.5rem;
@@ -1964,26 +2014,32 @@ label, .label {
 .pl-2 {
   padding-left: 0.5rem;
 }
-.pl-3 {
-  padding-left: 0.75rem;
-}
 .pl-8 {
   padding-left: 2rem;
 }
 .pl-9 {
   padding-left: 2.25rem;
 }
+.pl-\[12px\] {
+  padding-left: 12px;
+}
+.pl-input-x {
+  padding-left: 12px;
+}
 .pr-1\.5 {
   padding-right: 0.375rem;
-}
-.pr-3 {
-  padding-right: 0.75rem;
 }
 .pr-8 {
   padding-right: 2rem;
 }
 .pr-9 {
   padding-right: 2.25rem;
+}
+.pr-\[12px\] {
+  padding-right: 12px;
+}
+.pr-input-x {
+  padding-right: 12px;
 }
 .pt-0\.5 {
   padding-top: 0.125rem;
@@ -2011,11 +2067,11 @@ label, .label {
 }
 .text-2xl {
   font-size: 22.5px;
-  line-height: 1.75;
+  line-height: 39px;
 }
 .text-2xs {
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 18px;
 }
 .text-5xl {
   font-size: 3rem;
@@ -2032,15 +2088,23 @@ label, .label {
 }
 .text-base {
   font-size: 15.5px;
-  line-height: 1.5;
+  line-height: 23px;
 }
 .text-base\/7 {
   font-size: 15.5px;
   line-height: 1.75rem;
 }
+.text-button-size {
+  font-size: 13.5px;
+  line-height: 20px;
+}
+.text-input-size {
+  font-size: 13.5px;
+  line-height: 20px;
+}
 .text-lg {
   font-size: 18px;
-  line-height: 1.75;
+  line-height: 31px;
 }
 .text-md\/6 {
   font-size: 14px;
@@ -2048,7 +2112,7 @@ label, .label {
 }
 .text-sm {
   font-size: 13.5px;
-  line-height: 1.5;
+  line-height: 20px;
 }
 .text-sm\/6 {
   font-size: 13.5px;
@@ -2056,7 +2120,7 @@ label, .label {
 }
 .text-xs {
   font-size: 13px;
-  line-height: 1.5;
+  line-height: 19px;
 }
 .text-xs\/6 {
   font-size: 13px;
@@ -2087,6 +2151,10 @@ label, .label {
 .text-\[\#c6c8ce\] {
   --tw-text-opacity: 1;
   color: rgb(198 200 206 / var(--tw-text-opacity, 1));
+}
+.text-blue-900 {
+  --tw-text-opacity: 1;
+  color: rgb(30 58 138 / var(--tw-text-opacity, 1));
 }
 .text-danger {
   --tw-text-opacity: 1;
@@ -2258,6 +2326,10 @@ label, .label {
 .ring-black\/5 {
   --tw-ring-color: rgb(0 0 0 / 0.05);
 }
+.ring-blue-300 {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(147 197 253 / var(--tw-ring-opacity, 1));
+}
 .ring-gray-300 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(209 213 219 / var(--tw-ring-opacity, 1));
@@ -2268,6 +2340,9 @@ label, .label {
 .ring-indigo-200 {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(199 210 254 / var(--tw-ring-opacity, 1));
+}
+.ring-transparent {
+  --tw-ring-color: transparent;
 }
 .blur-3xl {
   --tw-blur: blur(64px);
@@ -2593,6 +2668,9 @@ label, .label {
   --tw-content: '';
   content: var(--tw-content);
 }
+.last\:mb-0:last-child {
+  margin-bottom: 0px;
+}
 .checked\:\!border-variable-selected:checked {
   --tw-border-opacity: 1 !important;
   border-color: rgb(76 80 249 / var(--tw-border-opacity, 1)) !important;
@@ -2630,6 +2708,10 @@ label, .label {
 }
 .hover\:overflow-y-auto:hover {
   overflow-y: auto;
+}
+.hover\:bg-blue-200:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(191 219 254 / var(--tw-bg-opacity, 1));
 }
 .hover\:bg-gray-100:hover {
   --tw-bg-opacity: 1;
