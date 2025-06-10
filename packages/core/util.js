@@ -1561,7 +1561,7 @@ export function trim (string) {
  */
 export function twMerge(...args) {
   const ignoredClasses = /** @type {string[]} */([])
-  const ignoreClasses = ['text-sm-button', 'text-sm-input']
+  const ignoreClasses = ['text-button-size', 'text-input-size']
   const classes = args.filter(Boolean).join(' ').split(' ')
 
   const filteredClasses = classes.filter(c => {

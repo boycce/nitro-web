@@ -26,7 +26,7 @@ export default {
         'dropdown-ul': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
       },
       colors: {
-        // Nitro colors
+        // Nitro main colors
         'primary': '#4c50f9',
         'primary-dark': darken('#4c50f9', 0.05),
         'primary-hover': lighten('#4c50f9', 0.05),
@@ -57,26 +57,30 @@ export default {
       },
       fontSize: {
         // Nitro font sizes 
-        '2xs': ['12px', { lineHeight: '1.5' }],
-        'xs': ['13px', { lineHeight: '1.5' }],
-        'sm': ['13.5px', { lineHeight: '1.5' }],
-        'md': ['14px', { lineHeight: '1.5' }],
-        'base': ['15.5px', { lineHeight: '1.5' }],
-        'lg': ['18px', { lineHeight: '1.75' }],
-        'xl': ['20px', { lineHeight: '1.75' }],
-        '2xl': ['22.5px', { lineHeight: '1.75' }],
-        '3xl': ['30px', { lineHeight: '1.75' }],
-        // 'sm-button': ['13.5px', { lineHeight: '1.5' }], // defaults to text-sm
-        // 'sm-input': ['13.5px', { lineHeight: '1.5' }], // defaults to text-sm
+        '3xl': ['30px', { lineHeight: '52px' }],
+        '2xl': ['22.5px', { lineHeight: '39px' }],
+        'xl': ['20px', { lineHeight: '35px' }],
+        'lg': ['18px', { lineHeight: '31px' }],
+        'base': ['15.5px', { lineHeight: '23px' }],
+        'md': ['14px', { lineHeight: '21px' }],
+        'sm': ['13.5px', { lineHeight: '20px' }],
+        'xs': ['13px', { lineHeight: '19px' }],
+        '2xs': ['12px', { lineHeight: '18px' }],
+        'button-size': ['13.5px', { lineHeight: '20px' }], // defaults to text-sm
+        'input-size': ['13.5px', { lineHeight: '20px' }], // defaults to text-sm
       },
       spacing: {
         // Nitro field spacing (defaults listed below)
         // 'input-before': '0.625rem',
         // 'input-after': '1.5rem',
-        // 'input-x': '0.75rem',
-        // 'input-y': '0.58rem',
-        // 'button-x-md': '0.75rem',
-        // 'button-y-md': '0.58rem',
+        'input-x': '12px',
+        'input-y': '9px',
+        'button-x-md': '12px',
+        'button-y-md': '9px',
+      },
+      borderRadius: {
+        // 'md': '5px', // button/input
+        // 'DEFAULT': '4px', // button small
       },
     },
   },

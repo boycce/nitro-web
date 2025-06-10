@@ -7,7 +7,6 @@ export function Signin() {
   const isSignout = location.pathname == '/signout'
   const isLoading = useState(isSignout)
   const [, setStore] = useTracked()
-  
   const [state, setState] = useState({
     email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
     password: injectedConfig.env == 'development' ? '1234' : '',

@@ -40,12 +40,12 @@ export function Button({
     clear: 'ring-1 ring-inset ring-gray-300 hover:bg-gray-50 text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   
-  // Button sizes
+  // Button sizes (px is better for height consistency)
   const sizes = {
-    xs: 'px-2 py-1 px-button-x-xs py-button-y-xs text-xs rounded',
-    sm: 'px-2.5 py-1.5 px-button-x-sm py-button-y-sm text-sm text-sm-button rounded-md',
-    md: 'px-3 py-[0.58rem] px-button-x-md py-button-y-md text-sm text-sm-button rounded-md', // default
-    lg: 'px-3.5 py-2.5 px-button-x-lg py-button-y-lg text-sm text-sm-button rounded-md',
+    xs: 'px-[6px] py-[3px] px-button-x-xs py-button-y-xs text-xs rounded',
+    sm: 'px-[12px] py-[9px] px-button-x-sm py-button-y-sm text-sm text-button-size rounded-md',
+    md: 'px-[12px] py-[9px] px-button-x-md py-button-y-md text-sm text-button-size rounded-md', // default
+    lg: 'px-[18px] py-[11px] px-button-x-lg py-button-y-lg text-sm text-button-size rounded-md',
   }
 
   const contentLayout = `gap-x-1.5 ${iconPosition == 'none' ? '' : 'inline-flex items-center justify-center'}`

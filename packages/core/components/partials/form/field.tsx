@@ -138,14 +138,14 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
   )
 }
 
-function getInputClasses({ error, Icon, iconPos, type }: { error: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
-  const pl = 'pl-3 pl-input-x'
-  const pr = 'pr-3 pr-input-x'
-  const py = 'py-[0.58rem] py-input-y'
+function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
+  const pl = 'pl-[12px] pl-input-x'
+  const pr = 'pr-[12px] pr-input-x'
+  const py = 'py-[9px] py-input-y'
   const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
   const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm text-sm-input outline outline-1 -outline-offset-1 ` +
+    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-sm text-input-size outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error 
