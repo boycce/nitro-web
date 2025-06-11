@@ -144,6 +144,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           state={filterState} 
           setState={setFilterState}
           dropdownProps={{ dir: 'bottom-left' }}
+          elements={{ Button: Button }}
         />
         {/* Search bar */}
         <Field
