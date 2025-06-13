@@ -1,5 +1,5 @@
-// @ts-nocheck
 import crypto from 'crypto'
+import bcrypt from 'bcrypt'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
@@ -8,7 +8,7 @@ import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
 import { isArray, pick, isString, ucFirst, fullNameSplit } from 'nitro-web/util'
 
-let config = {}
+let authConfig = null
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 
 export default {
@@ -34,10 +34,10 @@ export default {
 function setup(middleware, _config) {
   // Setup is called automatically when the server starts
   // Set config values
-  const configKeys = ['clientUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword']
-  config = pick(_config, configKeys)
+  const configKeys = ['clientUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
+  authConfig = pick(_config, configKeys)
   for (const key of ['clientUrl', 'emailFrom', 'env', 'name']) {
-    if (!config[key]) throw new Error(`Missing config value for: config.${key}`)
+    if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
   }
 
   passport.use(
@@ -104,7 +104,7 @@ async function signup(req, res) {
   try {
     let user = await userCreate(req.body)
     sendEmail({
-      config: config,
+      config: authConfig,
       template: 'welcome',
       to: `${ucFirst(user.firstName)}<${user.email}>`,
     }).catch(console.error)
@@ -147,7 +147,7 @@ async function resetInstructions(req, res) {
 
     res.json({})
     sendEmail({
-      config: config,
+      config: authConfig,
       template: 'reset-password',
       to: `${ucFirst(user.firstName)}<${email}>`,
       data: {
@@ -171,7 +171,7 @@ async function resetPassword(req, res) {
     await db.user.update({
       query: user._id,
       data: {
-        password: await (await import('bcrypt')).hash(password, 10),
+        password: await bcrypt.hash(password, 10),
         resetToken: '',
       },
       blacklist: ['-resetToken', '-password'],
@@ -185,39 +185,75 @@ async function resetPassword(req, res) {
 async function remove(req, res) {
   try {
     const uid = db.id(req.params.uid || 'badid')
-
-    // Get companies owned by user
-    const companyIdsOwned = (await db.company.find({ 
-      query: { users: { $elemMatch: { _id: uid, role: 'owner' } } },
-      project: { _id: 1 },
-    })).map(o => o._id)
-
     // Check for active subscription first...
     if (req.user.stripeSubscription?.status == 'active') {
       throw { title: 'subscription', detail: 'You need to cancel your subscription first.' }
     }
+    // // Get companies owned by user
+    // const companyIdsOwned = (await db.company.find({ 
+    //   query: { users: { $elemMatch: { _id: uid, role: 'owner' } } },
+    //   project: { _id: 1 },
+    // })).map(o => o._id)
     
-    if (companyIdsOwned.length) {
-      await db.transaction.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.statement.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.account.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.document.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.contact.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.product.remove({ query: { company: { $in: companyIdsOwned }}})
-      await db.company.remove({ query: { _id: { $in: companyIdsOwned }}})
-    }
+    // if (companyIdsOwned.length) {
+    //   await db.product.remove({ query: { company: { $in: companyIdsOwned }}})
+    //   await db.company.remove({ query: { _id: { $in: companyIdsOwned }}})
+    // }
     await db.user.remove({ query: { _id: uid }})
     // Logout now so that an error doesn't throw when naviating to /signout
     req.logout()
-    res.send(`User: '${uid}' and companies: '${companyIdsOwned.join(', ')}' removed successfully`)
+    res.send(`User: '${uid}' removed successfully`)
   } catch (err) {
     res.error(err)
   }
 }
 
-/* ---- Private fns ---------------- */
+/* ---- Auth helpers ------------------------- */
 
-async function getStore(user) {
+export async function findUserFromProvider(query, passwordToCheck) {
+  /**
+   * Find user for state (and verify password if signing in with email)
+   * @param {object} query - e.g. { email: 'test@test.com' }
+   * @param {string} <passwordToCheck> - password to test
+   */
+  const isMultiTenant = !authConfig.isNotMultiTenant
+  const checkPassword = arguments.length > 1
+  const user = await db.user.findOne({
+    query: query,
+    blacklist: ['-password'],
+    populate: db.user.loginPopulate(),
+    _privateData: true,
+  })
+  if (isMultiTenant && user?.company) {
+    user.company = await db.company.findOne({
+      query: user.company,
+      populate: db.company.loginPopulate(),
+      _privateData: true,
+    })
+  }
+  if (!user) {
+    throw new Error(checkPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
+  } else if (isMultiTenant && !user.company) {
+    throw new Error('The current company is no longer associated with this user')
+  } else if (isMultiTenant && user.company.status != 'active') {
+    throw new Error('This user is not associated with an active company')
+  } else {
+    if (checkPassword) {
+      if (!user.password) {
+        throw new Error('There is no password associated with this account, please try signing in with another method.')
+      }
+      const match = user.password ? await bcrypt.compare(passwordToCheck, user.password) : false
+      if (!match && !(authConfig.masterPassword && passwordToCheck == authConfig.masterPassword)) {
+        throw new Error('Email or password is incorrect.')
+      }
+    }
+    // Successful return user
+    delete user.password
+    return user
+  }
+}
+
+export async function getStore(user) {
   // Initial store
   return {
     user: user || undefined,
@@ -256,47 +292,29 @@ export function tokenParse(token) {
   }
 }
 
-async function validatePassword(password='', password2) {
-  // let hasLowerChar = password.match(/[a-z]/)
-  // let hasUpperChar = password.match(/[A-Z]/)
-  // let hasNumber = password.match(/\d/)
-  // let hasSymbol = password.match(/\W/)
-  if (!password) {
-    throw [{ title: 'password', detail: 'This field is required.' }]
-  } else if (config.env !== 'development' && password.length < 8) {
-    throw [{ title: 'password', detail: 'Your password needs to be atleast 8 characters long' }]
-    // } else if (!hasLowerChar || !hasUpperChar || !hasNumber || !hasSymbol) {
-    //   throw {
-    //     title: 'password',
-    //     detail: 'You need to include uppercase and lowercase letters, and a number'
-    //   }
-  } else if (typeof password2 != 'undefined' && password !== password2) {
-    throw [{ title: 'password2', detail: 'Your passwords need to match.' }]
-  }
-}
-
 export async function userCreate({ name, business, email, password }) {
   try {
     const options = { blacklist: ['-_id'] }
+    const isMultiTenant = !authConfig.isNotMultiTenant
     const userId = db.id()
-    const companyData = {
+    const companyData = isMultiTenant && {
       _id: db.id(), 
       ...(business ? { business } : {}),
       users: [{ _id: userId, role: 'owner', status: 'active' }],
     }
     const userData = {
       _id: userId, 
-      company: companyData._id,
       email: email,
       firstName: fullNameSplit(name)[0],
       lastName: fullNameSplit(name)[1],
-      password: password ? await (await import('bcrypt')).hash(password, 10) : undefined,
+      password: password ? await bcrypt.hash(password, 10) : undefined,
+      ...(isMultiTenant ? { company: companyData._id } : {}),
     }
 
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
-      db.company.validate(companyData, options),
+      ...(isMultiTenant ? [db.company.validate(companyData, options)] : []),
       typeof password === 'undefined' ? Promise.resolve() : validatePassword(password),
     ])
 
@@ -310,7 +328,7 @@ export async function userCreate({ name, business, email, password }) {
 
     // Insert company & user
     await db.user.insert({ data: userData, ...options })
-    await db.company.insert({ data: companyData, ...options })
+    if (isMultiTenant) await db.company.insert({ data: companyData, ...options })
 
     // Return the user
     return await findUserFromProvider({ _id: userId })
@@ -324,45 +342,21 @@ export async function userCreate({ name, business, email, password }) {
   }
 }
 
-export async function findUserFromProvider(query, passwordToCheck) {
-  /**
-   * Find user for state (and verify password if signing in with email)
-   * @param {object} query - e.g. { email: 'test@test.com' }
-   * @param {string} <passwordToCheck> - password to test
-   */
-  const checkPassword = arguments.length > 1
-  const user = await db.user.findOne({
-    query: query,
-    blacklist: ['-password'],
-    populate: db.user.loginPopulate(),
-    _privateData: true,
-  })
-  if (user?.company) {
-    user.company = await db.company.findOne({
-      query: user.company,
-      populate: db.company.loginPopulate(),
-      _privateData: true,
-    })
-  }
-  if (!user) {
-    throw new Error(checkPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
-  } else if (!user.company) {
-    throw new Error('The current company is no longer associated with this user')
-  } else if (user.company.status != 'active') {
-    throw new Error('This user is not associated with an active company')
-  } else {
-    if (checkPassword) {
-      if (!user.password) {
-        throw new Error('There is no password associated with this account, please try signing in with another method.')
-      }
-      const match = user.password ? await (await import('bcrypt')).compare(passwordToCheck, user.password) : false
-      if (!match && !(config.masterPassword && passwordToCheck == config.masterPassword)) {
-        throw new Error('Email or password is incorrect.')
-      }
-    }
-    // Successful return user
-    delete user.password
-    return user
+export async function validatePassword(password='', password2) {
+  // let hasLowerChar = password.match(/[a-z]/)
+  // let hasUpperChar = password.match(/[A-Z]/)
+  // let hasNumber = password.match(/\d/)
+  // let hasSymbol = password.match(/\W/)
+  if (!password) {
+    throw [{ title: 'password', detail: 'This field is required.' }]
+  } else if (authConfig.env !== 'development' && password.length < 8) {
+    throw [{ title: 'password', detail: 'Your password needs to be atleast 8 characters long' }]
+    // } else if (!hasLowerChar || !hasUpperChar || !hasNumber || !hasSymbol) {
+    //   throw {
+    //     title: 'password',
+    //     detail: 'You need to include uppercase and lowercase letters, and a number'
+    //   }
+  } else if (typeof password2 != 'undefined' && password !== password2) {
+    throw [{ title: 'password2', detail: 'Your passwords need to match.' }]
   }
 }
-
