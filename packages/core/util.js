@@ -767,7 +767,6 @@ export function getResponseErrors (errs) {
 
   // new Error
   } else if (errs instanceof Error || errs === null) {
-    console.info('getResponseErrors(): ', errs)
     return [{ title: 'error', detail: 'Oops there was an error' }]
 
   // Mongo errors (when called on the backend)
