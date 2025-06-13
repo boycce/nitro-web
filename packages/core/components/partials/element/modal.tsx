@@ -1,4 +1,4 @@
-import { IsFirstRender } from 'nitro-web'
+import { IsFirstRender, twMerge } from 'nitro-web'
 import SvgX1 from 'nitro-web/client/imgs/icons/x1.svg'
 
 type ModalProps = {
@@ -64,7 +64,7 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
   return (
     <div 
       onClick={(e) => e.stopPropagation()} 
-      class={`fixed top-0 w-[100vw] h-[100vh] z-[700] nitro-modal ${_state.root}`}
+      class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[100] ${_state.root} ${props.className}`)} nitro-modal`}
     >
       <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${_state.bg}`}></div>
       <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${_state.container}`}>

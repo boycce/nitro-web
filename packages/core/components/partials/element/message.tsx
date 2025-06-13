@@ -2,13 +2,14 @@
 import { isObject, isString, queryObject } from 'nitro-web/util'
 import { X, CircleCheck } from 'lucide-react'
 import { MessageObject } from 'nitro-web/types'
+import { twMerge } from 'nitro-web'
 
 /**
  * Shows a message
  * Triggered by navigating to a link with a valid query string, or
  * by setting store.message to a string or more explicitly, to an object
  **/
-export function Message() {
+export function Message({ className }: { className?: string }) {
   const devDontHide = false
   const [store, setStore] = useTracked()
   const [visible, setVisible] = useState(false)
@@ -81,13 +82,13 @@ export function Message() {
     setVisible(false)
     setTimeout(() => setStore(s => ({ ...s, message: undefined })), 250)
   }
-
+  
   return (
     <>
       {/* Global notification live region, render this permanently at the end of the document */}
       <div
         aria-live="assertive"
-        className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-20 nitro-message"
+        className={`${twMerge(`pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-[101] ${className||''}`)} nitro-message`}
       >
         <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
           {isObject(store.message) && (
