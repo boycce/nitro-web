@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.34.0",
-    "monastery": "~3.5.2",
+    "monastery": "~3.5.4",
     "nitro-web": "0.0.53",
     "stripe": "^9.16.0"
   },

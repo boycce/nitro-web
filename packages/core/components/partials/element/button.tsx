@@ -39,7 +39,7 @@ export function Button({
     'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.loader]:border-white',
     'black': 'bg-black hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
     'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
-    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black',
+    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black', // maybe change to text-foreground
     'clear': 'hover:bg-gray-50 ring-gray-300 text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   

@@ -31,6 +31,7 @@
     "client",
     "components/**/*.tsx",
     "components/**/*.ts",
+    "server/constants.js",
     "types",
     "./types/core-only-globals.d.ts"
   ]

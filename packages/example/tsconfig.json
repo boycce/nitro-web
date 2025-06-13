@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": true,
+    "checkJs": true,
     "allowSyntheticDefaultImports": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
@@ -29,6 +30,7 @@
     "client",
     "components/**/*.tsx",
     "components/**/*.ts",
+    "server/constants.js",
     "types"
   ]
 }

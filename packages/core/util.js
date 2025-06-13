@@ -164,7 +164,7 @@ export function currencyToCents (currency) {
 
 /**
  * Returns a formatted date string
- * @param {number|Date} date - number can be in seconds or milliseconds (UTC)
+ * @param {number|Date} [date] - number can be in seconds or milliseconds (UTC)
  * @param {string} [format] - e.g. "dd mmmm yy" (https://github.com/felixge/node-dateformat#mask-options)
  * @param {string} [timezone] - convert a UTC date to a particular timezone.
  * @returns {string}
@@ -753,27 +753,27 @@ export function getStripeClientPromise (stripePublishableKey) {
  * @returns {NitroError[]}
  */
 export function getResponseErrors (errs) {
-  // new Error
-  if (errs instanceof Error || errs === null) {
-    console.info('getResponseErrors(): ', errs)
-    return [{ title: 'error', detail: 'Oops there was an error' }]
-
   // Array of error objects
-  } else if (Array.isArray(errs)) {
+  if (Array.isArray(errs)) {
     return errs
-
-  // Mongo errors (when called on the backend, now coming before Axios errors...)
-  } else if (typeof errs === 'object' && 'toJSON' in errs) {
-    return [{ title: 'error', detail: errs.toJSON().message }]
   
   // Axios response errors
   } else if (typeof errs === 'object' && errs?.response?.data?.errors) {
     return errs.response.data.errors
 
-  // // Axios response error
+  // Axios response error
   } else if (typeof errs === 'object' && errs?.response?.data?.error) {
     return [{ title: errs.response.data.error, detail: errs.response.data.error_description || '' }]
 
+  // new Error
+  } else if (errs instanceof Error || errs === null) {
+    console.info('getResponseErrors(): ', errs)
+    return [{ title: 'error', detail: 'Oops there was an error' }]
+
+  // Mongo errors (when called on the backend)
+  } else if (typeof errs === 'object' && 'toJSON' in errs) {
+    return [{ title: 'error', detail: errs.toJSON().message }]
+      
   // String
   } else if (typeof errs === 'string') {
     return [{ title: 'error', detail: errs }]

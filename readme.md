@@ -52,7 +52,7 @@ If util.js is updated, you must run `npm run types` to update the types file.
 ### Versions
 
 - Express `^4.17`
-- Monastery `~3.5.1`
+- Monastery `~3.5.4`
 - Node `^18`
 - React `^18.3`
 - Tailwind `^3.4`

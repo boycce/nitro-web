@@ -23,6 +23,13 @@ export function Message() {
     'updated': { type: 'success', text: 'Updated successfully' },
     'unauth': { type: 'error', text: 'You are unauthorised' },
   }
+  const colorMap = {
+    'error': 'text-critical',
+    'warning': 'text-error',
+    'info': 'text-info',
+    'success': 'text-success',
+  }
+  const color = colorMap[(store.message as MessageObject)?.type || 'success']
 
   useEffect(() => {
     return () => {
@@ -91,7 +98,7 @@ export function Message() {
               <div className="p-3">
                 <div className="flex items-start">
                   <div className="shrink-0">
-                    <CircleCheck aria-hidden="true" size={21} className="text-green-400 mt-0.5" />
+                    <CircleCheck aria-hidden="true" size={21} className={`${color} mt-0.5`} />
                   </div>
                   <div className="ml-3 flex-1 pt-0.5">
                     <p className="text-sm font-medium text-gray-900">{typeof store.message === 'object' && store.message?.text}
