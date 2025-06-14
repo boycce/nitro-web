@@ -1297,6 +1297,10 @@ export function queryString (obj) {
  * @param {{preventDefault?: function}} [event] - event to prevent default
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @returns {Promise<any>}
+ * 
+ * @example
+ *   - request('post /api/user', { name: 'John' })
+ *   - request(`get  /api/user/${id}`, undefined, e, isLoading)
  */
 export async function request (route, data, event, isLoading) {
   try {

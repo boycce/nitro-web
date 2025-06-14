@@ -22,9 +22,9 @@
     }
   },
   "scripts": {
-    "major": "npm run types && standard-version --release-as major && npm publish && cd ../webpack && npm publish",
-    "minor": "npm run types && standard-version --release-as minor && npm publish && cd ../webpack && npm publish",
-    "patch": "npm run types && standard-version --release-as patch && npm publish && cd ../webpack && npm publish",
+    "major": "npm run types && standard-version -a --release-as major && npm publish && cd ../webpack && npm publish",
+    "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
+    "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
     "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types"
   },
   "dependencies": {
@@ -48,7 +48,7 @@
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "sort-route-addresses-nodeps": "0.0.4",
-    "standard-version": "^9.5.0"
+    "standard-version": "github:boycce/standard-version"
   },
   "devDependencies": {
     "@types/dateformat": "^5.0.3"
@@ -69,12 +69,20 @@
       "changelog": true,
       "tag": true
     },
+    "scripts": {
+      "prerelease": "npm run types && git add ./types"
+    },
     "bumpFiles": [
       "package.json",
       "../webpack/package.json",
       {
         "filename": "../example/package.json",
         "updater": "./semver-updater.cjs"
+      },
+      {
+        "filename": "../!(core|example|webpack)/package.json",
+        "updater": "./semver-updater.cjs",
+        "skipCommit": true
       }
     ]
   },
