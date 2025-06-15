@@ -55,7 +55,7 @@
   },
   "peerDependencies": {
     "@stripe/stripe-js": "^1.34.0",
-    "monastery": "~3.5.5",
+    "monastery": "~3.5.6",
     "stripe": "^9.16.0"
   },
   "_peers-are-packages-that-will-be-used-in-the-host-repo-too": "",

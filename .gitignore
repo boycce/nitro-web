@@ -3,6 +3,7 @@ client/dist
 node_modules
 **/node_modules
 *.log
+package-lock.json
 
 # User files
 ./.env
