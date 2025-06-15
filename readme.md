@@ -43,11 +43,15 @@ npm run build
 npm run start
 ```
 
-### Nitro Development
+### Example App Development
 
-The same run commands can be used in ./ which are actually executed in ./example/ via npm workspaces (`-w` flag).
+You can run the same commands above from the root nitro-web directory (./)
 
-If util.js is updated, you must run `npm run types` to update the types file.
+### Custom App Development
+
+1. Move your project into `./packages/MYPROJECT`
+2. Delete the `./MYPROJECT/package-lock.json` file (if it exists), and add `package-lock=false` to `./MYPROJECT/.npmrc`. Workspaces only generate a single `package-lock.json` at the root, if this file exists locally, npm may install outdated dependencies for your team or in production.
+3. Ensure the same versions of `nitro-web` and `nitro-web/webpack` are used, this is required for workspace linking to function correctly.
 
 ### Versions
 
