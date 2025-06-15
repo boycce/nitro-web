@@ -30,8 +30,11 @@ const nitroVersion = _require('./package.json').version
 
 // process.traceDeprecation = true
 export const getConfig = (config) => {
-  const { clientDir, componentsDir, distDir, imgsDir } = getDirectories(path, config.pwd)
-  const publicPath = getPublicPath(config.env, config.homepage, config.publicPath)
+  const { client, name='', pwd, env='development', homepage, publicPath, version } = config
+  const { clientDir, componentsDir, distDir, imgsDir } = getDirectories(path, pwd)
+  const publicPathResolved = getPublicPath(env, homepage, publicPath)
+
+  if (!name) throw new Error('No name found in config environement variables?')
 
   return (env, argv) => [{
     devtool: isBuild ? false : 'source-map',
@@ -103,7 +106,7 @@ export const getConfig = (config) => {
                   // }),
                   postcssNested,
                   postcssFor,
-                  tailwindcss({ config: path.resolve(config.pwd, 'tailwind.config.js') }), 
+                  tailwindcss({ config: path.resolve(pwd, 'tailwind.config.js') }), 
                   autoprefixer,
                 ],
               },
@@ -142,7 +145,7 @@ export const getConfig = (config) => {
                   ['babel-plugin-macros', {
                     'twin': {
                       preset: 'emotion',
-                      config: path.resolve(config.pwd, 'tailwind.config.js'),
+                      config: path.resolve(pwd, 'tailwind.config.js'),
                     },
                   }],
                   // 'react-refresh/babel', // !isBuild && _require.resolve('react-refresh/babel'),
@@ -245,7 +248,7 @@ export const getConfig = (config) => {
       // Because of this we manually need to prefix all output filenames with `assets/`.
       filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.js`,
       path: distDir,
-      publicPath: publicPath,
+      publicPath: publicPathResolved,
     },
     performance: {
       hints: false,
@@ -274,11 +277,11 @@ export const getConfig = (config) => {
       }),
       new webpack.DefinePlugin({
         INJECTED_CONFIG: JSON.stringify({
-          ...config.client,
+          ...(client||{}),
           isDemo: !!process.env.isDemo,
           isStatic: !!process.env.isStatic,
-          jwtName: 'nitro-jwt' + (isBuild ? '' : '-' + formatSlug(config.name)),
-          version: process.env.isDemo ? nitroVersion : config.version,
+          jwtName: 'nitro-jwt' + (isBuild ? '' : '-' + formatSlug(name)),
+          version: process.env.isDemo ? nitroVersion : version,
         }),
       }),
       new ESLintPlugin({
@@ -287,7 +290,7 @@ export const getConfig = (config) => {
       }),
       new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.css` }),
       new HtmlWebpackPlugin({ template: clientDir + 'index.html', filename: distDir + 'index.html' }),
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPath, NAME: config.name }),
+      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPathResolved, NAME: name }),
       new CleanTerminalPlugin({ skipFirstRun: true }),
       // !isBuild && new ReactRefreshWebpackPlugin({ overlay: false }),
     ].filter(Boolean),
