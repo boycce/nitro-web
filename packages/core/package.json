@@ -1,6 +1,6 @@
 {
   "name": "nitro-web",
-  "version": "0.0.60",
+  "version": "0.0.61",
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@hokify/axios": "^0.19.1",
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
     "axios": "^1.9.0",
     "axios-retry": "^3.3.1",
     "bcrypt": "^5.0.0",
