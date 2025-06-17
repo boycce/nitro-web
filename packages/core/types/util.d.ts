@@ -583,13 +583,14 @@ export function s3Image(awsUrl: string, imageOrArray: Image[] | Image, size?: st
 export function sanitizeHTML(string: string): string;
 /**
  * Process scrollbar width once.
- * @param {string} paddingClass - class name to give padding to
- * @param {string} marginClass - class name to give margin to
- * @param {number} maxWidth - enclose css in a max-width media query
+ * @param {string} [paddingClass] - class name to give padding to
+ * @param {string} [marginClass] - class name to give margin to
+ * @param {number} [maxWidth] - enclose css in a max-width media query
+ * @param {string} [marginClassNegative] - class name to give negative margin to
  * @returns {number}
  *
  */
-export function scrollbar(paddingClass: string, marginClass: string, maxWidth: number): number;
+export function scrollbar(paddingClass?: string, marginClass?: string, marginClassNegative?: string, maxWidth?: number): number;
 /**
  * Convert seconds to time
  * @param {number} seconds
