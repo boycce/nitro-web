@@ -1,1 +1,6 @@
-export { auth as default } from 'nitro-web/server'
+import { authRoutes } from 'nitro-web/server'
+
+export const routes = {
+  ...authRoutes,
+  // 'get /api/custom': [customRoute],
+}

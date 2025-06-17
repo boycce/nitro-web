@@ -24,7 +24,8 @@ export function Button({
   IconLeftEnd, 
   IconRight, 
   IconRightEnd, 
-  children, 
+  children,
+  type='button',
   ...props 
 }: Button) {
   // const size = (color.match(/xs|sm|md|lg/)?.[0] || 'md') as 'xs'|'sm'|'md'|'lg'
@@ -37,7 +38,7 @@ export function Button({
   const colors = {
     'primary': 'bg-primary hover:bg-primary-hover ring-transparent text-white [&>.loader]:border-white',
     'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.loader]:border-white',
-    'black': 'bg-black hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
+    'black': 'bg-black hover:bg-gray-800 ring-transparent text-white [&>.loader]:border-white',
     'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
     'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black', // maybe change to text-foreground
     'clear': 'hover:bg-gray-50 ring-gray-300 text-foreground [&>.loader]:border-foreground !shadow-none',
@@ -62,7 +63,11 @@ export function Button({
   }
   
   return (
-    <button class={twMerge(`${base} ${sizes[size]} ${appliedColor} ${contentLayout} ${loading} nitro-button ${className||''}`)} {...props}>
+    <button
+      type={type} 
+      class={twMerge(`${base} ${sizes[size]} ${appliedColor} ${contentLayout} ${loading} nitro-button ${className||''}`)} 
+      {...props}
+    >
       {IconLeft && getIcon(IconLeft)}
       {IconLeftEnd && getIcon(IconLeftEnd)}
       <span class={`${iconPosition == 'leftEnd' || iconPosition == 'rightEnd' ? 'flex-1' : ''}`}>{children}</span>

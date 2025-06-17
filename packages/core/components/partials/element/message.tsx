@@ -25,8 +25,8 @@ export function Message({ className }: { className?: string }) {
     'unauth': { type: 'error', text: 'You are unauthorised' },
   }
   const colorMap = {
-    'error': 'text-critical',
-    'warning': 'text-error',
+    'error': 'text-danger',
+    'warning': 'text-warning',
     'info': 'text-info',
     'success': 'text-success',
   }
@@ -70,7 +70,7 @@ export function Message({ className }: { className?: string }) {
     // Show message and hide it again after some time. Send back cleanup if store.message changes
     } else if (messageObject && now - 500 < messageObject.date) {
       const timeout1 = setTimeout(() => setVisible(true), 50)
-      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000)
+      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000000)
       return () => {
         clearTimeout(timeout1)
         clearTimeout(timeout2)
@@ -97,24 +97,24 @@ export function Message({ className }: { className?: string }) {
               (visible ? 'translate-x-0 opacity-100' : 'translate-x-1 opacity-0')
             }>
               <div className="p-3">
-                <div className="flex items-start">
-                  <div className="shrink-0">
-                    <CircleCheck aria-hidden="true" size={21} className={`${color} mt-0.5`} />
+                <div className="flex items-start gap-3 text-sm leading-[1.4em]">
+                  <div className="flex items-center shrink-0 min-h-[1.4em]">
+                    <CircleCheck aria-hidden="true" size={19} className={`${color}`} />
                   </div>
-                  <div className="ml-3 flex-1 pt-0.5">
-                    <p className="text-sm font-medium text-gray-900">{typeof store.message === 'object' && store.message?.text}
+                  <div className="flex flex-1 items-center min-h-[1.4em]">
+                    <p className="font-medium text-gray-900">{typeof store.message === 'object' && store.message?.text}
                     </p>
                     {/* <p className="mt-1 text-sm text-gray-500">{store.message.text}</p> */}
                   </div>
-                  <div className="ml-4 flex shrink-0">
+                  <div className="flex items-center shrink-0 min-h-[1.4em]">
                     <button
                       type="button"
                       onClick={hide}
-                      className="inline-flex  rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 
+                      className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 
                         focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       <span className="sr-only">Close</span>
-                      <X aria-hidden="true" size={19} className="mt-0.5" />
+                      <X aria-hidden="true" size={19} />
                     </button>
                   </div>
                 </div>

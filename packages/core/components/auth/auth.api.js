@@ -11,28 +11,31 @@ import { isArray, pick, isString, ucFirst, fullNameSplit } from 'nitro-web/util'
 let authConfig = null
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 
-export default {
-  routes: {
-    'get     /api/store': ['store'],
-    'get     /api/signout': ['signout'],
-    'post    /api/signin': ['signin'],
-    'post    /api/signup': ['signup'],
-    'post    /api/reset-instructions': ['resetInstructions'],
-    'post    /api/reset-password': ['resetPassword'],
-    'delete  /api/account/:uid': ['isUser', 'remove'],
-  },
+export const routes = {
+  // Routes
+  'get     /api/store': [store],
+  'get     /api/signout': [signout],
+  'post    /api/signin': [signin],
+  'post    /api/signup': [signup],
+  'post    /api/reset-instructions': [resetInstructions],
+  'post    /api/reset-password': [resetPassword],
+  'post    /api/invite-instructions': [inviteInstructions],
+  'post    /api/invite-accept': [resetPassword],
+  'delete  /api/account/:uid': [remove],
+
+  // Overridable helpers
   setup: setup,
-  store: store,
-  signup: signup,
-  signin: signin,
-  signout: signout,
-  resetInstructions: resetInstructions,
-  resetPassword: resetPassword,
-  remove: remove,
+  findUserFromProvider: findUserFromProvider,
+  getStore: getStore,
+  signinAndGetStore: signinAndGetStore,
+  tokenCreate: tokenCreate,
+  tokenParse: tokenParse,
+  userCreate: userCreate,
+  validatePassword: validatePassword,
 }
 
 function setup(middleware, _config) {
-  // Setup is called automatically when the server starts
+  // routes.setup is called automatically when express starts
   // Set config values
   const configKeys = ['clientUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
   authConfig = pick(_config, configKeys)
@@ -45,7 +48,7 @@ function setup(middleware, _config) {
       { usernameField: 'email' },
       async (email, password, next) => {
         try {
-          const user = await findUserFromProvider({ email }, password)
+          const user = await this.findUserFromProvider({ email }, password)
           next(null, user)
         } catch (err) {
           next(err.message)
@@ -62,7 +65,7 @@ function setup(middleware, _config) {
       },
       async (payload, done) => {
         try {
-          const user = await findUserFromProvider({ _id: payload._id })
+          const user = await this.findUserFromProvider({ _id: payload._id })
           if (!user) return done(null, false)
           return done(null, user)
         } catch (err) {
@@ -97,24 +100,26 @@ function setup(middleware, _config) {
 }
 
 async function store(req, res) {
-  res.json(await getStore(req.user))
+  res.json(await this.getStore(req.user))
 }
 
 async function signup(req, res) {
   try {
-    let user = await userCreate(req.body)
+    const desktop = req.query.desktop
+    let user = await this.userCreate(req.body, this.findUserFromProvider)
     sendEmail({
       config: authConfig,
       template: 'welcome',
       to: `${ucFirst(user.firstName)}<${user.email}>`,
     }).catch(console.error)
-    res.send(await signinAndGetState(user, req.query.desktop))
+    res.send(await this.signinAndGetStore(user, desktop, this.getStore))
   } catch (err) {
     res.error(err)
   }
 }
 
 function signin(req, res) {
+  const desktop = req.query.desktop
   if (!req.body.email) return res.error('email', 'The email you entered is incorrect.')
   if (!req.body.password) return res.error('password', 'The password you entered is incorrect.')
 
@@ -122,7 +127,7 @@ function signin(req, res) {
     if (err) return res.error(err)
     if (!user && info) return res.error('email', info.message)
     try {
-      const response = await signinAndGetState(user, req.query.desktop)
+      const response = await this.signinAndGetStore(user, desktop, this.getStore)
       res.send(response)
     } catch (err) {
       res.error(err)
@@ -137,7 +142,7 @@ function signout(req, res) {
 async function resetInstructions(req, res) {
   try {
     let email = (req.body.email || '').trim().toLowerCase()
-    if (!email || !isString(email)) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+    if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
 
     let user = await db.user.findOne({ query: { email }, _privateData: true })
     if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
@@ -162,11 +167,13 @@ async function resetInstructions(req, res) {
 async function resetPassword(req, res) {
   try {
     const { token, password, password2 } = req.body
+    const name = req.path.includes('invite') ? 'inviteToken' : 'resetToken'
+    const desktop = req.query.desktop
     const id = tokenParse(token)
     await validatePassword(password, password2)
 
-    let user = await db.user.findOne({ query: id, blacklist: ['-resetToken'], _privateData: true })
-    if (!user || user.resetToken !== token) throw new Error('Sorry your email token is invalid or has already been used.')
+    let user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
+    if (!user || user[name] !== token) throw new Error('Sorry your token is invalid or has already been used.')
 
     await db.user.update({
       query: user._id,
@@ -174,11 +181,50 @@ async function resetPassword(req, res) {
         password: await bcrypt.hash(password, 10),
         resetToken: '',
       },
-      blacklist: ['-resetToken', '-password'],
+      blacklist: ['-' + name, '-password'],
     })
-    res.send(await signinAndGetState({ ...user, resetToken: undefined }, req.query.desktop))
+    res.send(await this.signinAndGetStore({ ...user, [name]: undefined }, desktop, this.getStore))
   } catch (err) {
     res.error(err)
+  }
+}
+
+async function inviteInstructions(req, res) {
+  try {
+    // Check if user is admin here rather than in middleware (which may not exist yet)
+    if (req.user.type != 'admin') {
+      throw new Error('You are not authorized to invite users.')
+    }
+    const inviteToken = await tokenCreate()
+    const userData = await db.user.validate({
+      ...pick(req.body, ['email', 'firstName', 'lastName']),
+      status: 'invited',
+      inviteToken: inviteToken,
+    })
+
+    // Check if user already exists
+    if (await db.user.findOne({ query: { email: userData.email } })) {
+      throw { title: 'email', detail: 'User already exists.' }
+    }
+
+    // Create user
+    const user = await db.user.insert({
+      data: userData,
+    })
+
+    // Send email
+    res.send(user)
+    sendEmail({
+      config: authConfig,
+      template: 'invite-user',
+      to: `${ucFirst(userData.firstName)}<${userData.email}>`,
+      data: {
+        token: inviteToken + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
+      },
+    }).catch(err => console.error('sendEmail(..) mailgun error', err))
+
+  } catch (err) {
+    return res.error(err)
   }
 }
 
@@ -208,7 +254,7 @@ async function remove(req, res) {
   }
 }
 
-/* ---- Auth helpers ------------------------- */
+/* ---- Overridable helpers ------------------ */
 
 export async function findUserFromProvider(query, passwordToCheck) {
   /**
@@ -260,7 +306,7 @@ export async function getStore(user) {
   }
 }
 
-export async function signinAndGetState(user, isDesktop) {
+export async function signinAndGetStore(user, isDesktop, getStore) {
   if (user.loginActive === false) throw 'This user is not available.'
   user.desktop = isDesktop
 
@@ -269,30 +315,7 @@ export async function signinAndGetState(user, isDesktop) {
   return { ...store, jwt }
 }
 
-export function tokenCreate(id) {
-  return new Promise((resolve) => {
-    crypto.randomBytes(16, (err, buff) => {
-      let hash = buff.toString('hex') // 32 chars
-      resolve(`${hash}${id || ''}:${Date.now()}`)
-    })
-  })
-}
-
-export function tokenParse(token) {
-  let split = (token  ||  '').split(':')
-  let hash = split[0].slice(0, 32)
-  let userId = split[0].slice(32)
-  let time = split[1]
-  if (!hash || !userId || !time) {
-    throw { title: 'error', detail: 'Sorry your code is invalid.' }
-  } else if (parseFloat(time) + 1000 * 60 * 60 * 24 < Date.now()) {
-    throw { title: 'error', detail: 'Sorry your code has timed out.' }
-  } else {
-    return userId
-  }
-}
-
-export async function userCreate({ name, business, email, password }) {
+export async function userCreate({ name, business, email, password, findUserFromProvider }) {
   try {
     const options = { blacklist: ['-_id'] }
     const isMultiTenant = !authConfig.isNotMultiTenant
@@ -339,6 +362,29 @@ export async function userCreate({ name, business, email, password }) {
       if (o.title == 'firstName') o.title = 'name'
       return o
     })
+  }
+}
+
+export function tokenCreate(id) {
+  return new Promise((resolve) => {
+    crypto.randomBytes(16, (err, buff) => {
+      let hash = buff.toString('hex') // 32 chars
+      resolve(`${hash}${id || ''}:${Date.now()}`)
+    })
+  })
+}
+
+export function tokenParse(token) {
+  let split = (token  ||  '').split(':')
+  let hash = split[0].slice(0, 32)
+  let userId = split[0].slice(32)
+  let time = split[1]
+  if (!hash || !userId || !time) {
+    throw { title: 'error', detail: 'Sorry your code is invalid.' }
+  } else if (parseFloat(time) + 1000 * 60 * 60 * 24 < Date.now()) {
+    throw { title: 'error', detail: 'Sorry your code has timed out.' }
+  } else {
+    return userId
   }
 }
 

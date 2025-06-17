@@ -28,10 +28,8 @@ export default {
       colors: {
         // Nitro main colors
         'primary': '#4c50f9',
-        'primary-dark': darken('#4c50f9', 0.05),
         'primary-hover': lighten('#4c50f9', 0.05),
         'secondary': colors.green[500],
-        'secondary-dark': colors.green[600],
         'secondary-hover': lighten(colors.green[500], 0.05),
         'label': colors.gray[900],
         'link': colors.black,
@@ -39,9 +37,9 @@ export default {
         'link-focus': colors.blue[200],
         'foreground': colors.gray[900],
         // Nitro error & alert colors
-        'critical': '#ff0000',
-        'danger': '#ff0000',
-        'danger-dark': colors.red[800],
+        'danger': colors.red[500],
+        'danger-foreground': colors.red[600],
+        'warning': colors.yellow[500],
         'info': colors.blue[500],
         'success': colors.green[500],
         // Nitro element colors
@@ -49,6 +47,7 @@ export default {
         'input-placeholder': colors.gray[400],
         'input-border': colors.gray[300],
         'input-border-focus': '#4c50f9',
+        'dropdown-selected-foreground': darken('#4c50f9', 0.05),
         'dropdown-ul-border': colors.gray[200],
         'variable-selected': '#4c50f9',
       },

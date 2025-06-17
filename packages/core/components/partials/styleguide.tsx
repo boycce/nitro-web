@@ -348,7 +348,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         </div>
       </div>
 
-      <Modal show={showModal1} setShow={setShowModal1} class="p-9">
+      <Modal show={showModal1} setShow={setShowModal1}>
         <h3 class="h3">Edit Profile</h3>
         <p class="mb-5">An example modal containing a basic form for editing profiles.</p>
         <form class="mb-8 text-left">

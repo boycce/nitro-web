@@ -133,7 +133,7 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
   return (
     <div css={style} className={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`)}>
       {children}
-      {error && <div class="mt-1.5 text-xs text-danger nitro-error">{error.detail}</div>}
+      {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
   )
 }
@@ -149,7 +149,7 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error 
-      ? 'text-red-900 outline-danger focus:outline-danger ' 
+      ? 'text-danger-foreground outline-danger focus:outline-danger ' 
       : 'text-input outline-input-border focus:outline-input-border-focus ') + 
     (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ') + 
     'nitro-input'

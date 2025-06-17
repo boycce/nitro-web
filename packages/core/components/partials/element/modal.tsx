@@ -5,13 +5,15 @@ type ModalProps = {
   show: boolean
   setShow: (show: boolean) => void
   children: React.ReactNode
+  className?: string
+  rootClassName?: string
+  dismissable?: boolean
   maxWidth?: string
   minHeight?: string
-  dismissable?: boolean
   [key: string]: unknown
 }
 
-export function Modal({ show, setShow, children, maxWidth, minHeight, dismissable = true, ...props }: ModalProps) {
+export function Modal({ show, setShow, children, maxWidth, minHeight, dismissable = true, className, rootClassName }: ModalProps) {
   const [state, setState] = useState(show ? 'open' : 'close')
   const containerEl = useRef<HTMLDivElement>(null)
   const isFirst = IsFirstRender()
@@ -33,8 +35,7 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
       container: 'opacity-100 scale-[1] duration-200',
     },
   }
-  const _state = states[state as keyof typeof states]
-
+  const stateObj = states[state as keyof typeof states]
 
   useEffect(() => {
     if (isFirst) return
@@ -64,15 +65,15 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
   return (
     <div 
       onClick={(e) => e.stopPropagation()} 
-      class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[100] ${_state.root} ${props.className}`)} nitro-modal`}
+      class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[100] ${stateObj.root} ${rootClassName||''}`)} nitro-modal`}
     >
-      <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${_state.bg}`}></div>
-      <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${_state.container}`}>
+      <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${stateObj.bg}`}></div>
+      <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${stateObj.container}`}>
         <div class="flex items-center justify-center min-h-full" onMouseDown={onClick}> 
           <div 
             ref={containerEl} 
             style={{ maxWidth: maxWidth || '550px', minHeight: minHeight }} 
-            class={`relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg ${props.className}`}
+            class={`relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg p-9 ${className||''}`}
           >
             <div 
               class="absolute top-0 right-0 p-3 m-1 cursor-pointer" 

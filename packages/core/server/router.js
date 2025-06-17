@@ -20,8 +20,9 @@ export async function setupRouter (config) {
   const expressApp = express()
   const server = http.createServer(expressApp)
   const apiRoutes = {}
-  const controllers = {}
+  const controllers = {} // { controllerName: { ...routes, ...helpers } }
   const allMiddleware = { ...defaultMiddleware, ...(middleware || {}) }
+  const verbs = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'all']
 
   if (!env) {
     throw new Error('setupRouter: `config.env` missing')
@@ -40,23 +41,27 @@ export async function setupRouter (config) {
   let filepaths = getFiles(componentsDir, /\.api\.js$/)
   // console.log(filepaths, componentsDir)
   for (let filepath of filepaths) {
-    let file = (await import(filepath)).default
-    let name = filepath.replace(/^.*[\\\/]|\.api\.js$/g, '') // eslint-disable-line
-    controllers[name] = file
+    const file = await import(filepath)
+    const routes = file.routes
+    const name = filepath.replace(/^.*[\\\/]|\.api\.js$/g, '') // eslint-disable-line
+    controllers[name] = routes // { ...routes, ...helpers }
 
-    if (!file) {
-      console.warn(`API warning: no default export found on file ${filepath}`)
+    if (!routes) {
+      console.warn(`API warning: no 'routes' export found on file ${filepath}`)
       continue
     }
 
-    if (file.setup) file.setup(allMiddleware, config)
-    if (file.routes) {
-      util.each(file.routes, (_middleware, key) => {
+    if (routes?.setup) routes.setup.call(routes, allMiddleware, config)
+    if (routes) {
+      util.each(routes, (_middleware, key) => {
+        if (!key.match(/\s/)) return
+        const match = key.match(new RegExp(`^(${verbs.join('|')})\\s+(.*)$`, 'i'))
+        if (!match) throw new Error(`Invalid verb or path: ${key}`)
         apiRoutes[key] = {
           middleware: util.toArray(_middleware),
           filename: name,
-          path: key.replace(/^[a-z]+\s+/, ''),
-          verb: key.match(/^[a-z]+/)? key.match(/^[a-z]+/)[0] : 'get',
+          path: match[2],
+          verb: match[1],
         }
       })
     }
@@ -265,38 +270,22 @@ function getFiles (dir, regexp) {
   return paths
 }
 
-function resolveMiddleware (controllers, middleware, route, item, last) {
+function resolveMiddleware (controllers, middleware, route, item) {
   /**
    * Resolves a placeholder string into a function
+   * @param {object} controllers - { controllerName: { routes, setup, ...other exported functions } }
+   * @param {object} middleware
    * @param {object} route
    * @param {fn|string} item
    * @param {boolean} last - last item
    * @return function(req, res){..}
    */
   if (util.isFunction(item)) {
-    return item
+    return item.bind(controllers[route.filename])
 
-  } else if (!util.isString(item)) {
-    console.error('Invalid middleware item:', item)
+  } else if (typeof item !== 'string') {
+    console.error('Invalid middleware item on route:', route.path, item)
     return
-
-  } else if (item.match(/\./) || last) { // e.g. user.read
-    let arr = item.split('.')
-    let controllerGroup = controllers[arr[1]? arr[0] : route.filename]
-    let controllerName = arr[1] || arr[0]
-    if (controllerGroup && controllerGroup[controllerName]) {
-      if (middleware.endpointSwitcher && controllerGroup[controllerName + 'Desktop']) {
-        return middleware.endpointSwitcher.bind(
-          null,
-          controllerGroup[controllerName].bind(controllerGroup),
-          controllerGroup[controllerName + 'Desktop'].bind(controllerGroup)
-        )
-      } else {
-        return controllerGroup[controllerName].bind(controllerGroup)
-      }
-    } else  {
-      console.error(`The controller '${item}' defined in '${route.filename}.api' doesn't exist.`)
-    }
 
   } else if (middleware[item]) {
     return middleware[item]

@@ -151,7 +151,7 @@ function SelectBase({ inputId, minMenuWidth, name, prefix='', onChange, options,
         // isDisabled={true}
         // maxMenuHeight={200}
       />
-      {error && <div class="mt-1.5 text-xs text-danger">{error.detail}</div>}
+      {error && <div class="mt-1.5 text-xs text-danger-foreground">{error.detail}</div>}
     </div>
   )
 }
@@ -257,7 +257,7 @@ const selectStyles = {
   // Input container objects
   input: {
     base: 'text-input',
-    error: 'text-red-900',
+    error: 'text-danger-foreground',
   },
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: 'text-xs',
@@ -265,10 +265,10 @@ const selectStyles = {
   placeholder: 'text-input-placeholder',
   singleValue: {
     base: 'text-input',
-    error: 'text-red-900',
+    error: 'text-danger-foreground',
   },
   // Icon indicators
-  clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-red-800',
+  clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground',
   dropdownIndicator: 'p-1 hover:bg-gray-100 text-gray-500 rounded-md hover:text-black',
   indicatorsContainer: 'p-1 px-2 gap-1',
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
@@ -279,7 +279,7 @@ const selectStyles = {
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',
     hover: 'bg-gray-50',
-    selected: '!bg-gray-100 text-primary-dark',
+    selected: '!bg-gray-100 text-dropdown-selected-foreground',
   },
 }
 

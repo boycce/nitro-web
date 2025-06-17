@@ -1,1 +1,1 @@
-// export { settings as default } from 'nitro-web/server'
+// export { settingsRoutes as routes } from 'nitro-web/server'

@@ -17,6 +17,7 @@ const config = {
   pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
+  // isNotMultiTenant: true,
 
   monasteryOptions: {
     noDefaults: true,

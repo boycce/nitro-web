@@ -7,16 +7,14 @@ let stripe = undefined
 let stripeProducts = []
 let config = {}
 
-export default {
-  routes: {
-    'post   /api/stripe/webhook': ['stripeWebhook'],
-    'post   /api/stripe/create-billing-portal-session': ['isUser', 'billingPortalSessionCreate'],
-    'get    /api/stripe/upcoming-invoices': ['isUser', 'upcomingInvoicesFind'],
-  },
+export const routes = {
+  // Routes
+  'post   /api/stripe/webhook': [stripeWebhook],
+  'post   /api/stripe/create-billing-portal-session': [billingPortalSessionCreate],
+  'get    /api/stripe/upcoming-invoices': [upcomingInvoicesFind],
+
+  // Overridable helpers
   setup: setup,
-  stripeWebhook: stripeWebhook,
-  billingPortalSessionCreate: billingPortalSessionCreate,
-  upcomingInvoicesFind: upcomingInvoicesFind,
 }
 
 function setup(middleware, _config) {
@@ -104,7 +102,80 @@ async function upcomingInvoicesFind(req, res) {
   }
 }
 
-/* Private webhook actions */
+/* ---- Overridable helpers ------------------ */
+
+async function error(req, res, err) {
+  if (err && err.response && err.response.body) console.log(err.response.body)
+  if (util.isString(err) && err.match(/Cannot find company with id/)) {
+    res.json({ user: 'no company found' })
+  } else res.error(err)
+}
+
+export async function getProducts() {
+  /**
+   * Returns all products and caches it on the app
+   * @returns {Array} products
+   */
+  try {
+    if (stripeProducts) return stripeProducts
+    if (!config.stripeSecretKey) {
+      stripeProducts = []
+      throw new Error('Missing process.env.stripeSecretKey for retrieving products')
+    }
+
+    let products = (await stripe.products.list({ limit: 100, active: true })).data
+    let prices = (await stripe.prices.list({ limit: 100, active: true, expand: ['data.tiers'] })).data
+
+    return (stripeProducts = products.map((product) => ({
+      // remove default_price when new pricing is ready
+      ...util.pick(product, ['id', 'created', 'default_price', 'description', 'name', 'metadata']),
+      type: product.name.match(/housing/i) ? 'project' : 'subscription', // overwriting, was 'service'
+      prices: prices
+        .filter((price) => price.product == product.id)
+        .map((price) => ({
+          ...util.pick(price, ['id', 'product', 'nickname', 'recurring', 'unit_amount', 'tiers', 'tiers_mode']),
+          interval: price.recurring?.interval, // 'year', 'month', undefined
+        })),
+    })))
+  } catch (err) {
+    console.error(new Error(err)) // when stripe throws errors, the callstack is missing.
+    return []
+  }
+}
+
+async function getUserFromEvent(event) {
+  // User retreived from the event's customer. 
+  // The customer is created before the paymentIntent and subscriptionIntent is set up
+  let object = event.data.object
+  let customerId = object.object == 'customer'? object.id : object.customer
+  if (customerId) {
+    var user = await db.user.findOne({
+      query: { 'stripeCustomer.id': customerId },
+      populate: db.user.populate({}),
+      blacklist: false, // ['-company.users.inviteToken'],
+    })
+  }
+  if (!user) {
+    await db.log.insert({ data: {
+      date: Date.now(),
+      event: event.type,
+      message: `Cannot find user with id: ${customerId}.`,
+    }})
+    throw new Error(`Cannot find user with id: ${customerId}.`)
+  }
+  // populate company owner with user data (handy for _addSubscriptionBillingChange)
+  if (user.company?.users) {
+    user.company.users = user.company.users.map(o => {
+      if (o.role == 'owner' && o._id.toString() == user._id.toString()) {
+        o.firstName = user.firstName
+        o.name = user.name
+        o.email = user.email
+      }
+      return o
+    })
+  }
+  return user
+}
 
 async function webhookCustomerCreatedUpdated(req, res, event) {
   try {
@@ -169,72 +240,6 @@ async function webhookSubUpdated(req, res, event) {
   }
 }
 
-async function getUserFromEvent(event) {
-  // User retreived from the event's customer. 
-  // The customer is created before the paymentIntent and subscriptionIntent is set up
-  let object = event.data.object
-  let customerId = object.object == 'customer'? object.id : object.customer
-  if (customerId) {
-    var user = await db.user.findOne({
-      query: { 'stripeCustomer.id': customerId },
-      populate: db.user.populate({}),
-      blacklist: false, // ['-company.users.inviteToken'],
-    })
-  }
-  if (!user) {
-    await db.log.insert({ data: {
-      date: Date.now(),
-      event: event.type,
-      message: `Cannot find user with id: ${customerId}.`,
-    }})
-    throw new Error(`Cannot find user with id: ${customerId}.`)
-  }
-  // populate company owner with user data (handy for _addSubscriptionBillingChange)
-  if (user.company?.users) {
-    user.company.users = user.company.users.map(o => {
-      if (o.role == 'owner' && o._id.toString() == user._id.toString()) {
-        o.firstName = user.firstName
-        o.name = user.name
-        o.email = user.email
-      }
-      return o
-    })
-  }
-  return user
-}
-
-export async function getProducts() {
-  /**
-   * Returns all products and caches it on the app
-   * @returns {Array} products
-   */
-  try {
-    if (stripeProducts) return stripeProducts
-    if (!config.stripeSecretKey) {
-      stripeProducts = []
-      throw new Error('Missing process.env.stripeSecretKey for retrieving products')
-    }
-
-    let products = (await stripe.products.list({ limit: 100, active: true })).data
-    let prices = (await stripe.prices.list({ limit: 100, active: true, expand: ['data.tiers'] })).data
-
-    return (stripeProducts = products.map((product) => ({
-      // remove default_price when new pricing is ready
-      ...util.pick(product, ['id', 'created', 'default_price', 'description', 'name', 'metadata']),
-      type: product.name.match(/housing/i) ? 'project' : 'subscription', // overwriting, was 'service'
-      prices: prices
-        .filter((price) => price.product == product.id)
-        .map((price) => ({
-          ...util.pick(price, ['id', 'product', 'nickname', 'recurring', 'unit_amount', 'tiers', 'tiers_mode']),
-          interval: price.recurring?.interval, // 'year', 'month', undefined
-        })),
-    })))
-  } catch (err) {
-    console.error(new Error(err)) // when stripe throws errors, the callstack is missing.
-    return []
-  }
-}
-
 // async function createOrUpdateCustomer(user, paymentMethod=null) {
 //   /**
 //    * Creates or updates a stripe customer and saves it to the user
@@ -261,10 +266,3 @@ export async function getProducts() {
 //     blacklist: ['-stripeCustomer'],
 //   })
 // }
-
-async function error(req, res, err) {
-  if (err && err.response && err.response.body) console.log(err.response.body)
-  if (util.isString(err) && err.match(/Cannot find company with id/)) {
-    res.json({ user: 'no company found' })
-  } else res.error(err)
-}

@@ -1,13 +1,9 @@
 // @ts-nocheck
 import db from 'monastery'
 
-export default {
-  routes: {
-    'put  /api/company/:cid': ['isCompanyUser', 'update'],
-    'put  /api/user/:uid': ['isUser', 'updateUser'],
-  },
-  update: update,
-  updateUser: updateUser,
+export const routes = {
+  'put  /api/company/:cid': ['isCompanyUser', update],
+  'put  /api/user/:uid': ['isUser', updateUser],
 }
 
 async function update(req, res) {

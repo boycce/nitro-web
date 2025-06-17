@@ -1410,13 +1410,14 @@ export function sanitizeHTML (string) {
 
 /**
  * Process scrollbar width once.
- * @param {string} paddingClass - class name to give padding to
- * @param {string} marginClass - class name to give margin to
- * @param {number} maxWidth - enclose css in a max-width media query
+ * @param {string} [paddingClass] - class name to give padding to
+ * @param {string} [marginClass] - class name to give margin to
+ * @param {number} [maxWidth] - enclose css in a max-width media query
+ * @param {string} [marginClassNegative] - class name to give negative margin to
  * @returns {number}
  * 
  */
-export function scrollbar (paddingClass, marginClass, maxWidth) {
+export function scrollbar (paddingClass, marginClass, marginClassNegative, maxWidth) {
   if (typeof window === 'undefined') return 0
   if (scrollbarCache || scrollbarCache === 0) {
     return scrollbarCache
@@ -1452,6 +1453,7 @@ export function scrollbar (paddingClass, marginClass, maxWidth) {
       (maxWidth ? '@media only screen and (max-width: ' + maxWidth + 'px) {' : '') +
       (paddingClass ? paddingClass + ' {padding-right:' + scrollbarCache + 'px}' : '') +
       (marginClass ? marginClass + ' {margin-right:' + scrollbarCache + 'px}' : '') +
+      (marginClassNegative ? marginClassNegative + ' {margin-right:' + scrollbarCache * -1 + 'px}' : '') +
       (maxWidth ? '}' : '')
     document.head.appendChild(style)
   }
