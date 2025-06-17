@@ -1114,9 +1114,6 @@ label, .label {
 .ml-3 {
   margin-left: 0.75rem;
 }
-.ml-4 {
-  margin-left: 1rem;
-}
 .ml-\[-0\.5rem\] {
   margin-left: -0.5rem;
 }
@@ -1128,9 +1125,6 @@ label, .label {
 }
 .-mt-1 {
   margin-top: -0.25rem;
-}
-.mt-0\.5 {
-  margin-top: 0.125rem;
 }
 .mt-1 {
   margin-top: 0.25rem;
@@ -1293,6 +1287,9 @@ label, .label {
 }
 .min-h-12 {
   min-height: 3rem;
+}
+.min-h-\[1\.4em\] {
+  min-height: 1.4em;
 }
 .min-h-\[100\%\] {
   min-height: 100%;
@@ -2041,9 +2038,6 @@ label, .label {
 .pr-input-x {
   padding-right: 12px;
 }
-.pt-0\.5 {
-  padding-top: 0.125rem;
-}
 .pt-1 {
   padding-top: 0.25rem;
 }
@@ -2141,6 +2135,9 @@ label, .label {
 .uppercase {
   text-transform: uppercase;
 }
+.leading-\[1\.4em\] {
+  line-height: 1.4em;
+}
 .tracking-tight {
   letter-spacing: -0.025em;
 }
@@ -2156,13 +2153,17 @@ label, .label {
   --tw-text-opacity: 1;
   color: rgb(30 58 138 / var(--tw-text-opacity, 1));
 }
-.text-critical {
-  --tw-text-opacity: 1;
-  color: rgb(255 0 0 / var(--tw-text-opacity, 1));
-}
 .text-danger {
   --tw-text-opacity: 1;
-  color: rgb(255 0 0 / var(--tw-text-opacity, 1));
+  color: rgb(239 68 68 / var(--tw-text-opacity, 1));
+}
+.text-danger-foreground {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+}
+.text-dropdown-selected-foreground {
+  --tw-text-opacity: 1;
+  color: rgb(60 65 249 / var(--tw-text-opacity, 1));
 }
 .text-foreground {
   --tw-text-opacity: 1;
@@ -2224,14 +2225,6 @@ label, .label {
   --tw-text-opacity: 1;
   color: rgb(76 80 249 / var(--tw-text-opacity, 1));
 }
-.text-primary-dark {
-  --tw-text-opacity: 1;
-  color: rgb(60 65 249 / var(--tw-text-opacity, 1));
-}
-.text-red-900 {
-  --tw-text-opacity: 1;
-  color: rgb(127 29 29 / var(--tw-text-opacity, 1));
-}
 .text-secondary {
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity, 1));
@@ -2239,6 +2232,10 @@ label, .label {
 .text-success {
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity, 1));
+}
+.text-warning {
+  --tw-text-opacity: 1;
+  color: rgb(234 179 8 / var(--tw-text-opacity, 1));
 }
 .text-white {
   --tw-text-opacity: 1;
@@ -2314,7 +2311,7 @@ label, .label {
   outline-offset: -2px;
 }
 .outline-danger {
-  outline-color: #ff0000;
+  outline-color: #ef4444;
 }
 .outline-input-border {
   outline-color: #d1d5db;
@@ -2733,6 +2730,10 @@ label, .label {
   --tw-bg-opacity: 1;
   background-color: rgb(55 65 81 / var(--tw-bg-opacity, 1));
 }
+.hover\:bg-gray-800:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgb(31 41 55 / var(--tw-bg-opacity, 1));
+}
 .hover\:bg-indigo-400:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(129 140 248 / var(--tw-bg-opacity, 1));
@@ -2753,6 +2754,10 @@ label, .label {
   --tw-text-opacity: 1;
   color: rgb(0 0 0 / var(--tw-text-opacity, 1));
 }
+.hover\:text-danger-foreground:hover {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity, 1));
+}
 .hover\:text-gray-500:hover {
   --tw-text-opacity: 1;
   color: rgb(107 114 128 / var(--tw-text-opacity, 1));
@@ -2760,10 +2765,6 @@ label, .label {
 .hover\:text-indigo-600:hover {
   --tw-text-opacity: 1;
   color: rgb(79 70 229 / var(--tw-text-opacity, 1));
-}
-.hover\:text-red-800:hover {
-  --tw-text-opacity: 1;
-  color: rgb(153 27 27 / var(--tw-text-opacity, 1));
 }
 .hover\:ring-indigo-300:hover {
   --tw-ring-opacity: 1;
@@ -2783,7 +2784,7 @@ label, .label {
   outline-offset: -2px;
 }
 .focus\:outline-danger:focus {
-  outline-color: #ff0000;
+  outline-color: #ef4444;
 }
 .focus\:outline-input-border-focus:focus {
   outline-color: #4c50f9;
