@@ -297,13 +297,19 @@ function resolveMiddleware (controllers, middleware, route, item) {
 }
 
 const defaultMiddleware = {
-  beforeAPIRoute: (req, res, next) => {
-    res.set('version', req.version)
-    next()
-  },
+  order: [
+    // Express middleware runtime order
+    'loadAssets',
+    'modifyRequest',
+    'parseUrlEncoded',
+    'parseJson',
+    'parseFile',
+    'beforeAPIRoute',
+  ],
 
   modifyRequest: (req, res, next) => {
     // Handy boolean denoting that the request wants JSON returned
+    // global.start = new Date().getTime()
     req.json = req.xhr || req.accepts(['html', 'json']) == 'json'
     next()
   },
@@ -334,13 +340,8 @@ const defaultMiddleware = {
     })(req, res, () => { /*console.timeEnd('upload middleware'); */next() })
   },
 
-  order: [
-    // Express middleware runtime order
-    'loadAssets',
-    'modifyRequest',
-    'parseUrlEncoded',
-    'parseJson',
-    'parseFile',
-    'beforeAPIRoute',
-  ],
+  beforeAPIRoute: (req, res, next) => {
+    res.set('version', req.version)
+    next()
+  },
 }

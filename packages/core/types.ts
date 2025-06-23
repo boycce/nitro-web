@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 type InjectedConfig = {
   awsUrl?: string
   clientUrl: string
@@ -19,7 +21,7 @@ export type Config = InjectedConfig & {
   // Non-injectable config on the client
   beforeApp?: () => Promise<object>
   beforeStoreUpdate?: (prevStore: Store | null, newData: Store) => Store
-  middleware?: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
+  middleware?: {[key: string]: (route: any, store: any) => undefined | { redirect: string }}
 }
 
 export type User = {

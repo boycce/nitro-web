@@ -1224,44 +1224,34 @@ export function pick (obj, keys) {
 /**
  * 
  * Parses a query string into an object, or returns the last known matching cache
- * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
  * @param {boolean} [trueDefaults] - assign true to empty values
  * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
- * UPDATE: removed array values, e.g. '?page=1&page=2' will return { page: '2' }
  */
 export function queryObject (searchString, trueDefaults) {
-  searchString = searchString.replace(/^[^?]+\?/, '?') // remove domain preceeding search string
+  if (searchString.startsWith('?')) searchString = searchString.slice(1)
   const uniqueKey = searchString + (trueDefaults ? '-true' : '')
-  /** @type {{[key: string]: string|true}} */
-  let obj = {}
 
   if (searchString === '') return {}
   if (!queryObjectCache) queryObjectCache = {}
   if (queryObjectCache[uniqueKey]) return queryObjectCache[uniqueKey]
 
-  // Remove '?', and split each query parameter (ampersand-separated)
-  const searchParams = searchString.slice(1).split('&')
-
-  // Loop through each query paramter
-  searchParams.map(function (part) {
-    const partArr = part.split('=') // Split into key/value
-    const key = partArr[0]
-    const isEmpty = !partArr[1] && partArr[1] != '0'
-
-    if (trueDefaults === true) {
-      obj[key] = isEmpty ? true : decodeURIComponent(partArr[1])
-    } else {
-      obj[key] = decodeURIComponent(partArr[1])
+  const params = new URLSearchParams(searchString) 
+  /** @type {{[key: string]: string|true}} */
+  const result = Object.fromEntries(params.entries())
+  if (trueDefaults) {
+    for (const key in result) {
+      if (!result[key] && result[key] !== '0') result[key] = true
     }
-  })
+  }
 
-  queryObjectCache[uniqueKey] = obj
-  return obj
+  queryObjectCache[uniqueKey] = result
+  return result
 }
 
 /**
  * Parses a query string into an array of objects
- * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @param {string} searchString - location.search, e.g. '?page=1'
  * @returns {object[]} - e.g. [{ page: '1' }]
  */
 export function queryArray (searchString) {
@@ -1341,7 +1331,7 @@ export async function request (route, data, event, isLoading) {
 
     const [res] = await Promise.allSettled([
       axiosPromise,
-      setTimeoutPromise(() => {}, 200), // eslint-disable-line
+      // setTimeoutPromise(() => {}, 200), // eslint-disable-line
     ])
 
     // success

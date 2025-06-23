@@ -37,12 +37,16 @@ export type FiltersHandleType = {
   submit: (includePagination?: boolean) => void
 }
 
+const debounceTime = 250
+
 export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({ 
   filters, state, setState, elements, dropdownProps, buttonProps, buttonClassName, buttonText, buttonCounterClassName,
 }, ref) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const stateRef = useRef(state)
-  const [debouncedSubmit] = useState(() => debounce(submit, 150))
+  const [lastUpdated, setLastUpdated] = useState(0)
+  const [debouncedSubmit] = useState(() => debounce(submit, debounceTime))
   const count = Object.keys(state).length - (Object.keys(state).includes('page') ? 1 : 0)
   const Elements = {
     Button: elements?.Button || Button,
@@ -65,15 +69,18 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   }, [state])
 
   useEffect(() => {
-    setState(() => ({
-      ...queryObject(location.search),
-    }))
+    // Only update the state if the filters haven't been input changed in the last 500ms
+    if (Date.now() - lastUpdated > (debounceTime + 250)) {
+      setState(() => ({
+        ...queryObject(location.search),
+      }))
+    }
   }, [location.search])
 
   function reset(e: React.MouseEvent<HTMLAnchorElement>, filter: FilterType) {
     e.preventDefault()
     setState((s) => omit(s, [filter.name]) as FilterState)
-    debouncedSubmit()
+    onAfterChange()
   }
 
   function resetAll(e: React.MouseEvent<HTMLButtonElement>) {
@@ -81,18 +88,23 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     setState((s) => ({
       ...(s.page ? { page: s.page } : {}), // keep pagination
     } as FilterState))
-    debouncedSubmit()
+    onAfterChange()
   }
 
-  async function _onChange(e: {target: {name: string, value: unknown}}) {
+  async function onInputChange(e: {target: {name: string, value: unknown}}) {
     await onChange(setState, e)
+    onAfterChange()
+  }
+
+  function onAfterChange() {
+    setLastUpdated(Date.now())
     debouncedSubmit()
   }
 
-  // Submit the filters and update the URL
+  // Update the URL by replacing the current entry in the history stack
   function submit(includePagination?: boolean) {
     const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
-    history.pushState(null, '', location.pathname + queryStr)
+    navigate(location.pathname + queryStr, { replace: true })
   }
 
   if (!filters) return null
@@ -123,7 +135,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                       type={filter.type}
                       placeholder={filter.placeholder} 
                       state={state} 
-                      onChange={_onChange}
+                      onChange={onInputChange}
                     />
                   }
                   {
@@ -134,7 +146,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                       type="date"
                       mode="range"
                       state={state}
-                      onChange={_onChange}
+                      onChange={onInputChange}
                       placeholder={filter.placeholder || 'Select range...'}
                     />
                   }
@@ -146,7 +158,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                       type="country" 
                       state={state} 
                       options={filter.enums || []} 
-                      onChange={_onChange}
+                      onChange={onInputChange}
                       placeholder={filter.placeholder}
                     />
                   }
