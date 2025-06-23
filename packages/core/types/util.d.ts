@@ -516,17 +516,16 @@ export function pick(obj: {
 /**
  *
  * Parses a query string into an object, or returns the last known matching cache
- * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
  * @param {boolean} [trueDefaults] - assign true to empty values
  * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
- * UPDATE: removed array values, e.g. '?page=1&page=2' will return { page: '2' }
  */
 export function queryObject(searchString: string, trueDefaults?: boolean): {
     [key: string]: string | true;
 };
 /**
  * Parses a query string into an array of objects
- * @param {string} searchString - location.search or location.href, e.g. '?page=1', 'https://...co.nz?page=1'
+ * @param {string} searchString - location.search, e.g. '?page=1'
  * @returns {object[]} - e.g. [{ page: '1' }]
  */
 export function queryArray(searchString: string): object[];
