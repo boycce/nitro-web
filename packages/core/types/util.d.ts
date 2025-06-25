@@ -504,6 +504,73 @@ export function onChange<T>(setState: React.Dispatch<React.SetStateAction<T>>, e
  */
 export function pad(num?: number, padLeft?: number, fixedRight?: number): string;
 /**
+ * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
+ * @param {{ [key: string]: string }} query - req.query
+ *   E.g. {
+ *     dateRange: '1749038400000,1749729600000',
+ *     location: '10-RS',
+ *     status: 'incomplete',
+ *     search: 'John'
+ *   }
+ * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
+ *   E.g. {
+ *     dateRange: 'dateRange',
+ *     location: 'string',
+ *     status: ['incomplete', 'complete'],
+ *     search: 'string',
+ *   }
+ * @example returned object (using the examples above):
+ *   E.g. {
+ *     date: { $gte: 1749038400000, $lte: 1749729600000 },
+ *     location: '10-RS',
+ *     status: 'incomplete',
+ *     search: 'John'
+ *   }
+ */
+export function parseFilters(query: {
+    [key: string]: string;
+}, config: {
+    [key: string]: "string" | "number" | "search" | "dateRange" | string[];
+}): {
+    [key: string]: string | number | string[] | {
+        $gte: number;
+        $lte?: number;
+    } | {
+        $search: string;
+    };
+};
+/**
+ * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
+ * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
+ * @param {{ page?: string, sort?: '1'|'-1', sortBy?: string }} query - req.query
+ *   E.g. {
+ *     page: '1',
+ *     sort: '1',
+ *     sortBy: 'createdAt'
+ *   }
+ * @param {number} [limit=10]
+ * @example returned object (using the examples above):
+ *   E.g. {
+ *     limit: 10,
+ *     skip: undefined,
+ *     sort: { createdAt: 1 },
+ *   }
+ */
+export function parseSortOptions(model: {
+    fieldsFlattened: object;
+    name: string;
+}, query: {
+    page?: string;
+    sort?: "1" | "-1";
+    sortBy?: string;
+}, limit?: number): {
+    limit: number;
+    skip: number;
+    sort: {
+        [x: string]: number;
+    };
+};
+/**
  * Picks fields from an object
  * @param {{ [key: string]: any }} obj
  * @param {string|RegExp|string[]|RegExp[]} keys
