@@ -33,6 +33,7 @@ type FiltersProps = {
   buttonText?: string
   buttonCounterClassName?: string
   filtersContainerClassName?: string
+  menuClassName?: string
 }
 
 export type FiltersHandleType = {
@@ -52,6 +53,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   dropdownProps, 
   elements, 
   filtersContainerClassName,
+  menuClassName,
 }, ref) => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -123,14 +125,19 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   return (
     <Elements.Dropdown 
       dir="bottom-right"
+      allowOverflow={true}
       // menuIsOpen={true}
-      menuClassName="!rounded-lg"
+      menuClassName={twMerge(`!rounded-lg min-w-[330px] ${menuClassName || ''}`)}
       menuContent={
-        <div class="w-[330px]">
+        <div>
           <div class="flex justify-between items-center border-b p-4 py-3.5">
             <div class="text-lg font-semibold">Filters</div>
             <Button color="clear" size="sm" onClick={resetAll}>Reset All</Button>
           </div>
+          {/* <div class="w-[1330px] bg-red-500 absolute">
+            This div shouldnt produce a page scrollbar when the dropdown is closed.
+            But should be visibile if allowedOverflow is true.
+          </div> */}
           <div class={twMerge(`flex flex-wrap gap-4 px-4 py-4 pb-6 ${filtersContainerClassName || ''}`)}>
             {
               filters?.map(({label, rowClassName, ...filter}, i) => (

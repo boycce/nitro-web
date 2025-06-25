@@ -1,9 +1,10 @@
 import { css } from 'twin.macro'
 import { forwardRef, cloneElement } from 'react'
-import { getSelectStyle } from 'nitro-web'
+import { getSelectStyle, twMerge } from 'nitro-web'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
 type DropdownProps = {
+  allowOverflow?: boolean
   animate?: boolean
   children?: React.ReactNode
   className?: string
@@ -18,20 +19,23 @@ type DropdownProps = {
   /** The content to render inside the top of the dropdown **/
   menuContent?: React.ReactNode
   menuClassName?: string
+  menuOptionClassName?: string
   menuIsOpen?: boolean
   menuToggles?: boolean
   toggleCallback?: (isActive: boolean) => void
 }
 
 export const Dropdown = forwardRef(function Dropdown({
+  allowOverflow=false,
   animate=true,
   children, 
   className,
   dir, 
   options, 
   isHoverable,
-  minWidth, 
+  minWidth, // remove in favour of menuClassName
   menuClassName,
+  menuOptionClassName,
   menuContent, 
   menuIsOpen, 
   menuToggles=true,
@@ -92,6 +96,7 @@ export const Dropdown = forwardRef(function Dropdown({
         (isHoverable ? ' is-hoverable' : '') +
         (isActive ? ' is-active' : '') +
         (!animate ? ' no-animation' : '') +
+        (allowOverflow ? ' is-allowOverflow' : '') +
         ' nitro-dropdown' +
         (className ? ` ${className}` : '')
       }
@@ -117,7 +122,7 @@ export const Dropdown = forwardRef(function Dropdown({
             return (
               <li 
                 key={i} 
-                className={`${optionStyle} ${option.className}`}
+                className={twMerge(`${optionStyle} ${option.className} ${menuOptionClassName}`)}
                 onClick={(e: React.MouseEvent) => onClick(option, e)}
               >
                 <span class="flex-auto">{option.label}</span>
@@ -137,8 +142,7 @@ const style = css`
     transition: transform 0.15s ease, opacity 0.15s ease, visibility 0s 0.15s ease, max-width 0s 0.15s ease, max-height 0s 0.15s ease;
     max-width: 0; // handy if the dropdown ul exceeds the viewport width
     max-height: 0; // handy if the dropdown ul exceeds the viewport height
-    /* overflow: visible !important; // override menustyle  */
-    pointer-events: none; 
+    pointer-events: none;
   }
   &.is-bottom-right,
   &.is-top-right {
@@ -175,6 +179,8 @@ const style = css`
       max-width: 1000px;
       max-height: 1000px;
       pointer-events: auto;
+    }
+    &.is-allowOverflow > ul {
       overflow: visible;
     }
     &.is-bottom-left > ul,
