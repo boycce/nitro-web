@@ -37,19 +37,20 @@ export { Modal } from '../components/partials/element/modal'
 export { Sidebar, type SidebarProps } from '../components/partials/element/sidebar'
 export { Tooltip } from '../components/partials/element/tooltip'
 export { Topbar } from '../components/partials/element/topbar'
-// Component Form
+
+// Component Form Elements
 export { Checkbox } from '../components/partials/form/checkbox'
 export { Drop } from '../components/partials/form/drop'
 export { DropHandler } from '../components/partials/form/drop-handler'
 export { FormError } from '../components/partials/form/form-error'
-export { Field, isFieldCached } from '../components/partials/form/field'
+export { Field, isFieldCached, type FieldProps } from '../components/partials/form/field'
 export { FieldColor, type FieldColorProps } from '../components/partials/form/field-color'
 export { FieldCurrency, type FieldCurrencyProps } from '../components/partials/form/field-currency'
 export { FieldDate, type FieldDateProps } from '../components/partials/form/field-date'
 export { Location } from '../components/partials/form/location'
-export { Select, getSelectStyle } from '../components/partials/form/select'
+export { Select, getSelectStyle, type SelectProps } from '../components/partials/form/select'
 
-// Component Other
+// Component Other Components
 export { IsFirstRender } from '../components/partials/is-first-render'
 
 // Expose the injected config

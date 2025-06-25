@@ -1,26 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 import { css } from 'twin.macro'
 import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
 import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
 import { Errors, type Error } from 'nitro-web/types'
 import { EnvelopeIcon, CalendarIcon, FunnelIcon, MagnifyingGlassIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'
 import { memo } from 'react'
-// Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 
+type FieldType = 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
-  // field name or path on state (used to match errors), e.g. 'date', 'company.email'
+  /** field name or path on state (used to match errors), e.g. 'date', 'company.email' */
   name: string
-  // name is applied if id is not provided
+  /** name is applied if id is not provided */
   id?: string
-  // state object to get the value, and check errors against
+  /** state object to get the value, and check errors against */
   state?: { errors?: Errors, [key: string]: any }
-  type?: 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+  /** type of the field */
+  type?: FieldType
+  /** icon to show in the input */
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'
-  /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
+  /** Pass dependencies to break memoization, handy for onChange/onInputChange */
   deps?: unknown[]
+  placeholder?: string
 }
 type IconWrapperProps = {
   iconPos: string
@@ -46,7 +50,7 @@ export const Field = memo(FieldBase, (prev, next) => {
 })
 
 function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
-  // type must be kept as props.type for TS to be happy and follow the conditions below
+  // `type` must be kept as props.type for TS to be happy and follow the conditions below
   let value!: string
   let Icon!: React.ReactNode
   const error = getErrorFromState(state, props.name)
@@ -145,7 +149,7 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
   const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
   const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-input-size outline outline-1 -outline-offset-1 ` +
+    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-input-base outline outline-1 -outline-offset-1 ` +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
     (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
     (error 

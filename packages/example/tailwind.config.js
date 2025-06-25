@@ -65,17 +65,17 @@ export default {
         'sm': ['13.5px', { lineHeight: '20px' }],
         'xs': ['13px', { lineHeight: '19px' }],
         '2xs': ['12px', { lineHeight: '18px' }],
-        'button-size': ['13.5px', { lineHeight: '20px' }],
-        'input-size': ['13.5px', { lineHeight: '20px' }],
+        'button-md': ['13.5px', { lineHeight: '20px' }],
+        'input-base': ['13.5px', { lineHeight: '20px' }],
       },
       spacing: {
         // Nitro field spacing (defaults listed below)
-        // 'input-before': '0.625rem',
-        // 'input-after': '1.5rem',
+        'button-x-md': '12px',
+        'button-h-md': '38px',
         'input-x': '12px',
         'input-y': '9px',
-        'button-x-md': '12px',
-        'button-y-md': '9px',
+        // 'input-before': '0.625rem',
+        // 'input-after': '1.5rem',
       },
       borderRadius: {
         // 'md': '5px', // button/input

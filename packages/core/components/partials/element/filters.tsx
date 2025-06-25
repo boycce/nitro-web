@@ -1,24 +1,25 @@
 import { forwardRef, Dispatch, SetStateAction, useRef, useEffect, useImperativeHandle } from 'react'
-import { Button, Dropdown, Field, Select, twMerge } from 'nitro-web'
-import { camelCaseToTitle, debounce, omit, queryString, queryObject } from 'nitro-web/util'
+import { Button, Dropdown, Field, Select, type FieldProps, type SelectProps } from 'nitro-web'
+import { camelCaseToTitle, debounce, omit, queryString, queryObject, twMerge } from 'nitro-web/util'
 import { ListFilterIcon } from 'lucide-react'
 
-export type FilterType = {
-  name: string
-  type: 'text'|'date'|'search'|'select'
+type CommonProps = {
   label?: string
-  enums?: { label: string, value: string }[]
-  placeholder?: string
+  rowClassName?: string
 }
+export type FilterType = (
+  | FieldProps & CommonProps
+  | ({ type: 'select' } & SelectProps & CommonProps)
+)
 
 type FilterState = {
   [key: string]: string | true
 }
 
 type FiltersProps = {
+  state?: FilterState
+  setState?: Dispatch<SetStateAction<FilterState>>
   filters?: FilterType[]
-  state: FilterState
-  setState: Dispatch<SetStateAction<FilterState>>
   elements?: {
     Button?: typeof Button
     Dropdown?: typeof Dropdown
@@ -31,6 +32,7 @@ type FiltersProps = {
   buttonClassName?: string
   buttonText?: string
   buttonCounterClassName?: string
+  filtersContainerClassName?: string
 }
 
 export type FiltersHandleType = {
@@ -40,14 +42,26 @@ export type FiltersHandleType = {
 const debounceTime = 250
 
 export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({ 
-  filters, state, setState, elements, dropdownProps, buttonProps, buttonClassName, buttonText, buttonCounterClassName,
+  filters, 
+  setState: setState2,
+  state: state2,
+  buttonClassName, 
+  buttonCounterClassName,
+  buttonProps, 
+  buttonText, 
+  dropdownProps, 
+  elements, 
+  filtersContainerClassName,
 }, ref) => {
   const location = useLocation()
   const navigate = useNavigate()
-  const stateRef = useRef(state)
   const [lastUpdated, setLastUpdated] = useState(0)
   const [debouncedSubmit] = useState(() => debounce(submit, debounceTime))
-  const count = Object.keys(state).length - (Object.keys(state).includes('page') ? 1 : 0)
+  const [state3, setState3] = useState(() => ({ ...queryObject(location.search) }))
+  const [state, setState] = [state2 || state3, setState2 || setState3]
+  const stateRef = useRef(state)
+  const count = useMemo(() => Object.keys(state).filter((k) => state[k] && filters?.some((f) => f.name === k)).length, [state, filters])
+
   const Elements = {
     Button: elements?.Button || Button,
     Dropdown: elements?.Dropdown || Dropdown,
@@ -85,9 +99,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
 
   function resetAll(e: React.MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
-    setState((s) => ({
-      ...(s.page ? { page: s.page } : {}), // keep pagination
-    } as FilterState))
+    setState((s) => omit(s, filters?.map((f) => f.name) || []) as FilterState)
     onAfterChange()
   }
 
@@ -106,8 +118,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
     navigate(location.pathname + queryStr, { replace: true })
   }
-
-  if (!filters) return null
+  
+  // if (!filters) return null
   return (
     <Elements.Dropdown 
       dir="bottom-right"
@@ -119,47 +131,31 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
             <div class="text-lg font-semibold">Filters</div>
             <Button color="clear" size="sm" onClick={resetAll}>Reset All</Button>
           </div>
-          <div class="flex flex-col px-4 py-4 mb-[-6px]">
+          <div class={twMerge(`flex flex-wrap gap-4 px-4 py-4 pb-6 ${filtersContainerClassName || ''}`)}>
             {
-              filters.map((filter) => (
-                <div key={filter.name}>
+              filters?.map(({label, rowClassName, ...filter}, i) => (
+                <div key={i} class={twMerge(`w-full ${rowClassName||''}`)}>
                   <div class="flex justify-between"> 
-                    <label for={filter.name}>{filter.label || camelCaseToTitle(filter.name)}</label>
+                    <label for={filter.id || filter.name}>{label || camelCaseToTitle(filter.name)}</label>
                     <a href="#" class="label font-normal text-secondary underline" onClick={(e) => reset(e, filter)}>Reset</a>
                   </div>
                   {
-                    (filter.type === 'text' || filter.type === 'search') &&
-                    <Elements.Field 
-                      class="mb-4"
-                      name={filter.name}
-                      type={filter.type}
-                      placeholder={filter.placeholder} 
-                      state={state} 
-                      onChange={onInputChange}
-                    />
-                  }
-                  {
-                    filter.type === 'date' &&
-                    <Elements.Field
-                      class="mb-4"
-                      name={filter.name}
-                      type="date"
-                      mode="range"
+                    filter.type === 'select' && 
+                    <Elements.Select
+                      {...filter}
+                      class="mb-0"
                       state={state}
                       onChange={onInputChange}
-                      placeholder={filter.placeholder || 'Select range...'}
+                      type={undefined}
                     />
                   }
                   {
-                    filter.type === 'select' &&
-                    <Elements.Select
-                      class="mb-4"
-                      name={filter.name} 
-                      type="country" 
+                    filter.type !== 'select' && 
+                    <Elements.Field 
+                      {...filter}
+                      class="mb-0"
                       state={state} 
-                      options={filter.enums || []} 
                       onChange={onInputChange}
-                      placeholder={filter.placeholder}
                     />
                   }
                 </div>

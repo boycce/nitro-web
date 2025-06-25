@@ -3,7 +3,7 @@ import {
   Filters, FiltersHandleType, FilterType,
 } from 'nitro-web'
 import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
-import { Check } from 'lucide-react'
+import { Check, FileEditIcon } from 'lucide-react'
 
 type StyleguideProps = {
   className?: string
@@ -34,27 +34,40 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
   })
   const [filterState, setFilterState] = useState({})
   const filtersRef = useRef<FiltersHandleType>(null)
-  const filters: FilterType[] = useMemo(() => [
-    { 
-      name: 'dateRange',
-      type: 'date',
-    },
-    { 
-      name: 'search',
-      type: 'search',
-      label: 'Keyword Search',
-      placeholder: 'Job, employee name...',
-    },
-    { 
-      name: 'status', 
-      type: 'select',
-      enums: [
-        { label: 'Pending', value: 'pending' }, 
-        { label: 'Approved', value: 'approved' }, 
-        { label: 'Rejected', value: 'rejected' },
-      ],
-    },
-  ], [])
+  const filters = useMemo(() => {
+    const filters: FilterType[] = [
+      { 
+        type: 'date',
+        name: 'dateRange',
+        mode: 'range',
+        placeholder: 'Select a range...',
+      },
+      {
+        type: 'search',
+        name: 'search',
+        label: 'Keyword Search',
+        placeholder: 'Job, employee name...',
+      },
+      {
+        type: 'select',
+        name: 'status',
+        rowClassName: 'flex-1',
+        options: [
+          { label: 'Pending', value: 'pending' }, 
+          { label: 'Approved', value: 'approved' }, 
+          { label: 'Rejected', value: 'rejected' },
+        ],
+      },
+      {
+        type: 'color',
+        name: 'color',
+        label: 'Half column',
+        placeholder: 'Select color...',
+        rowClassName: 'flex-1',
+      },
+    ]
+    return filters
+  }, [])
 
   const options = useMemo(() => [
     { label: 'Open customer preview' },
@@ -182,6 +195,9 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         <div><Button IconRight="v">IconRight</Button></div>
         <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>
         <div><Button color="primary" IconRight="v" isLoading>primary isLoading</Button></div>
+        <div><Button IconCenter={<FileEditIcon size={18}/>}></Button></div>
+        <div><Button size="sm" IconCenter={<FileEditIcon size={16}/>}></Button></div>
+        <div><Button size="xs" IconCenter={<FileEditIcon size={14}/>}></Button></div>
       </div>
 
       <h2 class="h3">Checkboxes</h2>
@@ -243,7 +259,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           <Select
             // https://github.com/lipis/flag-icons
             name="country" 
-            type="country" 
+            mode="country"
             state={state} 
             options={useMemo(() => getCountryOptions(injectedConfig.countries), [])} 
             onChange={(e) => onChange(setState, e)}
@@ -255,7 +271,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
             // menuIsOpen={true}
             placeholder="Select or add customer..."
             name="customer" 
-            type="customer"
+            mode="customer"
             state={state}
             onChange={onCustomerInputChange}
             onInputChange={onCustomerSearch}
@@ -323,7 +339,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         </div>
         <div>
           <label for="brandColor">Brand Color</label>
-          <Field name="brandColor" type="color" state={state} iconPos="left" onChange={(e) => onChange(setState, e)} />
+          <Field name="brandColor" type="color" iconPos="left" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
@@ -343,8 +359,8 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
-          <label for="date">Date (right aligned)</label>
-          <Field name="date" type="date" mode="single" state={state} onChange={(e) => onChange(setState, e)} dir="bottom-right" />
+          <label for="date">Date multi-select (right aligned)</label>
+          <Field name="date" type="date" mode="multiple" state={state} onChange={(e) => onChange(setState, e)} dir="bottom-right" />
         </div>
       </div>
 

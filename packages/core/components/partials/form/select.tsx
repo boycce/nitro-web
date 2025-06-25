@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
 import { memo } from 'react'
-import ReactSelect, { components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
-  DropdownIndicatorProps, MultiValueRemoveProps } from 'react-select'
+import ReactSelect, { 
+  components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
+  DropdownIndicatorProps, MultiValueRemoveProps,
+} from 'react-select'
 import { ChevronUpDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { isFieldCached } from 'nitro-web'
 import { getErrorFromState, deepFind, twMerge } from 'nitro-web/util'
@@ -19,11 +21,13 @@ type GetSelectStyle = {
 }
 
 /** Select (all other props are passed to react-select) **/
-type SelectProps = {
+export type SelectProps = {
   /** field name or path on state (used to match errors), e.g. 'date', 'company.email' **/
   name: string
-  /** name used if not provided **/
-  inputId?: string
+  /** inputId, the name is used if not provided **/
+  id?: string
+  /** 'container' id to pass to react-select **/
+  containerId?: string
   /** The minimum width of the dropdown menu **/
   minMenuWidth?: number
   /** The prefix to add to the input **/
@@ -35,7 +39,7 @@ type SelectProps = {
   /** The state object to get the value and check errors from **/
   state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
   /** Select variations **/
-  type?: 'country'|'customer'|''
+  mode?: 'country'|'customer'|''
   /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
   deps?: unknown[]
   /** All other props are passed to react-select **/
@@ -46,7 +50,7 @@ export const Select = memo(SelectBase, (prev, next) => {
   return isFieldCached(prev, next)
 })
 
-function SelectBase({ inputId, minMenuWidth, name, prefix='', onChange, options, state, type='', ...props }: SelectProps) {
+function SelectBase({ id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', ...props }: SelectProps) {
   let value: unknown|unknown[]
   const error = getErrorFromState(state, name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
@@ -78,10 +82,11 @@ function SelectBase({ inputId, minMenuWidth, name, prefix='', onChange, options,
          */
         {...props}
         // @ts-expect-error
-        _nitro={{ prefix, type }}
+        _nitro={{ prefix, mode }}
         key={value as string}
         unstyled={true}
-        inputId={inputId || name}
+        inputId={id || name}
+        id={containerId}
         filterOption={(option, searchText) => {
           if ((option.data as {fixed?: boolean}).fixed) return true
           return filterFn(option, searchText)
@@ -161,7 +166,7 @@ function Control({ children, ...props }: ControlProps) {
   // todo: check that the flag/prefix looks okay
   const selectedOption = props.getValue()[0]
   const optionFlag = (selectedOption as { flag?: string })?.flag
-  const _nitro = (props.selectProps as { _nitro?: { prefix?: string, type?: string } })?._nitro
+  const _nitro = (props.selectProps as { _nitro?: { prefix?: string, mode?: string } })?._nitro
   return (
     <components.Control {...props}>
       {
@@ -173,7 +178,7 @@ function Control({ children, ...props }: ControlProps) {
                 {children}
               </>
             )
-          } else if (_nitro?.type == 'country') {
+          } else if (_nitro?.mode == 'country') {
             return (
               <>
                 { optionFlag && <Flag flag={optionFlag} /> }
@@ -201,10 +206,10 @@ function SingleValue(props: SingleValueProps) {
 function Option(props: OptionProps) {
   // todo: check that the flag looks okay
   const data = props.data as { className?: string, flag?: string }
-  const _nitro = (props.selectProps as { _nitro?: { type?: string } })?._nitro
+  const _nitro = (props.selectProps as { _nitro?: { mode?: string } })?._nitro
   return (
     <components.Option className={data.className} {...props}>
-      { _nitro?.type == 'country' && <Flag flag={data.flag} /> }
+      { _nitro?.mode == 'country' && <Flag flag={data.flag} /> }
       <span class="flex-auto">{props.label}</span>
       {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-1" />}
     </components.Option>
@@ -248,7 +253,7 @@ const selectStyles = {
   // Based off https://www.jussivirtanen.fi/writing/styling-react-select-with-tailwind
   // Input container
   control: {
-    base: 'rounded-md bg-white hover:cursor-pointer text-input-size outline outline-1 -outline-offset-1 '
+    base: 'rounded-md bg-white hover:cursor-pointer text-input-base outline outline-1 -outline-offset-1 '
       + '!min-h-0 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
@@ -273,8 +278,8 @@ const selectStyles = {
   indicatorsContainer: 'p-1 px-2 gap-1',
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
   // Dropdown menu
-  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-size overflow-hidden shadow-dropdown-ul',
-  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-input-size',
+  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
+  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-input-base',
   noOptionsMessage: 'm-1 text-gray-500 p-2 bg-gray-50 border border-dashed border-gray-200 rounded-sm',
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',

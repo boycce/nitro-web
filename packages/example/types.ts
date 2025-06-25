@@ -1,21 +1,27 @@
-import type { Errors, Store as NitroStore, MonasteryImage } from 'nitro-web/types'
-export type { Config, Errors, MessageObject } from 'nitro-web/types'
+import type { Config, Errors, MessageObject, MonasteryImage, Store as NitroStore } from 'nitro-web/types'
+export type { Config, Errors, MessageObject }
+
+/* ---- Enums -------------------------------- */
+
+export type Role = 'admin' | 'user'
 
 /* ---- Common ------------------------------- */
 
+export type Date = number
 export type Id = string
-export type StateErrors = { errors?: Errors; }
+export type StateError = Error;
+export interface StateErrors { errors: Errors; }
 export type BaseEntity = {
-  _id: Id;
+  _id?: Id;
   createdAt: number;
   updatedAt: number;
 }
 
-/* ---- Enums -------------------------------- */
+/* ---- Store & User ------------------------- */
 
-// ...
-
-/* ---- User & Store ------------------------- */
+export type Store = NitroStore & {
+  user?: User
+}
 
 export type User = BaseEntity & {
   firstName?: string
@@ -23,7 +29,4 @@ export type User = BaseEntity & {
   name?: string
   avatar?: MonasteryImage
   type: 'user' | 'admin'
-}
-export type Store = NitroStore & {
-  user?: User
 }

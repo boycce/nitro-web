@@ -9,14 +9,21 @@ type DropdownRef = {
 }
 
 type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
+  /** field name or path on state (used to match errors), e.g. 'date', 'company.email' **/
   name: string
+  /** mode of the date picker */
   mode: Mode
-  // name is applied if id is not provided
+  /** name is used as the id if not provided */
   id?: string
+  /** show the time picker */
   showTime?: boolean
+  /** prefix to add to the input */
   prefix?: string
+  /** number of months to show in the dropdown */
   numberOfMonths?: number
+  /** icon to show in the input */
   Icon?: React.ReactNode
+  /** direction of the dropdown */
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
 }
 
@@ -27,7 +34,7 @@ export type FieldDateProps = (
       value?: null|number|string
     })
   | ({ mode: 'multiple' | 'range' } & PreFieldDateProps & { 
-      onChange: (e: { target: { name: string, value: (null|number)[] } }) => void 
+      onChange?: (e: { target: { name: string, value: (null|number)[] } }) => void 
       value?: null|number|string|(null|number|string)[]
     })
 )
@@ -37,8 +44,16 @@ type TimePickerProps = {
   onChange: (mode: Mode, value: number|null) => void
 }
 
-export function FieldDate({ 
-  mode, onChange, prefix='', value, numberOfMonths, Icon, showTime, dir = 'bottom-left', ...props 
+export function FieldDate({
+  dir = 'bottom-left',
+  Icon,
+  mode,
+  numberOfMonths,
+  onChange: onChangeProp,
+  prefix = '',
+  showTime,
+  value: valueProp,
+  ...props
 }: FieldDateProps) {
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
@@ -46,7 +61,12 @@ export function FieldDate({
   const [month, setMonth] = useState<number|undefined>()
   const [lastUpdated, setLastUpdated] = useState(0)
   const id = props.id || props.name
-  
+
+  // Since value and onChange are optional, we need to hold the value in state if not provided
+  const [internalValue, setInternalValue] = useState<typeof valueProp>(valueProp)
+  const value = valueProp ?? internalValue
+  const onChange = onChangeProp ?? ((e: { target: { name: string, value: any } }) => setInternalValue(e.target.value))
+    
   // Convert the value to an array of valid* dates
   const dates = useMemo(() => {
     const _dates = Array.isArray(value) ? value : [value]
@@ -70,10 +90,8 @@ export function FieldDate({
     if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
     // Update the value
-    if (onChange) {
-      onChange({ target: { name: props.name, value: value as any } })
-      setLastUpdated(new Date().getTime())
-    }
+    onChange({ target: { name: props.name, value: value as any } })
+    setLastUpdated(new Date().getTime())
   }
 
   function getInputValue(dates: Date|number|null|(Date|number|null)[]) {
@@ -104,10 +122,8 @@ export function FieldDate({
     
     // Update the value
     const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
-    if (onChange) {
-      onChange({ target: { name: props.name, value: value as any }})
-      setLastUpdated(new Date().getTime())
-    }
+    onChange({ target: { name: props.name, value: value as any }})
+    setLastUpdated(new Date().getTime())
   } 
 
   return (
@@ -135,7 +151,7 @@ export function FieldDate({
         {
           prefix && 
           // Similar classNames to the input.tsx:IconWrapper()
-          <span className="z-[0] col-start-1 row-start-1 self-center select-none justify-self-start text-input-size ml-3">
+          <span className="z-[0] col-start-1 row-start-1 self-center select-none justify-self-start text-input-base ml-3">
             {prefix}
           </span>
         }

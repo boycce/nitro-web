@@ -3,24 +3,29 @@ import Saturation from '@uiw/react-color-saturation'
 import Hue from '@uiw/react-color-hue'
 import { Dropdown, util } from 'nitro-web'
 
-export type FieldColorProps = React.InputHTMLAttributes<HTMLInputElement> & {
+export type FieldColorProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'|'value'> & {
   name: string
   /** name is applied if id is not provided */
   id?: string 
   defaultColor?: string
   Icon?: React.ReactNode
-  onChange?: (event: { target: { name: string, value: string|null } }) => void
-  value?: string|null
+  onChange?: (event: { target: { name: string, value: string } }) => void
+  value?: string
 }
 
-export function FieldColor({ defaultColor='#333', Icon, onChange, value, ...props }: FieldColorProps) {
+export function FieldColor({ defaultColor='#333', Icon, onChange: onChangeProp, value: valueProp, ...props }: FieldColorProps) {
   const [lastChanged, setLastChanged] = useState(() => `ic-${Date.now()}`)
   const isInvalid = props.className?.includes('is-invalid') ? 'is-invalid' : ''
   const id = props.id || props.name
 
-  function onInputChange(e: { target: { name: string, value: string|null } }) {
+  // Since value and onChange are optional, we need to hold the value in state if not provided
+  const [internalValue, setInternalValue] = useState(valueProp ?? defaultColor)
+  const value = valueProp ?? internalValue
+  const onChange = onChangeProp ?? ((e: { target: { name: string, value: string } }) => setInternalValue(e.target.value))
+
+  function onInputChange(e: { target: { name: string, value: string } }) {
     setLastChanged(`ic-${Date.now()}`)
-    if (onChange) onChange(e)
+    onChange(e)
   }
 
   return (

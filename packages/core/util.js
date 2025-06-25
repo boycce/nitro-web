@@ -1200,6 +1200,112 @@ export function pad (num=0, padLeft=0, fixedRight) {
 }
 
 /**
+ * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
+ * @param {{ [key: string]: string }} query - req.query
+ *   E.g. {
+ *     dateRange: '1749038400000,1749729600000',
+ *     location: '10-RS',
+ *     status: 'incomplete',
+ *     search: 'John'
+ *   }
+ * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
+ *   E.g. {
+ *     dateRange: 'dateRange',
+ *     location: 'string',
+ *     status: ['incomplete', 'complete'],
+ *     search: 'string',
+ *   }
+ * @example returned object (using the examples above):
+ *   E.g. {
+ *     date: { $gte: 1749038400000, $lte: 1749729600000 },
+ *     location: '10-RS',
+ *     status: 'incomplete',
+ *     search: 'John'
+ *   }
+ */
+export function parseFilters(query, config) {
+  /** @type {{ [key: string]: string|number|{ $gte: number; $lte?: number; }|{ $search: string }|string[] }} */
+  const mongoQuery = {}
+
+  for (const key in query) {
+    const val = query[key]
+    const rule = config[key]
+
+    if (!rule) {
+      continue
+
+    } else if (rule === 'string') {
+      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      mongoQuery[key] = val
+
+    } else if (rule === 'number') {
+      if (typeof val !== 'number' || isNaN(val)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a number.`)
+      mongoQuery[key] = parseFloat(val)
+
+    } else if (rule === 'search') {
+      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      mongoQuery['$text'] = { $search: val }
+
+    } else if (Array.isArray(rule)) {
+      if (!rule.includes(val)) {
+        throw new Error(`The "${key}" filter has an invalid value "${val}". Allowed values: "${rule.join('", "')}"`)
+      }
+      mongoQuery[key] = val
+
+    } else if (rule === 'dateRange') {
+      const [start, end] = val.split(',').map(Number)
+      if (isNaN(start) && isNaN(end)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a date range.`)
+      else if (isNaN(start)) mongoQuery.date = { $gte: 0, $lte: end }
+      else if (isNaN(end)) mongoQuery.date = { $gte: start }
+      else mongoQuery.date = { $gte: start, $lte: end }
+
+    } else {
+      throw new Error(`Unknown filter type "${rule}" in the config.`)
+    }
+  }
+
+  return mongoQuery
+}
+
+/**
+ * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
+ * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
+ * @param {{ page?: string, sort?: '1'|'-1', sortBy?: string }} query - req.query
+ *   E.g. { 
+ *     page: '1', 
+ *     sort: '1', 
+ *     sortBy: 'createdAt' 
+ *   }
+ * @param {number} [limit=10]
+ * @example returned object (using the examples above):
+ *   E.g. {
+ *     limit: 10,
+ *     skip: undefined,
+ *     sort: { createdAt: 1 },
+ *   }
+ */
+export function parseSortOptions(model, query, limit = 10) {
+  const page = parseInt(query.page || '') || 1
+
+  // Validate sortBy value
+  const sortBy = query.sortBy || 'createdAt'
+  const fields = Object.keys(model.fieldsFlattened)
+  if (!fields.includes(sortBy)) {
+    throw new Error(`"${sortBy}" is an invalid sortBy value for the "${model.name}" model.`)
+  }
+
+  const sort = sortBy === 'createdAt' && !query.sort ? -1 : (parseInt(query.sort || '') || 1)
+
+  return {
+    limit: limit + 1, // get an extra row to signal there are more pages
+    skip: page > 1 ? (page - 1) * limit : undefined,
+    sort: {
+      [sortBy]: sort,
+    },
+  }
+}
+
+/**
  * Picks fields from an object
  * @param {{ [key: string]: any }} obj
  * @param {string|RegExp|string[]|RegExp[]} keys
@@ -1570,7 +1676,13 @@ export function trim (string) {
  */
 export function twMerge(...args) {
   const ignoredClasses = /** @type {string[]} */([])
-  const ignoreClasses = ['text-button-size', 'text-input-size']
+  const ignoreClasses = [
+    'text-button-xs',
+    'text-button-sm',
+    'text-button-md',
+    'text-button-lg',
+    'text-input-base',
+  ]
   const classes = args.filter(Boolean).join(' ').split(' ')
 
   const filteredClasses = classes.filter(c => {
