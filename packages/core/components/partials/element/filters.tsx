@@ -27,13 +27,11 @@ type FiltersProps = {
     Select?: typeof Select
     FilterIcon?: typeof ListFilterIcon
   }
-  dropdownProps?: Partial<React.ComponentProps<typeof Dropdown>>
   buttonProps?: Partial<React.ComponentProps<typeof Button>>
-  buttonClassName?: string
   buttonText?: string
   buttonCounterClassName?: string
-  filtersContainerClassName?: string
-  menuClassName?: string
+  dropdownProps?: Partial<React.ComponentProps<typeof Dropdown>>
+  dropdownFiltersClassName?: string
 }
 
 export type FiltersHandleType = {
@@ -46,14 +44,12 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   filters, 
   setState: setState2,
   state: state2,
-  buttonClassName, 
+  buttonProps,
   buttonCounterClassName,
-  buttonProps, 
   buttonText, 
   dropdownProps, 
-  elements, 
-  filtersContainerClassName,
-  menuClassName,
+  dropdownFiltersClassName,
+  elements,
 }, ref) => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -126,7 +122,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
       dir="bottom-right"
       allowOverflow={true}
       // menuIsOpen={true}
-      menuClassName={twMerge(`!rounded-lg min-w-[330px] ${menuClassName || ''}`)}
+      {...dropdownProps}
+      menuClassName={twMerge(`!rounded-lg min-w-[330px] ${dropdownProps?.menuClassName || ''}`)}
       menuContent={
         <div>
           <div class="flex justify-between items-center border-b p-4 py-3.5">
@@ -137,7 +134,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
             This div shouldnt produce a page scrollbar when the dropdown is closed.
             But should be visibile if allowedOverflow is true.
           </div> */}
-          <div class={twMerge(`flex flex-wrap gap-4 px-4 py-4 pb-6 ${filtersContainerClassName || ''}`)}>
+          <div class={twMerge(`flex flex-wrap gap-4 px-4 py-4 pb-6 ${dropdownFiltersClassName || ''}`)}>
             {
               filters?.map(({label, rowClassName, ...filter}, i) => (
                 <div key={i} class={twMerge(`w-full ${rowClassName||''}`)}>
@@ -170,13 +167,12 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
           </div>
         </div>
       }
-      {...dropdownProps}
     >
       <Elements.Button 
         color="white" 
         IconLeft={<Elements.FilterIcon size={16} />} 
-        className={twMerge(`flex gap-x-2.5 ${buttonClassName || ''}`)}
         {...buttonProps}
+        className={twMerge(`flex gap-x-2.5 ${buttonProps?.className || ''}`)}
       >
         <span class="flex items-center gap-x-2.5">
           { buttonText || 'Filter By' }
