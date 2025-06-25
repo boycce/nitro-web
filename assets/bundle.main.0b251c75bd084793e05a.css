@@ -1342,6 +1342,9 @@ label, .label {
 .w-\[100vw\] {
   width: 100vw;
 }
+.w-\[1330px\] {
+  width: 1330px;
+}
 .w-\[160px\] {
   width: 160px;
 }
@@ -1360,9 +1363,6 @@ label, .label {
 .w-\[32px\] {
   width: 32px;
 }
-.w-\[330px\] {
-  width: 330px;
-}
 .w-\[40px\] {
   width: 40px;
 }
@@ -1377,6 +1377,9 @@ label, .label {
 }
 .min-w-\[242px\] {
   min-width: 242px;
+}
+.min-w-\[330px\] {
+  min-width: 330px;
 }
 .min-w-full {
   min-width: 100%;
@@ -1818,6 +1821,10 @@ label, .label {
 .bg-primary {
   --tw-bg-opacity: 1;
   background-color: rgb(76 80 249 / var(--tw-bg-opacity, 1));
+}
+.bg-red-500 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
 }
 .bg-secondary {
   --tw-bg-opacity: 1;
