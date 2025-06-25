@@ -1301,6 +1301,7 @@ export function parseSortOptions(model, query, limit = 10) {
     skip: page > 1 ? (page - 1) * limit : undefined,
     sort: {
       [sortBy]: sort,
+      ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
     },
   }
 }
