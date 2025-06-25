@@ -113,7 +113,7 @@ export const Dropdown = forwardRef(function Dropdown({
       }
       <ul
         style={{ minWidth }}
-        class={`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName}`}
+        class={twMerge(`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName}`)}
       >
         {menuContent}
         {

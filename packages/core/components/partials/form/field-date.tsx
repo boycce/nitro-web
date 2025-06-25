@@ -69,8 +69,11 @@ export function FieldDate({
     
   // Convert the value to an array of valid* dates
   const dates = useMemo(() => {
-    const _dates = Array.isArray(value) ? value : [value]
-    return _dates.map(date => isValid(date) ? new Date(date as number) : null) /// change to null
+    const arrOfNumbers = typeof value === 'string' 
+      ? value.split(/\s*,\s*/g).map(o => parseFloat(o)) 
+      : Array.isArray(value) ? value : [value]
+    const out = arrOfNumbers.map(date => isValid(date) ? new Date(date as number) : null) /// changed to null
+    return out
   }, [value])
 
   // Hold the input value in state
@@ -79,7 +82,7 @@ export function FieldDate({
   // Update the date's inputValue (text) when the value changes outside of the component
   useEffect(() => {
     if (new Date().getTime() > lastUpdated + 100) setInputValue(getInputValue(dates))
-  }, [value])
+  }, [dates])
 
   // Get the prefix content width
   useEffect(() => {
@@ -90,13 +93,8 @@ export function FieldDate({
     if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
     // Update the value
-    onChange({ target: { name: props.name, value: value as any } })
+    onChange({ target: { name: props.name, value: getOutputValue(value) } })
     setLastUpdated(new Date().getTime())
-  }
-
-  function getInputValue(dates: Date|number|null|(Date|number|null)[]) {
-    const _dates = Array.isArray(dates) ? dates : [dates]
-    return _dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -122,9 +120,19 @@ export function FieldDate({
     
     // Update the value
     const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
-    onChange({ target: { name: props.name, value: value as any }})
+    onChange({ target: { name: props.name, value: getOutputValue(value) }})
     setLastUpdated(new Date().getTime())
   } 
+
+  function getInputValue(value: Date|number|null|(Date|number|null)[]) {
+    const _dates = Array.isArray(value) ? value : [value]
+    return _dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
+  }
+
+  function getOutputValue(value: Date|number|null|(Date|number|null)[]): any {
+    // console.log(value)
+    return value
+  }
 
   return (
     <Dropdown
@@ -136,7 +144,8 @@ export function FieldDate({
       menuContent={
         <div className="flex">
           <Calendar 
-            {...{ mode, value, numberOfMonths, month }} 
+            // Calendar actually accepts an array of dates, but the type is not typed correctly
+            {...{ mode: mode, value: dates as any, numberOfMonths: numberOfMonths, month: month }} 
             preserveTime={!!showTime} 
             onChange={onCalendarChange} 
             className="pt-1 pb-2  px-3" 

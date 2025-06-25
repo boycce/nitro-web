@@ -121,7 +121,6 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     navigate(location.pathname + queryStr, { replace: true })
   }
   
-  // if (!filters) return null
   return (
     <Elements.Dropdown 
       dir="bottom-right"

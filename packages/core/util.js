@@ -1255,9 +1255,9 @@ export function parseFilters(query, config) {
     } else if (rule === 'dateRange') {
       const [start, end] = val.split(',').map(Number)
       if (isNaN(start) && isNaN(end)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a date range.`)
-      else if (isNaN(start)) mongoQuery.date = { $gte: 0, $lte: end }
-      else if (isNaN(end)) mongoQuery.date = { $gte: start }
-      else mongoQuery.date = { $gte: start, $lte: end }
+      else if (isNaN(start)) mongoQuery[key] = { $gte: 0, $lte: end }
+      else if (isNaN(end)) mongoQuery[key] = { $gte: start }
+      else mongoQuery[key] = { $gte: start, $lte: end }
 
     } else {
       throw new Error(`Unknown filter type "${rule}" in the config.`)
