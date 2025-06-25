@@ -567,7 +567,7 @@ export function parseSortOptions(model: {
     limit: number;
     skip: number;
     sort: {
-        [x: string]: number;
+        createdAt?: number;
     };
 };
 /**
