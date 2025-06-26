@@ -49,8 +49,14 @@ export function addressSchema(): {
     };
 };
 /**
- * Returns an axios instance
+ * Returns an axios instance for the client
  * @returns {import('axios').AxiosStatic}
+ *
+ * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
+ * ```js
+ *   import { axios } from 'nitro-web/util'
+ *   axios().defaults.baseURL = 'https://example.com'
+ * ```
  */
 export function axios(): import("axios").AxiosStatic;
 /**
