@@ -15,13 +15,13 @@ import * as util from 'nitro-web/util'
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
 export async function setupRouter (config) {
-  const { env, middleware, version } = config
+  const { env, middleware: configMiddleware, version } = config
   const { componentsDir, distDir, emailTemplateDir } = util.getDirectories(path, config.pwd)
   const expressApp = express()
   const server = http.createServer(expressApp)
   const apiRoutes = {}
   const controllers = {} // { controllerName: { ...routes, ...helpers } }
-  const allMiddleware = { ...defaultMiddleware, ...(middleware || {}) }
+  const allMiddleware = { ...middleware, ...(configMiddleware || {}) }
   const verbs = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'all']
 
   if (!env) {
@@ -296,9 +296,9 @@ function resolveMiddleware (controllers, middleware, route, item) {
   }
 }
 
-const defaultMiddleware = {
+export const middleware = {
   order: [
-    // Express middleware runtime order
+    // Express middleware runtime order that are called for all API requests
     'loadAssets',
     'modifyRequest',
     'parseUrlEncoded',

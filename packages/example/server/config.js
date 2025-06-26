@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import { createRequire } from 'module'
+import { middleware } from 'nitro-web/server'
 const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'
@@ -89,6 +90,14 @@ const config = {
   },
 
   middleware: {
+    ...middleware,
+    // You can extend the default middleware, e.g. adding cors
+    // order: [...middleware.order, 'cors'],
+    // cors: cors({
+    //   origin: '*',
+    //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    //   credentials: true,
+    // }),
     isAdmin: (req, res, next) => {
       // Still need to remove cookie matching in favour of uid..
       // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
