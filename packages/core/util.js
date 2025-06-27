@@ -1675,31 +1675,75 @@ export function trim (string) {
   return string.trim().replace(/\n\s+\n/g, '\n\n')
 }
 
-/**
- * Merge tailwind classes, but ignore classes that shouldn't be merged, and intended as an override
- * @param  {...string} args 
- * @returns {string}
- */
-export function twMerge(...args) {
-  const ignoredClasses = /** @type {string[]} */([])
-  const ignoreClasses = [
-    'text-button-xs',
-    'text-button-sm',
-    'text-button-md',
-    'text-button-lg',
-    'text-input-base',
-  ]
-  const classes = args.filter(Boolean).join(' ').split(' ')
+import { createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
 
-  const filteredClasses = classes.filter(c => {
-    if (ignoreClasses.includes(c)) {
-      ignoredClasses.push(c)
-      return false
+// Create a custom twMerge instance
+export const twMerge = createTailwindMerge(() => {
+  const config = getDefaultConfig()
+
+  /**
+   * @param {string[]} baseNames - base names for x-axis (e.g. 'input-x')
+   * @returns {object} extended classGroups with new spacing classes
+   */
+  function newSpacingSizes(baseNames) {
+    const obj = {
+      pl: [...(/** @type {any} */(config.classGroups.pl) ?? [])],
+      pr: [...(/** @type {any} */(config.classGroups.pr) ?? [])],
+      pt: [...(/** @type {any} */(config.classGroups.pt) ?? [])],
+      pb: [...(/** @type {any} */(config.classGroups.pb) ?? [])],
+      px: [...(/** @type {any} */(config.classGroups.px) ?? [])],
+      py: [...(/** @type {any} */(config.classGroups.py) ?? [])],
+      p: [...(/** @type {any} */(config.classGroups.p) ?? [])],
+      ml: [...(/** @type {any} */(config.classGroups.ml) ?? [])],
+      mr: [...(/** @type {any} */(config.classGroups.mr) ?? [])],
+      mt: [...(/** @type {any} */(config.classGroups.mt) ?? [])],
+      mb: [...(/** @type {any} */(config.classGroups.mb) ?? [])],
+      mx: [...(/** @type {any} */(config.classGroups.mx) ?? [])],
+      my: [...(/** @type {any} */(config.classGroups.my) ?? [])],
+      m: [...(/** @type {any} */(config.classGroups.m) ?? [])],
+      gap: [...(/** @type {any} */(config.classGroups.gap) ?? [])],
     }
-    return true
-  })
-  return _twMerge(...filteredClasses) + ' ' + ignoredClasses.join(' ')
-}
+  
+    // Add both axes classes
+    for (const baseName of baseNames) {
+      obj.pl.push(`pl-${baseName}`)
+      obj.pr.push(`pr-${baseName}`)
+      obj.pt.push(`pt-${baseName}`)
+      obj.pb.push(`pb-${baseName}`)
+      obj.px.push(`px-${baseName}`)
+      obj.py.push(`py-${baseName}`)
+      obj.p.push(`p-${baseName}`)
+      obj.ml.push(`ml-${baseName}`)
+      obj.mr.push(`mr-${baseName}`)
+      obj.mt.push(`mt-${baseName}`)
+      obj.mb.push(`mb-${baseName}`)
+      obj.mx.push(`mx-${baseName}`)
+      obj.my.push(`my-${baseName}`)
+      obj.m.push(`m-${baseName}`)
+      obj.gap.push(`gap-${baseName}`)
+    }
+    return obj
+  }
+  return {
+    ...config,
+    classGroups: {
+      ...config.classGroups,
+      ...newSpacingSizes(['input-x', 'input-x-icon', 'input-y', 'input-before', 'input-after', 'input-icon']),
+      'shadow': [...(config.classGroups.shadow || []), 'shadow-dropdown-ul'],
+      'font-size': [...(config.classGroups['font-size'] || []), 'text-button-base', 'text-input-base'],
+    },
+  }
+  // console.dir(
+  //   newSpacingSizes(['input-x', 'input-y', 'input-before', 'input-after']),
+  //   { depth: null }
+  // )
+  // console.log(customTwMerge('mb-1 mb-2 mb-input-x')) // mb-input-x
+  // console.log(customTwMerge('mb-1 mb-2 my-input-y')) // my-input-y
+  // console.log(customTwMerge('mb-1 my-input-y mb-2')) // my-input-y mb-2 
+  // console.log(customTwMerge('mb-1 my-input-y mb-2 my-input-x')) // my-input-x
+  // console.log(customTwMerge('mx-1 my-input-y mb-2 my-input-x')) // mx-1 my-input-x
+  // console.log(customTwMerge('text-xs text-base text-input text-button-base'))
+})
 
 /**
  * Capitalize the first letter of a string

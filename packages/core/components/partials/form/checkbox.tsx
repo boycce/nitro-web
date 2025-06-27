@@ -1,3 +1,5 @@
+import { twMerge } from 'nitro-web/util'
+
 type CheckboxProps = {  
   name: string
   /** name is applied if not provided. Used for radios */
@@ -32,7 +34,7 @@ export function Checkbox({ name, id, size='sm', subtext, text, type='checkbox', 
   const _size = sizeMap[size]
 
   return (
-    <div className={`mt-2.5 mb-6 mt-input-before mb-input-after flex gap-3 nitro-checkbox ${props.className || ''}`}>
+    <div className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after flex gap-3 nitro-checkbox ${props.className || ''}`)}>
       <div className="flex shrink-0 mt-[2px]">
         {
           type !== 'toggle'

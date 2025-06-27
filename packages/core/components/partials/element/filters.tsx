@@ -123,7 +123,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
       allowOverflow={true}
       // menuIsOpen={true}
       {...dropdownProps}
-      menuClassName={twMerge(`!rounded-lg min-w-[330px] ${dropdownProps?.menuClassName || ''}`)}
+      menuClassName={twMerge(`min-w-[330px] ${dropdownProps?.menuClassName || ''}`)}
       menuContent={
         <div>
           <div class="flex justify-between items-center border-b p-4 py-3.5">
@@ -146,7 +146,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     filter.type === 'select' && 
                     <Elements.Select
                       {...filter}
-                      class="mb-0"
+                      class="!mb-0"
                       state={state}
                       onChange={onInputChange}
                       type={undefined}
@@ -156,7 +156,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     filter.type !== 'select' && 
                     <Elements.Field 
                       {...filter}
-                      class="mb-0"
+                      class="!mb-0"
                       state={state} 
                       onChange={onInputChange}
                     />

@@ -6,10 +6,10 @@ import {
   Bars3Icon,
   HomeIcon,
   UsersIcon,
-  XMarkIcon,
   ArrowLeftCircleIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
+import { XIcon } from 'lucide-react'
 
 const sidebarWidth = 'w-80'
 
@@ -42,7 +42,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
           (sidebarOpen ? 'opacity-100' : 'opacity-0')
         }>
           <button type="button" onClick={() => setSidebarOpen(false)} className="-m-2.5 p-2.5">
-            <XMarkIcon aria-hidden="true" className="size-6 text-white" />
+            <XIcon aria-hidden="true" strokeWidth={1.5} size={24} className="text-white" />
           </button>
         </div>
         <SidebarContents Logo={Logo} menu={menu} links={links} />

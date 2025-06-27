@@ -5,7 +5,8 @@ import ReactSelect, {
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
   DropdownIndicatorProps, MultiValueRemoveProps,
 } from 'react-select'
-import { ChevronUpDownIcon, CheckCircleIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { CheckCircleIcon } from '@heroicons/react/20/solid'
+import { ChevronsUpDownIcon, XIcon } from 'lucide-react'
 import { isFieldCached } from 'nitro-web'
 import { getErrorFromState, deepFind, twMerge } from 'nitro-web/util'
 import { Errors } from 'nitro-web/types'
@@ -67,7 +68,7 @@ function SelectBase({ id, containerId, minMenuWidth, name, prefix='', onChange, 
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
 
   return (
-    <div css={style} class={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after nitro-select ${props.className||''}`)}>
+    <div css={style} class={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after nitro-select ${props.className||''}`)}>
       <ReactSelect
         /**
          * react-select prop quick reference (https://react-select.com/props#api):
@@ -211,7 +212,7 @@ function Option(props: OptionProps) {
     <components.Option className={data.className} {...props}>
       { _nitro?.mode == 'country' && <Flag flag={data.flag} /> }
       <span class="flex-auto">{props.label}</span>
-      {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-1" />}
+      {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" />}
     </components.Option>
   )
 }
@@ -219,7 +220,7 @@ function Option(props: OptionProps) {
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronUpDownIcon className="text-gray-400 size-[17px] -my-0.5 -mx-0.5" />
+      <ChevronsUpDownIcon size={15} className="text-gray-400 -my-0.5 -mx-[1px]" />
     </components.DropdownIndicator>
   )
 }
@@ -227,7 +228,7 @@ const DropdownIndicator = (props: DropdownIndicatorProps) => {
 const ClearIndicator = (props: ClearIndicatorProps) => {
   return (
     <components.ClearIndicator {...props}>
-      <XMarkIcon className="size-4" />
+      <XIcon size={14} />
     </components.ClearIndicator>
   )
 }
@@ -235,7 +236,7 @@ const ClearIndicator = (props: ClearIndicatorProps) => {
 const MultiValueRemove = (props: MultiValueRemoveProps) => {
   return (
     <components.MultiValueRemove {...props}>
-      <XMarkIcon className="size-[1em] p-[1px]" />
+      <XIcon className="size-[1em] p-[1px]" />
     </components.MultiValueRemove>
   )
 }
@@ -258,7 +259,7 @@ const selectStyles = {
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
   },
-  valueContainer: 'py-[9px] px-[12px] py-input-y px-input-x gap-1',
+  valueContainer: 'py-[9px] px-[12px] py-input-y px-input-x gap-1', // dont twMerge (input-x is optional)
   // Input container objects
   input: {
     base: 'text-input',

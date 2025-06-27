@@ -3,6 +3,8 @@ import { isValid } from 'date-fns'
 import 'react-day-picker/style.css'
 import { IsFirstRender } from 'nitro-web'
 
+export const dayButtonClassName = 'size-[33px] text-sm'
+
 type Mode = 'single'|'multiple'|'range'
 type ModeSelection<T extends Mode> = (
   T extends 'single' ? Date | undefined
@@ -94,7 +96,7 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
       // Days
       weekday: `${d.weekday} text-[11px] font-bold uppercase`,
       day: `${d.day} size-[33px]`,
-      day_button: `${d.day_button} size-[33px] text-sm`,
+      day_button: `${d.day_button} ${dayButtonClassName}`,
 
       // States
       focused: `${d.focused} [&>button]:bg-gray-200 [&>button]:border-gray-200`,

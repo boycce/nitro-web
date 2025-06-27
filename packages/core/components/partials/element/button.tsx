@@ -1,10 +1,11 @@
 import { twMerge } from 'nitro-web'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
-type Button = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+interface Button extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   color?: 'primary'|'secondary'|'black'|'dark'|'white'|'clear'|'custom'
-  size?: 'xs'|'sm'|'md'|'lg'
+  size?: 'xs'|'sm'|'md'|'lg'|'custom'
   customColor?: string
+  customSize?: string
   className?: string
   isLoading?: boolean
   IconLeft?: React.ReactNode|'v'
@@ -19,6 +20,7 @@ export function Button({
   size='md', 
   color='primary',
   customColor,
+  customSize,
   className, 
   isLoading, 
   IconLeft, 
@@ -49,26 +51,27 @@ export function Button({
   
   // Button sizes (px is better for height consistency)
   const sizes = {
-    xs: 'px-[6px]  h-[25px] px-button-x-xs h-button-h-xs text-xs !text-button-xs rounded',
-    sm: 'px-[10px] h-[32px] px-button-x-sm h-button-h-sm text-button-md text-button-sm rounded-md',
-    md: 'px-[12px] h-[38px] px-button-x-md h-button-h-md text-button-md rounded-md', // default
-    lg: 'px-[18px] h-[42px] px-button-x-lg h-button-h-lg text-button-md !text-button-lg rounded-md',
+    'xs': 'px-[6px]  h-[25px] text-xs !text-button-xs rounded',
+    'sm': 'px-[10px] h-[32px] text-md text-button-base rounded-md',
+    'md': 'px-[12px] h-[38px] text-md text-button-base rounded-md', // default
+    'lg': 'px-[18px] h-[42px] text-md text-button-base rounded-md',
   }
   
   const appliedColor = color === 'custom' ? customColor : colors[color]
+  const appliedSize = size === 'custom' ? customSize : sizes[size]
   const contentLayout = `gap-x-1.5 ${iconPosition == 'none' ? '' : ''}`
   const loading = isLoading ? '[&>*]:opacity-0 text-opacity-0' : ''
 
   function getIcon(Icon: React.ReactNode | 'v') {
-    if (Icon == 'v' || Icon == 'down') return <ChevronDown size={16.5} className="mt-[-1.4rem] mb-[-1.5rem] -mx-0.5" />
-    if (Icon == '^' || Icon == 'up') return <ChevronUp size={16.5} className="mt-[-1.4rem] mb-[-1.5rem] -mx-0.5" />
+    if (Icon == 'v' || Icon == 'down') return <ChevronDown size={16.5} className="mt-[-1.4rem] mb-[-1.5rem]" />
+    if (Icon == '^' || Icon == 'up') return <ChevronUp size={16.5} className="mt-[-1.4rem] mb-[-1.5rem]" />
     else return Icon
   }
   
   return (
     <button
       type={type} 
-      class={twMerge(`${base} ${sizes[size]} ${appliedColor} ${contentLayout} ${loading} nitro-button ${className||''}`)} 
+      class={twMerge(`${base} ${appliedSize} ${appliedColor} ${contentLayout} ${loading} nitro-button ${className||''}`)} 
       {...props}
     >
       {

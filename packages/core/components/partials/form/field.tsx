@@ -4,7 +4,7 @@ import { css } from 'twin.macro'
 import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
 import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
 import { Errors, type Error } from 'nitro-web/types'
-import { EnvelopeIcon, CalendarIcon, FunnelIcon, MagnifyingGlassIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/20/solid'
+import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { memo } from 'react'
 
 type FieldType = 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
@@ -27,7 +27,7 @@ type FieldExtraProps = {
   placeholder?: string
 }
 type IconWrapperProps = {
-  iconPos: string
+  iconPos: 'left' | 'right'
   icon?: React.ReactNode
   [key: string]: unknown
 }
@@ -77,22 +77,22 @@ function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
   if (type == 'password') {
     Icon = <IconWrapper 
       iconPos={iconPos} 
-      icon={icon || inputType == 'password' ? <EyeSlashIcon /> : <EyeIcon />} 
+      icon={icon || inputType == 'password' ? <EyeOffIcon /> : <EyeIcon />} 
       onClick={() => setInputType(o => o == 'password' ? 'text' : 'password')}
-      className="pointer-events-auto"
+      className="size-[15px] size-input-icon pointer-events-auto"
     />
   } else if (type == 'email') {
-    Icon = <IconWrapper iconPos={iconPos} icon={icon || <EnvelopeIcon />} />
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <MailIcon />} className="size-[14px] size-input-icon" />
   } else if (type == 'filter') {
-    Icon = <IconWrapper iconPos={iconPos} icon={icon || <FunnelIcon />} className="size-3"  />
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <FunnelIcon />} className="size-[14px] size-input-icon" />
   } else if (type == 'search') {
-    Icon = <IconWrapper iconPos={iconPos} icon={icon || <MagnifyingGlassIcon />} className="size-4" />
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <SearchIcon />} className="size-[14px] size-input-icon" />
   } else if (type == 'color') {
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <ColorSvg hex={value}/>} className="size-[17px]" />
   } else if (type == 'date') {
-    Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-4" />
-  } else {
-    Icon = <IconWrapper iconPos={iconPos} icon={icon} />
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-[14px] size-input-icon" />
+  } else if (icon) {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon} className="size-[14px] size-input-icon" />
   }
 
   // Classname
@@ -135,7 +135,7 @@ function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
 
 function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
   return (
-    <div css={style} className={twMerge(`mt-2.5 mb-6 mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`)}>
+    <div css={style} className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`)}>
       {children}
       {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
@@ -143,15 +143,15 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
 }
 
 function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
-  const pl = 'pl-[12px] pl-input-x'
-  const pr = 'pr-[12px] pr-input-x'
+  // not twMerge
+  const px = 'px-[12px]'
   const py = 'py-[9px] py-input-y'
-  const plWithIcon = type == 'color' ? 'pl-9' : 'pl-8' // was sm:pl-8 pl-8, etc
-  const prWithIcon = type == 'color' ? 'pr-9' : 'pr-8'
   return (
-    `block ${py} col-start-1 row-start-1 w-full rounded-md bg-white text-input-base outline outline-1 -outline-offset-1 ` +
-    'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' +
-    (iconPos == 'right' && Icon ? `${pl} ${prWithIcon} ` : (Icon ? `${plWithIcon} ${pr} ` : `${pl} ${pr} `)) +
+    'block col-start-1 row-start-1 w-full rounded-md bg-white text-input-base outline outline-1 -outline-offset-1 ' +
+    'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' + `${py} ${px} ` +
+    (iconPos == 'right' && Icon ? 'pr-[32px] pr-input-x-icon pl-input-x ' : '') +
+    (iconPos == 'left' && Icon ? 'pl-[32px] pl-input-x-icon pr-input-x ' : 'px-input-x ') +
+    (iconPos == 'left' && Icon && type == 'color' ? 'indent-[5px] ' : '') +
     (error 
       ? 'text-danger-foreground outline-danger focus:outline-danger ' 
       : 'text-input outline-input-border focus:outline-input-border-focus ') + 
@@ -166,8 +166,8 @@ function IconWrapper({ icon, iconPos, ...props }: IconWrapperProps) {
     <div
       {...props}
       className={
-        'z-[0] size-[14px] col-start-1 row-start-1 self-center text-[#c6c8ce] select-none ' +
-        (iconPos == 'right' ? 'justify-self-end mr-3 ' : 'justify-self-start ml-3 ') + 
+        'z-[0] col-start-1 row-start-1 self-center text-[#c6c8ce] text-input-icon select-none [&>svg]:size-full ' +
+        (iconPos == 'right' ? 'justify-self-end mr-[12px] mr-input-x ' : 'justify-self-start ml-[12px] ml-input-x ') + 
         props.className || ''
       }
     >{icon}</div>
@@ -220,4 +220,8 @@ const style = css`
     -webkit-appearance: none;
     margin: 0;
   }
+  /* tw4 we can use calc to determine the padding-left with css variables...
+  .inputt {
+    padding-left: calc(var(--input-x) * 2);
+  } */
 `

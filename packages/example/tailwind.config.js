@@ -50,6 +50,7 @@ export default {
         'dropdown-selected-foreground': darken('#4c50f9', 0.05),
         'dropdown-ul-border': colors.gray[200],
         'variable-selected': '#4c50f9',
+        // 'input-icon': '#c6c8ce', // optional
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -65,17 +66,17 @@ export default {
         'sm': ['13.5px', { lineHeight: '20px' }],
         'xs': ['13px', { lineHeight: '19px' }],
         '2xs': ['12px', { lineHeight: '18px' }],
-        'button-md': ['13.5px', { lineHeight: '20px' }],
+        'button-base': ['13.5px', { lineHeight: '20px' }],
         'input-base': ['13.5px', { lineHeight: '20px' }],
       },
       spacing: {
-        // Nitro field spacing (defaults listed below)
-        'button-x-md': '12px',
-        'button-h-md': '38px',
-        'input-x': '12px',
-        'input-y': '9px',
+        // Nitro field spacing values (defaults listed below)
+        // 'input-x': '12px',
+        // 'input-x-icon': '32px',
+        // 'input-y': '9px',
         // 'input-before': '0.625rem',
         // 'input-after': '1.5rem',
+        // 'input-icon': '14px',
       },
       borderRadius: {
         // 'md': '5px', // button/input

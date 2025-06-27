@@ -2,6 +2,7 @@
 import { format, isValid, parse } from 'date-fns'
 import { getPrefixWidth } from 'nitro-web/util'
 import { Calendar, Dropdown } from 'nitro-web'
+import { dayButtonClassName } from '../element/calendar'
 
 type Mode = 'single' | 'multiple' | 'range'
 type DropdownRef = {
@@ -160,7 +161,7 @@ export function FieldDate({
         {
           prefix && 
           // Similar classNames to the input.tsx:IconWrapper()
-          <span className="z-[0] col-start-1 row-start-1 self-center select-none justify-self-start text-input-base ml-3">
+          <span className="z-[0] col-start-1 row-start-1 self-center select-none justify-self-start text-input-base ml-[12px] ml-input-x">
             {prefix}
           </span>
         }
@@ -234,7 +235,7 @@ function TimePicker({ date, onChange }: TimePickerProps) {
                 <button 
                   key={item}
                   className={
-                    'size-[33px] rounded-full flex justify-center items-center group-hover:bg-gray-100 '
+                    `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-gray-100 `
                     + (item === currentValue ? '!bg-input-border-focus text-white' : '')
                   }
                   onClick={() => handleTimeChange(type, item)}

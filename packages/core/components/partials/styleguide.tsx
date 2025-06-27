@@ -187,10 +187,10 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         <div><Button color="primary" size="sm">*-sm button</Button></div>
         <div><Button color="primary">*-md (default)</Button></div>
         <div><Button color="primary" size="lg">*-lg button</Button></div>
-        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />}>IconLeft</Button></div>
-        <div><Button IconLeft={<Check size={19} className="-my-5 -mx-0.5" />} 
+        <div><Button IconLeft={<Check size={19} className="-my-5" />}>IconLeft</Button></div>
+        <div><Button IconLeft={<Check size={19} className="-my-5" />} 
           className="w-[160px]">IconLeft 160px</Button></div>
-        <div><Button IconLeftEnd={<Check size={19} className="-my-5 -mx-0.5" />} 
+        <div><Button IconLeftEnd={<Check size={19} className="-my-5" />} 
           className="w-[190px]">IconLeftEnd 190px</Button></div>
         <div><Button IconRight="v">IconRight</Button></div>
         <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>

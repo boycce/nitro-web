@@ -3,6 +3,7 @@ import { deepFind, s3Image, getErrorFromState } from 'nitro-web/util'
 import { DropHandler } from 'nitro-web'
 import noImage from 'nitro-web/client/imgs/no-image.svg'
 import { Errors, MonasteryImage } from 'nitro-web/types'
+import { twMerge } from 'nitro-web/util'
 
 type DropProps = {
   awsUrl?: string
@@ -93,7 +94,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
   // }
 
   return (
-    <div class={`mt-2.5 mb-6 mt-input-before mb-input-after nitro-field nitro-drop ${className || ''}`}>
+    <div class={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after nitro-field nitro-drop ${className || ''}`)}>
       <input 
         {...props}
         id={inputId}
