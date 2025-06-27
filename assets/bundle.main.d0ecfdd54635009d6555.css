@@ -951,14 +951,14 @@ label, .label {
 .left-1\/2 {
   left: 50%;
 }
-.left-3 {
-  left: 0.75rem;
-}
 .left-\[-100\%\] {
   left: -100%;
 }
 .left-\[-100vw\] {
   left: -100vw;
+}
+.left-\[12px\] {
+  left: 12px;
 }
 .left-\[50\%\] {
   left: 50%;
@@ -1031,10 +1031,6 @@ label, .label {
   margin-left: -0.125rem;
   margin-right: -0.125rem;
 }
-.-mx-1 {
-  margin-left: -0.25rem;
-  margin-right: -0.25rem;
-}
 .-mx-2 {
   margin-left: -0.5rem;
   margin-right: -0.5rem;
@@ -1042,6 +1038,10 @@ label, .label {
 .-mx-6 {
   margin-left: -1.5rem;
   margin-right: -1.5rem;
+}
+.-mx-\[1px\] {
+  margin-left: -1px;
+  margin-right: -1px;
 }
 .-my-0\.5 {
   margin-top: -0.125rem;
@@ -1120,11 +1120,14 @@ label, .label {
 .ml-\[-0\.5rem\] {
   margin-left: -0.5rem;
 }
+.ml-\[12px\] {
+  margin-left: 12px;
+}
 .mr-2 {
   margin-right: 0.5rem;
 }
-.mr-3 {
-  margin-right: 0.75rem;
+.mr-\[12px\] {
+  margin-right: 12px;
 }
 .-mt-1 {
   margin-top: -0.25rem;
@@ -1209,14 +1212,6 @@ label, .label {
   width: 0.375rem;
   height: 0.375rem;
 }
-.size-3 {
-  width: 0.75rem;
-  height: 0.75rem;
-}
-.size-4 {
-  width: 1rem;
-  height: 1rem;
-}
 .size-5 {
   width: 1.25rem;
   height: 1.25rem;
@@ -1232,6 +1227,10 @@ label, .label {
 .size-\[14px\] {
   width: 14px;
   height: 14px;
+}
+.size-\[15px\] {
+  width: 15px;
+  height: 15px;
 }
 .size-\[16px\] {
   width: 16px;
@@ -1299,9 +1298,6 @@ label, .label {
 }
 .h-\[42px\] {
   height: 42px;
-}
-.h-button-h-md {
-  height: 38px;
 }
 .\!min-h-0 {
   min-height: 0px !important;
@@ -1682,9 +1678,6 @@ label, .label {
 .text-pretty {
   text-wrap: pretty;
 }
-.\!rounded-lg {
-  border-radius: 0.5rem !important;
-}
 .rounded {
   border-radius: 0.25rem;
 }
@@ -1967,14 +1960,6 @@ label, .label {
   padding-left: 6px;
   padding-right: 6px;
 }
-.px-button-x-md {
-  padding-left: 12px;
-  padding-right: 12px;
-}
-.px-input-x {
-  padding-left: 12px;
-  padding-right: 12px;
-}
 .py-0\.5 {
   padding-top: 0.125rem;
   padding-bottom: 0.125rem;
@@ -2023,10 +2008,6 @@ label, .label {
   padding-top: 9px;
   padding-bottom: 9px;
 }
-.py-input-y {
-  padding-top: 9px;
-  padding-bottom: 9px;
-}
 .pb-2 {
   padding-bottom: 0.5rem;
 }
@@ -2039,32 +2020,14 @@ label, .label {
 .pl-2 {
   padding-left: 0.5rem;
 }
-.pl-8 {
-  padding-left: 2rem;
-}
-.pl-9 {
-  padding-left: 2.25rem;
-}
-.pl-\[12px\] {
-  padding-left: 12px;
-}
-.pl-input-x {
-  padding-left: 12px;
+.pl-\[32px\] {
+  padding-left: 32px;
 }
 .pr-1\.5 {
   padding-right: 0.375rem;
 }
-.pr-8 {
-  padding-right: 2rem;
-}
-.pr-9 {
-  padding-right: 2.25rem;
-}
-.pr-\[12px\] {
-  padding-right: 12px;
-}
-.pr-input-x {
-  padding-right: 12px;
+.pr-\[32px\] {
+  padding-right: 32px;
 }
 .pt-1 {
   padding-top: 0.25rem;
@@ -2083,6 +2046,9 @@ label, .label {
 }
 .text-center {
   text-align: center;
+}
+.indent-\[5px\] {
+  text-indent: 5px;
 }
 .align-middle {
   vertical-align: middle;
@@ -2116,7 +2082,7 @@ label, .label {
   font-size: 15.5px;
   line-height: 1.75rem;
 }
-.text-button-md {
+.text-button-base {
   font-size: 13.5px;
   line-height: 20px;
 }
@@ -2127,6 +2093,10 @@ label, .label {
 .text-lg {
   font-size: 18px;
   line-height: 31px;
+}
+.text-md {
+  font-size: 14px;
+  line-height: 21px;
 }
 .text-md\/6 {
   font-size: 14px;
@@ -2966,9 +2936,6 @@ label, .label {
     padding-left: 1.5rem;
     padding-right: 1.5rem;
   }
-  .sm\:pl-8 {
-    padding-left: 2rem;
-  }
   .sm\:text-5xl {
     font-size: 3rem;
     line-height: 1;
@@ -3117,5 +3084,9 @@ label, .label {
 .\[\&\>button\]\:bg-gray-200>button {
   --tw-bg-opacity: 1;
   background-color: rgb(229 231 235 / var(--tw-bg-opacity, 1));
+}
+.\[\&\>svg\]\:size-full>svg {
+  width: 100%;
+  height: 100%;
 }
 
