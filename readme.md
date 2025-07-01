@@ -16,18 +16,24 @@ npm i nitro-web -D @nitro-web/webpack
 
 ### Usage
 
-On the client, you can import components and page-components as you would normally. See ./example for further info.
+On the client, you can import components and page-components. See ./example for further info.
 
 ```javascript
-import { SigninPage, Field, util } from 'nitro-web'
+import { SigninPage, Field } from 'nitro-web'
 ```
 
 On the server, you can import the express router, default models, and controllers. See ./example for further info.
 
 ```javascript
-import { setupRouter, util } from 'nitro-web/server'
+import { setupRouter } from 'nitro-web/server'
 const server = await setupRouter(config)
 server.listen(3001, '0.0.0.0')
+```
+
+On the client/server, you can import common utilities.
+
+```javascript
+import { deepCopy } from 'nitro-web/util'
 ```
 
 ### Run
@@ -43,12 +49,9 @@ npm run build
 npm run start
 ```
 
-### Example App Development
+### Developing Nitro in a Custom Project
 
-You can run the same commands above from the root nitro-web directory (./)
-
-### Custom App Development
-
+1. Git clone Nitro
 1. Move your project into `./packages/MYPROJECT`
 2. Delete the `./MYPROJECT/package-lock.json` file (if it exists), and add `package-lock=false` to `./MYPROJECT/.npmrc`. Workspaces only generate a single `package-lock.json` at the root, if this file exists locally, npm may install outdated dependencies for your team or in production.
 3. Ensure the same versions of `nitro-web` and `nitro-web/webpack` are used, this is required for workspace linking to function correctly.
