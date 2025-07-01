@@ -10,19 +10,19 @@ npm i nitro-web -D @nitro-web/webpack
 
 ### Install
 
-1. Copy ./example into your project
+1. Copy ./packages/example into your project
 5. Uncomment `# .env` in `./gitignore`  
 5. Run `npm i`
 
 ### Usage
 
-On the client, you can import components and page-components. See ./example for further info.
+On the client, you can import components and page-components. See ./packages/example for further info.
 
 ```javascript
 import { SigninPage, Field } from 'nitro-web'
 ```
 
-On the server, you can import the express router, default models, and controllers. See ./example for further info.
+On the server, you can import the express router, default models, and controllers. See ./packages/example for further info.
 
 ```javascript
 import { setupRouter } from 'nitro-web/server'
