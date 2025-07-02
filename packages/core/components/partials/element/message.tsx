@@ -4,12 +4,16 @@ import { X, CircleCheck } from 'lucide-react'
 import { MessageObject } from 'nitro-web/types'
 import { twMerge } from 'nitro-web'
 
+type MessageProps = {
+  className?: string
+  classNameWrapper?: string
+  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+}
 /**
  * Shows a message
- * Triggered by navigating to a link with a valid query string, or
- * by setting store.message to a string or more explicitly, to an object
+ * Triggered by navigating to a link with a valid query string, or by setting store.message to a string or more explicitly, to an object
  **/
-export function Message({ className }: { className?: string }) {
+export function Message({ className, classNameWrapper, position='top-right' }: MessageProps) {
   const devDontHide = false
   const [store, setStore] = useTracked()
   const [visible, setVisible] = useState(false)
@@ -30,7 +34,16 @@ export function Message({ className }: { className?: string }) {
     'info': 'text-info',
     'success': 'text-success',
   }
+  const positionMap = {
+    'top-left': ['sm:items-start sm:justify-start', 'sm:translate-y-0  sm:translate-x-[-0.5rem]'],
+    'top-center': ['sm:items-start sm:justify-center', 'sm:translate-y-[-0.5rem]'],
+    'top-right': ['sm:items-start sm:justify-end', 'sm:translate-y-0 sm:translate-x-1'],
+    'bottom-left': ['sm:items-end sm:justify-start', 'sm:translate-y-0  sm:translate-x-[-0.5rem]'],
+    'bottom-center': ['sm:items-end sm:justify-center', 'sm:translate-y-1'],
+    'bottom-right': ['sm:items-end sm:justify-end', 'sm:translate-y-0 sm:translate-x-1'],
+  }
   const color = colorMap[(store.message as MessageObject)?.type || 'success']
+  const positionArr = positionMap[(position as keyof typeof positionMap)]
 
   useEffect(() => {
     return () => {
@@ -70,7 +83,7 @@ export function Message({ className }: { className?: string }) {
     // Show message and hide it again after some time. Send back cleanup if store.message changes
     } else if (messageObject && now - 500 < messageObject.date) {
       const timeout1 = setTimeout(() => setVisible(true), 50)
-      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000)
+      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000000)
       return () => {
         clearTimeout(timeout1)
         clearTimeout(timeout2)
@@ -82,29 +95,29 @@ export function Message({ className }: { className?: string }) {
     setVisible(false)
     setTimeout(() => setStore(s => ({ ...s, message: undefined })), 250)
   }
-  
+
   return (
     <>
       {/* Global notification live region, render this permanently at the end of the document */}
       <div
         aria-live="assertive"
-        className={`${twMerge(`pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-[101] ${className||''}`)} nitro-message`}
+        className={`${twMerge(`pointer-events-none items-end justify-center fixed inset-0 flex px-4 py-6 sm:p-6 z-[101] nitro-message ${positionArr[0]} ${classNameWrapper || ''}`)}`}
       >
-        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+        <div className="flex flex-col items-center space-y-4">
           {isObject(store.message) && (
-            <div className={
-              'overflow-hidden pointer-events-auto max-w-[350px] rounded-md bg-white shadow-lg ring-1 ring-black/5 transition ' +
-              (visible ? 'translate-x-0 opacity-100' : 'translate-x-1 opacity-0')
-            }>
+            <div className={twMerge(
+              'overflow-hidden translate-y-[0.5rem] opacity-0 pointer-events-auto max-w-[350px] rounded-md bg-white shadow-lg ring-1 ring-black/5 transition text-sm font-medium text-gray-900',
+              positionArr[1],
+              (visible ? 'translate-x-0 translate-y-0 sm:translate-x-0 sm:translate-y-0 opacity-100' : ''),
+              className
+            )}>
               <div className="p-3">
-                <div className="flex items-start gap-3 text-sm leading-[1.4em]">
+                <div className="flex items-start gap-3 leading-[1.4em]">
                   <div className="flex items-center shrink-0 min-h-[1.4em]">
                     <CircleCheck aria-hidden="true" size={19} className={`${color}`} />
                   </div>
                   <div className="flex flex-1 items-center min-h-[1.4em]">
-                    <p className="font-medium text-gray-900">{typeof store.message === 'object' && store.message?.text}
-                    </p>
-                    {/* <p className="mt-1 text-sm text-gray-500">{store.message.text}</p> */}
+                    <p>{typeof store.message === 'object' && store.message?.text}</p>
                   </div>
                   <div className="flex items-center shrink-0 min-h-[1.4em]">
                     <button
