@@ -106,7 +106,7 @@ async function store(req, res) {
 async function signup(req, res) {
   try {
     const desktop = req.query.desktop
-    let user = await this.userCreate(req.body, this.findUserFromProvider)
+    let user = await this.userCreate(req.body)
     sendEmail({
       config: authConfig,
       template: 'welcome',
@@ -315,8 +315,12 @@ export async function signinAndGetStore(user, isDesktop, getStore) {
   return { ...store, jwt }
 }
 
-export async function userCreate({ name, business, email, password, findUserFromProvider }) {
+export async function userCreate({ name, business, email, password }) {
   try {
+    if (!this.findUserFromProvider) {
+      throw new Error('this.findUserFromProvider doesn\'t exist, make sure the context is available when calling this function')
+    }
+
     const options = { blacklist: ['-_id'] }
     const isMultiTenant = !authConfig.isNotMultiTenant
     const userId = db.id()

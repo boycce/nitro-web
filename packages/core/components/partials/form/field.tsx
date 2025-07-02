@@ -22,7 +22,7 @@ type FieldExtraProps = {
   /** icon to show in the input */
   icon?: React.ReactNode
   iconPos?: 'left' | 'right'
-  /** Pass dependencies to break memoization, handy for onChange/onInputChange */
+  /** Dependencies to break the implicit memoization of onChange/onInputChange */
   deps?: unknown[]
   placeholder?: string
 }
@@ -181,25 +181,19 @@ function ColorSvg({ hex }: { hex?: string }) {
 }
 
 export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps) {
+  // Check if the field is cached, onChange/onInputChange doesn't affect the cache
   const path = prev.name
   const state = prev.state || {}
-  // If state/satte-error values have changed, re-render!
-  if (deepFind(state, path) !== deepFind(next.state || {}, path)) {
-    // console.log(1, 'state changed', path)
-    return false
-  }
-  if (getErrorFromState(state, path) !== getErrorFromState(next.state || {}, path)) {
-    // console.log(2, 'error changed', path)
-    return false
-  }
-  // If deps have changed, re-render!
-  if ((next.deps?.length !== prev.deps?.length) || next.deps?.some((v, i) => v !== prev.deps?.[i])) {
-    // console.log(3, 'deps changed', path)
-    return false
-  }
-  // If any other props have changed, except onChange/onInputChange, re-render!
-  // In most cases, onChange/onInputChange remain the same and reference the same function...
-  for (const k in prev) {
+  // If the state value has changed, re-render!
+  if (deepFind(state, path) !== deepFind(next.state || {}, path)) return false
+  // If the state error has changed, re-render!
+  if (getErrorFromState(state, path) !== getErrorFromState(next.state || {}, path)) return false
+  // If `deps` have changed, handy for onChange/onInputChange, re-render!
+  if ((next.deps?.length !== prev.deps?.length) || next.deps?.some((v, i) => v !== prev.deps?.[i])) return false
+
+  // Check if any prop has changed, except `onChange`/`onInputChange`
+  const allKeys = new Set([...Object.keys(prev), ...Object.keys(next)])
+  for (const k of allKeys) {
     if (k === 'state' || k === 'onChange' || k === 'onInputChange') continue
     if (prev[k as keyof typeof prev] !== next[k as keyof typeof next]) {
       // console.log(4, 'changed', path, k)
