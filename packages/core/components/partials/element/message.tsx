@@ -83,7 +83,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     // Show message and hide it again after some time. Send back cleanup if store.message changes
     } else if (messageObject && now - 500 < messageObject.date) {
       const timeout1 = setTimeout(() => setVisible(true), 50)
-      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000000)
+      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000)
       return () => {
         clearTimeout(timeout1)
         clearTimeout(timeout2)
