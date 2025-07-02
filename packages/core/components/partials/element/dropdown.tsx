@@ -132,13 +132,11 @@ export const Dropdown = forwardRef(function Dropdown({
     if (option.onClick) option.onClick(e)
     if (!menuIsOpen) setIsActive(!isActive)
   }
-  var ready2
 
   return (
     <div 
       class={
         `relative is-${direction || dir}` + // until hovered, show the original direction to prevent scrollbars
-        (ready2 ? ' is-ready' : '') +
         (isHoverable ? ' is-hoverable' : '') +
         (isActive ? ' is-active' : '') +
         (!animate ? ' no-animation' : '') +

@@ -119,9 +119,9 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   
   return (
     <Elements.Dropdown 
+      // menuIsOpen={true}
       dir="bottom-right"
       allowOverflow={true}
-      // menuIsOpen={true}
       {...dropdownProps}
       menuClassName={twMerge(`min-w-[330px] ${dropdownProps?.menuClassName || ''}`)}
       menuContent={
