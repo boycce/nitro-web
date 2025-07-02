@@ -1,4 +1,4 @@
-import { createBrowserRouter, createHashRouter, redirect, useParams, RouterProvider } from 'react-router-dom' 
+import { createBrowserRouter, createHashRouter, redirect, RouterProvider } from 'react-router-dom' 
 import { Fragment, ReactNode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
@@ -25,7 +25,7 @@ type Settings = {
 }
 
 type Route = {
-  component: React.FC<{ route?: Route; params?: object; location?: object; config?: Config }>
+  component: React.FC<{ route?: Route; config?: Config }>
   middleware: string[]
   name: string
   path: string
@@ -70,9 +70,7 @@ export function updateJwt(token?: string | null) {
 }
 
 function App({ settings, config, storeContainer }: { settings: Settings, config: Config, storeContainer: StoreContainer }): ReactNode {
-  // const themeNormalised = theme
-  const router = getRouter({ settings, config })
-  // const theme = pick(themeNormalised, []) // e.g. 'topPanelHeight'
+  const router = useMemo(() => getRouter({ settings, config }), [])
 
   useEffect(() => {
     /**
@@ -97,10 +95,8 @@ function App({ settings, config, storeContainer }: { settings: Settings, config:
 
   return (
     <storeContainer.Provider>
-      {/* <ThemeProvider theme={themeNormalised}> */}
-      { router && <RouterProvider router={router} /> }
+      { router && <RouterProvider router={router}/> }
       <AfterApp settings={settings} />
-      {/* </ThemeProvider> */}
     </storeContainer.Provider>
   )
 }
@@ -206,7 +202,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
           ),
           path: route.path,
           loader: async () => { // request
-            // wait for container/exposedStoreData to be setup
+            // wait for container/exposedStoreData to be setup (note that this causes ReactRouter to re-render, but not the page)
             if (!nonce) {
               nonce = true 
               await setTimeoutPromise(() => {}, 0)
@@ -255,11 +251,9 @@ function RestoreScroll() {
 
 function RouteComponent({ route, config }: { route: Route, config: Config }) {
   const Component = route.component
-  const params = useParams()
-  const location = useLocation()
   document.title = route.meta?.title || ''
   return (
-    <Component route={route} params={params} location={location} config={config} />
+    <Component route={route} config={config} />
   )
 }
 
