@@ -67,8 +67,7 @@ const res = await sendEmail({
   template: 'welcome',
   to: 'test@test.com',
 })
-// if config.emailTestMode=true, the template will be returned 
-// console.log(res)
+console.log(res) // if config.emailTestMode=true, the template will be returned 
 ```
 
 ### Developing Nitro in a Custom Project
