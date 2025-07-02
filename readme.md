@@ -22,7 +22,7 @@ On the client, you can import components and page-components. See ./packages/exa
 import { SigninPage, Field } from 'nitro-web'
 ```
 
-On the server, you can import the express router, default models, and controllers. See ./packages/example for further info.
+On the server, you can import the express router, default models, and controllers. See ./packages/example.
 
 ```javascript
 import { setupRouter } from 'nitro-web/server'
@@ -30,7 +30,7 @@ const server = await setupRouter(config)
 server.listen(3001, '0.0.0.0')
 ```
 
-On the client/server, you can import common utilities.
+On the client & server, you can import common utils.
 
 ```javascript
 import { deepCopy } from 'nitro-web/util'
