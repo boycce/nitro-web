@@ -53,7 +53,7 @@ npm run start
 
 The `sendEmail` utility compiles and sends Nunjuck templates with Mailgun.
 
-1. Templates must be placed in the `/server/email/` directory, there are three available by default: welcome, reset-password, invite-user
+1. Templates are placed in `/server/email/`, there are three available by default: welcome, reset-password, invite-user
 2. You can test the email templates at [http://localhost:3000/email/welcome](http://localhost:3000/email/welcome)
 3. Update the `emailFrom`, `emailReplyTo`, `emailTestMode`, `mailgunKey`, `mailgunDomain` in the your .env once you are ready to send
 
