@@ -54,6 +54,7 @@ export function Checkbox({
                 ? <>
                     <input
                       {...props}
+                      id={id}
                       type={type}
                       style={{ width: checkboxSize, height: checkboxSize }}
                       checked={value}
@@ -106,6 +107,7 @@ export function Checkbox({
                 : <>
                     <input 
                       {...props}
+                      id={id}
                       type="checkbox" 
                       className="sr-only peer"
                       checked={value}

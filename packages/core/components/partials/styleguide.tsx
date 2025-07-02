@@ -200,22 +200,22 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         <div><Button size="xs" IconCenter={<FileEditIcon size={14}/>}></Button></div>
       </div>
 
-      <h2 class="h3">Checkboxes</h2>
+      <h2 class="h3">Varients</h2>
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
-          <label for="input2">Label</label>
+          <label for="input2">Toggles</label>
           <Checkbox name="input2" type="toggle" text="Toggle sm" subtext="some additional text here." class="!mb-0" 
             state={state} onChange={(e) => onChange(setState, e)} />
           <Checkbox name="input3" type="toggle" text="Toggle 22px" subtext="some additional text here." size={22} />
         </div>
         <div>
-          <label for="input1">Label</label>
+          <label for="input1">Radios</label>
           <Checkbox name="input1" type="radio" text="Radio" subtext="some additional text here 1." id="input1-1" class="!mb-0" 
             defaultChecked />
           <Checkbox name="input1" type="radio" text="Radio 16px" subtext="some additional text here 2." id="input1-2"  size={16} />
         </div>
         <div>
-          <label for="input0">Label</label>
+          <label for="input0">Checkboxes</label>
           <Checkbox name="input0" type="checkbox" text="Checkbox" subtext="some additional text here."  class="!mb-0" defaultChecked />
           <Checkbox name="input0.1" type="checkbox" text="Checkbox 16px" size={16}
             subtext="some additional text here which is a bit longer that will be line-wrap to the next line." />
