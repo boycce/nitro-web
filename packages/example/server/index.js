@@ -21,13 +21,22 @@ server.listen(process.env.PORT || 3001, '0.0.0.0', async () => {
   // ...success
 })
 
-// You can send transactional Mailgun emails like so:
-// import { sendEmail } from '#nitro-web/server.js'
-// const html = await sendEmail({
-//   config: config,
-//   data: { name: 'Test' },
-//   template: 'welcome',
-//   test: true,
-//   to: 'test@test.com',
-// })
-// console.log(html)
+/**
+ * Transactional Mailgun emails:
+ *
+ *   The `sendEmail` utility compiles and sends Nunjuck templates with Mailgun.
+ *   1. Templates must be placed in the `/server/email/` directory, there are 3 available by default: welcome, reset-password, invite-user
+ *   2. You can test the email templates at http://localhost:3000/email/welcome
+ *   3. Update the `emailFrom`, `emailReplyTo`, `emailTestMode`, `mailgunKey`, `mailgunDomain` in the your .env once you are ready to send
+ *
+ *   Example:
+ * 
+ *   import { sendEmail } from 'nitro-web/server'
+ *   const res = await sendEmail({
+ *     config: config,
+ *     data: { name: 'Test' },
+ *     template: 'welcome',
+ *     to: 'test@test.com',
+ *   })
+ *   console.log(res) // if config.emailTestMode=true, the template will be returned
+ */

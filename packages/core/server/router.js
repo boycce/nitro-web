@@ -98,7 +98,8 @@ export async function setupRouter (config) {
   let indexExists = !!fs.existsSync(distDir + 'index.html')
 
   // Register email routes for development
-  // E.g. http://localhost:3001/email/welcome
+  // E.g. http://localhost:3001/email/welcome Or
+  // E.g. http://localhost:3000/email/welcome (with webpack-dev-server proxy)
   if (env == 'development') {
     expressApp.get('/email/partials/email.css', (req, res) => {
       // first check if there is a custom email.css in the emailTemplateDir

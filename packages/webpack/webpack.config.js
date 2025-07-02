@@ -72,7 +72,7 @@ export const getConfig = (config) => {
           //   // await axios.get('http://0.0.0.0:3001/ping')
           // },
         },
-        '/server/email/templates': {
+        '/email': {
           logLevel: 'silent',
           target: 'http://0.0.0.0:3001',
         },

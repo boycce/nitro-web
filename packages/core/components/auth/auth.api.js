@@ -6,7 +6,7 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import db from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
-import { isArray, pick, isString, ucFirst, fullNameSplit } from 'nitro-web/util'
+import { isArray, pick, ucFirst, fullNameSplit } from 'nitro-web/util'
 
 let authConfig = null
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
