@@ -1274,13 +1274,13 @@ export function parseFilters(query, config) {
 
 /**
  * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
- * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
  * @param {{ page?: string, sort?: '1'|'-1', sortBy?: string }} query - req.query
  *   E.g. { 
  *     page: '1', 
  *     sort: '1', 
  *     sortBy: 'createdAt' 
  *   }
+ * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
  * @param {number} [limit=10]
  * @example returned object (using the examples above):
  *   E.g. {
@@ -1289,7 +1289,7 @@ export function parseFilters(query, config) {
  *     sort: { createdAt: 1 },
  *   }
  */
-export function parseSortOptions(model, query, limit = 10) {
+export function parseSortOptions(query, model, limit = 10) {
   const page = parseInt(query.page || '') || 1
 
   // Validate sortBy value
