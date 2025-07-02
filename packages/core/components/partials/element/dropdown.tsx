@@ -14,14 +14,14 @@ type DropdownProps = {
   options?: { label: string|React.ReactNode, onClick?: Function, isSelected?: boolean, icon?: React.ReactNode, className?: string }[]
   /** Whether the dropdown is hoverable **/
   isHoverable?: boolean
-  /** The minimum width of the menu **/
-  minWidth?: number | string
   /** The content to render inside the top of the dropdown **/
   menuContent?: React.ReactNode
   menuClassName?: string
   menuOptionClassName?: string
   menuIsOpen?: boolean
   menuToggles?: boolean
+  /** The minimum width of the menu **/
+  minWidth?: number | string
   toggleCallback?: (isActive: boolean) => void
 }
 
@@ -30,15 +30,15 @@ export const Dropdown = forwardRef(function Dropdown({
   animate=true,
   children, 
   className,
-  dir, 
+  dir='bottom-left', 
   options, 
   isHoverable,
-  minWidth, // remove in favour of menuClassName
   menuClassName,
   menuOptionClassName,
   menuContent, 
   menuIsOpen, 
   menuToggles=true,
+  minWidth,
   toggleCallback,
 }: DropdownProps, ref) {
   // https://letsbuildui.dev/articles/building-a-dropdown-menu-component-with-react-hooks
@@ -46,6 +46,8 @@ export const Dropdown = forwardRef(function Dropdown({
   const dropdownRef = useRef<HTMLDivElement|null>(null)
   const [isActive, setIsActive] = useState(!!menuIsOpen)
   const menuStyle = getSelectStyle({ name: 'menu' })
+  const [direction, setDirection] = useState<null | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'>(null)
+  const [ready, setReady] = useState(false)
 
   // Expose the setIsActive function to the parent component
   useImperativeHandle(ref, () => ({ setIsActive }))
@@ -76,7 +78,50 @@ export const Dropdown = forwardRef(function Dropdown({
   useEffect(() => {
     if (toggleCallback) toggleCallback(isActive)
   }, [isActive])
+
+  useEffect(() => {
+    setReady(false)
+    if (!isActive || !dropdownRef.current) return
+    
+    const ul = dropdownRef.current.querySelector('ul') as HTMLElement
+    if (!ul) return
   
+    // Temporarily show the ul for measurement
+    const originalMaxHeight = ul.style.maxHeight
+    const originalVisibility = ul.style.visibility
+    const originalOpacity = ul.style.opacity
+    const originalPointerEvents = ul.style.pointerEvents
+  
+    ul.style.maxHeight = 'none'
+    ul.style.visibility = 'hidden'
+    ul.style.opacity = '0'
+    ul.style.pointerEvents = 'none'
+  
+    const dropdownHeight = ul.getBoundingClientRect().height
+  
+    // Revert styles
+    ul.style.maxHeight = originalMaxHeight
+    ul.style.visibility = originalVisibility
+    ul.style.opacity = originalOpacity
+    ul.style.pointerEvents = originalPointerEvents
+  
+    const rect = dropdownRef.current.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+  
+    const side = dir.endsWith('right') ? 'right' : 'left'
+  
+    const newDirection = dir.startsWith('bottom')
+      ? `${spaceBelow < dropdownHeight && spaceAbove > dropdownHeight ? 'top' : 'bottom'}-${side}`
+      : `${spaceAbove < dropdownHeight && spaceBelow > dropdownHeight ? 'bottom' : 'top'}-${side}`
+  
+    setDirection(newDirection as 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right')
+  
+    requestAnimationFrame(() => {
+      setReady(true)
+    })
+  }, [isActive, dir])
+
   function onMouseDown(e: { key: string, preventDefault: Function }) {
     if (e.key && e.key != 'Enter') return
     if (e.key) e.preventDefault() // for button, stops buttons firing twice
@@ -87,12 +132,13 @@ export const Dropdown = forwardRef(function Dropdown({
     if (option.onClick) option.onClick(e)
     if (!menuIsOpen) setIsActive(!isActive)
   }
+  var ready2
 
   return (
     <div 
       class={
-        'relative' + 
-        (dir ? ` is-${dir}` : ' is-bottom-left') +
+        `relative is-${direction || dir}` + // until hovered, show the original direction to prevent scrollbars
+        (ready2 ? ' is-ready' : '') +
         (isHoverable ? ' is-hoverable' : '') +
         (isActive ? ' is-active' : '') +
         (!animate ? ' no-animation' : '') +
@@ -113,7 +159,8 @@ export const Dropdown = forwardRef(function Dropdown({
       }
       <ul
         style={{ minWidth }}
-        class={twMerge(`${menuStyle} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName}`)}
+        class={
+          twMerge(`${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName||''}`)}
       >
         {menuContent}
         {
@@ -172,7 +219,7 @@ const style = css`
   &>ul>li:hover,
   &>ul>li:focus,
   &>ul>li.is-active {
-    &>ul {
+    &>ul.is-ready {
       opacity: 1;
       visibility: visible;
       transition: transform 0.15s ease, opacity 0.15s ease;

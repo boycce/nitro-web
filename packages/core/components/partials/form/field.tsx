@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// Maybe use fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
+// fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 import { css } from 'twin.macro'
 import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
 import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'

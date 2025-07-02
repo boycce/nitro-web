@@ -1,121 +1,146 @@
-import { twMerge } from 'nitro-web/util'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { twMerge, deepFind, getErrorFromState } from 'nitro-web/util'
+import { Errors, type Error } from 'nitro-web/types'
 
-type CheckboxProps = {  
+type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {  
+  /** field name or path on state (used to match errors), e.g. 'date', 'company.email' */
   name: string
-  /** name is applied if not provided. Used for radios */
+  /** name is applied if id is not provided. Used for radios */
   id?: string 
-  size?: 'md' | 'sm'
+  /** state object to get the value, and check errors against */
+  state?: { errors?: Errors, [key: string]: any }
+  size?: number
   subtext?: string|React.ReactNode
   text?: string|React.ReactNode
   type?: 'checkbox' | 'radio' | 'toggle'
-  [key: string]: unknown
+  checkboxClassName?: string
+  svgClassName?: string
+  labelClassName?: string
 }
 
-export function Checkbox({ name, id, size='sm', subtext, text, type='checkbox', ...props }: CheckboxProps) {
+export function Checkbox({ 
+  state, size, subtext, text, type='checkbox', className, checkboxClassName, svgClassName, labelClassName, ...props 
+}: CheckboxProps) {
   // Checkbox/radio/toggle component
-  // https://tailwindui.com/components/application-ui/forms/checkboxes#component-744ed4fa65ba36b925701eb4da5c6e31
-  if (!name) throw new Error('Checkbox requires a `name` prop')
-  id = id || name
+  let value!: boolean
+  const error = getErrorFromState(state, props.name)
+  const id = props.id || props.name
 
-  const sizeMap = {
-    sm: {
-      checkbox: 'size-[14px]',
-      toggleWidth: 'w-[32px]', // 4px border + (toggleAfterSize * 2)
-      toggleHeight: 'h-[18px]',
-      toggleAfterSize: 'after:size-[14px]', // account for 2px border
-    },
-    md: {
-      checkbox: 'size-[16px]',
-      toggleWidth: 'w-[40px]', // 4px border + (toggleAfterSize * 2)
-      toggleHeight: 'h-[22px]',
-      toggleAfterSize: 'after:size-[18px]', // account for 2px border
-    },
+  if (!props.name) throw new Error('Checkbox requires a `name` prop')
+  
+  // Value: Input is always controlled if state is passed in
+  if (typeof props.checked !== 'undefined') value = props.checked
+  else if (typeof state == 'object') {
+    const v = deepFind(state, props.name) as boolean | undefined
+    value = v ?? false
   }
-  const _size = sizeMap[size]
+
+  const BORDER = 2
+  const checkboxSize = size ?? 14
+  const toggleHeight = size ?? 18
+  const toggleWidth = toggleHeight * 2 - BORDER * 2
+  const toggleAfterSize = toggleHeight - BORDER * 2
 
   return (
-    <div className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after flex gap-3 nitro-checkbox ${props.className || ''}`)}>
-      <div className="flex shrink-0 mt-[2px]">
-        {
-          type !== 'toggle'
-            ? <div className={`group grid ${_size.checkbox} grid-cols-1`}>
-                <input
-                  {...props}
-                  id={id}
-                  name={name}
-                  type={type}
-                  className={
-                    `${type === 'radio' ? 'rounded-full' : 'rounded'} col-start-1 row-start-1 appearance-none border border-gray-300 bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto ` + 
-                    // Default
-                    'checked:border-blue-600 checked:bg-blue-600 indeterminate:border-blue-600 indeterminate:bg-blue-600 focus-visible:outline-blue-600 ' +
-                    // Variable-selected color defined?
-                    'checked:!border-variable-selected checked:!bg-variable-selected indeterminate:!border-variable-selected indeterminate:!bg-variable-selected focus-visible:!outline-variable-selected'
-                  }
-                />
-                <svg
-                  fill="none"
-                  viewBox="0 0 14 14"
-                  className={`pointer-events-none col-start-1 row-start-1 ${_size.checkbox} self-center justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25`}
-                >
-                  {
-                    type === 'radio'
-                      ? <circle
-                          // cx={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 2}
-                          // cy={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 2}
-                          // r={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 6}
-                          cx={7}
-                          cy={7}
-                          r={2.5}
-                          className="fill-white opacity-0 group-has-[:checked]:opacity-100"
-                        />
-                      : <>
-                          <path
-                            d="M4 8L6 10L10 4.5"
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="opacity-0 group-has-[:checked]:opacity-100"
-                          />
-                          <path
-                            d="M4 7H10"
-                            strokeWidth={2}
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="opacity-0 group-has-[:indeterminate]:opacity-100"
-                          />
-                        </>
-                  }
-                </svg>
-              </div>
-            : <div className="group grid grid-cols-1">
-                <input 
-                  {...props}
-                  id={id}
-                  name={name}
-                  type="checkbox" 
-                  class="sr-only peer"
-                />
-                <label 
-                  for={id}
-                  className={
-                    `col-start-1 row-start-1 relative ${_size.toggleWidth} ${_size.toggleHeight} bg-gray-200 peer-focus-visible:outline-none peer-focus-visible:ring-4 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full ${_size.toggleAfterSize} after:transition-all ` +
-                    // Default
-                    'peer-focus-visible:ring-blue-300 peer-checked:bg-blue-600 ' +
-                    // Variable-selected color defined?
-                    'peer-focus-visible:!ring-variable-selected peer-checked:!bg-variable-selected '
-                    // Dark mode not used yet...
-                    // 'dark:peer-focus-visible:ring-blue-800 dark:bg-gray-700 dark:border-gray-600 '
-                  }
-                />
-              </div>
+    <div 
+      className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after text-sm nitro-checkbox ${className}`)}
+    >
+      <div className="flex gap-3 items-baseline">
+        <div className="shrink-0 flex items-center">
+          <div className="w-0">&nbsp;</div>
+          <div className="group relative">
+            {
+              type !== 'toggle'
+                ? <>
+                    <input
+                      {...props}
+                      type={type}
+                      style={{ width: checkboxSize, height: checkboxSize }}
+                      checked={value}
+                      className={
+                        twMerge(
+                          `${type === 'radio' ? 'rounded-full' : 'rounded'} appearance-none border border-gray-300 bg-white forced-colors:appearance-auto disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ` + 
+                          // Variable-selected theme colors (was .*-blue-600)
+                          'checked:border-variable-selected checked:bg-variable-selected indeterminate:border-variable-selected indeterminate:bg-variable-selected focus-visible:outline-variable-selected ' +
+                          // Dark mode not used yet... dark:focus-visible:outline-blue-800
+                          checkboxClassName
+                        )
+                      }
+                    />
+                    <svg
+                      fill="none"
+                      viewBox="0 0 14 14"
+                      style={{ width: checkboxSize, height: checkboxSize }}
+                      className={twMerge('absolute top-0 left-0 pointer-events-none justify-self-center stroke-white group-has-[:disabled]:stroke-gray-950/25', svgClassName)}
+                    >
+                      {
+                        type === 'radio'
+                          ? <circle
+                              // cx={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 2}
+                              // cy={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 2}
+                              // r={(_size.checkbox.match(/\d+/)?.[0] as unknown as number) / 6}
+                              cx={7}
+                              cy={7}
+                              r={2.5}
+                              className="fill-white opacity-0 group-has-[:checked]:opacity-100"
+                            />
+                          : <>
+                              <path
+                                d="M4 8L6 10L10 4.5"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="opacity-0 group-has-[:checked]:opacity-100"
+                              />
+                              <path
+                                d="M4 7H10"
+                                strokeWidth={2}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="opacity-0 group-has-[:indeterminate]:opacity-100"
+                              />
+                            </>
+                      }
+                    </svg>
+                  </>
+                : <>
+                    <input 
+                      {...props}
+                      type="checkbox" 
+                      className="sr-only peer"
+                      checked={value}
+                    />
+                    <label
+                      for={id}
+                      style={{ width: toggleWidth, height: toggleHeight }}
+                      className={
+                        twMerge(
+                          'block bg-gray-200 rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 ' +
+                          // Variable-selected theme colors (was .*-blue-600)
+                          'peer-checked:bg-variable-selected peer-focus-visible:outline-variable-selected ' +
+                          labelClassName
+                        )
+                      }
+                    >
+                      <span
+                        style={{ width: toggleAfterSize, height: toggleAfterSize }}
+                        className={
+                          'absolute top-[2px] start-[2px] bg-white border-gray-300 border rounded-full transition-all group-has-[:checked]:border-white group-has-[:checked]:translate-x-full '
+                        }
+                      />
+                    </label>
+                  </>
+            }
+          </div>
+        </div>
+        {text && 
+          <label for={id} className="text-[length:inherit] leading-[inherit] select-none">
+            <span className="text-gray-900">{text}</span>
+            <span className="ml-2 text-gray-500">{subtext}</span>
+          </label>
         }
       </div>
-      {text && 
-        <label for={id} className="self-center text-sm select-none">
-          <span className="text-gray-900">{text}</span>
-          <span className="ml-2 text-gray-500">{subtext}</span>
-        </label>
-      }
+      {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
   )
 }
