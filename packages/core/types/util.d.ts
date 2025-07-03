@@ -592,6 +592,7 @@ export function pick(obj: {
  * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
  * @param {boolean} [trueDefaults] - assign true to empty values
  * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
+ * todo: maybe add toDeepObject param? be kinda cool to have
  */
 export function queryObject(searchString: string, trueDefaults?: boolean): {
     [key: string]: string | true;
@@ -603,12 +604,16 @@ export function queryObject(searchString: string, trueDefaults?: boolean): {
  */
 export function queryArray(searchString: string): object[];
 /**
- * Parses an object and returns a query string
+ * Parses an object and returns a query string (deep value keys are flatterned, e.g. 'job.location=1')
  * @param {{[key: string]: unknown}} [obj] - query object
+ * @param {string} [_path] - path to the object
+ * @param {{[key: string]: string}} [_output] - output object
  * @returns {string}
  */
 export function queryString(obj?: {
     [key: string]: unknown;
+}, _path?: string, _output?: {
+    [key: string]: string;
 }): string;
 /**
  * Axios request to the route
