@@ -56,6 +56,7 @@ function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
   const error = getErrorFromState(state, props.name)
   const type = props.type
   const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
+  const id = props.id || props.name
 
   if (!props.name) {
     throw new Error('Field component requires a `name` prop')
@@ -97,7 +98,7 @@ function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
 
   // Classname
   const inputClassName = getInputClasses({ error, Icon, iconPos, type })
-  const commonProps = { id: props.id || props.name, value: value, className: inputClassName }
+  const commonProps = { id: id, value: value, className: inputClassName }
 
   // Type has to be referenced as props.type for TS to be happy
   if (!type || type == 'text' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {

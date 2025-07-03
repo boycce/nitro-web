@@ -1339,6 +1339,7 @@ export function pick (obj, keys) {
  * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
  * @param {boolean} [trueDefaults] - assign true to empty values
  * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
+ * todo: maybe add toDeepObject param? be kinda cool to have
  */
 export function queryObject (searchString, trueDefaults) {
   if (searchString.startsWith('?')) searchString = searchString.slice(1)
@@ -1374,21 +1375,25 @@ export function queryArray (searchString) {
 }
 
 /**
- * Parses an object and returns a query string
+ * Parses an object and returns a query string (deep value keys are flatterned, e.g. 'job.location=1')
  * @param {{[key: string]: unknown}} [obj] - query object
+ * @param {string} [_path] - path to the object
+ * @param {{[key: string]: string}} [_output] - output object
  * @returns {string}
  */
-export function queryString (obj) {
+export function queryString (obj, _path='', _output) {
   /** @type {{[key: string]: string}} */
-  const newObj = {}
+  const output = _output || {}
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (typeof obj[key] == 'undefined' || !obj[key]) continue
-      newObj[key] = obj[key] + ''
+      else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path + key + '.', output)
+      else output[_path + key] = obj[key] + ''
     }
   }
-  let qs = new URLSearchParams(newObj).toString()
+  if (_path) return /** @type {string} */(/** @type {unknown} */ (output))
+  const qs = new URLSearchParams(output).toString()
   return qs ? `?${qs}` : ''
 }
 

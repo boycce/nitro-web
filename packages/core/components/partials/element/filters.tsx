@@ -102,7 +102,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   }
 
   async function onInputChange(e: {target: {name: string, value: unknown}}) {
-    await onChange(setState, e)
+    // basic name and value (keeping deep paths intact e.g. 'jobCache.location': '10')
+    setState((s) => ({ ...s, [e.target.name]: e.target.value as string })) 
     onAfterChange()
   }
 
@@ -116,7 +117,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
     navigate(location.pathname + queryStr, { replace: true })
   }
-  
+
   return (
     <Elements.Dropdown 
       // menuIsOpen={true}
@@ -147,7 +148,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     <Elements.Select
                       {...filter}
                       class="!mb-0"
-                      state={state}
+                      value={state[filter.name] || ''}
                       onChange={onInputChange}
                       type={undefined}
                     />
@@ -157,7 +158,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     <Elements.Field 
                       {...filter}
                       class="!mb-0"
-                      state={state} 
+                      value={state[filter.name] as string || ''}
                       onChange={onInputChange}
                     />
                   }
