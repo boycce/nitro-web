@@ -15,8 +15,8 @@ export function Signup() {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
+      setState({ ...state, errors: [] }) // clear errors (optional)
       const data = await util.request('post /api/signup', state, e, isLoading)
-      isLoading[1](true)
       setStore((s) => ({ ...s, ...data }))
       setTimeout(() => navigate('/'), 0) // wait for setStore
     } catch (e) {

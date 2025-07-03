@@ -34,6 +34,7 @@ export function Signin() {
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
       const data = await util.request('post /api/signin', state, e, isLoading)
+      // Keep it loading until we navigate
       isLoading[1](true)
       setStore((s) => ({ ...s, ...data }))
       setTimeout(() => { // wait for setStore
