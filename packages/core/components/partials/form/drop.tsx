@@ -37,7 +37,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, .
   stateRef.current = state
 
   // Input is always controlled if state is passed in
-  if (props.value) value = props.value as Image
+  if (typeof props.value !== 'undefined') value = props.value as Image
   else if (typeof state == 'object') value = deepFind(state, name) as Image
   if (typeof value == 'undefined') value = null
 

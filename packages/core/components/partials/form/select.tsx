@@ -57,7 +57,7 @@ function SelectBase({ id, containerId, minMenuWidth, name, prefix='', onChange, 
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
 
   // Get value from value or state
-  if ('value' in props) value = props.value
+  if (typeof props.value !== 'undefined') value = props.value
   else if (typeof state == 'object') value = deepFind(state, name)
 
   // If multi-select, filter options by value

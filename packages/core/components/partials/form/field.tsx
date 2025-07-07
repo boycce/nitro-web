@@ -68,7 +68,7 @@ function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
   })
   
   // Value: Input is always controlled if state is passed in
-  if (props.value) value = props.value as string
+  if (typeof props.value !== 'undefined') value = props.value as string
   else if (typeof state == 'object') {
     const v = deepFind(state, props.name) as string | undefined
     value = v ?? ''

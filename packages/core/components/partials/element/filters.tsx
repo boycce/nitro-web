@@ -158,7 +158,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     <Elements.Field 
                       {...filter}
                       class="!mb-0"
-                      value={state[filter.name] as string || ''}
+                      value={(state[filter.name] as string) || ''}
                       onChange={onInputChange}
                     />
                   }
