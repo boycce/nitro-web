@@ -3,15 +3,8 @@
  * be automatically imported and setup by the client router, you can have multiple page compoennts in the same file, like this one.
  */
 import { injectedConfig } from 'nitro-web'
-import { Dashboard, Styleguide, NotFound } from 'nitro-web'
+import { Styleguide, NotFound } from 'nitro-web'
 import { Button } from './element'
-
-// Dashboard page
-export const DashboardPage = () => <Dashboard />
-DashboardPage.route = { 
-  '/': true, 
-  'meta': { 'title': 'Dashboard', layout: 1 },
-}
 
 // Styleguide page
 export const StyleguidePage = () => {

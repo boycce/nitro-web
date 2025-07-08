@@ -91,47 +91,13 @@ const config = {
 
   middleware: {
     ...middleware,
-    // You can extend the default middleware, e.g. adding cors
+    // You add/extend middleware here, or even override what default middleware is used, e.g:
     // order: [...middleware.order, 'cors'],
     // cors: cors({
     //   origin: '*',
     //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     //   credentials: true,
     // }),
-    isAdmin: (req, res, next) => {
-      // Still need to remove cookie matching in favour of uid..
-      // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
-      let cookieMatch = req.user && (!req.headers.authid || req.user._id.toString() == req.headers.authid)
-      if (cookieMatch && req.user.type.match(/admin/)) next()
-      else if (req.user && req.user.type.match(/admin/)) res.unauthorized('Invalid cookie, please refresh your browser')
-      else if (req.user) res.unauthorized('You are not authorised to make this request.')
-      else res.unauthorized('Please sign in first.')
-    },
-    isCompanyOwner: (req, res, next) => {
-      let user = req.user || { companies: [] }
-      let cid = req.params.cid
-      let company = user.companies.find((o) => o._id.toString() == cid)
-      let companyUser = company?.users?.find((o) => o._id.toString() == user._id.toString())
-      if (!user._id) return res.unauthorized('Please sign in first.')
-      else if (!company || !companyUser) res.unauthorized('You are not authorised to make this request.')
-      else if (companyUser.type != 'owner') res.unauthorized('Only owners can make this request.')
-      else next()
-    },
-    isCompanyUser: (req, res, next) => {
-      let user = req.user || { companies: [] }
-      let cid = req.params.cid
-      let company = user.companies.find((o) => o._id.toString() == cid)
-      if (!user._id) return res.unauthorized('Please sign in first.')
-      else if (!company) res.unauthorized('You are not authorised to make this request.')
-      else next()
-    },
-    isUser: (req, res, next) => {
-      // todo: need to double check that uid is always defined
-      let uid = req.params.uid
-      if (req.user && (typeof uid == 'undefined' || req.user._id.toString() == uid)) next()
-      else if (req.user) res.unauthorized('You are not authorised to make this request.')
-      else res.unauthorized('Please sign in first.')
-    },
   },
 }
 

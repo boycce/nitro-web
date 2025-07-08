@@ -298,8 +298,8 @@ function resolveMiddleware (controllers, middleware, route, item) {
 }
 
 export const middleware = {
+  // Default middleware called before all /api/* routes
   order: [
-    // Express middleware runtime order that are called for all API requests
     'loadAssets',
     'modifyRequest',
     'parseUrlEncoded',
@@ -307,6 +307,8 @@ export const middleware = {
     'parseFile',
     'beforeAPIRoute',
   ],
+
+  // --- Default middleware ---------------------
 
   modifyRequest: (req, res, next) => {
     // Handy boolean denoting that the request wants JSON returned
@@ -344,5 +346,43 @@ export const middleware = {
   beforeAPIRoute: (req, res, next) => {
     res.set('version', req.version)
     next()
+  },
+
+  // --- Custom middleware ----------------------
+
+  isAdmin: (req, res, next) => {
+    // Still need to remove cookie matching in favour of uid..
+    // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
+    const user = req.user
+    let cookieMatch = user && (!req.headers.authid || user._id.toString() == req.headers.authid)
+    if (cookieMatch && (user.type?.match(/admin/) || user.isAdmin)) next()
+    else if (user && (user.type?.match(/admin/) || user.isAdmin)) res.unauthorized('Invalid cookie, please refresh your browser')
+    else if (user) res.unauthorized('You are not authorised to make this request.')
+    else res.unauthorized('Please sign in first.')
+  },
+  isCompanyOwner: (req, res, next) => {
+    let user = req.user || { companies: [] }
+    let cid = req.params.cid
+    let company = user.companies.find((o) => o._id.toString() == cid)
+    let companyUser = company?.users?.find((o) => o._id.toString() == user._id.toString())
+    if (!user._id) return res.unauthorized('Please sign in first.')
+    else if (!company || !companyUser) res.unauthorized('You are not authorised to make this request.')
+    else if (companyUser.type != 'owner') res.unauthorized('Only owners can make this request.')
+    else next()
+  },
+  isCompanyUser: (req, res, next) => {
+    let user = req.user || { companies: [] }
+    let cid = req.params.cid
+    let company = user.companies.find((o) => o._id.toString() == cid)
+    if (!user._id) return res.unauthorized('Please sign in first.')
+    else if (!company) res.unauthorized('You are not authorised to make this request.')
+    else next()
+  },
+  isUser: (req, res, next) => {
+    // todo: need to double check that uid is always defined
+    let uid = req.params.uid
+    if (req.user && (typeof uid == 'undefined' || req.user._id.toString() == uid)) next()
+    else if (req.user) res.unauthorized('You are not authorised to make this request.')
+    else res.unauthorized('Please sign in first.')
   },
 }

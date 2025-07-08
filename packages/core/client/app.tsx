@@ -291,9 +291,9 @@ async function beforeApp(config: Config) {
 
 const defaultMiddleware = {
   // Global middleware that can referenced from component routes
-  isAdmin: (route: unknown, store: { user?: { type?: string } }) => {
+  isAdmin: (route: unknown, store: { user?: { type?: string, isAdmin?: boolean } }) => {
     const user = store.user || { type: 'visitor' }
-    if (user?.type?.match(/admin/)) return
+    if (user?.type?.match(/admin/) || user?.isAdmin) return
     else if (user?.type && user?.type !== 'visitor') return { redirect: '/signin?unauth' }
     else return { redirect: '/signin?signin' }
   },

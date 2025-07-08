@@ -192,7 +192,7 @@ async function resetPassword(req, res) {
 async function inviteInstructions(req, res) {
   try {
     // Check if user is admin here rather than in middleware (which may not exist yet)
-    if (req.user.type != 'admin') {
+    if (req.user.type != 'admin' && !req.user.isAdmin) {
       throw new Error('You are not authorized to invite users.')
     }
     const inviteToken = await tokenCreate()
