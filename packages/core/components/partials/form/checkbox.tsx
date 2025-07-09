@@ -16,14 +16,16 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   checkboxClassName?: string
   svgClassName?: string
   labelClassName?: string
+  /** title used to find related error messages */
+  errorTitle?: string|RegExp
 }
 
 export function Checkbox({ 
-  state, size, subtext, text, type='checkbox', className, checkboxClassName, svgClassName, labelClassName, ...props 
+  state, size, subtext, text, type='checkbox', className, checkboxClassName, svgClassName, labelClassName, errorTitle, ...props 
 }: CheckboxProps) {
   // Checkbox/radio/toggle component
   let value!: boolean
-  const error = getErrorFromState(state, props.name)
+  const error = getErrorFromState(state, errorTitle || props.name)
   const id = props.id || props.name
 
   if (!props.name) throw new Error('Checkbox requires a `name` prop')

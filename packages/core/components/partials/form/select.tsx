@@ -43,6 +43,8 @@ export type SelectProps = {
   mode?: 'country'|'customer'|''
   /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
   deps?: unknown[]
+  /** title used to find related error messages */
+  errorTitle?: string|RegExp
   /** All other props are passed to react-select **/
   [key: string]: unknown
 }
@@ -51,9 +53,11 @@ export const Select = memo(SelectBase, (prev, next) => {
   return isFieldCached(prev, next)
 })
 
-function SelectBase({ id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', ...props }: SelectProps) {
+function SelectBase({ 
+  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, ...props 
+}: SelectProps) {
   let value: unknown|unknown[]
-  const error = getErrorFromState(state, name)
+  const error = getErrorFromState(state, errorTitle || name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
 
   // Get value from value or state

@@ -25,6 +25,8 @@ type FieldExtraProps = {
   /** Dependencies to break the implicit memoization of onChange/onInputChange */
   deps?: unknown[]
   placeholder?: string
+  /** title used to find related error messages */
+  errorTitle?: string|RegExp
 }
 type IconWrapperProps = {
   iconPos: 'left' | 'right'
@@ -43,17 +45,18 @@ type IsFieldCachedProps = {
   name: string
   state?: FieldProps['state']
   deps?: FieldProps['deps']
+  errorTitle?: FieldProps['errorTitle']
 }
 
 export const Field = memo(FieldBase, (prev, next) => {
   return isFieldCached(prev, next)
 })
 
-function FieldBase({ state, icon, iconPos: ip, ...props }: FieldProps) {
+function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProps) {
   // `type` must be kept as props.type for TS to be happy and follow the conditions below
   let value!: string
   let Icon!: React.ReactNode
-  const error = getErrorFromState(state, props.name)
+  const error = getErrorFromState(state, errorTitle || props.name)
   const type = props.type
   const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
   const id = props.id || props.name
@@ -184,13 +187,9 @@ function ColorSvg({ hex }: { hex?: string }) {
 export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps) {
   // Check if the field is cached, onChange/onInputChange doesn't affect the cache
   const path = prev.name
-  const state = prev.state || {}
-  // If the state value has changed, re-render!
-  if (deepFind(state, path) !== deepFind(next.state || {}, path)) return false
-  // If the state error has changed, re-render!
-  if (getErrorFromState(state, path) !== getErrorFromState(next.state || {}, path)) return false
-  // If `deps` have changed, handy for onChange/onInputChange, re-render!
-  if ((next.deps?.length !== prev.deps?.length) || next.deps?.some((v, i) => v !== prev.deps?.[i])) return false
+  const prevState = prev.state || {}
+  const nextState = next.state || {}
+  const errorTitle = next.errorTitle || path
 
   // Check if any prop has changed, except `onChange`/`onInputChange`
   const allKeys = new Set([...Object.keys(prev), ...Object.keys(next)])
@@ -201,6 +200,16 @@ export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps
       return false
     }
   }
+
+  // If `deps` have changed, handy for onChange/onInputChange, re-render!
+  if ((next.deps?.length !== prev.deps?.length) || next.deps?.some((v, i) => v !== prev.deps?.[i])) return false
+
+  // If the state value has changed, re-render!
+  if (deepFind(prevState, path) !== deepFind(nextState, path)) return false
+  
+  // If the state error has changed, re-render!
+  if (getErrorFromState(prevState, errorTitle) !== getErrorFromState(nextState, errorTitle)) return false
+
   // All good, use cached version
   return true
 }

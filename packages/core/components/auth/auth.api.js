@@ -315,7 +315,7 @@ export async function signinAndGetStore(user, isDesktop, getStore) {
   return { ...store, jwt }
 }
 
-export async function userCreate({ name, business, email, password }) {
+export async function userCreate({ business, password, ...userDataProp }) {
   try {
     if (!this.findUserFromProvider) {
       throw new Error('this.findUserFromProvider doesn\'t exist, make sure the context is available when calling this function')
@@ -330,14 +330,15 @@ export async function userCreate({ name, business, email, password }) {
       users: [{ _id: userId, role: 'owner', status: 'active' }],
     }
     const userData = {
-      _id: userId, 
-      email: email,
-      firstName: fullNameSplit(name)[0],
-      lastName: fullNameSplit(name)[1],
+      ...userDataProp,
+      _id: userId,
+      ...(userDataProp.name ? { 
+        firstName: fullNameSplit(userDataProp.name)[0],
+        lastName: fullNameSplit(userDataProp.name)[1],
+      } : {}),
       password: password ? await bcrypt.hash(password, 10) : undefined,
       ...(isMultiTenant ? { company: companyData._id } : {}),
     }
-
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
@@ -362,10 +363,7 @@ export async function userCreate({ name, business, email, password }) {
 
   } catch (err) {
     if (!isArray(err)) throw err
-    throw err.map((o) => {
-      if (o.title == 'firstName') o.title = 'name'
-      return o
-    })
+    else throw err //...
   }
 }
 

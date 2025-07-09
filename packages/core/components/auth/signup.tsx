@@ -32,7 +32,10 @@ export function Signup() {
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>
-            <Field name="name" placeholder="E.g. Bruce Wayne" state={state} onChange={(e) => onChange(setState, e)} />
+            <Field name="name" placeholder="E.g. Bruce Wayne" state={state} 
+              onChange={(e) => onChange(setState, e)} 
+              errorTitle={/^(name|firstName|lastName)$/} // if different from `name`
+            />
           </div>
           <div>
             <label for="business.name">Company Name</label>

@@ -689,7 +689,7 @@ export function getCurrencyOptions (currencies) {
 /**
  * Returns an error from a state object matching the path
  * @param {{ errors?: { title: string, detail: string }[] }|undefined} state
- * @param {string} path
+ * @param {string|RegExp} path
  * @returns {{ title: string, detail: string }|undefined}
  */
 export function getErrorFromState (state, path) {

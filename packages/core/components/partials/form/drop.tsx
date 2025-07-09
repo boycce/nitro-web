@@ -21,16 +21,18 @@ type DropProps = {
     errors?: Errors
     [key: string]: unknown
   }
+  /** title used to find related error messages */
+  errorTitle?: string|RegExp
   /** Props to pass to the input element */
   [key: string]: unknown
 }
 
 type Image = File | FileList | MonasteryImage | null
 
-export function Drop({ awsUrl, className, id, name, onChange, multiple, state, ...props }: DropProps) {
+export function Drop({ awsUrl, className, id, name, onChange, multiple, state, errorTitle, ...props }: DropProps) {
   if (!name) throw new Error('Drop component requires a `name` prop')
   let value: Image = null
-  const error = getErrorFromState(state, name)
+  const error = getErrorFromState(state, errorTitle || name)
   const inputId = id || name
   const [urls, setUrls] = useState([])
   const stateRef = useRef(state)

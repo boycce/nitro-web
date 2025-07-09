@@ -8,7 +8,7 @@ export default {
     company: { model: 'company', required: true },
     email: { type: 'email', required: true, index: 'unique' },
     firstName: { type: 'string', required: true },
-    lastName: { type: 'string' },
+    lastName: { type: 'string', required: true },
     password: { type: 'string', minLength: 6 },
     resetToken: { type: 'string' },
     status: { type: 'string', default: 'active', enum: ['active', 'deleted', 'inactive'] },
@@ -22,6 +22,12 @@ export default {
   findBL: ['password', 'resetToken'],
   updateBL: ['company', 'password', 'resetToken', 'status', 'stripeSubscription', 'type', 'usedFreeTrial'],
 
+  messages: {
+    lastName: {
+      required: 'A full name is required',
+    },
+  },
+
   beforeValidate: [
     async function (data) {
       if (data.email) data.email = data.email.trim().toLowerCase()
@@ -32,7 +38,7 @@ export default {
 
   afterFind: [
     async function (data) {
-      if (!data) return
+      if (!data) return data
       data.name = fullName(data)
     },
   ],
