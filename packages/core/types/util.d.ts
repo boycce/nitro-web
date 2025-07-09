@@ -266,7 +266,7 @@ export function getCurrencyOptions(currencies: {
 /**
  * Returns an error from a state object matching the path
  * @param {{ errors?: { title: string, detail: string }[] }|undefined} state
- * @param {string} path
+ * @param {string|RegExp} path
  * @returns {{ title: string, detail: string }|undefined}
  */
 export function getErrorFromState(state: {
@@ -274,7 +274,7 @@ export function getErrorFromState(state: {
         title: string;
         detail: string;
     }[];
-} | undefined, path: string): {
+} | undefined, path: string | RegExp): {
     title: string;
     detail: string;
 } | undefined;
@@ -621,6 +621,7 @@ export function queryString(obj?: {
  * @param {{ [key: string]: any }} [data] - payload
  * @param {{preventDefault?: function}} [event] - event to prevent default
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
+ * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @returns {Promise<any>}
  *
  * @example
@@ -631,7 +632,7 @@ export function request(route: string, data?: {
     [key: string]: any;
 }, event?: {
     preventDefault?: Function;
-}, isLoading?: [boolean, (value: boolean) => void]): Promise<any>;
+}, isLoading?: [boolean, (value: boolean) => void], setState?: SetState): Promise<any>;
 /**
  * Removes undefined from an array or object
  * @param {[]|{[key: string]: any}} variable
@@ -784,4 +785,5 @@ export type Image = {
     base64?: string;
     date?: number;
 };
+export type SetState = import("react").Dispatch<import("react").SetStateAction<any>>;
 //# sourceMappingURL=util.d.ts.map
