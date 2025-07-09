@@ -9,7 +9,7 @@ export function ResetInstructions() {
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      await util.request('post /api/reset-instructions', state, event, isLoading)
+      await util.request('post /api/reset-instructions', state, event, isLoading, setState)
       setStore((s) => ({ ...s, message: 'Done! Please check your email.' }))
       navigate('/signin')
     } catch (e) {
@@ -52,7 +52,7 @@ export function ResetPassword() {
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request('post /api/reset-password', state, event, isLoading)
+      const data = await util.request('post /api/reset-password', state, event, isLoading, setState)
       setStore((s) => ({ ...s, ...data }))
       navigate('/')
     } catch (e) {

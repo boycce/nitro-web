@@ -15,12 +15,11 @@ export function Signup() {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      setState({ ...state, errors: [] }) // clear errors (optional)
-      const data = await util.request('post /api/signup', state, e, isLoading)
-      setStore((s) => ({ ...s, ...data }))
+      const data = await util.request('post /api/signup', state, e, isLoading, setState)
+      setStore((prev) => ({ ...prev, ...data }))
       setTimeout(() => navigate('/'), 0) // wait for setStore
     } catch (e) {
-      return setState({ ...state, errors: e as Errors })
+      setState((prev) => ({ ...prev, errors: e as Errors }))
     }
   }
   

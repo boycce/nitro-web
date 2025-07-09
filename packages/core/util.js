@@ -4,6 +4,8 @@ import dateformat from 'dateformat'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge } from 'tailwind-merge'
 
+/** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
+
 /** @type {{[key: string]: {[key: string]: string|true}}} */
 let queryObjectCache = {}
 
@@ -1403,13 +1405,14 @@ export function queryString (obj, _path='', _output) {
  * @param {{ [key: string]: any }} [data] - payload
  * @param {{preventDefault?: function}} [event] - event to prevent default
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
+ * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @returns {Promise<any>}
  * 
  * @example
  *   - request('post /api/user', { name: 'John' })
  *   - request(`get  /api/user/${id}`, undefined, e, isLoading)
  */
-export async function request (route, data, event, isLoading) {
+export async function request (route, data, event, isLoading, setState) {
   try {
     if (event?.preventDefault) event.preventDefault()
     const uri = route.replace(/^(post|put|delete|get) /, '')
@@ -1426,7 +1429,7 @@ export async function request (route, data, event, isLoading) {
 
     // warning, not persisting through re-renders, but should be fine until loading is finished
     data = data || {}
-    delete data.errors
+    if (setState) setState((/** @type {{[key: string]: any}} */prev) => ({ ...prev, errors: [] }))
 
     // Find out if the data has files?
     let hasFiles = false
@@ -1439,7 +1442,7 @@ export async function request (route, data, event, isLoading) {
 
     // If yes, convert to form data
     /** @type {FormData|undefined} */
-    const formData2 = hasFiles ? formData(data, { allowEmptyArrays: true, indices: true }) : undefined
+    const formData2 = hasFiles ? formData({ ...data }, { allowEmptyArrays: true, indices: true }) : undefined
 
     // send the request
     const axiosPromise = (method === 'get' || method === 'delete') 
