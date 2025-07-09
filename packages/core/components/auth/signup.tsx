@@ -1,4 +1,4 @@
-import { Button, Field, FormError, Topbar, util, injectedConfig } from 'nitro-web'
+import { Button, Field, FormError, Topbar, request, injectedConfig } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
 export function Signup() {
@@ -15,7 +15,7 @@ export function Signup() {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request('post /api/signup', state, e, isLoading, setState)
+      const data = await request('post /api/signup', state, e, isLoading, setState)
       setStore((prev) => ({ ...prev, ...data }))
       setTimeout(() => navigate('/'), 0) // wait for setStore
     } catch (e) {

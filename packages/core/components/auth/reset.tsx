@@ -1,4 +1,4 @@
-import { Topbar, Field, FormError, Button, util } from 'nitro-web'
+import { Topbar, Field, FormError, Button, request } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
 export function ResetInstructions() {
@@ -9,7 +9,7 @@ export function ResetInstructions() {
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      await util.request('post /api/reset-instructions', state, event, isLoading, setState)
+      await request('post /api/reset-instructions', state, event, isLoading, setState)
       setStore((s) => ({ ...s, message: 'Done! Please check your email.' }))
       navigate('/signin')
     } catch (e) {
@@ -52,7 +52,7 @@ export function ResetPassword() {
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request('post /api/reset-password', state, event, isLoading, setState)
+      const data = await request('post /api/reset-password', state, event, isLoading, setState)
       setStore((s) => ({ ...s, ...data }))
       navigate('/')
     } catch (e) {

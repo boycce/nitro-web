@@ -20,10 +20,8 @@ export { sendEmail } from './email/index.js'
 
 // Export API controllers
 export * from '../components/auth/auth.api.js'
-export * from '../components/settings/settings.api.js'
 export * from '../components/billing/stripe.api.js'
 
 export { routes as authRoutes } from '../components/auth/auth.api.js'
-export { routes as settingsRoutes } from '../components/settings/settings.api.js'
 export { routes as stripeRoutes } from '../components/billing/stripe.api.js'
 

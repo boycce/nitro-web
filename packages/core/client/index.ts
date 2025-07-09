@@ -18,10 +18,6 @@ export { ResetInstructions, ResetPassword } from '../components/auth/reset'
 export { Dashboard } from '../components/dashboard/dashboard'
 export { NotFound } from '../components/partials/not-found'
 export { Styleguide } from '../components/partials/styleguide'
-// export { SettingsAccount } from '../components/settings/settings-account'
-// export { SettingsBusiness } from '../components/settings/settings-business'
-// export { SettingsTeamMember } from '../components/settings/settings-team--member'
-// export { SettingsTeam } from '../components/settings/settings-team'
 
 // Component Elements
 export { Accordion } from '../components/partials/element/accordion'

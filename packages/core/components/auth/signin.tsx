@@ -1,4 +1,4 @@
-import { Topbar, Field, Button, FormError, util, injectedConfig, updateJwt } from 'nitro-web'
+import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
 export function Signin() {
@@ -15,7 +15,7 @@ export function Signin() {
 
   useEffect(() => {
     // Autofill the email input from ?email=
-    const query = util.queryObject(location.search, true)
+    const query = queryObject(location.search, true)
     if (query.email) setState({ ...state, email: query.email as string })
   }, [location.search])
 
@@ -33,7 +33,7 @@ export function Signin() {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await util.request('post /api/signin', state, e, isLoading, setState)
+      const data = await request('post /api/signin', state, e, isLoading, setState)
       // Keep it loading until we navigate
       isLoading[1](true)
       setStore((s) => ({ ...s, ...data }))
