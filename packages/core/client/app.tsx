@@ -94,10 +94,12 @@ function App({ settings, config, storeContainer }: { settings: Settings, config:
   }, [!!router])
 
   return (
+    // <StrictMode>
     <storeContainer.Provider>
       { router && <RouterProvider router={router}/> }
       <AfterApp settings={settings} />
     </storeContainer.Provider>
+    // </StrictMode>
   )
 }
 

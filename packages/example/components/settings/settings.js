@@ -1,1 +1,0 @@
-// export { settingsRoutes as routes } from 'nitro-web/server'
