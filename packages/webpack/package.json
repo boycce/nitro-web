@@ -4,7 +4,11 @@
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "main": "./webpack.config.js",
+  "types": "./types/webpack.config.d.ts",
   "type": "module",
+  "scripts": {
+    "types": "tsc webpack.config.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types"
+  },
   "dependencies": {
     "@babel/core": "^7.8.0",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",

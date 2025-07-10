@@ -13,33 +13,47 @@ let templates = {}
 let nodemailerMailgun = undefined
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
-export async function sendEmail({ template, to, bcc, data, from, replyTo, recipientVariables, subject, test, skipCssInline, config }) {
-  /**
-   * Email recipient a predefined template with data and/or recipientVariables
-   *
-   * @param {string} template = e.g. 'reset-password' or html
-   * @param {string} to - e.g. "Bruce Wayne<bruce@wayneenterprises.com>, ..."
-   * @param {object} config - e.g. { mailgunKey, mailgunDomain, emailFrom, clientUrl, name }
-   * @param {string} <bcc> - e.g. "Chuck Norris<chuck@gmail.com>" (not sent in development)
-   * @param {object} <data> - recipientVariables[to] shorthand, data is copied to all recipients
-   * @param {string} <from> - e.g. "Chuck Norris<chuck@gmail.com>"
-   * @param {string} <replyTo> - e.g. "Chuck Norris<chuck@gmail.com>"
-   * @param {object} <recipientVariables> - mailgun recipient-variables for batch sending
-   * @param {string} <subject> - subject, this can also be defined in the template
-   * @param {boolean} <skipCssInline> - skip inlining css
-   * @param {boolean} <test> - subject, this can also be defined in the template
-   * @return Promise([mailgunErr, mailgunInfo])
-   */
+/**
+ * Sends an email using a predefined template, with optional data/or recipientVariables
+ * @typedef {{ clientUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ *
+ * @param {object} opts
+ * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
+ * @param {string} opts.to - Recipient(s), e.g. "Bruce<bruce@wayneenterprises.com>,..."
+ * @param {Config} opts.config - Config object
+ * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>" (not sent in development)
+ * @param {object} [opts.data] - template data shared across recipients
+ * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
+ * @param {string} [opts.replyTo] - reply-to address, e.g. "Bruce<bruce@wayneenterprises.com>"
+ * @param {object} [opts.recipientVariables] - Mailgun recipient-variables for batch sending
+ * @param {string} [opts.subject] - subject (can also be defined in template)
+ * @param {boolean} [opts.skipCssInline] - skip CSS inlining
+ * @param {boolean} [opts.test] - enable test mode
+ * @returns {Promise<[any, any]>} Resolves with [mailgunErr, mailgunInfo]
+ */
+export async function sendEmail({ 
+  template,
+  to, 
+  config,
+  bcc, 
+  data, 
+  from, 
+  replyTo, 
+  recipientVariables, 
+  subject, 
+  skipCssInline,
+  test,  
+}) {
   if (!config) {
     throw new Error('sendEmail: `config` missing')
-  } else if (!config.emailFrom) {
-    throw new Error('sendEmail: `config.emailFrom` is missing')
   } else if (!config.clientUrl) {
     throw new Error('sendEmail: `config.clientUrl` is missing')
-  } else if (!config.name) {
-    throw new Error('sendEmail: `config.name` is missing')
+  } else if (!config.emailFrom) {
+    throw new Error('sendEmail: `config.emailFrom` is missing')
   } else if (!test && (!config.mailgunKey || !config.mailgunDomain)) {
     throw new Error('sendEmail: `config.mailgunKey` or `config.mailgunDomain` is missing')
+  } else if (!config.name) {
+    throw new Error('sendEmail: `config.name` is missing')
   } else if (!template) {
     throw new Error('sendEmail: `template` missing')
   } else if (!to) {

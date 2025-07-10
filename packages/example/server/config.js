@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import { createRequire } from 'module'
 import { middleware } from 'nitro-web/server'
+
 const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'

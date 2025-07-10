@@ -10,14 +10,14 @@ await setupDefaultModels(db)
 
 // Catch mongod not running
 if (config.env === 'development') {
-  db.onError((err) => console.log(err))
+  db.onError(/** @param {Error} err */(err) => console.log(err))
 }
 
 // Setup router
 const server = await setupRouter(config)
 
 // Start express
-server.listen(process.env.PORT || 3001, '0.0.0.0', async () => {
+server.listen({ port: process.env.PORT || 3001, host: '0.0.0.0' }, async () => {
   // ...success
 })
 

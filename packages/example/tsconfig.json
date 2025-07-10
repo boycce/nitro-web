@@ -24,13 +24,12 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
-    "target": "es6"
+    "target": "esnext"
   },
   "include": [
     "client",
     "components",
-    "server/constants.js",
-    "server/util.js",
+    "server",
     "types",
   ]
 }

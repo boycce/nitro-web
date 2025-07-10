@@ -10,11 +10,14 @@
     ".": "./client/index.ts",
     "./client/imgs/*": "./client/imgs/*",
     "./client/globals": "./client/globals.ts",
-    "./server": "./server/index.js",
+    "./server": {
+      "require": "./server/index.js",
+      "import": "./server/index.js",
+      "types": "./types/server/index.d.ts"
+    },
     "./types": "./types.ts",
     "./.eslintrc.json": "./.eslintrc.json",
     "./tsconfig.json": "./tsconfig.json",
-    "./webpack.config.js": "./webpack.config.js",
     "./util": {
       "require": "./util.js",
       "import": "./util.js",
@@ -25,7 +28,7 @@
     "major": "npm run types && standard-version -a --release-as major && npm publish && cd ../webpack && npm publish",
     "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
-    "types": "tsc util.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types"
+    "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
     "@hokify/axios": "^0.19.1",
