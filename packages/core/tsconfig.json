@@ -10,7 +10,7 @@
     "jsx": "react-jsx",
     "lib": ["es6", "dom", "dom.iterable", "esnext"],
     "module": "esnext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "noEmit": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
@@ -22,6 +22,7 @@
       "types": ["./types.ts"]
     },
     "resolveJsonModule": true,
+    "rootDir": "./",
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
@@ -29,8 +30,7 @@
   },
   "include": [
     "client",
-    "components/**/*.tsx",
-    "components/**/*.ts",
+    "components",
     "server/constants.js",
     "types",
     "./types/core-only-globals.d.ts"
