@@ -1,10 +1,12 @@
 // const pi = parseFloat(3.142)
 import '../types/globals.d.ts'
 
-// Utility functions
-export * from '../util.js'
-export * as util from '../util.js'
-export * from '../types'
+// Utility functions (use export path for js declarations to work in host projects)
+export * from 'nitro-web/util'
+export * as util from 'nitro-web/util'
+
+// Main types
+export * from 'types'
 
 // Main app functions
 export { setupApp, updateJwt } from './app'
