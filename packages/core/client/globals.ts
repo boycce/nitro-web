@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { onChange } from 'nitro-web'
 
 declare global {
-  // Common application globals
-  const onChange: typeof import('nitro-web').onChange
-
-  // Common aependency globals
-  /** The public API for rendering a history-aware `<a>`. */
   const Link: typeof import('react-router-dom').Link
   const useCallback: typeof import('react').useCallback
   const useEffect: typeof import('react').useEffect
@@ -21,9 +15,6 @@ declare global {
 }
 
 Object.assign(window, {
-  // application globals
-  onChange: onChange,
-  // dependency globals
   Link: Link,
   useCallback: useCallback,
   useEffect: useEffect,

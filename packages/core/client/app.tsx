@@ -40,6 +40,10 @@ type RouteWithPolicies = Route & {
 
 export async function setupApp(config: Config, storeContainer: StoreContainer, layouts: React.FC<LayoutProps>[]) {
   if (!layouts) throw new Error('layouts are required')
+  if (!(window as unknown as { useTracked: unknown }).useTracked) {
+    throw new Error('useTracked is not defined globally before setupApp()')
+  }
+
   // Fetch state and init app
   const settings: Settings = {
     beforeApp: config.beforeApp || beforeApp,

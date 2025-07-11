@@ -1,4 +1,4 @@
-import { Button, Field, FormError, Topbar, request, injectedConfig } from 'nitro-web'
+import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
 export function Signup() {

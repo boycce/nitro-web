@@ -1,8 +1,8 @@
 import { Store } from 'nitro-web/types'
 import { Dispatch, SetStateAction } from 'react'
 
-// Core-only global, this global will be defined globally in the project (e.g. in ./client/index.ts)
-declare global { 
+declare global {
+  // useTracked global (normally defined in your project's /client/index.ts)
   const useTracked: () => [Store, Dispatch<SetStateAction<Store>>]
 }
 

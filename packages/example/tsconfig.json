@@ -30,6 +30,5 @@
     "client",
     "components",
     "server",
-    "types",
   ]
 }

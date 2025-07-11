@@ -2,7 +2,7 @@ import {
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
   Filters, FiltersHandleType, FilterType,
 } from 'nitro-web'
-import { getCountryOptions, getCurrencyOptions, ucFirst } from 'nitro-web/util'
+import { getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, FileEditIcon } from 'lucide-react'
 
 type StyleguideProps = {

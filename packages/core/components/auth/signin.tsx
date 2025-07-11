@@ -1,4 +1,4 @@
-import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt } from 'nitro-web'
+import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
 export function Signin() {

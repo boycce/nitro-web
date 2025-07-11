@@ -29,10 +29,9 @@
     "target": "es2022"
   },
   "include": [
-    "client",
+    "client", // includes ./globals.ts
     "components",
-    "server/constants.js",
-    "types",
-    "./types/core-only-globals.d.ts"
+    "server",
+    "types/core-only-globals.d.ts"
   ]
 }

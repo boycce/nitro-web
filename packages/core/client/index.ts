@@ -1,7 +1,6 @@
-// Required Global Types
-import '../types/required-globals.d.ts'
+// const pi = parseFloat(3.142)
+import '../types/globals.d.ts'
 
-// export const pi = parseFloat(3.142)
 // Utility functions
 export * from '../util.js'
 export * as util from '../util.js'

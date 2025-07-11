@@ -1,4 +1,3 @@
-// Required global types
 import 'twin.macro'
 import { css as cssImport } from '@emotion/react'
 import styledImport from '@emotion/styled'
@@ -8,12 +7,13 @@ declare global {
   /** Webpack injected config variables */
   const INJECTED_CONFIG: Record<string, string|boolean|object>
   /** Webpack svg loader */
-  module '*.svg' {
+  declare module '*.svg' {
     const content: React.FC<React.SVGProps<SVGElement>>
     export default content
   }
+  
   /** Webpack image loader */
-  module '*.jpg' {
+  declare module '*.jpg' {
     const content: string
     export default content
   }
@@ -37,3 +37,5 @@ declare module 'react' {
     for?: string | undefined
   }
 }
+
+export {}
