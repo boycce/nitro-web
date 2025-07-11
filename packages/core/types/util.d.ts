@@ -50,7 +50,7 @@ export function addressSchema(): {
 };
 /**
  * Returns an axios instance for the client
- * @returns {import('axios').AxiosStatic}
+ * @returns {import('./types/core-only-globals').AxiosWithRetry}
  *
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
  * ```js
@@ -58,7 +58,7 @@ export function addressSchema(): {
  *   axios().defaults.baseURL = 'https://example.com'
  * ```
  */
-export function axios(): import("axios").AxiosStatic;
+export function axios(): import("./types/core-only-globals").AxiosWithRetry;
 /**
  * Builds the url with params
  * @param {string} url
