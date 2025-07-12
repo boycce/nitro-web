@@ -803,7 +803,7 @@ export type AxiosResponse = import("axios").AxiosResponse;
  */
 export type IAxiosRetryConfigExtended = import("axios-retry").IAxiosRetryConfigExtended;
 /**
- * We only need to fix the `get` method, the rest of the methods inherit the new extended config?
+ * We only need to fix the `get` method, the rest of the methods inherit the new extended config...
  */
 export type AxiosRequestConfigWithRetry = AxiosRequestConfig & {
     "axios-retry"?: IAxiosRetryConfigExtended;
