@@ -50,7 +50,7 @@ export function addressSchema(): {
 };
 /**
  * Returns an axios instance for the client
- * @returns {import('./types/core-only-globals').AxiosWithRetry}
+ * @returns {AxiosInstanceWithRetry}
  *
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
  * ```js
@@ -58,7 +58,7 @@ export function addressSchema(): {
  *   axios().defaults.baseURL = 'https://example.com'
  * ```
  */
-export function axios(): import("./types/core-only-globals").AxiosWithRetry;
+export function axios(): AxiosInstanceWithRetry;
 /**
  * Builds the url with params
  * @param {string} url
@@ -786,4 +786,32 @@ export type Image = {
     date?: number;
 };
 export type SetState = import("react").Dispatch<import("react").SetStateAction<any>>;
+/**
+ * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ */
+export type AxiosInstance = import("axios").AxiosInstance;
+/**
+ * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ */
+export type AxiosRequestConfig = import("axios").AxiosRequestConfig;
+/**
+ * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ */
+export type AxiosResponse = import("axios").AxiosResponse;
+/**
+ * Extend the config to be used below
+ */
+export type IAxiosRetryConfigExtended = import("axios-retry").IAxiosRetryConfigExtended;
+/**
+ * We only need to fix the `get` method, the rest of the methods inherit the new extended config?
+ */
+export type AxiosRequestConfigWithRetry = AxiosRequestConfig & {
+    "axios-retry"?: IAxiosRetryConfigExtended;
+};
+/**
+ * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ */
+export type AxiosInstanceWithRetry = Omit<AxiosInstance, "get"> & {
+    get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>;
+};
 //# sourceMappingURL=util.d.ts.map
