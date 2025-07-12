@@ -2,15 +2,6 @@ import 'twin.macro'
 import { css as cssImport } from '@emotion/react'
 import styledImport from '@emotion/styled'
 import { CSSInterpolation } from '@emotion/serialize'
-// import 'axios'
-// import type { IAxiosRetry } from 'axios-retry'
-// // Webpack: axios-retry augment (since axios-retry is not imported in host project)
-// declare module 'axios' {
-//   export interface AxiosRequestConfig {
-//     'axios-retry'?: IAxiosRetry.IAxiosRetryConfigExtended
-//   }
-// }
-
 
 declare global {
   /** Webpack injected config variables */

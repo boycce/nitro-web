@@ -6,6 +6,22 @@ import { twMerge as _twMerge } from 'tailwind-merge'
 
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
+/**
+ * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ * @typedef {import('axios').AxiosInstance} AxiosInstance
+ * @typedef {import('axios').AxiosRequestConfig} AxiosRequestConfig
+ * @typedef {import('axios').AxiosResponse} AxiosResponse
+ * @typedef {import('axios-retry').IAxiosRetryConfigExtended} IAxiosRetryConfigExtended
+ * 
+ * Extend the config to be used below
+ * @typedef {AxiosRequestConfig & { 'axios-retry'?: IAxiosRetryConfigExtended }} AxiosRequestConfigWithRetry
+ * 
+ * We only need to fix the `get` method, the rest of the methods inherit the new extended config?
+ * @typedef {Omit<AxiosInstance, 'get'> & {
+ *   get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>
+* }} AxiosInstanceWithRetry
+*/
+
 /** @type {{[key: string]: {[key: string]: string|true}}} */
 let queryObjectCache = {}
 
@@ -56,7 +72,7 @@ export function addressSchema () {
 
 /**
  * Returns an axios instance for the client
- * @returns {import('./types/core-only-globals').AxiosWithRetry}
+ * @returns {AxiosInstanceWithRetry}
  * 
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
  * ```js
