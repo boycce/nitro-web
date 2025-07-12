@@ -60,16 +60,16 @@ export type Store = {
 export type Svg = React.FC<React.SVGProps<SVGElement>>
 
 /*
+// Create an `axios` instance type that contains the `axios-retry` global declarations.
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
 import type { IAxiosRetryConfigExtended } from 'axios-retry'
 
-// Extend the config
+// Extend the config to be used below
 export interface AxiosRequestConfigWithRetry extends AxiosRequestConfig {
   'axios-retry'?: IAxiosRetryConfigExtended
 }
 
-// Clone the AxiosInstance, but fix the config type in .get, .post, etc.
-// Update, it seems we only need to fix the get method, the rest will inherit the new extended config?
+// We only need to fix the `get` method, the rest of the methods inherit the new extended config...
 export interface AxiosInstanceWithRetry extends Omit<AxiosInstance, 'get'> { // | 'patch' | 'post' | 'put' | 'delete' | 'request'
   get<T = any, R = AxiosResponse<T>, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>;
   // patch<T = any, R = AxiosResponse<T>, D = any>(url: string, data?: D, config?: AxiosRequestConfigWithRetry): Promise<R>;

@@ -16,7 +16,7 @@ import { twMerge as _twMerge } from 'tailwind-merge'
  * Extend the config to be used below
  * @typedef {AxiosRequestConfig & { 'axios-retry'?: IAxiosRetryConfigExtended }} AxiosRequestConfigWithRetry
  * 
- * We only need to fix the `get` method, the rest of the methods inherit the new extended config?
+ * We only need to fix the `get` method, the rest of the methods inherit the new extended config...
  * @typedef {Omit<AxiosInstance, 'get'> & {
  *   get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>
 * }} AxiosInstanceWithRetry
