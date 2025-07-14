@@ -513,14 +513,14 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  * @param {{ [key: string]: string }} query - req.query
  *   E.g. {
- *     dateRange: '1749038400000,1749729600000',
+ *     createdAt: '1749038400000,1749729600000',
  *     location: '10-RS',
  *     status: 'incomplete',
  *     search: 'John'
  *   }
  * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
  *   E.g. {
- *     dateRange: 'dateRange',
+ *     createdAt: 'dateRange',
  *     location: 'string',
  *     status: ['incomplete', 'complete'],
  *     search: 'string',
