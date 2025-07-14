@@ -1226,14 +1226,14 @@ export function pad (num=0, padLeft=0, fixedRight) {
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  * @param {{ [key: string]: string }} query - req.query
  *   E.g. {
- *     dateRange: '1749038400000,1749729600000',
+ *     createdAt: '1749038400000,1749729600000',
  *     location: '10-RS',
  *     status: 'incomplete',
  *     search: 'John'
  *   }
  * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
  *   E.g. {
- *     dateRange: 'dateRange',
+ *     createdAt: 'dateRange',
  *     location: 'string',
  *     status: ['incomplete', 'complete'],
  *     search: 'string',
@@ -1249,6 +1249,16 @@ export function pad (num=0, padLeft=0, fixedRight) {
 export function parseFilters(query, config) {
   /** @type {{ [key: string]: string|number|{ $gte: number; $lte?: number; }|{ $search: string }|string[] }} */
   const mongoQuery = {}
+
+  // Convert splayed array items into a unified array objects
+  for (const key in query) {
+    if (key.match(/\.\d+$/)) {
+      const baseKey = key.replace(/\.\d+$/, '')
+      const index = key.match(/\.(\d+)$/)?.[1] || 0
+      if (index == 0) query[baseKey] = query[key]
+      else query[baseKey] += ',' + query[key]
+    }
+  }
 
   for (const key in query) {
     const val = query[key]

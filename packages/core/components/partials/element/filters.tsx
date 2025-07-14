@@ -102,7 +102,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   }
 
   async function onInputChange(e: {target: {name: string, value: unknown}}) {
-    // basic name and value (keeping deep paths intact e.g. 'jobCache.location': '10')
+    // console.log('onInputChange', e.target.name, e.target.value)
+    // use basic path keys and values (keeping deep paths intact e.g. 'jobCache.location': '10')
     setState((s) => ({ ...s, [e.target.name]: e.target.value as string })) 
     onAfterChange()
   }
@@ -148,7 +149,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     <Elements.Select
                       {...filter}
                       class="!mb-0"
-                      value={state[filter.name] || ''}
+                      value={state[filter.name] || ''} // ref basic path-keys (rather than deconstructing the state)
                       onChange={onInputChange}
                       type={undefined}
                     />
@@ -158,7 +159,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                     <Elements.Field 
                       {...filter}
                       class="!mb-0"
-                      value={(state[filter.name] as string) || ''}
+                      value={(state[filter.name] as string) || ''} // ref basic path-keys (rather than deconstructing the state)
                       onChange={onInputChange}
                     />
                   }
