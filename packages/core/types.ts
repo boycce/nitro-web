@@ -30,6 +30,8 @@ export type User = {
   lastName?: string
   name?: string
   avatar?: MonasteryImage
+  isAdmin?: boolean
+  type?: string
 }
 
 export type Error = { title: string, detail: string }

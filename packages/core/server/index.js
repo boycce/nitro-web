@@ -2,6 +2,11 @@
 export * from '../util.js'
 export * as util from '../util.js'
 
+/**
+ * Re-export the MiddlewareConfig type from nitro-web/server
+ * @typedef {import('./router.js').MiddlewareConfig} MiddlewareConfig
+ */
+
 // Export models
 import userModel from './models/user.js'
 import companyModel from './models/company.js'

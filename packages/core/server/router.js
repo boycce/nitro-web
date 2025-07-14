@@ -12,9 +12,29 @@ import sortRouteAddressesNodeps from 'sort-route-addresses-nodeps'
 import { sendEmail } from 'nitro-web/server'
 import * as util from 'nitro-web/util'
 
+/**
+ * @typedef {express.Request & {
+ *   version: string,
+ *   user?: import('types').User,
+ * }} Request
+ * @typedef {express.Response & {
+ *   error: (msg?: string | Error | Error[], detail?: string) => void,
+ *   unauthorized: (msg?: string | Error | Error[]) => void,
+ *   forbidden: (msg?: string | Error | Error[]) => void,
+ *   notFound: (msg?: string | Error | Error[]) => void,
+ *   serverError: (msg?: string | Error | Error[]) => void,
+ * }} Response
+ * @typedef {{ 
+ *   order: string[], 
+ *   [key: string]: ((req: Request, res: Response, next: Function) => void) | string[],
+ * }} MiddlewareConfig
+ */
+
+let configLocal
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
 export async function setupRouter (config) {
+  configLocal = config
   const { env, middleware: configMiddleware, version } = config
   const { componentsDir, distDir, emailTemplateDir } = util.getDirectories(path, config.pwd)
   const expressApp = express()
@@ -53,8 +73,9 @@ export async function setupRouter (config) {
 
     if (routes?.setup) routes.setup.call(routes, allMiddleware, config)
     if (routes) {
-      util.each(routes, (_middleware, key) => {
-        if (!key.match(/\s/)) return
+      util.each(routes, (_middleware, _key) => {
+        if (!_key.match(/\s/)) return
+        const key = _key.replace(/\s+/g, ' ')
         const match = key.match(new RegExp(`^(${verbs.join('|')})\\s+(.*)$`, 'i'))
         if (!match) throw new Error(`Invalid verb or path: ${key}`)
         apiRoutes[key] = {
@@ -297,6 +318,7 @@ function resolveMiddleware (controllers, middleware, route, item) {
   }
 }
 
+/** @type {MiddlewareConfig} */
 export const middleware = {
   // Default middleware called before all /api/* routes
   order: [
@@ -350,39 +372,44 @@ export const middleware = {
 
   // --- Custom middleware ----------------------
 
+
   isAdmin: (req, res, next) => {
     // Still need to remove cookie matching in favour of uid..
     // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
     const user = req.user
-    let cookieMatch = user && (!req.headers.authid || user._id.toString() == req.headers.authid)
-    if (cookieMatch && (user.type?.match(/admin/) || user.isAdmin)) next()
+    let cookieMatch = user && (!req.headers.authid || user._id?.toString() == req.headers.authid)
+    if (cookieMatch && user && (user.type?.match(/admin/) || user.isAdmin)) next()
     else if (user && (user.type?.match(/admin/) || user.isAdmin)) res.unauthorized('Invalid cookie, please refresh your browser')
     else if (user) res.unauthorized('You are not authorised to make this request.')
     else res.unauthorized('Please sign in first.')
   },
-  isCompanyOwner: (req, res, next) => {
-    let user = req.user || { companies: [] }
-    let cid = req.params.cid
-    let company = user.companies.find((o) => o._id.toString() == cid)
-    let companyUser = company?.users?.find((o) => o._id.toString() == user._id.toString())
-    if (!user._id) return res.unauthorized('Please sign in first.')
-    else if (!company || !companyUser) res.unauthorized('You are not authorised to make this request.')
-    else if (companyUser.type != 'owner') res.unauthorized('Only owners can make this request.')
-    else next()
-  },
-  isCompanyUser: (req, res, next) => {
-    let user = req.user || { companies: [] }
-    let cid = req.params.cid
-    let company = user.companies.find((o) => o._id.toString() == cid)
-    if (!user._id) return res.unauthorized('Please sign in first.')
-    else if (!company) res.unauthorized('You are not authorised to make this request.')
-    else next()
-  },
+  // isCompanyOwner: (req, res, next) => {
+  //   let user = req.user || { companies: [] }
+  //   let cid = req.params.cid
+  //   let company = user.companies.find((o) => o._id.toString() == cid)
+  //   let companyUser = company?.users?.find((o) => o._id.toString() == user._id?.toString())
+  //   if (!user._id) return res.unauthorized('Please sign in first.')
+  //   else if (!company || !companyUser) res.unauthorized('You are not authorised to make this request.')
+  //   else if (companyUser.type != 'owner') res.unauthorized('Only owners can make this request.')
+  //   else next()
+  // },
+  // isCompanyUser: (req, res, next) => {
+  //   let user = req.user || { companies: [] }
+  //   let cid = req.params.cid
+  //   let company = user.companies.find((o) => o._id.toString() == cid)
+  //   if (!user._id) return res.unauthorized('Please sign in first.')
+  //   else if (!company) res.unauthorized('You are not authorised to make this request.')
+  //   else next()
+  // },
   isUser: (req, res, next) => {
     // todo: need to double check that uid is always defined
     let uid = req.params.uid
-    if (req.user && (typeof uid == 'undefined' || req.user._id.toString() == uid)) next()
+    if (req.user && (typeof uid == 'undefined' || req.user._id?.toString() == uid)) next()
     else if (req.user) res.unauthorized('You are not authorised to make this request.')
     else res.unauthorized('Please sign in first.')
+  },
+  isDevelopment: (req, res, next) => {
+    if (configLocal.env !== 'development') res.error('This API endpoint is only available in development')
+    else next()
   },
 }
