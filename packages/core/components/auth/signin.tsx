@@ -1,7 +1,7 @@
 import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function Signin() {
+export function Signin({ className }: { className?: string }) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
@@ -47,10 +47,10 @@ export function Signin() {
   }
 
   return (
-    <div>
+    <div className={className}>
       <Topbar title={<>Sign in to your Account</>} />
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="email">Email Address</label>
           <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)}

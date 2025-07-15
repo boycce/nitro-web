@@ -1,7 +1,7 @@
 import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function Signup() {
+export function Signup({ className }: { className?: string }) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
@@ -9,7 +9,7 @@ export function Signup() {
     email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
     name: injectedConfig.env === 'development' ? 'Bruce Wayne' : '',
     business: { name: injectedConfig.env === 'development' ? 'Wayne Enterprises' : '' },
-    password: injectedConfig.env === 'development' ? '1234' : '',
+    password: injectedConfig.env === 'development' ? '' : '',
     errors: [] as Errors,
   })
 
@@ -24,10 +24,10 @@ export function Signup() {
   }
   
   return (
-    <div class="">
+    <div className={className}>
       <Topbar title={<>Start your 21 day Free Trial</>} />
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} class="mb-0">
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>

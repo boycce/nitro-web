@@ -1,7 +1,7 @@
 import { Topbar, Field, FormError, Button, request, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function ResetInstructions() {
+export function ResetInstructions({ className }: { className?: string }) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
@@ -18,10 +18,10 @@ export function ResetInstructions() {
   }
 
   return (
-    <div class="">
+    <div className={className}>
       <Topbar title={<>Reset your Password</>} />
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="email">Email Address</label>
           <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)} placeholder="Your email address..." />
@@ -38,7 +38,7 @@ export function ResetInstructions() {
   )
 }
 
-export function ResetPassword() {
+export function ResetPassword({ className }: { className?: string }) {
   const navigate = useNavigate()
   const params = useParams()
   const isLoading = useState(false)
@@ -61,10 +61,10 @@ export function ResetPassword() {
   }
 
   return (
-    <div class="">
+    <div className={className}>
       <Topbar title={<>Reset your Password</>} />
 
-      <form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="password">Your New Password</label>
           <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)} />
