@@ -1,11 +1,20 @@
 import { Topbar, Field, FormError, Button, request, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function ResetInstructions({ className }: { className?: string }) {
+type resetInstructionsProps = {
+  className?: string,
+  elements?: { Button?: typeof Button },
+}
+
+export function ResetInstructions({ className, elements }: resetInstructionsProps) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({ email: '', errors: [] as Errors })
+
+  const Elements = {
+    Button: elements?.Button || Button,
+  }
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
@@ -32,13 +41,13 @@ export function ResetInstructions({ className }: { className?: string }) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button className="w-full" isLoading={isLoading[0]} type="submit">Email me a reset password link</Button>
+        <Elements.Button className="w-full" isLoading={isLoading[0]} type="submit">Email me a reset password link</Elements.Button>
       </form>
     </div>
   )
 }
 
-export function ResetPassword({ className }: { className?: string }) {
+export function ResetPassword({ className, elements }: resetInstructionsProps) {
   const navigate = useNavigate()
   const params = useParams()
   const isLoading = useState(false)
@@ -49,6 +58,10 @@ export function ResetPassword({ className }: { className?: string }) {
     token: params.token,
     errors: [] as Errors,
   }))
+  
+  const Elements = {
+    Button: elements?.Button || Button,
+  }
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
@@ -79,7 +92,7 @@ export function ResetPassword({ className }: { className?: string }) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={isLoading[0]} type="submit">Reset Password</Button>
+        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Reset Password</Elements.Button>
       </form>
     </div>
   )

@@ -1,7 +1,12 @@
 import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function Signup({ className }: { className?: string }) {
+type signupProps = {
+  className?: string,
+  elements?: { Button?: typeof Button },
+}
+
+export function Signup({ className, elements }: signupProps) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
@@ -12,6 +17,10 @@ export function Signup({ className }: { className?: string }) {
     password: injectedConfig.env === 'development' ? '' : '',
     errors: [] as Errors,
   })
+
+  const Elements = {
+    Button: elements?.Button || Button,
+  }
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
@@ -55,7 +64,7 @@ export function Signup({ className }: { className?: string }) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={isLoading[0]} type="submit">Create Account</Button>
+        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Create Account</Elements.Button>
       </form>
     </div>
   )

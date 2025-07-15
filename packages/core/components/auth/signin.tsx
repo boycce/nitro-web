@@ -1,7 +1,12 @@
 import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
 
-export function Signin({ className }: { className?: string }) {
+type signinProps = {
+  className?: string,
+  elements?: { Button?: typeof Button },
+}
+
+export function Signin({ className, elements }: signinProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
@@ -12,6 +17,10 @@ export function Signin({ className }: { className?: string }) {
     password: injectedConfig.env == 'development' ? '1234' : '',
     errors: [] as Errors,
   })
+  
+  const Elements = {
+    Button: elements?.Button || Button,
+  }
 
   useEffect(() => {
     // Autofill the email input from ?email=
@@ -69,7 +78,7 @@ export function Signin({ className }: { className?: string }) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Button class="w-full" isLoading={isLoading[0]} type="submit">Sign In</Button>
+        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Sign In</Elements.Button>
       </form>
     </div>
   )
