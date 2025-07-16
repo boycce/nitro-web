@@ -34,6 +34,7 @@ export { Modal } from '../components/partials/element/modal'
 export { Sidebar, type SidebarProps } from '../components/partials/element/sidebar'
 export { Tooltip } from '../components/partials/element/tooltip'
 export { Topbar } from '../components/partials/element/topbar'
+export { Table, type TableColumn, type TableProps, type TableRow } from '../components/partials/element/table'
 
 // Component Form Elements
 export { Checkbox } from '../components/partials/form/checkbox'

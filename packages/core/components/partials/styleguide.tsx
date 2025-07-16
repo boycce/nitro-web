@@ -1,19 +1,36 @@
 import { 
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
-  Filters, FiltersHandleType, FilterType,
+  Filters, FiltersHandleType, FilterType, Table, TableColumn,
 } from 'nitro-web'
-import { getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
-import { Check, FileEditIcon } from 'lucide-react'
+import { date, getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
+import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
+
+const perPage = 10
+const statusColors = function(status: string) {
+  return {
+    pending: 'bg-yellow-400',
+    approved: 'bg-green-400',
+    rejected: 'bg-red-400',
+  }[status]
+}
 
 type StyleguideProps = {
   className?: string
-  elements?: {
-    Button?: typeof ButtonNitro
-  }
+  elements?: { Button?: typeof ButtonNitro }
   children?: React.ReactNode
 }
 
+type QuoteExample = {
+  _id?: string
+  freightType: string
+  destination: { code: string }
+  date: number
+  weight: number
+  status: string
+}
+
 export function Styleguide({ className, elements, children }: StyleguideProps) {
+  const Button = elements?.Button || ButtonNitro
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -28,10 +45,12 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
     'date-time': Date.now(),
     calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
     firstName: 'Bruce',
+    tableFilter: '',
     errors: [
       { title: 'address', detail: 'Address is required' },
     ],
   })
+
   const [filterState, setFilterState] = useState({})
   const filtersRef = useRef<FiltersHandleType>(null)
   const filters = useMemo(() => {
@@ -79,9 +98,23 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
     { label: 'Delete' },
   ], [])
 
-  const Button = elements?.Button || ButtonNitro
+  const thead: TableColumn[] = useMemo(() => [
+    { value: 'freightType', label: 'Freight Type' },
+    { value: 'destination.code', label: 'Destination Code' },
+    { value: 'date', label: 'Date' },
+    { value: 'weight', label: 'Weight', align: 'center' },
+    { value: 'status', label: 'Status' },
+    { value: 'actions', label: 'Actions', disableSort: true, overflow: true, minWidth: 100, align: 'right' },
+  ], [])
 
-  function onCustomerInputChange (e: { target: { name: string, value: unknown } }) {
+  const rows: QuoteExample[] = useMemo(() => [
+    { _id: '1', freightType: 'air', destination: { code: 'nz' }, date: new Date().getTime(), weight: 100, status: 'pending' },
+    { _id: '2', freightType: 'sea', destination: { code: 'nz' }, date: new Date().getTime(), weight: 200, status: 'approved' },
+    { _id: '3', freightType: 'road', destination: { code: 'au' }, date: new Date().getTime(), weight: 300, status: 'rejected' },
+    // normally you should filter the rows on the api using the query string
+  ].filter((row) => row.freightType.match(new RegExp(state.tableFilter, 'i'))), [state.tableFilter])
+
+  const onCustomerInputChange = (e: { target: { name: string, value: unknown } }) => {
     if (e.target.name == 'customer' && e.target.value == '0') {
       setCustomerSearch('')
       e.target.value = null // clear the select's selected value
@@ -90,9 +123,44 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
     onChange(setState, e)
   }
 
-  function onCustomerSearch (search: string) {
+  const onCustomerSearch = (search: string) => {
     setCustomerSearch(search || '')
   }
+
+  const generateCheckboxActions = useCallback((selectedRowIds: string[]) => {
+    return <div class='flex items-center gap-x-2'>
+      <Button size='xs' color='dark' onClick={() => { console.log('set', selectedRowIds) }}>Set Status</Button>
+      <Button size='xs' color='dark' onClick={() => { console.log('remove', selectedRowIds) }}>Delete</Button>
+    </div>
+  }, [])
+
+  const generateTd = useCallback((col: TableColumn, row: QuoteExample, i: number) => {
+    switch (col.value) {
+      case 'freightType':
+        return <div>{ucFirst(row.freightType)}</div>
+      case 'destination.code':
+        return <div>{row.destination.code.toUpperCase()}</div>
+      case 'date':
+        return <div>{date(row.date, 'dd mmm, yyyy')}</div>
+      case 'weight':
+        return <div>{row.weight}</div>
+      case 'status':  
+        return <div>{ucFirst(row.status)}</div>
+      case 'actions':
+        return (
+          <Dropdown 
+            options={[{ label: 'Set Status' }, { label: 'Delete' }]} 
+            dir={rows.slice(0, perPage).length - 3 < i ? 'top-right' : 'bottom-right'} 
+            minWidth={100}
+          >
+            <Button color='clear' className='ring-0' size='sm' IconCenter={<EllipsisVerticalIcon size={18} strokeWidth={1.5} />}  />
+          </Dropdown>
+        )
+      default:
+        console.error(`Error: unexpected thead value: ${col.value}`)
+        return null
+    }
+  }, [rows.length])
 
   // Example of updating state
   // useEffect(() => {
@@ -103,6 +171,24 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
 
   return (
     <div class={`text-left max-w-[1100px] ${className}`}>
+      <Modal show={showModal1} setShow={setShowModal1}>
+        <h3 class="h3">Edit Profile</h3>
+        <p class="mb-5">An example modal containing a basic form for editing profiles.</p>
+        <form class="mb-8 text-left">
+          <div>
+            <label for="firstName2">First Name</label>
+            <Field name="firstName2" state={state} onChange={(e) => onChange(setState, e)} />
+          </div>
+          <div>
+            <label for="email2">Email Address</label>
+            <Field name="email2" type="email" placeholder="Your email address..."/>
+          </div>
+        </form>
+        <div class="flex justify-end">
+          <Button color="primary" onClick={() => setShowModal1(false)}>Save</Button>
+        </div>
+      </Modal>
+
       <GithubLink filename={__filename} />
       <div class="mb-7">
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
@@ -367,26 +453,8 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         </div>
       </div>
 
-      <Modal show={showModal1} setShow={setShowModal1}>
-        <h3 class="h3">Edit Profile</h3>
-        <p class="mb-5">An example modal containing a basic form for editing profiles.</p>
-        <form class="mb-8 text-left">
-          <div>
-            <label for="firstName2">First Name</label>
-            <Field name="firstName2" state={state} onChange={(e) => onChange(setState, e)} />
-          </div>
-          <div>
-            <label for="email2">Email Address</label>
-            <Field name="email2" type="email" placeholder="Your email address..."/>
-          </div>
-        </form>
-        <div class="flex justify-end">
-          <Button color="primary" onClick={() => setShowModal1(false)}>Save</Button>
-        </div>
-      </Modal>
-
       <h2 class="h3">File Inputs & Calendar</h2>
-      <div class="grid grid-cols-3 gap-x-6 mb-4 last:mb-0">
+      <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="avatar">Avatar</label>
           <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />
@@ -399,6 +467,44 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
             }} 
           />
         </div>
+      </div>
+
+      <div class="flex justify-between items-start">
+        <h2 class="h3">Tables</h2>
+        <Field 
+          name="tableFilter"
+          type="search"
+          state={state}
+          placeholder="Basic table filter..."
+          onChange={(e) => onChange(setState, e)} 
+          className="!my-0 [&>input]:font-normal [&>input]:text-xs [&>input]:py-1.5" /////todo: need to allow twmerge here
+        />
+      </div>
+      <div class="grid mb-4 last:mb-0">
+        <Table
+          rows={rows.slice(0, perPage)}
+          columns={thead}
+          rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+          generateCheckboxActions={generateCheckboxActions}
+          generateTd={generateTd}
+          className="mb-6"
+        />
+        <Table
+          rows={rows.slice(0, 2)}
+          columns={thead}
+          rowLinesMax={1}
+          headerHeightMin={35}
+          rowSpacing={8}
+          rowHeightMin={52}
+          rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
+          generateCheckboxActions={generateCheckboxActions}
+          generateTd={generateTd}
+          tableClassName="rounded-3px"
+          columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
+          columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
+          checkboxClassName="rounded-[2px] shadow-none"
+          className="mb-5"
+        />
       </div>
 
       {children}
