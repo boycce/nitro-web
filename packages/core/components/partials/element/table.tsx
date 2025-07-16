@@ -30,11 +30,13 @@ export type TableProps<T> = {
   rowContentHeightMax?: number
   rowLinesMax?: number
   rowSideColor?: (row?: T) => { className: string, width: number }
-  rowSpacing?: number
-  // columnSpacing?: number
+  rowGap?: number
+  columnGap?: number
+  columnPaddingX?: number
   className?: string
   tableClassName?: string
   columnClassName?: string
+  columnSelectedClassName?: string
   columnHeaderClassName?: string
   checkboxClassName?: string
   checkboxSize?: number
@@ -50,18 +52,21 @@ export function Table<T extends TableRow>({
   rowContentHeightMax, 
   rowLinesMax, 
   rowSideColor,
-  rowSpacing=0,
-  // columnSpacing=15,
+  rowGap=0,
+  columnGap=11,
+  columnPaddingX=11,
+  // Class names
   className,
   tableClassName,
   columnClassName,
+  columnSelectedClassName,
   columnHeaderClassName,
   checkboxClassName,
   checkboxSize=16,
 }: TableProps<T>) {
   const location = useLocation()
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
-  const _columnClassName = 'table-cell px-3 py-1 align-middle text-sm border-y border-border ' +
+  const _columnClassName = 'table-cell py-1 align-middle text-sm border-y border-border ' +
     'first:border-l last:border-r border-t-0 box-border'
 
   const columns = useMemo(() => {
@@ -111,11 +116,11 @@ export function Table<T extends TableRow>({
 
   return (
     <div 
-      style={{ marginTop: -rowSpacing }}
+      style={{ marginTop: -rowGap }}
       className={twMerge('overflow-x-auto thin-scrollbar', className)}
     >
       <div 
-        style={{ borderSpacing: `0 ${rowSpacing}px` }}
+        style={{ borderSpacing: `0 ${rowGap}px` }}
         className={twMerge('table w-full border-separate', tableClassName)}
       >
         {/* Thead row */}
@@ -124,11 +129,13 @@ export function Table<T extends TableRow>({
             columns.map((col, j) => {
               const disableSort = col.disableSort || selectedRowIds.length
               const sideColor = j == 0 && rowSideColor ? rowSideColor(undefined) : undefined
+              const pl = j == 0 ? columnPaddingX : columnGap
+              const pr = j == columns.length - 1 ? columnPaddingX : columnGap
               return (
                 <div
                   key={j}
                   onClick={disableSort ? undefined : () => onSort(col)}
-                  style={{ height: headerHeightMin, minWidth: col.minWidth }}
+                  style={{ height: headerHeightMin, minWidth: col.minWidth, paddingLeft: pl, paddingRight: pr }}
                   className={twMerge(
                     _columnClassName,
                     'h-auto text-sm font-medium border-t-1',
@@ -192,23 +199,27 @@ export function Table<T extends TableRow>({
         {/* Tbody rows */}
         {
           rows.map((row: T, i: number) => {
+            const isSelected = selectedRowIds.includes(row?._id||'')
             return (
               <div 
                 key={`${row._id}-${i}`}
-                className={`table-row relative ${selectedRowIds.includes(row?._id||'') ? 'bg-gray-50' : 'bg-white'}`}
+                className="table-row relative"
               >
                 {
                   columns.map((col, j) => {
                     const sideColor = j == 0 && rowSideColor ? rowSideColor(row) : undefined
+                    const pl = j == 0 ? columnPaddingX : columnGap
+                    const pr = j == columns.length - 1 ? columnPaddingX : columnGap
                     return (
                       <div
                         key={j}
-                        style={{ height: rowHeightMin }}
+                        style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
                         className={twMerge(
                           _columnClassName,
                           getAlignClass(col.align),
                           columnClassName,
-                          col.className
+                          col.className,
+                          isSelected && `bg-gray-50 ${columnSelectedClassName||''}`
                         )}
                       >
                         <div 
@@ -256,22 +267,26 @@ export function Table<T extends TableRow>({
           rows.length == 0 &&
           <div className='table-row relative'>
             {
-              columns.map((col, j) => (
-                <div
-                  key={j}
-                  style={{ height: rowHeightMin }}
-                  className={twMerge(_columnClassName, columnClassName, col.className)}
-                >
+              columns.map((col, j) => {
+                const pl = j == 0 ? columnPaddingX : columnGap
+                const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+                return (
                   <div
-                    className={twMerge(
-                      'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
-                      col.innerClassName
-                    )}
+                    key={j}
+                    style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
+                    className={twMerge(_columnClassName, columnClassName, col.className)}
                   >
-                    { j == 0 && 'No records found.' }
+                    <div
+                      className={twMerge(
+                        'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
+                        col.innerClassName
+                      )}
+                    >
+                      { j == 0 && 'No records found.' }
+                    </div>
                   </div>
-                </div>
-              ))
+                )
+              })
             }
           </div>
         }

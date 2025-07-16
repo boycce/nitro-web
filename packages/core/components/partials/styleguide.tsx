@@ -494,13 +494,14 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           columns={thead}
           rowLinesMax={1}
           headerHeightMin={35}
-          rowSpacing={8}
-          rowHeightMin={52}
+          rowGap={8}
+          rowHeightMin={42}
           rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
           generateCheckboxActions={generateCheckboxActions}
           generateTd={generateTd}
           tableClassName="rounded-3px"
           columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
+          columnSelectedClassName="bg-indigo-50 border-indigo-300"
           columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
           checkboxClassName="rounded-[2px] shadow-none"
           className="mb-5"
