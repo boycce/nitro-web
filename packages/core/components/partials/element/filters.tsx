@@ -58,6 +58,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   const [state3, setState3] = useState(() => ({ ...queryObject(location.search) }))
   const [state, setState] = [state2 || state3, setState2 || setState3]
   const stateRef = useRef(state)
+  const locationRef = useRef(location)
   const count = useMemo(() => Object.keys(state).filter((k) => state[k] && filters?.some((f) => f.name === k)).length, [state, filters])
 
   const Elements = {
@@ -79,6 +80,10 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   useEffect(() => {
     stateRef.current = state
   }, [state])
+  
+  useEffect(() => {
+    locationRef.current = location
+  }, [location])
 
   useEffect(() => {
     // Only update the state if the filters haven't been input changed in the last 500ms
@@ -116,7 +121,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   // Update the URL by replacing the current entry in the history stack
   function submit(includePagination?: boolean) {
     const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
-    navigate(location.pathname + queryStr, { replace: true })
+    navigate(locationRef.current.pathname + queryStr, { replace: true })
   }
 
   return (
