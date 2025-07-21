@@ -1874,10 +1874,6 @@ label, .label {
   --tw-bg-opacity: 1;
   background-color: rgb(74 222 128 / var(--tw-bg-opacity, 1));
 }
-.bg-indigo-50 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(238 242 255 / var(--tw-bg-opacity, 1));
-}
 .bg-indigo-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(99 102 241 / var(--tw-bg-opacity, 1));
@@ -2086,6 +2082,10 @@ label, .label {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+.py-\[5px\] {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 .py-\[9px\] {
   padding-top: 9px;
@@ -3116,6 +3116,10 @@ label, .label {
        -moz-appearance: auto;
             appearance: auto;
   }
+}
+.\[\&\:hover\>div\]\:bg-gray-50:hover>div {
+  --tw-bg-opacity: 1;
+  background-color: rgb(249 250 251 / var(--tw-bg-opacity, 1));
 }
 .\[\&\:hover\>svg\]\:fill-input-border-focus:hover>svg {
   fill: #4c50f9;
