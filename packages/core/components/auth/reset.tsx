@@ -4,9 +4,10 @@ import { Errors } from 'nitro-web/types'
 type resetInstructionsProps = {
   className?: string,
   elements?: { Button?: typeof Button },
+  redirectTo?: string,
 }
 
-export function ResetInstructions({ className, elements }: resetInstructionsProps) {
+export function ResetInstructions({ className, elements, redirectTo }: resetInstructionsProps) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
@@ -20,7 +21,7 @@ export function ResetInstructions({ className, elements }: resetInstructionsProp
     try {
       await request('post /api/reset-instructions', state, event, isLoading, setState)
       setStore((s) => ({ ...s, message: 'Done! Please check your email.' }))
-      navigate('/signin')
+      navigate(redirectTo || '/signin')
     } catch (e) {
       return setState({ ...state, errors: e as Errors })
     }
@@ -47,7 +48,7 @@ export function ResetInstructions({ className, elements }: resetInstructionsProp
   )
 }
 
-export function ResetPassword({ className, elements }: resetInstructionsProps) {
+export function ResetPassword({ className, elements, redirectTo }: resetInstructionsProps) {
   const navigate = useNavigate()
   const params = useParams()
   const isLoading = useState(false)
@@ -67,7 +68,7 @@ export function ResetPassword({ className, elements }: resetInstructionsProps) {
     try {
       const data = await request('post /api/reset-password', state, event, isLoading, setState)
       setStore((s) => ({ ...s, ...data }))
-      navigate('/')
+      navigate(redirectTo || '/')
     } catch (e) {
       return setState({ ...state, errors: e as Errors })
     }

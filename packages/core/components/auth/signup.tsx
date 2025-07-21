@@ -4,9 +4,10 @@ import { Errors } from 'nitro-web/types'
 type signupProps = {
   className?: string,
   elements?: { Button?: typeof Button },
+  redirectTo?: string,
 }
 
-export function Signup({ className, elements }: signupProps) {
+export function Signup({ className, elements, redirectTo }: signupProps) {
   const navigate = useNavigate()
   const isLoading = useState(false)
   const [, setStore] = useTracked()
@@ -26,7 +27,7 @@ export function Signup({ className, elements }: signupProps) {
     try {
       const data = await request('post /api/signup', state, e, isLoading, setState)
       setStore((prev) => ({ ...prev, ...data }))
-      setTimeout(() => navigate('/'), 0) // wait for setStore
+      setTimeout(() => navigate(redirectTo || '/'), 0) // wait for setStore
     } catch (e) {
       setState((prev) => ({ ...prev, errors: e as Errors }))
     }

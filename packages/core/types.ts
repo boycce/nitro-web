@@ -59,6 +59,24 @@ export type Store = {
   user?: User,
 }
 
+// util.addressSchema
+export type Address = {
+  city?: string
+  country?: string
+  full?: string
+  line1?: string
+  line2?: string
+  number?: string
+  postcode?: string
+  suburb?: string
+  unit?: string
+  area?: {
+    bottomLeft?: [number, number]
+    topRight?: [number, number]
+  }
+  location?: [number, number]
+}
+
 export type Svg = React.FC<React.SVGProps<SVGElement>>
 
 /*

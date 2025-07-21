@@ -35,7 +35,7 @@ let scrollbarCache
 let axiosNonce
 
 /**
- * Returns an address monastery schema which Google autocomplete should return
+ * Returns a monastery schema which matches the Google autocomplete output
  */
 export function addressSchema () {
   // Google autocomplete should return the following object

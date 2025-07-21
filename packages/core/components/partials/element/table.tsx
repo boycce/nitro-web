@@ -100,8 +100,8 @@ export function Table<T extends TableRow>({
     else return align == 'left' ? '' : align == 'center' ? 'text-center' : 'text-right'
   }, [])
 
-  // Reset selected rows when the location changes
-  useEffect(() => setSelectedRowIds([]), [location.key])
+  // Reset selected rows when the location changes, or the number of rows changed (e.g. when a row is removed)
+  useEffect(() => setSelectedRowIds([]), [location.key, rows.map(row => row?._id||'').join(',')])
 
   // --- Sorting ---
 
@@ -134,7 +134,8 @@ export function Table<T extends TableRow>({
             columns.map((col, j) => {
               const disableSort = col.disableSort || selectedRowIds.length
               const sideColor = j == 0 && rowSideColor ? rowSideColor(undefined) : undefined
-              const pl = j == 0 ? columnPaddingX : columnGap
+              const sideColorPadding = sideColor && rows.length > 0 ? sideColor.width + 5 : 0
+              const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
               const pr = j == columns.length - 1 ? columnPaddingX : columnGap
               return (
                 <div
@@ -152,13 +153,10 @@ export function Table<T extends TableRow>({
                   )}
                 >
                   <div
-                    style={{ 
-                      maxHeight: rowContentHeightMax, 
-                      paddingLeft: sideColor && rows.length > 0 ? sideColor.width + 5 : 0,
-                    }}
+                    style={{ maxHeight: rowContentHeightMax }}
                     className={twMerge(
+                      col.value == 'checkbox' ? 'relative' : getLineClampClassName(col.rowLinesMax),
                       rowContentHeightMax ? 'overflow-hidden' : '',
-                      getLineClampClassName(col.rowLinesMax),
                       col.overflow ? 'overflow-visible' : '',
                       col.innerClassName
                     )}
@@ -175,7 +173,7 @@ export function Table<T extends TableRow>({
                               onChange={(e) => onSelect('all', e.target.checked)}
                             />
                             <div 
-                              className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[68px] [&>*]:z-10`}
+                              className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[35px] [&>*]:z-10 whitespace-nowrap`}
                             >
                               {generateCheckboxActions && generateCheckboxActions(selectedRowIds)}
                             </div>

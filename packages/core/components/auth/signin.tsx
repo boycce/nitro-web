@@ -4,9 +4,10 @@ import { Errors } from 'nitro-web/types'
 type signinProps = {
   className?: string,
   elements?: { Button?: typeof Button },
+  redirectTo?: string,
 }
 
-export function Signin({ className, elements }: signinProps) {
+export function Signin({ className, elements, redirectTo }: signinProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
@@ -48,7 +49,7 @@ export function Signin({ className, elements }: signinProps) {
       setStore((s) => ({ ...s, ...data }))
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
-        else navigate('/')
+        else navigate(redirectTo || '/')
       }, 100) 
     } catch (e) {
       return setState({ ...state, errors: e as Errors})
