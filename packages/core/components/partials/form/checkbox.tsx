@@ -16,12 +16,26 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   checkboxClassName?: string
   svgClassName?: string
   labelClassName?: string
+  hitboxPadding?: number
+  onClick?: (e: React.MouseEvent<HTMLLabelElement>) => void
   /** title used to find related error messages */
   errorTitle?: string|RegExp
 }
 
 export function Checkbox({ 
-  state, size, subtext, text, type='checkbox', className, checkboxClassName, svgClassName, labelClassName, errorTitle, ...props 
+  state,
+  size, 
+  subtext, 
+  text, 
+  type='checkbox', 
+  className, 
+  checkboxClassName, 
+  svgClassName, 
+  labelClassName, 
+  hitboxPadding, 
+  errorTitle, 
+  onClick, // this gets called twice...
+  ...props 
 }: CheckboxProps) {
   // Checkbox/radio/toggle component
   let value!: boolean
@@ -44,13 +58,12 @@ export function Checkbox({
   const toggleAfterSize = toggleHeight - BORDER * 2
 
   return (
-    <div 
-      className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after text-sm nitro-checkbox ${className}`)}
-    >
-      <div className="flex gap-3 items-baseline">
+    <div className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after text-sm nitro-checkbox ${className}`)}>
+      <label for={id} className="inline-flex gap-3 items-baseline" onClick={onClick}>
         <div className="shrink-0 flex items-center">
           <div className="w-0">&nbsp;</div>
           <div className="group relative">
+            {hitboxPadding && <div className='block absolute cursor-default' style={{inset: `-${hitboxPadding}px`}} />}
             {
               type !== 'toggle'
                 ? <>
@@ -114,12 +127,11 @@ export function Checkbox({
                       className="sr-only peer"
                       checked={value}
                     />
-                    <label
-                      for={id}
+                    <div
                       style={{ width: toggleWidth, height: toggleHeight }}
                       className={
                         twMerge(
-                          'block bg-gray-200 rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 ' +
+                          'block bg-gray-200 rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 p-2 ' +
                           // Variable-selected theme colors (was .*-blue-600)
                           'peer-checked:bg-variable-selected peer-focus-visible:outline-variable-selected ' +
                           labelClassName
@@ -132,18 +144,18 @@ export function Checkbox({
                           'absolute top-[2px] start-[2px] bg-white border-gray-300 border rounded-full transition-all group-has-[:checked]:border-white group-has-[:checked]:translate-x-full '
                         }
                       />
-                    </label>
+                    </div>
                   </>
             }
           </div>
         </div>
         {text && 
-          <label for={id} className="text-[length:inherit] leading-[inherit] select-none">
+          <div className="text-[length:inherit] leading-[inherit] select-none">
             <span className="text-gray-900">{text}</span>
             <span className="ml-2 text-gray-500">{subtext}</span>
-          </label>
+          </div>
         }
-      </div>
+      </label>
       {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
   )

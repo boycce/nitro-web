@@ -31,10 +31,12 @@ export type TableProps<T> = {
   rowLinesMax?: number
   rowSideColor?: (row?: T) => { className: string, width: number }
   rowGap?: number
+  rowOnClick?: (row: T) => void
   columnGap?: number
   columnPaddingX?: number
   className?: string
   tableClassName?: string
+  rowClassName?: string
   columnClassName?: string
   columnSelectedClassName?: string
   columnHeaderClassName?: string
@@ -53,11 +55,13 @@ export function Table<T extends TableRow>({
   rowLinesMax, 
   rowSideColor,
   rowGap=0,
+  rowOnClick,
   columnGap=11,
   columnPaddingX=11,
   // Class names
   className,
   tableClassName,
+  rowClassName,
   columnClassName,
   columnSelectedClassName,
   columnHeaderClassName,
@@ -68,6 +72,7 @@ export function Table<T extends TableRow>({
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
   const _columnClassName = 'table-cell py-1 align-middle text-sm border-y border-border ' +
     'first:border-l last:border-r border-t-0 box-border'
+  const [now] = useState(new Date().getTime())
 
   const columns = useMemo(() => {
     const checkboxCol: TableColumn = { value: 'checkbox', label: '', disableSort: true }
@@ -163,10 +168,11 @@ export function Table<T extends TableRow>({
                         ? <>
                             <Checkbox 
                               size={checkboxSize}
-                              name="checkbox-all" 
-                              className='!m-0' 
+                              name={`checkbox-all-${now}`}
+                              hitboxPadding={5}
+                              className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
                               checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
-                              onChange={(e) => onSelect('all', e.target.checked)} 
+                              onChange={(e) => onSelect('all', e.target.checked)}
                             />
                             <div 
                               className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[68px] [&>*]:z-10`}
@@ -203,7 +209,10 @@ export function Table<T extends TableRow>({
             return (
               <div 
                 key={`${row._id}-${i}`}
-                className="table-row relative"
+                onClick={rowOnClick ? () => rowOnClick(row) : undefined}
+                className={twMerge(
+                  `table-row relative ${rowOnClick ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`, rowClassName
+                )}
               >
                 {
                   columns.map((col, j) => {
@@ -249,7 +258,9 @@ export function Table<T extends TableRow>({
                                   name={`checkbox-${row._id}`} 
                                   onChange={(e) => onSelect(row?._id || '', e.target.checked)}
                                   checked={selectedRowIds.includes(row?._id || '')}
-                                  className='!m-0' 
+                                  onClick={(e) => e.stopPropagation()}
+                                  hitboxPadding={5}
+                                  className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
                                   checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
                                 />
                               : generateTd(col, row, i, i == rows.length - 1)

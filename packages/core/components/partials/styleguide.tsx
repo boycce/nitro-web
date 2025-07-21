@@ -31,6 +31,7 @@ type QuoteExample = {
 
 export function Styleguide({ className, elements, children }: StyleguideProps) {
   const Button = elements?.Button || ButtonNitro
+  const [, setStore] = useTracked()
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
   const [state, setState] = useState({
@@ -490,21 +491,23 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           className="mb-6"
         />
         <Table
-          rows={rows.slice(0, 2)}
+          rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}
           columns={thead}
           rowLinesMax={1}
           headerHeightMin={35}
           rowGap={8}
           rowHeightMin={42}
           rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
+          rowOnClick={useCallback((row: QuoteExample) => {setStore(s => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
           generateCheckboxActions={generateCheckboxActions}
           generateTd={generateTd}
+          className="mb-5"
           tableClassName="rounded-3px"
+          rowClassName="[&:hover>div]:bg-gray-50"
           columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
-          columnSelectedClassName="bg-indigo-50 border-indigo-300"
+          columnSelectedClassName="bg-gray-50 border-indigo-300"
           columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
           checkboxClassName="rounded-[2px] shadow-none"
-          className="mb-5"
         />
       </div>
 
