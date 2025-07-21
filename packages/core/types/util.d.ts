@@ -1,5 +1,5 @@
 /**
- * Returns an address monastery schema which Google autocomplete should return
+ * Returns a monastery schema which matches the Google autocomplete output
  */
 export function addressSchema(): {
     city: {
