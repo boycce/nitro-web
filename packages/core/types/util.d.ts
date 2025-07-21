@@ -555,6 +555,7 @@ export function parseFilters(query: {
  *   }
  * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
  * @param {number} [limit=10]
+ * @param {boolean} [hasMore] - returns an extra row to signal there are more pages
  * @example returned object (using the examples above):
  *   E.g. {
  *     limit: 10,
@@ -569,7 +570,7 @@ export function parseSortOptions(query: {
 }, model: {
     fieldsFlattened: object;
     name: string;
-}, limit?: number): {
+}, limit?: number, hasMore?: boolean): {
     limit: number;
     skip: number;
     sort: {
