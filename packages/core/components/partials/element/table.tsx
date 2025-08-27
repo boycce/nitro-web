@@ -9,6 +9,7 @@ export interface TableColumn {
   disableSort?: boolean
   innerClassName?: string
   minWidth?: number
+  maxWidth?: number
   overflow?: boolean
   rowLinesMax?: number
   /** Use if the value is different from the sortBy */
@@ -141,7 +142,7 @@ export function Table<T extends TableRow>({
                 <div
                   key={j}
                   onClick={disableSort ? undefined : () => onSort(col)}
-                  style={{ height: headerHeightMin, minWidth: col.minWidth, paddingLeft: pl, paddingRight: pr }}
+                  style={{ height: headerHeightMin, minWidth: col.minWidth, maxWidth: col.maxWidth, paddingLeft: pl, paddingRight: pr }}
                   className={twMerge(
                     _columnClassName,
                     'h-auto text-sm font-medium border-t-1',
