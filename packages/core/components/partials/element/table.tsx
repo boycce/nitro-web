@@ -22,7 +22,7 @@ export type TableRow = {
   
 export type TableProps<T> = {
   columns: TableColumn[]
-  rows: T[]
+  rows: T[] | null
   generateTd: (col: TableColumn, row: T, i: number, isLast: boolean) => JSX.Element | null
   generateCheckboxActions?: (selectedRowIds: string[]) => JSX.Element | null
   headerHeightMin?: number
@@ -87,7 +87,7 @@ export function Table<T extends TableRow>({
 
   const onSelect = useCallback((idOrAll: string, checked: boolean) => {
     setSelectedRowIds((o) => {
-      if (idOrAll == 'all' && checked) return rows.map(row => row?._id||'')
+      if (idOrAll == 'all' && checked) return (rows ?? []).map(row => row?._id||'')
       else if (idOrAll == 'all' && !checked) return []
       else if (o.includes(idOrAll) && !checked) return o.filter(id => id != idOrAll)
       else if (!o.includes(idOrAll) && checked) return [...o, idOrAll]
@@ -101,7 +101,7 @@ export function Table<T extends TableRow>({
   }, [])
 
   // Reset selected rows when the location changes, or the number of rows changed (e.g. when a row is removed)
-  useEffect(() => setSelectedRowIds([]), [location.key, rows.map(row => row?._id||'').join(',')])
+  useEffect(() => setSelectedRowIds([]), [location.key, (rows ?? []).map(row => row?._id||'').join(',')])
 
   // --- Sorting ---
 
@@ -118,6 +118,16 @@ export function Table<T extends TableRow>({
     })
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
+
+  if (!rows) return (
+    <div class='w-full h-full flex justify-center items-center'>
+      <div class='relative'>
+        <span class={'loader !opacity-100 absolute top-[50%] left-[50%]' + 
+      ' w-[2rem] h-[2rem] ml-[-1rem] mt-[-1rem] rounded-full animate-spin border-2' +
+      ' !border-t-2 border-t-foreground'} />
+      </div>
+    </div>
+  )
 
   return (
     <div 
