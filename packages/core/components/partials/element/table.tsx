@@ -22,7 +22,7 @@ export type TableRow = {
   
 export type TableProps<T> = {
   columns: TableColumn[]
-  rows: T[] | null
+  rows: T[]
   generateTd: (col: TableColumn, row: T, i: number, isLast: boolean) => JSX.Element | null
   generateCheckboxActions?: (selectedRowIds: string[]) => JSX.Element | null
   headerHeightMin?: number
@@ -42,6 +42,7 @@ export type TableProps<T> = {
   columnHeaderClassName?: string
   checkboxClassName?: string
   checkboxSize?: number
+  isLoading?:boolean
 }
 
 export function Table<T extends TableRow>({ 
@@ -67,6 +68,7 @@ export function Table<T extends TableRow>({
   columnHeaderClassName,
   checkboxClassName,
   checkboxSize=16,
+  isLoading=false,
 }: TableProps<T>) {
   const location = useLocation()
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
@@ -119,12 +121,10 @@ export function Table<T extends TableRow>({
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
 
-  if (!rows) return (
-    <div class='w-full h-full flex justify-center items-center'>
+  if (isLoading || rows.length === 0) return (
+    <div class='relative w-full h-full flex justify-center items-center'>
       <div class='relative'>
-        <span class={'loader !opacity-100 absolute top-[50%] left-[50%]' + 
-      ' w-[2rem] h-[2rem] ml-[-1rem] mt-[-1rem] rounded-full animate-spin border-2' +
-      ' !border-t-2 border-t-foreground'} />
+        Loading<span className="absolute ml-[2px] loading-dots" />
       </div>
     </div>
   )
