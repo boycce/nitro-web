@@ -121,7 +121,7 @@ export function Table<T extends TableRow>({
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
 
-  if (isLoading || rows.length === 0) return (
+  if (isLoading) return (
     <div class='relative w-full h-full flex justify-center items-center'>
       <div class='relative'>
         Loading<span className="absolute ml-[2px] loading-dots" />
