@@ -48,46 +48,6 @@ const config = {
     placeholderEmail: process.env.placeholderEmail,
     stripePublishableKey: process.env.stripePublishableKey,
     version: _require(pwd + 'package.json').version,
-    countries: {
-      nz: {
-        currency: 'nzd',
-        name: 'New Zealand',
-        numberFormats: {
-          currency: '¤#,##0.00',
-          percentage: '¤#,##0.00%',
-        },
-        dateFormats: {
-          full: 'dddd, D MMMM YYYY',
-          long: 'D MMMM YYYY',
-          medium: 'D/MM/YYYY',
-          short: 'D/MM/YY',
-        },
-      },
-      au: {
-        currency: 'aud',
-        name: 'Australia',
-        numberFormats: {
-          currency: '¤#,##0.00',
-          percentage: '¤#,##0.00%',
-        },
-        dateFormats: {
-          full: 'dddd, D MMMM YYYY',
-          long: 'D MMMM YYYY',
-          medium: 'D/MM/YYYY',
-          short: 'D/MM/YY',
-        },
-      },
-    },
-    currencies: {
-      nzd: {
-        name: 'New Zealand Dollar',
-        symbol: '$',
-      },
-      aud: {
-        name: 'Australian Dollar',
-        symbol: '$',
-      },
-    },
   },
 
   middleware: {

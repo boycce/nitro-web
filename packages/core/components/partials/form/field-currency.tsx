@@ -18,21 +18,20 @@ type NumericFormatProps = React.InputHTMLAttributes<HTMLInputElement> & {
 export type FieldCurrencyProps = NumericFormatProps & {
   name: string
   /** name is applied if id is not provided */
-  id?: string 
-  /** e.g. { currencies: { nzd: { symbol: '$', digits: 2 } } } (check out the nitro example for more info) */
-  config: {
-    currencies: { [key: string]: { symbol: string, digits: number } }, 
-    countries: { [key: string]: { numberFormats: { currency: string } } } 
-  }
+  id?: string
   /** currency iso, e.g. 'nzd' */
   currency: string
+  /** override the default currencies array used to lookup currency symbol and digits, e.g. {nzd: { symbol: '$', digits: 2 }} */
+  currencies?: { [key: string]: { symbol: string, digits: number } }, 
+  /** override the default CLDR country currency format, e.g. '¤#,##0.00' */
+  format?: string, 
   onChange?: (event: { target: { name: string, value: string|number|null } }) => void
   /** value should be in cents */
   value?: string|number|null
   defaultValue?: number | string | null
 }
 
-export function FieldCurrency({ config, currency='nzd', onChange, value, defaultValue, ...props }: FieldCurrencyProps) {
+export function FieldCurrency({ currency='nzd', currencies, format, onChange, value, defaultValue, ...props }: FieldCurrencyProps) {
   const [dontFix, setDontFix] = useState(false)
   const [settings, setSettings] = useState(() => getCurrencySettings(currency))
   const [dollars, setDollars] = useState(() => toDollars(value, true, settings))
@@ -61,7 +60,7 @@ export function FieldCurrency({ config, currency='nzd', onChange, value, default
 
   useEffect(() => {
     // Get the prefix content width
-    setPrefixWidth(settings.prefix == '$' ? getPrefixWidth(settings.prefix, 1) : 0)
+    setPrefixWidth(settings.prefix ? getPrefixWidth(settings.prefix, 1) : 0)
   }, [settings.prefix])
 
   function toCents(value?: string|number|null) {
@@ -95,29 +94,33 @@ export function FieldCurrency({ config, currency='nzd', onChange, value, default
       prefix?: string,            // e.g. '$'
       suffix?: string             // e.g. ''
     } = { currency }
-    const { symbol, digits } = config.currencies[currency]
-    let format = config.countries['nz'].numberFormats.currency
+
+    let _format = format || defaultFormat
+    const _currencies = currencies ?? defaultCurrencies
+    const currencyObject = _currencies[currency as keyof typeof _currencies]
+    const symbol = currencyObject ? currencyObject.symbol : ''
+    const digits = currencyObject ? currencyObject.digits : 2
 
     // Check for currency symbol (¤) and determine its position
-    if (format.indexOf('¤') !== -1) {
-      const position = format.indexOf('¤') === 0 ? 'prefix' : 'suffix'
+    if (_format.indexOf('¤') !== -1) {
+      const position = _format.indexOf('¤') === 0 ? 'prefix' : 'suffix'
       output[position] = symbol
-      format = format.replace('¤', '')
+      _format = _format.replace('¤', '')
     }
 
     // Find and set the thousands separator
-    const thousandMatch = format.match(/[^0-9#]/)
+    const thousandMatch = _format.match(/[^0-9#]/)
     if (thousandMatch) output.thousandSeparator = thousandMatch[0]
 
     // Find and set the decimal separator and fraction digits
-    const decimalMatch = format.match(/0[^0-9]/)
+    const decimalMatch = _format.match(/0[^0-9]/)
     if (decimalMatch) {
       output.decimalSeparator = decimalMatch[0].slice(1)
       if (typeof digits !== 'undefined') {
         output.minDecimals = digits
         output.maxDecimals = digits
       } else {
-        const fractionDigits = format.split(output.decimalSeparator)[1]
+        const fractionDigits = _format.split(output.decimalSeparator)[1]
         if (fractionDigits) {
           output.minDecimals = fractionDigits.length 
           output.maxDecimals = fractionDigits.length
@@ -156,3 +159,14 @@ export function FieldCurrency({ config, currency='nzd', onChange, value, default
     </div>
   )
 }
+
+const defaultCurrencies = {
+  nzd: { symbol: '$', digits: 2 },
+  aud: { symbol: '$', digits: 2 },
+  usd: { symbol: '$', digits: 2 },
+  eur: { symbol: '€', digits: 2 },
+  gbp: { symbol: '£', digits: 2 },
+  btc: { symbol: '₿', digits: 8 },
+}
+
+const defaultFormat = '¤#,##0.00'

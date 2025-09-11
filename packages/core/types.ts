@@ -3,8 +3,6 @@
 type InjectedConfig = {
   awsUrl?: string
   clientUrl: string
-  countries: { [key: string]: { name: string, numberFormats: { currency: string } } } // for input-currency.tsx
-  currencies: { [key: string]: { name: string, symbol: string, digits: number } } // for input-currency.tsx
   env: string
   googleMapsApiKey?: string
   isDemo: boolean // implicitly defined by webpack

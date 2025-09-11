@@ -5,11 +5,12 @@
 import { injectedConfig } from 'nitro-web'
 import { Styleguide, NotFound } from 'nitro-web'
 import { Button } from './element'
+import { currencies } from '../../server/constants'
 
 // Styleguide page
 export const StyleguidePage = () => {
   return (
-    <Styleguide elements={{ Button: Button }}>
+    <Styleguide elements={{ Button: Button }} currencies={currencies}>
       <div>
         <h3 className="h3">Custom Buttons</h3>
         <div className="flex flex-wrap gap-x-6 gap-y-4">

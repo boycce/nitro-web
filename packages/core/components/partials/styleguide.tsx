@@ -18,6 +18,7 @@ type StyleguideProps = {
   className?: string
   elements?: { Button?: typeof ButtonNitro }
   children?: React.ReactNode
+  currencies?: { [key: string]: { name: string, symbol: string, digits: number } }
 }
 
 type QuoteExample = {
@@ -29,7 +30,7 @@ type QuoteExample = {
   status: string
 }
 
-export function Styleguide({ className, elements, children }: StyleguideProps) {
+export function Styleguide({ className, elements, children, currencies }: StyleguideProps) {
   const Button = elements?.Button || ButtonNitro
   const [, setStore] = useTracked()
   const [customerSearch, setCustomerSearch] = useState('')
@@ -40,7 +41,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
     brandColor: '#F3CA5F',
     colorsMulti: ['blue', 'green'],
     country: 'nz',
-    currency: 'nzd', // can be commented too
+    currency: 'nzd',
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
     'date-time': Date.now(),
@@ -351,7 +352,7 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
             name="country" 
             mode="country"
             state={state} 
-            options={useMemo(() => getCountryOptions(injectedConfig.countries), [])} 
+            options={useMemo(() => [{ value: 'nz', label: 'New Zealand' }, { value: 'au', label: 'Australia' }], [])} 
             onChange={(e) => onChange(setState, e)}
           />
         </div>
@@ -384,11 +385,11 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
           />
         </div>
         <div>
-          <label for="currency">Currencies (Error)</label>
+          <label for="currency">Currencies</label>
           <Select 
             name="currency"
             state={state} 
-            options={useMemo(() => getCurrencyOptions(injectedConfig.currencies), [])} 
+            options={useMemo(() => (currencies ? getCurrencyOptions(currencies) : [{ value: 'nzd', label: 'New Zealand Dollar' }, { value: 'aud', label: 'Australian Dollar' }]), [])} 
             onChange={(e) => onChange(setState, e)}
           />
         </div>
@@ -433,8 +434,12 @@ export function Styleguide({ className, elements, children }: StyleguideProps) {
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
-          <Field name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(setState, e)} 
-            config={injectedConfig} />
+          <Field 
+            name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(setState, e)} 
+            // Example of using a custom format and currencies, e.g. 
+            format={'¤#,##0.00'} 
+            currencies={currencies} 
+          />
         </div>
       </div>
 
