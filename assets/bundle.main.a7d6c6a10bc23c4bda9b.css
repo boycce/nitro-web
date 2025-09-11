@@ -1121,6 +1121,9 @@ label, .label {
 .ml-\[12px\] {
   margin-left: 12px;
 }
+.ml-\[2px\] {
+  margin-left: 2px;
+}
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -2621,6 +2624,24 @@ label, .label {
 /* ---- Misc ------------------------- */
 .__PrivateStripeElementLoader {
   display: none !important;
+}
+/* ---- Animation ------------------------- */
+@-webkit-keyframes dots {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}
+@keyframes dots {
+  0%, 20% { content: ""; }
+  40% { content: "."; }
+  60% { content: ".."; }
+  80%, 100% { content: "..."; }
+}
+.loading-dots::after {
+  content: "";
+  -webkit-animation: dots 2s steps(1, end) infinite;
+          animation: dots 2s steps(1, end) infinite;
 }
 /* ---- Font Inter ------------ */
 /* https://gwfh.mranftl.com/fonts/inter?subsets=latin */
