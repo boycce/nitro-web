@@ -121,14 +121,6 @@ export function Table<T extends TableRow>({
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
 
-  if (isLoading) return (
-    <div class='relative w-full h-full flex justify-center items-center'>
-      <div class='relative'>
-        Loading<span className="absolute ml-[2px] loading-dots" />
-      </div>
-    </div>
-  )
-
   return (
     <div 
       style={{ marginTop: -rowGap }}
@@ -297,11 +289,12 @@ export function Table<T extends TableRow>({
                   >
                     <div
                       className={twMerge(
-                        'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
+                        'absolute top-0 h-full flex items-center justify-center text-sm',
+                        isLoading ? '' : 'text-gray-500',
                         col.innerClassName
                       )}
                     >
-                      { j == 0 && 'No records found.' }
+                      { j == 0 && (isLoading ? <>Loading<span className="relative ml-[2px] loading-dots" /></> : 'No records found.') }
                     </div>
                   </div>
                 )

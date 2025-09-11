@@ -506,6 +506,15 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           className="mb-6"
         />
         <Table
+          rows={[]}
+          columns={thead}
+          rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+          generateCheckboxActions={generateCheckboxActions}
+          generateTd={generateTd}
+          className="mb-6"
+          isLoading={true}
+        />
+        <Table
           rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}
           columns={thead}
           rowLinesMax={1}
