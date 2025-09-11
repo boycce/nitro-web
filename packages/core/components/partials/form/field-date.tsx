@@ -2,7 +2,7 @@
 import { format, isValid, parse } from 'date-fns'
 import { getPrefixWidth } from 'nitro-web/util'
 import { Calendar, Dropdown } from 'nitro-web'
-import { dayButtonClassName } from '../element/calendar'
+import { dayButtonClassName, DayPickerProps } from '../element/calendar'
 
 type Mode = 'single' | 'multiple' | 'range'
 type DropdownRef = {
@@ -26,6 +26,8 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
   Icon?: React.ReactNode
   /** direction of the dropdown */
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
+  /** Calendar props */
+  DayPickerProps?: DayPickerProps
 }
 
 // An array is returned for mode = 'multiple' or 'range'
@@ -54,6 +56,7 @@ export function FieldDate({
   prefix = '',
   showTime,
   value: valueProp,
+  DayPickerProps,
   ...props
 }: FieldDateProps) {
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
@@ -146,10 +149,11 @@ export function FieldDate({
         <div className="flex">
           <Calendar 
             // Calendar actually accepts an array of dates, but the type is not typed correctly
-            {...{ mode: mode, value: dates as any, numberOfMonths: numberOfMonths, month: month }} 
+            {...{ mode: mode, value: dates as any, numberOfMonths: numberOfMonths, month: month }}
+            {...DayPickerProps}
             preserveTime={!!showTime} 
             onChange={onCalendarChange} 
-            className="pt-1 pb-2  px-3" 
+            className="pt-1 pb-2 px-3" 
           />
           {!!showTime && mode == 'single' && <TimePicker date={dates?.[0]} onChange={onCalendarChange} />}
         </div>

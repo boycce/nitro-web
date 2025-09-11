@@ -1,4 +1,4 @@
-import { DayPicker, getDefaultClassNames } from 'react-day-picker'
+import { DayPicker, getDefaultClassNames, DayPickerProps as DayPickerPropsBase } from 'react-day-picker'
 import { isValid } from 'date-fns'
 import 'react-day-picker/style.css'
 import { IsFirstRender } from 'nitro-web'
@@ -11,8 +11,10 @@ type ModeSelection<T extends Mode> = (
   : T extends 'multiple' ? Date[]
   : { from?: Date; to?: Date }
 )
+export type DayPickerProps = Omit<DayPickerPropsBase, 
+  'mode' | 'selected' | 'onSelect' | 'modifiersClassNames' | 'classNames' | 'numberOfMonths'  | 'month' | 'onMonthChange'>
 
-export type CalendarProps = {
+export type CalendarProps = DayPickerProps & {
   mode?: Mode
   onChange?: (mode: Mode, value: null|number|(null|number)[]) => void
   value?: null|number|string|(null|number|string)[]
@@ -22,7 +24,8 @@ export type CalendarProps = {
   preserveTime?: boolean // just for single mode
 }
 
-export function Calendar({ mode='single', onChange, value, numberOfMonths, month: monthProp, className, preserveTime }: CalendarProps) {
+export function Calendar({ mode='single', onChange, value, numberOfMonths, month: monthProp, className, preserveTime, 
+  ...props }: CalendarProps) {
   const isFirstRender = IsFirstRender()
   const isRange = mode == 'range'
 
@@ -113,11 +116,11 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
     <div>
       {
         mode === 'single' ? (
-          <DayPicker mode="single" selected={dates[0]} {...common} className={className} />
+          <DayPicker  {...props} {...common} mode="single" selected={dates[0]} className={className} />
         ) : mode === 'range' ? (
-          <DayPicker mode="range" selected={{ from: dates[0], to: dates[1] }} {...common} className={className} />
+          <DayPicker {...props} {...common} mode="range" selected={{ from: dates[0], to: dates[1] }} className={className} />
         ) : (
-          <DayPicker mode="multiple" selected={dates.filter((d) => !!d)} {...common} className={className} />
+          <DayPicker {...props} {...common} mode="multiple" selected={dates.filter((d) => !!d)} className={className} />
         )
       }
     </div>

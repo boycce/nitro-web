@@ -450,8 +450,18 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(setState, e)} />
         </div>
         <div>
-          <label for="date-range">Date range with prefix</label>
-          <Field name="date-range" type="date" mode="range" prefix="Date:" state={state} onChange={(e) => onChange(setState, e)} />
+          <label for="date-range">Date range (with prefix & disabled days)</label>
+          <Field 
+            name="date-range" 
+            type="date" 
+            mode="range" 
+            prefix="Date:" 
+            state={state} 
+            onChange={(e) => onChange(setState, e)} 
+            DayPickerProps={{
+              disabled: { after: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) }
+            }} 
+          />
         </div>
         <div>
           <label for="date">Date multi-select (right aligned)</label>
