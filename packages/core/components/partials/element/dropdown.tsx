@@ -22,6 +22,7 @@ type DropdownProps = {
   menuToggles?: boolean
   /** The minimum width of the menu **/
   minWidth?: number | string
+  maxHeight?: number | string
   toggleCallback?: (isActive: boolean) => void
 }
 
@@ -39,6 +40,7 @@ export const Dropdown = forwardRef(function Dropdown({
   menuIsOpen, 
   menuToggles=true,
   minWidth,
+  maxHeight,
   toggleCallback,
 }: DropdownProps, ref) {
   // https://letsbuildui.dev/articles/building-a-dropdown-menu-component-with-react-hooks
@@ -156,7 +158,11 @@ export const Dropdown = forwardRef(function Dropdown({
         })
       }
       <ul
-        style={{ minWidth }}
+        style={{ 
+          minWidth: minWidth, 
+          maxHeight: maxHeight, 
+          overflow: maxHeight ? 'auto' : 'inherit', 
+        }}
         class={
           twMerge(`${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName||''}`)}
       >
