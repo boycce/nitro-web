@@ -161,7 +161,7 @@ export const Dropdown = forwardRef(function Dropdown({
         style={{ 
           minWidth: minWidth, 
           maxHeight: maxHeight, 
-          overflow: maxHeight ? 'auto' : 'inherit', 
+          ...(maxHeight ? { overflow: 'auto' } : {}),
         }}
         class={
           twMerge(`${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName||''}`)}
