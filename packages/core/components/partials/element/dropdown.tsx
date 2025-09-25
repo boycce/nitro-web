@@ -11,7 +11,14 @@ type DropdownProps = {
   css?: string
   /** The direction of the menu **/
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
-  options?: { label: string|React.ReactNode, onClick?: Function, isSelected?: boolean, icon?: React.ReactNode, className?: string }[]
+  options?: { 
+    label: string|React.ReactNode,
+    onClick?: Function,
+    isSelected?: boolean,
+    icon?: React.ReactNode,
+    iconLeft?: React.ReactNode,
+    className?: string 
+  }[]
   /** Whether the dropdown is hoverable **/
   isHoverable?: boolean
   /** The content to render inside the top of the dropdown **/
@@ -176,6 +183,7 @@ export const Dropdown = forwardRef(function Dropdown({
                 className={twMerge(`${optionStyle} ${option.className} ${menuOptionClassName}`)}
                 onClick={(e: React.MouseEvent) => onClick(option, e)}
               >
+                { !!option.iconLeft && option.iconLeft }
                 <span class="flex-auto">{option.label}</span>
                 { !!option.icon && option.icon }
                 { option.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" /> }
