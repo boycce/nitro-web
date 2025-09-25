@@ -124,7 +124,7 @@ export function Table<T extends TableRow>({
   return (
     <div 
       style={{ marginTop: -rowGap }}
-      className={twMerge('overflow-x-auto thin-scrollbar', className)}
+      className={twMerge('overflow-x-auto thin-scrollbar min-h-full', className)}
     >
       <div 
         style={{ borderSpacing: `0 ${rowGap}px` }}
