@@ -14,6 +14,7 @@ export interface TableColumn {
   /** Use if the value is different from the sortBy */
   sortByValue?: string 
   align?: 'left' | 'center' | 'right'
+  isHidden?: boolean 
 }
 
 export type TableRow = {
@@ -83,6 +84,7 @@ export function Table<T extends TableRow>({
       rowLinesMax: typeof col.rowLinesMax != 'undefined' ? col.rowLinesMax : rowLinesMax,
       sortByValue: col.sortByValue || col.value,
       align: col.align || 'left',
+      isHidden: col.isHidden ?? false,
     }))
     return cols
   }, [columnsProp])
@@ -139,6 +141,8 @@ export function Table<T extends TableRow>({
               const sideColorPadding = sideColor && rows.length > 0 ? sideColor.width + 5 : 0
               const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
               const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+
+              if(col.isHidden) return <></>
               return (
                 <div
                   key={j}
@@ -219,6 +223,8 @@ export function Table<T extends TableRow>({
                     const sideColor = j == 0 && rowSideColor ? rowSideColor(row) : undefined
                     const pl = j == 0 ? columnPaddingX : columnGap
                     const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+
+                    if(col.isHidden) return <></>
                     return (
                       <div
                         key={j}
