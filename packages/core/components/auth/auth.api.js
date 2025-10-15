@@ -309,6 +309,7 @@ export async function getStore(user) {
 
 export async function signinAndGetStore(user, isDesktop, getStore) {
   if (user.loginActive === false) throw 'This user is not available.'
+  if (!getStore) throw new Error('Please provide a getStore function')
   user.desktop = isDesktop
 
   const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
