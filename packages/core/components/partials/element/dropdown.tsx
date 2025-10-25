@@ -17,6 +17,8 @@ type DropdownProps = {
     isSelected?: boolean,
     icon?: React.ReactNode,
     iconLeft?: React.ReactNode,
+    /** Prevent the dropdown from closing when the option is clicked */
+    preventCloseOnClick?: boolean,
     className?: string 
   }[]
   /** Whether the dropdown is hoverable **/
@@ -25,6 +27,7 @@ type DropdownProps = {
   menuContent?: React.ReactNode
   menuClassName?: string
   menuOptionClassName?: string
+  /** force open the menu */
   menuIsOpen?: boolean
   menuToggles?: boolean
   /** The minimum width of the menu **/
@@ -137,9 +140,9 @@ export const Dropdown = forwardRef(function Dropdown({
     if (!isHoverable && !menuIsOpen && ((menuToggles || e.key) || !isActive)) setIsActive(!isActive)
   }
 
-  function onClick(option: { onClick?: Function }, e: React.MouseEvent) {
+  function onClick(option: { onClick?: Function, preventCloseOnClick?: boolean }, e: React.MouseEvent) {
     if (option.onClick) option.onClick(e)
-    if (!menuIsOpen) setIsActive(!isActive)
+    if (!menuIsOpen && !option?.preventCloseOnClick) setIsActive(!isActive)
   }
 
   return (

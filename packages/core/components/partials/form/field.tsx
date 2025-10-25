@@ -7,7 +7,7 @@ import { Errors, type Error } from 'nitro-web/types'
 import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
 import { memo } from 'react'
 
-type FieldType = 'text' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
@@ -35,7 +35,7 @@ type IconWrapperProps = {
 }
 // Discriminated union (https://stackoverflow.com/a/77351290/1900648)
 export type FieldProps = (
-  | ({ type?: 'text' | 'password' | 'email' | 'filter' | 'search' } & InputProps & FieldExtraProps)
+  | ({ type?: 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' } & InputProps & FieldExtraProps)
   | ({ type: 'textarea' } & TextareaProps & FieldExtraProps)
   | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
@@ -67,7 +67,7 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
   
   // Input type
   const [inputType, setInputType] = useState(() => { // eslint-disable-line
-    return type == 'password' ? 'password' : (type == 'textarea' ? 'textarea' : 'text')
+    return type == 'password' ? 'password' : (type == 'textarea' ? 'textarea' : (type == 'number' ? 'number' : 'text'))
   })
   
   // Value: Input is always controlled if state is passed in
@@ -76,7 +76,7 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
     const v = deepFind(state, props.name) as string | undefined
     value = v ?? ''
   }
-
+  
   // Icon
   if (type == 'password') {
     Icon = <IconWrapper 
@@ -104,7 +104,7 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
   const commonProps = { id: id, value: value, className: inputClassName }
 
   // Type has to be referenced as props.type for TS to be happy
-  if (!type || type == 'text' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {
+  if (!type || type == 'text' || type == 'number' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {
     return (
       <FieldContainer error={error} className={props.className}>
         {Icon}<input {...props} {...commonProps} type={inputType} />

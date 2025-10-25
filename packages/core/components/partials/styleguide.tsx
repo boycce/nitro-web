@@ -413,6 +413,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <Field name="password" type="password"/>
         </div>
         <div>
+          <label for="search3number">Number</label>
+          <Field name="number" id="search3number" type="number" placeholder="Number..." />
+        </div>
+        <div>
           <label for="search3">Search</label>
           <Field name="search" id="search3" type="search" placeholder="Search..." />
         </div>

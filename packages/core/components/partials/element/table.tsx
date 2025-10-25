@@ -1,4 +1,4 @@
-import { JSX, useState, useCallback } from 'react'
+import { JSX, useState, useCallback, Fragment } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { Checkbox, queryObject, queryString, twMerge } from 'nitro-web'
 
@@ -142,7 +142,7 @@ export function Table<T extends TableRow>({
               const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
               const pr = j == columns.length - 1 ? columnPaddingX : columnGap
 
-              if(col.isHidden) return <></>
+              if (col.isHidden) return <Fragment key={j} />
               return (
                 <div
                   key={j}
@@ -213,6 +213,7 @@ export function Table<T extends TableRow>({
             return (
               <div 
                 key={`${row._id}-${i}`}
+                id={`row-${row._id}-${i}`}
                 onClick={rowOnClick ? () => rowOnClick(row) : undefined}
                 className={twMerge(
                   `table-row relative ${rowOnClick ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`, rowClassName
@@ -224,7 +225,7 @@ export function Table<T extends TableRow>({
                     const pl = j == 0 ? columnPaddingX : columnGap
                     const pr = j == columns.length - 1 ? columnPaddingX : columnGap
 
-                    if(col.isHidden) return <></>
+                    if (col.isHidden) return <Fragment key={j} />
                     return (
                       <div
                         key={j}
