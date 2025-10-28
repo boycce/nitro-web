@@ -57,7 +57,6 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange, va
     }
   }, [value])
 
-
   useEffect(() => {
     // Get the prefix content width
     setPrefixWidth(settings.prefix ? getPrefixWidth(settings.prefix, 1) : 0)

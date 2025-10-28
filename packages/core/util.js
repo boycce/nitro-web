@@ -450,35 +450,51 @@ export function deepFind(obj, path) {
  * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
  * @returns {T}
  */
-export function deepSave(obj, path, value) {
+export function deepSet(obj, path, value) {
   if (obj === null || obj === undefined) return obj
+  return deepSetWithInfo(obj, path, value).obj
+}
 
+/**
+ * Sets a deeply nested value without mutating the original object.
+ * @template T
+ * @param {T} _obj - The target object or array.
+ * @param {string} path - Dot-separated path to the nested property.
+ * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
+ * @returns {{ obj: T, parent: T, fieldName: string }}
+ */
+export function deepSetWithInfo(_obj, path, value) {
   /** @type {any} */
-  let clone = Array.isArray(obj) ? [...obj] : { ...obj }
-  let chunks = (path || '').split('.')
-  let target = clone
+  let obj = Array.isArray(_obj) ? [..._obj] : { ..._obj }
+  let parent = obj
+  const chunks = (path || '').split('.')
 
   for (let i = 0, l = chunks.length; i < l; i++) {
     const key = chunks[i]
     const isLast = i === l - 1
 
     if (isLast) {
-      target[key] = typeof value === 'function' ? value(target[key]) : value
+      // was obj for onChange()
+      parent[key] = typeof value === 'function' ? value(parent[key]) : value 
     } else {
       const nextIsArray = /^\d+$/.test(chunks[i + 1])
-      const current = target[key]
+      const current = parent[key]
 
       // If the next level doesn't exist, create an empty array/object
       const parentCopy = nextIsArray
         ? Array.isArray(current) ? [...current] : []
         : isObject(current) ? { ...current } : {}
 
-      target = target[key] = parentCopy
+      parent = parent[key] = parentCopy
     }
   }
-
-  return clone
+  return {
+    obj: obj,
+    parent: parent,
+    fieldName: chunks.pop() ?? '',
+  }
 }
+
 
 /**
  * Iterates over an object or array
@@ -1142,7 +1158,8 @@ export function omit (obj, fields) {
  * 
  * @template T
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
+ * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue 
+ *   - The input/select change event or path/value pair to update the state with
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  * 
@@ -1153,14 +1170,14 @@ export function omit (obj, fields) {
 export function onChange (setState, eventOrPathValue, beforeSetState) {
   /** @type {unknown|function} */
   let value
-  /** @type {string[]} */
-  let chunks = []
+  /** @type {string} */
+  let path = ''
   /** @type {boolean} */
   let hasFiles
   
   if (typeof eventOrPathValue === 'object' && 'target' in eventOrPathValue) {
     const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target) // we need to assume this is an input
-    chunks = (element.name || element.id).split('.')
+    path = (element.name || element.id)
     hasFiles = !!element.files
     value = element.files
       ? element.files[0]
@@ -1171,7 +1188,7 @@ export function onChange (setState, eventOrPathValue, beforeSetState) {
           : element.value
 
   } else if (Array.isArray(eventOrPathValue)) {
-    chunks = eventOrPathValue[0].split('.')
+    path = eventOrPathValue[0]
     value = eventOrPathValue[1]
   }
   
@@ -1184,20 +1201,9 @@ export function onChange (setState, eventOrPathValue, beforeSetState) {
   return new Promise((resolve) => {
     setState((state) => {
       /** @type {{[key: string]: any}} */
-      const newState = { ...state, ...(hasFiles ? { hasFiles } : {}) }
-      let target = newState
-      for (var i = 0, l = chunks.length; i < l; i++) {
-        if (l === i + 1) { // Last
-          target[chunks[i]] = typeof value === 'function' ? value(state) : value
-          // console.log(target)
-        } else {
-          let isArray = chunks[i + 1].match(/^[0-9]+$/)
-          let parentCopy = isArray ? [...(target[chunks[i]] || [])] : { ...(target[chunks[i]] || {}) }
-          target = target[chunks[i]] = parentCopy
-        }
-      }
+      const { obj: newState, parent, fieldName } = deepSetWithInfo({ ...state, ...(hasFiles ? { hasFiles } : {}) }, path, value)
       if (beforeSetState) {
-        beforeSetState({ newState: newState, fieldName: chunks[i], parent: target })
+        beforeSetState({ newState, fieldName, parent })
       }
       resolve(/** @type {T} */(newState))
       return /** @type {T} */(newState)
