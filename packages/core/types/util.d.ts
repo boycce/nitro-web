@@ -171,7 +171,20 @@ export function deepFind(obj: object | any[], path: string): unknown;
  * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
  * @returns {T}
  */
-export function deepSave<T>(obj: T, path: string, value: unknown | Function): T;
+export function deepSet<T>(obj: T, path: string, value: unknown | Function): T;
+/**
+ * Sets a deeply nested value without mutating the original object.
+ * @template T
+ * @param {T} _obj - The target object or array.
+ * @param {string} path - Dot-separated path to the nested property.
+ * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
+ * @returns {{ obj: T, parent: T, fieldName: string }}
+ */
+export function deepSetWithInfo<T>(_obj: T, path: string, value: unknown | Function): {
+    obj: T;
+    parent: T;
+    fieldName: string;
+};
 /**
  * Iterates over an object or array
  * @param {{[key: string]: any}|[]|null} obj
@@ -488,6 +501,7 @@ export function omit(obj: {
  * @template T
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
  * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
+ *   - The input/select change event or path/value pair to update the state with
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  *
