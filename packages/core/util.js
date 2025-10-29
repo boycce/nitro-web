@@ -495,7 +495,6 @@ export function deepSetWithInfo(_obj, path, value) {
   }
 }
 
-
 /**
  * Iterates over an object or array
  * @param {{[key: string]: any}|[]|null} obj

@@ -46,7 +46,7 @@ export function Button({
     'black': 'bg-black hover:bg-gray-800 ring-transparent text-white [&>.loader]:border-white',
     'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
     'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black', // maybe change to text-foreground
-    'clear': 'hover:bg-gray-50 ring-gray-300 text-foreground [&>.loader]:border-foreground !shadow-none',
+    'clear': 'hover:bg-gray-50 ring-gray-300 hover:text-foreground [&>.loader]:border-foreground !shadow-none',
   }
   
   // Button sizes (px is better for height consistency)
