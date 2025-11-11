@@ -224,7 +224,7 @@ function Option(props: OptionProps) {
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronsUpDownIcon size={15} className="text-input-icon -my-0.5 -mx-[1px]" />
+      <ChevronsUpDownIcon size={15} className="text-[#b6b8be] text-input-icon -my-0.5 -mx-[1px]" />
     </components.DropdownIndicator>
   )
 }
