@@ -1322,6 +1322,9 @@ label, .label {
 .h-\[1rem\] {
   height: 1rem;
 }
+.h-\[250px\] {
+  height: 250px;
+}
 .h-\[25px\] {
   height: 25px;
 }
@@ -1778,6 +1781,9 @@ label, .label {
 .border-l {
   border-left-width: 1px;
 }
+.border-t {
+  border-top-width: 1px;
+}
 .border-t-0 {
   border-top-width: 0px;
 }
@@ -2095,6 +2101,10 @@ label, .label {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+.py-\[1px\] {
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 .py-\[5px\] {
   padding-top: 5px;
@@ -2643,6 +2653,16 @@ label, .label {
   -webkit-animation: dots 2s steps(1, end) infinite;
           animation: dots 2s steps(1, end) infinite;
 }
+/* ---- Scrollbar -------------------- */
+.sm-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.sm-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.3);
+}
+.sm-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+}
 /* ---- Font Inter ------------ */
 /* https://gwfh.mranftl.com/fonts/inter?subsets=latin */
 /* inter-300 - latin */
@@ -2773,6 +2793,9 @@ label, .label {
 }
 .first\:border-l:first-child {
   border-left-width: 1px;
+}
+.first\:border-l-0:first-child {
+  border-left-width: 0px;
 }
 .last\:mb-0:last-child {
   margin-bottom: 0px;
