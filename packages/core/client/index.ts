@@ -45,6 +45,7 @@ export { Field, isFieldCached, type FieldProps } from '../components/partials/fo
 export { FieldColor, type FieldColorProps } from '../components/partials/form/field-color'
 export { FieldCurrency, type FieldCurrencyProps } from '../components/partials/form/field-currency'
 export { FieldDate, type FieldDateProps } from '../components/partials/form/field-date'
+export { FieldTime, type FieldTimeProps } from '../components/partials/form/field-time'
 export { Location } from '../components/partials/form/location'
 export { Select, getSelectStyle, type SelectProps } from '../components/partials/form/select'
 

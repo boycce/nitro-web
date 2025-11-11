@@ -2,7 +2,8 @@
 import { format, isValid, parse } from 'date-fns'
 import { getPrefixWidth } from 'nitro-web/util'
 import { Calendar, Dropdown } from 'nitro-web'
-import { dayButtonClassName, DayPickerProps } from '../element/calendar'
+import { DayPickerProps } from '../element/calendar'
+import { TimePicker } from './field-time'
 
 type Mode = 'single' | 'multiple' | 'range'
 type DropdownRef = {
@@ -42,11 +43,6 @@ export type FieldDateProps = (
     })
 )
 
-type TimePickerProps = {
-  date: Date|null
-  onChange: (mode: Mode, value: number|null) => void
-}
-
 export function FieldDate({
   dir = 'bottom-left',
   Icon,
@@ -59,6 +55,8 @@ export function FieldDate({
   DayPickerProps,
   ...props
 }: FieldDateProps) {
+  // Currently this displays the dates in local timezone and saves in utc. We should allow the user to display the dates in a 
+  // different timezone.
   const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
@@ -72,7 +70,7 @@ export function FieldDate({
   const onChange = onChangeProp ?? ((e: { target: { name: string, value: any } }) => setInternalValue(e.target.value))
     
   // Convert the value to an array of valid* dates
-  const dates = useMemo(() => {
+  const validDates = useMemo(() => {
     const arrOfNumbers = typeof value === 'string' 
       ? value.split(/\s*,\s*/g).map(o => parseFloat(o)) 
       : Array.isArray(value) ? value : [value]
@@ -81,19 +79,19 @@ export function FieldDate({
   }, [value])
 
   // Hold the input value in state
-  const [inputValue, setInputValue] = useState(() => getInputValue(dates))
+  const [inputValue, setInputValue] = useState(() => getInputValue(validDates))
 
   // Update the date's inputValue (text) when the value changes outside of the component
   useEffect(() => {
-    if (new Date().getTime() > lastUpdated + 100) setInputValue(getInputValue(dates))
-  }, [dates])
+    if (new Date().getTime() > lastUpdated + 100) setInputValue(getInputValue(validDates))
+  }, [validDates])
 
   // Get the prefix content width
   useEffect(() => {
     setPrefixWidth(getPrefixWidth(prefix, 4))
   }, [prefix])
 
-  function onCalendarChange(mode: Mode, value: null|number|(null|number)[]) {
+  function onCalendarChange(value: null|number|(null|number)[]) {
     if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
     setInputValue(getInputValue(value))
     // Update the value
@@ -102,6 +100,7 @@ export function FieldDate({
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
+    // Calls onChange (should update state, thus updating the value) with "raw" values
     setInputValue(e.target.value) // keep the input value in sync
 
     let split = e.target.value.split(/-|,/).map(o => {
@@ -132,7 +131,7 @@ export function FieldDate({
     const _dates = Array.isArray(value) ? value : [value]
     return _dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
   }
-
+  
   function getOutputValue(value: Date|number|null|(Date|number|null)[]): any {
     // console.log(value)
     return value
@@ -149,13 +148,13 @@ export function FieldDate({
         <div className="flex">
           <Calendar 
             // Calendar actually accepts an array of dates, but the type is not typed correctly
-            {...{ mode: mode, value: dates as any, numberOfMonths: numberOfMonths, month: month }}
+            {...{ mode: mode, value: validDates as any, numberOfMonths: numberOfMonths, month: month }}
             {...DayPickerProps}
             preserveTime={!!showTime} 
             onChange={onCalendarChange} 
             className="pt-1 pb-2 px-3" 
           />
-          {!!showTime && mode == 'single' && <TimePicker date={dates?.[0]} onChange={onCalendarChange} />}
+          {!!showTime && mode == 'single' && <TimePicker date={validDates?.[0] ?? undefined} onChange={onCalendarChange} />}
         </div>
       }
       dir={dir}
@@ -175,7 +174,7 @@ export function FieldDate({
           id={id}
           autoComplete="off" 
           className={(props.className||'')}// + props.className?.includes('is-invalid') ? ' is-invalid' : ''} 
-          onBlur={() => setInputValue(getInputValue(dates))}
+          onBlur={() => setInputValue(getInputValue(validDates))} // onChange should of updated the value -> validValue by this point
           onChange={onInputChange}
           style={{ textIndent: prefixWidth + 'px' }}
           type="text"
@@ -183,74 +182,5 @@ export function FieldDate({
         />
       </div>
     </Dropdown>
-  )
-}
-
-function TimePicker({ date, onChange }: TimePickerProps) {
-  const lists = [
-    [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], // hours
-    [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55], // minutes
-    ['AM', 'PM'], // AM/PM
-  ]
-  
-  // Get current values from date or use defaults
-  const hour = date ? parseInt(format(date, 'h')) : undefined
-  const minute = date ? parseInt(format(date, 'm')) : undefined
-  const period = date ? format(date, 'a') : undefined
-  
-  const handleTimeChange = (type: 'hour' | 'minute' | 'period', value: string | number) => {
-    // Create a new date object from the current date or current time
-    const newDate = new Date(date || new Date())
-    
-    if (type === 'hour') {
-      // Parse the time with the new hour value
-      const timeString = `${value}:${format(newDate, 'mm')} ${format(newDate, 'a')}`
-      const updatedDate = parse(timeString, 'h:mm a', newDate)
-      newDate.setHours(updatedDate.getHours(), updatedDate.getMinutes())
-    } else if (type === 'minute') {
-      // Parse the time with the new minute value
-      const timeString = `${format(newDate, 'h')}:${value} ${format(newDate, 'a')}`
-      const updatedDate = parse(timeString, 'h:mm a', newDate)
-      newDate.setMinutes(updatedDate.getMinutes())
-    } else if (type === 'period') {
-      // Parse the time with the new period value
-      const timeString = `${format(newDate, 'h')}:${format(newDate, 'mm')} ${value}`
-      const updatedDate = parse(timeString, 'h:mm a', newDate)
-      newDate.setHours(updatedDate.getHours())
-    }
-    
-    onChange('single', newDate.getTime())
-  }
-
-  return (
-    lists.map((list, i) => {
-      const type = i === 0 ? 'hour' : i === 1 ? 'minute' : 'period'
-      const currentValue = i === 0 ? hour : i === 1 ? minute : period
-
-      return (
-        <div key={i} className="w-[60px] py-1 relative overflow-hidden hover:overflow-y-auto border-l border-gray-100">
-          <div className="w-[60px] absolute flex flex-col items-center">
-            {list.map(item => (
-              <div 
-                className="py-1 flex group cursor-pointer"
-                key={item}
-                onClick={() => handleTimeChange(type, item)}
-              >
-                <button 
-                  key={item}
-                  className={
-                    `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-gray-100 `
-                    + (item === currentValue ? '!bg-input-border-focus text-white' : '')
-                  }
-                  onClick={() => handleTimeChange(type, item)}
-                >
-                  {item.toString().padStart(2, '0').toLowerCase()}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-    })
   )
 }

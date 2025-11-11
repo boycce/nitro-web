@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // fill-current tw class for lucide icons (https://github.com/lucide-icons/lucide/discussions/458)
 import { css } from 'twin.macro'
-import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps } from 'nitro-web'
+import { FieldCurrency, FieldCurrencyProps, FieldColor, FieldColorProps, FieldDate, FieldDateProps, FieldTime, 
+  FieldTimeProps } from 'nitro-web'
 import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
 import { Errors, type Error } from 'nitro-web/types'
-import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon } from 'lucide-react'
+import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon } from 'lucide-react'
 import { memo } from 'react'
 
-type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color' | 'time'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
@@ -40,6 +41,8 @@ export type FieldProps = (
   | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
   | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
+  | ({ type: 'time' } & FieldTimeProps & FieldExtraProps)
+  // | ({ type: 'time2' } & FieldTimeProps2 & FieldExtraProps)
 )
 type IsFieldCachedProps = {
   name: string
@@ -95,6 +98,8 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <ColorSvg hex={value}/>} className="size-[17px]" />
   } else if (type == 'date') {
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-[14px] size-input-icon" />
+  } else if (type == 'time') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <ClockIcon />} className="size-[14px] size-input-icon" /> 
   } else if (icon) {
     Icon = <IconWrapper iconPos={iconPos} icon={icon} className="size-[14px] size-input-icon" />
   }
@@ -134,7 +139,20 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
         <FieldDate {...props} {...commonProps} Icon={Icon} />
       </FieldContainer>
     )
-  }
+  } else if (type == 'time') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        <FieldTime {...props} {...commonProps} Icon={Icon} />
+      </FieldContainer>
+    )
+  } 
+  // else if (type == 'time2') {
+  //   return (
+  //     <FieldContainer error={error} className={props.className}>
+  //       <FieldTime2 {...props} {...commonProps} Icon={Icon} />
+  //     </FieldContainer>
+  //   )
+  // }
 }
 
 function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {

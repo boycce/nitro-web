@@ -96,3 +96,15 @@
   content: "";
   animation: dots 2s steps(1, end) infinite;
 }
+
+/* ---- Scrollbar -------------------- */
+
+.sm-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.sm-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.3);
+}
+.sm-scrollbar::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.05);
+}

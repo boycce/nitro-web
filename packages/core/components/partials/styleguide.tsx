@@ -45,6 +45,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
     'date-time': Date.now(),
+    time: null,
     calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
     firstName: 'Bruce',
     tableFilter: '',
@@ -471,6 +472,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <label for="date">Date multi-select (right aligned)</label>
           <Field name="date" type="date" mode="multiple" state={state} onChange={(e) => onChange(setState, e)} dir="bottom-right" />
         </div>
+        <div>
+          <label for="time">Time</label>
+          <Field name="time" type="time" state={state} onChange={(e) => onChange(setState, e)}  />
+        </div>
       </div>
 
       <h2 class="h3">File Inputs & Calendar</h2>
@@ -482,7 +487,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         <div>
           <label for="calendar">Calendar</label>
           <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
-            onChange={(mode, value) => {
+            onChange={(value) => {
               onChange(setState, { target: { name: 'calendar', value: value } })
             }} 
           />

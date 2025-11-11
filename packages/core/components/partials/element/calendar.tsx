@@ -16,7 +16,7 @@ export type DayPickerProps = Omit<DayPickerPropsBase,
 
 export type CalendarProps = DayPickerProps & {
   mode?: Mode
-  onChange?: (mode: Mode, value: null|number|(null|number)[]) => void
+  onChange?: (value: null|number|(null|number)[]) => void
   value?: null|number|string|(null|number|string)[]
   numberOfMonths?: number
   month?: number // the value may be updated from an outside source, thus the month may have changed
@@ -48,17 +48,17 @@ export function Calendar({ mode='single', onChange, value, numberOfMonths, month
       case 'single': {
         const date = newDate as ModeSelection<'single'>
         preserveTimeFn(date)
-        onChange?.(mode, date?.getTime() ?? null)
+        onChange?.(date?.getTime() ?? null)
         break
       }
       case 'range': {
         const { from, to } = (newDate ?? {}) as ModeSelection<'range'>
-        onChange?.(mode, from ? [from.getTime() || null, to?.getTime() || null] : null)
+        onChange?.(from ? [from.getTime() || null, to?.getTime() || null] : null)
         break
       }
       case 'multiple': {
         const dates = (newDate as ModeSelection<'multiple'>)?.filter(Boolean) ?? []
-        onChange?.(mode, dates.map((d) => d.getTime()))
+        onChange?.(dates.map((d) => d.getTime()))
         break
       }
     }
