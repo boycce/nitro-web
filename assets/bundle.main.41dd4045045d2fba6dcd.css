@@ -2258,6 +2258,10 @@ label, .label {
   --tw-text-opacity: 1;
   color: rgb(31 31 31 / var(--tw-text-opacity, 1));
 }
+.text-\[\#b6b8be\] {
+  --tw-text-opacity: 1;
+  color: rgb(182 184 190 / var(--tw-text-opacity, 1));
+}
 .text-\[\#c6c8ce\] {
   --tw-text-opacity: 1;
   color: rgb(198 200 206 / var(--tw-text-opacity, 1));
