@@ -75,7 +75,7 @@ export function Table<T extends TableRow>({
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
   const _columnClassName = 'table-cell py-1 align-middle text-sm border-y border-border ' +
     'first:border-l last:border-r border-t-0 box-border'
-  const [now] = useState(new Date().getTime())
+  const [rand] = useState(() => new Date().getTime() + Math.random())
 
   const columns = useMemo(() => {
     const checkboxCol: TableColumn = { value: 'checkbox', label: '', disableSort: true }
@@ -126,7 +126,7 @@ export function Table<T extends TableRow>({
   return (
     <div 
       style={{ marginTop: -rowGap }}
-      className={twMerge('overflow-x-auto thin-scrollbar min-h-full', className)}
+      className={twMerge('overflow-x-auto thin-scrollbar', className)}
     >
       <div 
         style={{ borderSpacing: `0 ${rowGap}px` }}
@@ -172,7 +172,7 @@ export function Table<T extends TableRow>({
                         ? <>
                             <Checkbox 
                               size={checkboxSize}
-                              name={`checkbox-all-${now}`}
+                              name={`checkbox-all-${rand}`}
                               hitboxPadding={5}
                               className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
                               checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
