@@ -1323,7 +1323,7 @@ export function parseFilters(query, config) {
  *     sort: { createdAt: 1 },
  *   }
  */
-export function parseSortOptions(query, model, limit = 10, hasMore) {
+export function parseSortOptions(query, model, limit = 10, hasMore, isAll = false) {
   const page = parseInt(query.page || '') || 1
 
   // Validate sortBy value
@@ -1336,8 +1336,8 @@ export function parseSortOptions(query, model, limit = 10, hasMore) {
   const sort = sortBy === 'createdAt' && !query.sort ? -1 : (parseInt(query.sort || '') || 1)
 
   return {
-    limit: hasMore ? limit + 1 : limit,
-    skip: page > 1 ? (page - 1) * limit : undefined,
+    ...(!isAll ? { limit: hasMore ? limit + 1 : limit } : {}),
+    ...(!isAll ? {skip: page > 1 ? (page - 1) * limit : undefined} : {}),
     sort: {
       [sortBy]: sort,
       ...(sortBy !== 'createdAt' ? { createdAt: -1 } : {}),
