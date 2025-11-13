@@ -568,8 +568,7 @@ export function parseFilters(query: {
  *     sortBy: 'createdAt'
  *   }
  * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
- * @param {number | false} [limit=10] - if limit is false, exclude limit and skip to fetch regardless of pagination
- * @param {boolean} [hasMore] - returns an extra row to signal there are more pages
+ * @param {number} [limit=10] - if limit is falsy, exclude limit and skip to fetch regardless of pagination\
  * @example returned object (using the examples above):
  *   E.g. {
  *     limit: 10,
@@ -584,7 +583,7 @@ export function parseSortOptions(query: {
 }, model: {
     fieldsFlattened: object;
     name: string;
-}, limit?: number | false, hasMore?: boolean): {
+}, limit?: number, hasMore: any): {
     sort: {
         createdAt?: number;
     };
