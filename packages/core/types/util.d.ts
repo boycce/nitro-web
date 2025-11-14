@@ -139,6 +139,7 @@ export function date(date?: number | Date, format?: string, timezone?: string): 
  *     flush: () => ReturnType<T>
  * }}
  *
+ * @example const debounced = debounce(updatePosition, 100)
  * @see https://lodash.com/docs/4.17.15#debounce
  */
 export function debounce<T extends (...args: any[]) => any>(func: T, wait?: number, options?: {
@@ -568,7 +569,8 @@ export function parseFilters(query: {
  *     sortBy: 'createdAt'
  *   }
  * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
- * @param {number} [limit=10] - if limit is falsy, exclude limit and skip to fetch regardless of pagination\
+ * @param {number} [limit=10] - if limit is falsy, exclude limit and skip to fetch regardless of pagination
+ * @param {boolean} [hasMore] - hasMore parameter on parseSortOptions has been deprecated.
  * @example returned object (using the examples above):
  *   E.g. {
  *     limit: 10,
@@ -583,7 +585,7 @@ export function parseSortOptions(query: {
 }, model: {
     fieldsFlattened: object;
     name: string;
-}, limit?: number, hasMore: any): {
+}, limit?: number, hasMore?: boolean): {
     sort: {
         createdAt?: number;
     };
@@ -713,21 +715,29 @@ export function sortByKey(collection: {
     [key: string]: any;
 }[], key: string): object[];
 /**
-   * Creates a throttled function that only invokes `func` at most once per every `wait` milliseconds
- * @param {(...args: any[]) => any} func
+ * @template {(...args: any[]) => any} T
+ * Creates a throttled function that only invokes `func` at most once per every `wait` milliseconds
+ *
+ * @param {T} func - The function to throttle.
  * @param {number} [wait=0] - the number of milliseconds to throttle invocations to
  * @param {{
- *    leading?: boolean, // invoke on the leading edge of the timeout
- *    trailing?: boolean, // invoke on the trailing edge of the timeout
+ *    leading?: boolean, // invoke on the leading edge of the timeout (default: true)
+ *    trailing?: boolean, // invoke on the trailing edge of the timeout (default: true)
  * }} [options] - options object
- * @returns {function}
- * @example const throttled = util.throttle(updatePosition, 100)
+ * @returns {((...args: Parameters<T>) => ReturnType<T>) & {
+ *     cancel: () => void;
+ *     flush: () => ReturnType<T>
+ * }}
+ * @example const throttled = throttle(updatePosition, 100)
  * @see lodash
  */
-export function throttle(func: (...args: any[]) => any, wait?: number, options?: {
+export function throttle<T extends (...args: any[]) => any>(func: T, wait?: number, options?: {
     leading?: boolean;
     trailing?: boolean;
-}): Function;
+}): ((...args: Parameters<T>) => ReturnType<T>) & {
+    cancel: () => void;
+    flush: () => ReturnType<T>;
+};
 /**
  * Convert a variable to an array, if not already an array.
  * @template T
