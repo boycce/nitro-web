@@ -31,7 +31,6 @@ export function FieldTime({ onChange, value, Icon, dir = 'bottom-left', ...props
   // Convert the value to a valid time value
   const validValue = useMemo(() => {
     const num = typeof value === 'string' ? parseInt(value) : value
-    console.log(11, num)
     return typeof num === 'number' && !isNaN(num) ? num : new Date(0).getTime()
   }, [value])
 
