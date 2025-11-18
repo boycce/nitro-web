@@ -528,36 +528,58 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  * @param {{ [key: string]: string }} query - req.query
  *   E.g. {
- *     createdAt: '1749038400000,1749729600000',
  *     location: '10-RS',
+ *     age: '33',
+ *     isDeleted: 'false',
+ *     search: 'John Doe',
+ *     createdAt: '1749038400000,1749729600000',
  *     status: 'incomplete',
- *     search: 'John'
+ *     bookingDate: '14'
+ *     isActive: 'true',
+ *     customer.0: '1234567890', // splayed array items
  *   }
- * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
+ * @param {{
+ *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId }
+ * }} config - allowed filters and their rules
  *   E.g. {
- *     createdAt: 'dateRange',
  *     location: 'string',
- *     status: ['incomplete', 'complete'],
- *     search: 'string',
+ *     age: 'number',
+ *     isDeleted: 'boolean',
+ *     search: 'search',
+ *     createdAt: 'dateRange',
+ *     status: ['incomplete', 'complete'],       // EnumArray
+ *     bookingDate: [11, 14, 33],                // EnumArray
+ *     isActive: [true, false],                  // EnumArray
+ *     customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
  *   }
  * @example returned object (using the examples above):
  *   E.g. {
- *     date: { $gte: 1749038400000, $lte: 1749729600000 },
  *     location: '10-RS',
+ *     age: 33,
+ *     isDeleted: false,
+ *     search: { $search: 'John' },
+ *     createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
  *     status: 'incomplete',
- *     search: 'John'
+ *     bookingDate: 14,
+ *     isActive: true,
+ *     customer: { $in: [new ObjectId('1234567890')] },
  *   }
  */
 export function parseFilters(query: {
     [key: string]: string;
 }, config: {
-    [key: string]: "string" | "number" | "search" | "dateRange" | string[];
+    [key: string]: "string" | "number" | "boolean" | "search" | "dateRange" | EnumArray | {
+        rule: "ids";
+        parseId: parseId;
+    };
 }): {
-    [key: string]: string | number | string[] | {
+    [key: string]: string | number | boolean | {
+        $search: string;
+    } | {
         $gte: number;
         $lte?: number;
     } | {
-        $search: string;
+        $in: ObjectId[];
     };
 };
 /**
@@ -838,4 +860,10 @@ export type AxiosRequestConfigWithRetry = AxiosRequestConfig & {
 export type AxiosInstanceWithRetry = Omit<AxiosInstance, "get"> & {
     get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>;
 };
+export type ObjectId = object;
+export type parseId = (value: string) => ObjectId;
+/**
+ * - an array of strings, numbers or booleans
+ */
+export type EnumArray = (string | number | boolean)[];
 //# sourceMappingURL=util.d.ts.map
