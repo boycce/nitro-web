@@ -2271,6 +2271,9 @@ label, .label {
 .uppercase {
   text-transform: uppercase;
 }
+.italic {
+  font-style: italic;
+}
 .leading-\[1\.4em\] {
   line-height: 1.4em;
 }
