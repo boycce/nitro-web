@@ -73,7 +73,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       {
         type: 'select',
         name: 'status',
-        rowClassName: 'flex-1',
+        width: 'half',
         options: [
           { label: 'Pending', value: 'pending' }, 
           { label: 'Approved', value: 'approved' }, 
@@ -85,7 +85,8 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         name: 'color',
         label: 'Half column',
         placeholder: 'Select color...',
-        rowClassName: 'flex-1',
+        rowClassName: 'italic', // for custom styling
+        width: 'half',
       },
     ]
     return filters

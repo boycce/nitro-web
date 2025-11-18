@@ -5,7 +5,7 @@ import { ListFilterIcon } from 'lucide-react'
 
 type CommonProps = {
   label?: string
-  size?: 'full' | 'half' | 'third' | 'quarter' | 'fifth'
+  width?: 'full' | 'half' | 'third' | 'quarter' | 'fifth'
   rowClassName?: string
 }
 export type FilterType = (
@@ -125,13 +125,13 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     navigate(locationRef.current.pathname + queryStr, { replace: true })
   }
   
-  function getBasisWidth(size: 'full' | 'half' | 'third' | 'quarter' | 'fifth') {
+  function getBasisWidth(width: 'full' | 'half' | 'third' | 'quarter' | 'fifth') {
     // Need to splay out the classnames for tailwind to work
-    if (size == 'full') return 'w-full'
-    else if (size == 'half') return 'shrink basis-[calc(50%-8px)]'
-    else if (size == 'third') return 'shrink basis-[calc(33.33%-8px)]'
-    else if (size == 'quarter') return 'shrink basis-[calc(25%-8px)]'
-    else if (size == 'fifth') return 'shrink basis-[calc(20%-8px)]'
+    if (width == 'full') return 'w-full'
+    else if (width == 'half') return 'shrink basis-[calc(50%-8px)]'
+    else if (width == 'third') return 'shrink basis-[calc(33.33%-8px)]'
+    else if (width == 'quarter') return 'shrink basis-[calc(25%-8px)]'
+    else if (width == 'fifth') return 'shrink basis-[calc(20%-8px)]'
   }
 
   return (
@@ -153,8 +153,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
           </div> */}
           <div class={twMerge(`flex flex-wrap gap-[16px] p-[16px] pb-6 ${dropdownFiltersClassName || ''}`)}>
             {
-              filters?.map(({label, size='full', rowClassName, ...filter}, i) => (
-                <div key={i} class={twMerge(getBasisWidth(size), rowClassName || '')}>
+              filters?.map(({label, width='full', rowClassName, ...filter}, i) => (
+                <div key={i} class={twMerge(getBasisWidth(width), rowClassName || '')}>
                   <div class="flex justify-between"> 
                     <label for={filter.id || filter.name}>{label || camelCaseToTitle(filter.name)}</label>
                     <a href="#" class="label font-normal text-secondary underline" onClick={(e) => reset(e, filter)}>Reset</a>
