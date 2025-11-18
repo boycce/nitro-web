@@ -1332,6 +1332,9 @@ export function parseFilters(query, config) {
     
     // Ids
     } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') {
+      if (!rule.parseId) {
+        throw new Error(`The "${key}" filter has an invalid rule. Expected a parseId function.`)
+      }
       const ids = val.split(',').map(id => {
         if (!isHex24(id)) throw new Error(`Invalid id "${id}" passed to the "${key}" filter.`)
         else return rule.parseId(id)
