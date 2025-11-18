@@ -22,6 +22,10 @@ import { twMerge as _twMerge } from 'tailwind-merge'
 * }} AxiosInstanceWithRetry
 */
 
+/** @typedef {object} ObjectId */
+/** @typedef {(value: string) => ObjectId} parseId */
+/** @typedef {(string|number|boolean)[]} EnumArray - an array of strings, numbers or booleans */
+
 /** @type {{[key: string]: {[key: string]: string|true}}} */
 let queryObjectCache = {}
 
@@ -1232,31 +1236,51 @@ export function pad (num=0, padLeft=0, fixedRight) {
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  * @param {{ [key: string]: string }} query - req.query
  *   E.g. {
- *     createdAt: '1749038400000,1749729600000',
  *     location: '10-RS',
+ *     age: '33',
+ *     isDeleted: 'false',
+ *     search: 'John Doe',
+ *     createdAt: '1749038400000,1749729600000',
  *     status: 'incomplete',
- *     search: 'John'
+ *     bookingDate: '14'
+ *     isActive: 'true',
+ *     customer.0: '1234567890', // splayed array items
  *   }
- * @param {{ [key: string]: 'string'|'number'|'search'|'dateRange'|string[] }} config - allowed filters and their rules
+ * @param {{ 
+ *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId } 
+ * }} config - allowed filters and their rules
  *   E.g. {
- *     createdAt: 'dateRange',
  *     location: 'string',
- *     status: ['incomplete', 'complete'],
- *     search: 'string',
+ *     age: 'number',
+ *     isDeleted: 'boolean',
+ *     search: 'search',  
+ *     createdAt: 'dateRange',
+ *     status: ['incomplete', 'complete'],       // EnumArray
+ *     bookingDate: [11, 14, 33],                // EnumArray
+ *     isActive: [true, false],                  // EnumArray
+ *     customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
  *   }
  * @example returned object (using the examples above):
  *   E.g. {
- *     date: { $gte: 1749038400000, $lte: 1749729600000 },
  *     location: '10-RS',
+ *     age: 33,
+ *     isDeleted: false,
+ *     search: { $search: 'John' },
+ *     createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
  *     status: 'incomplete',
- *     search: 'John'
+ *     bookingDate: 14,
+ *     isActive: true,
+ *     customer: { $in: [new ObjectId('1234567890')] },
  *   }
  */
 export function parseFilters(query, config) {
-  /** @type {{ [key: string]: string|number|{ $gte: number; $lte?: number; }|{ $search: string }|string[] }} */
+  /** 
+   * Should match the example returned object above
+   * @type {{ 
+   *   [key: string]: string|number|boolean|{ $search: string }|{ $gte: number; $lte?: number; }|{ $in: ObjectId[] } }} */
   const mongoQuery = {}
 
-  // Convert splayed array items into a unified array objects
+  // Convert splayed array items into a unified array objects, e.g. 'customer.0' = '1' and 'customer.1' = '2' -> 'customer' = '1,2'
   for (const key in query) {
     if (key.match(/\.\d+$/)) {
       const baseKey = key.replace(/\.\d+$/, '')
@@ -1278,18 +1302,42 @@ export function parseFilters(query, config) {
       mongoQuery[key] = val
 
     } else if (rule === 'number') {
-      if (typeof val !== 'number' || isNaN(val)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a number.`)
-      mongoQuery[key] = parseFloat(val)
+      const num = parseFloat(val)
+      if (isNaN(num)) throw new Error(`The "${key}" filter should be a number, but received "${val}".`)
+      mongoQuery[key] = num
+
+    } else if (rule === 'boolean') {
+      const bool = val === 'true' ? true : val === 'false' ? false : undefined
+      if (bool === undefined) throw new Error(`The "${key}" filter should be a boolean, but received "${val}".`)
+      mongoQuery[key] = bool
 
     } else if (rule === 'search') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
       mongoQuery['$text'] = { $search: '"' + val + '"' }
 
+    // Enums
     } else if (Array.isArray(rule)) {
-      if (!rule.includes(val)) {
-        throw new Error(`The "${key}" filter has an invalid value "${val}". Allowed values: "${rule.join('", "')}"`)
+      // Detetect the entire array's type from the first item
+      const type = typeof rule[0]
+      if (!['string', 'number', 'boolean'].includes(type)) {
+        throw new Error(`The rule for "${key}" should only contain strings, numbers or booleans, but received "${type}".`)
       }
-      mongoQuery[key] = val
+      // Parse the value to the correct type and compare it to the rule item
+      for (const ruleItem of rule) {
+        let valParsed = /** @type {string|number|boolean|undefined} */(val)
+        if (type === 'number') valParsed = parseFloat(val)
+        else if (type === 'boolean') valParsed = val === 'true' ? true : val === 'false' ? false : undefined
+        if (valParsed === ruleItem) mongoQuery[key] = valParsed
+      }
+    
+    // Ids
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') {
+      const ids = val.split(',').map(id => {
+        if (!isHex24(id)) throw new Error(`Invalid id "${id}" passed to the "${key}" filter.`)
+        else return rule.parseId(id)
+      })
+      if (!ids.length) throw new Error(`Please pass at least one id to the "${key}" filter.`)
+      mongoQuery[key] = { $in: ids }
 
     } else if (rule === 'dateRange') {
       const [start, end] = val.split(',').map(Number)
