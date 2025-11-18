@@ -1471,7 +1471,7 @@ export function queryString (obj, _path='', _output) {
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] == 'undefined' || !obj[key]) continue
+      if (typeof obj[key] == 'undefined' || obj[key] === '') continue
       else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path + key + '.', output)
       else output[_path + key] = obj[key] + ''
     }
