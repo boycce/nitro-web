@@ -316,17 +316,18 @@ export function getDirectories(path: {
 export function getStripeClientPromise(stripePublishableKey: string): Promise<import("@stripe/stripe-js").Stripe | null>;
 /**
  * Returns a list of response errors
- *
- * @typedef {{ title: string, detail: string }} NitroError
- * @typedef {{ toJSON: () => { message: string } }} MongoError
- * @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors
- *
  * @typedef {Error|NitroError[]|MongoError|AxiosWithErrors|string|any} NitroErrorRaw
  *
  * @param {NitroErrorRaw} errs
  * @returns {NitroError[]}
  */
 export function getResponseErrors(errs: NitroErrorRaw): NitroError[];
+/**
+ * Returns the system error from a list of errors
+ * @param {NitroError[]|undefined} nitroErrors
+ * @returns {string}
+ */
+export function getSystemError(nitroErrors: NitroError[] | undefined): string;
 /**
  * Checks if a value is in an array (todo, update this to not use optional key)
  * @param {any[]} array
@@ -783,33 +784,6 @@ export const twMerge: (...classLists: import("tailwind-merge").ClassNameValue[])
 /**
  * Returns a list of response errors
  */
-export type NitroError = {
-    title: string;
-    detail: string;
-};
-/**
- * Returns a list of response errors
- */
-export type MongoError = {
-    toJSON: () => {
-        message: string;
-    };
-};
-/**
- * Returns a list of response errors
- */
-export type AxiosWithErrors = {
-    response: {
-        data: {
-            errors?: NitroError[];
-            error?: string;
-            error_description?: string;
-        };
-    };
-};
-/**
- * Returns a list of response errors
- */
 export type NitroErrorRaw = Error | NitroError[] | MongoError | AxiosWithErrors | string | any;
 /**
  * - lng/lat
@@ -866,4 +840,22 @@ export type parseId = (value: string) => ObjectId;
  * - an array of strings, numbers or booleans
  */
 export type EnumArray = (string | number | boolean)[];
+export type NitroError = {
+    title: string;
+    detail: string;
+};
+export type MongoError = {
+    toJSON: () => {
+        message: string;
+    };
+};
+export type AxiosWithErrors = {
+    response: {
+        data: {
+            errors?: NitroError[];
+            error?: string;
+            error_description?: string;
+        };
+    };
+};
 //# sourceMappingURL=util.d.ts.map
