@@ -25,6 +25,9 @@ import { twMerge as _twMerge } from 'tailwind-merge'
 /** @typedef {object} ObjectId */
 /** @typedef {(value: string) => ObjectId} parseId */
 /** @typedef {(string|number|boolean)[]} EnumArray - an array of strings, numbers or booleans */
+/** @typedef {{ title: string, detail: string }} NitroError */
+/** @typedef {{ toJSON: () => { message: string } }} MongoError */
+/** @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors */
 
 /** @type {{[key: string]: {[key: string]: string|true}}} */
 let queryObjectCache = {}
@@ -785,11 +788,6 @@ export function getStripeClientPromise (stripePublishableKey) {
 
 /**
  * Returns a list of response errors
- * 
- * @typedef {{ title: string, detail: string }} NitroError
- * @typedef {{ toJSON: () => { message: string } }} MongoError
- * @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors
- * 
  * @typedef {Error|NitroError[]|MongoError|AxiosWithErrors|string|any} NitroErrorRaw
  * 
  * @param {NitroErrorRaw} errs
@@ -825,6 +823,17 @@ export function getResponseErrors (errs) {
     console.info('getResponseErrors(): ', errs)
     return [{ title: 'error', detail: 'Oops there was an error' }]
   }
+}
+
+/**
+ * Returns the system error from a list of errors
+ * @param {NitroError[]|undefined} nitroErrors
+ * @returns {string}
+ */
+export function getSystemError(nitroErrors) {
+  const allErrors = getResponseErrors(nitroErrors || [])
+  const systemError = allErrors.find(error => error.title === 'error')
+  return systemError?.detail || ''
 }
 
 /**
