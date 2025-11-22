@@ -55,6 +55,7 @@
     }],
     "object-shorthand": ["error", "consistent"],
     "quotes": ["error", "single"],
+    "react/jsx-fragments": ["error", "element"], // shorthand caues eslint max callstack errors 
     "react/jsx-no-undef": ["error", { "allowGlobals": true }],
     "react/no-unknown-property": ["error", {"ignore": ["class", "for", "css"]}], // dom attributes
     "react/prop-types": "off",
