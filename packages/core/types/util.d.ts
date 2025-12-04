@@ -537,7 +537,7 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  *     status: 'incomplete',
  *     bookingDate: '14'
  *     isActive: 'true',
- *     customer.0: '1234567890', // splayed array items
+ *     customer.0: '69214ce7ab121fb3726965a1', // splayed array items
  *   }
  * @param {{
  *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId }
@@ -628,13 +628,15 @@ export function pick(obj: {
 /**
  *
  * Parses a query string into an object, or returns the last known matching cache
- * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
- * @param {boolean} [trueDefaults] - assign true to empty values
- * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
+ * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
+ * @param {boolean} [emptyStringAsTrue] - assign true to empty values
+ * @param {boolean} [parseArrayItems] - group splayed array items into real arrays,
+ *   e.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
+ * @returns {{[key: string]: string|true|(string|true)[]}} - e.g. { page: '1', book: 'my book', date: [1234567890] }
  * todo: maybe add toDeepObject param? be kinda cool to have
  */
-export function queryObject(searchString: string, trueDefaults?: boolean): {
-    [key: string]: string | true;
+export function queryObject(searchString: string, emptyStringAsTrue?: boolean, parseArrayItems?: boolean): {
+    [key: string]: string | true | (string | true)[];
 };
 /**
  * Parses a query string into an array of objects
@@ -644,16 +646,18 @@ export function queryObject(searchString: string, trueDefaults?: boolean): {
 export function queryArray(searchString: string): object[];
 /**
  * Parses an object and returns a query string (deep value keys are flatterned, e.g. 'job.location=1')
- * @param {{[key: string]: unknown}} [obj] - query object
+ * @param {{[key: string]: unknown}} obj - query object
  * @param {string} [_path] - path to the object
  * @param {{[key: string]: string}} [_output] - output object
+ * @param {boolean} [concatenateArrays] - concatenate arrays into a comma-separated string, rather than separate  keys
+ *   e.g. { date: [1234567890, 1234567891] } -> 'date=1234567890,1234567891'
  * @returns {string}
  */
-export function queryString(obj?: {
+export function queryString(obj: {
     [key: string]: unknown;
 }, _path?: string, _output?: {
     [key: string]: string;
-}): string;
+}, concatenateArrays?: boolean): string;
 /**
  * Axios request to the route
  * @param {string} route - e.g. 'post /api/user'
