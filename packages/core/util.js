@@ -29,7 +29,7 @@ import { twMerge as _twMerge } from 'tailwind-merge'
 /** @typedef {{ toJSON: () => { message: string } }} MongoError */
 /** @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors */
 
-/** @type {{[key: string]: {[key: string]: string|true}}} */
+/** @type {{[key: string]: {[key: string]: string|true|(string|true)[]}}} */
 let queryObjectCache = {}
 
 /** @type {Promise<import('@stripe/stripe-js').Stripe|null>|undefined} */
@@ -1253,7 +1253,7 @@ export function pad (num=0, padLeft=0, fixedRight) {
  *     status: 'incomplete',
  *     bookingDate: '14'
  *     isActive: 'true',
- *     customer.0: '1234567890', // splayed array items
+ *     customer.0: '69214ce7ab121fb3726965a1', // splayed array items
  *   }
  * @param {{ 
  *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId } 
@@ -1432,25 +1432,40 @@ export function pick (obj, keys) {
 /**
  * 
  * Parses a query string into an object, or returns the last known matching cache
- * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book'
- * @param {boolean} [trueDefaults] - assign true to empty values
- * @returns {{[key: string]: string|true}} - e.g. { page: '1' }
+ * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
+ * @param {boolean} [emptyStringAsTrue] - assign true to empty values
+ * @param {boolean} [parseArrayItems] - group splayed array items into real arrays, 
+ *   e.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
+ * @returns {{[key: string]: string|true|(string|true)[]}} - e.g. { page: '1', book: 'my book', date: [1234567890] }
  * todo: maybe add toDeepObject param? be kinda cool to have
  */
-export function queryObject (searchString, trueDefaults) {
+export function queryObject (searchString, emptyStringAsTrue, parseArrayItems=true) {
   if (searchString.startsWith('?')) searchString = searchString.slice(1)
-  const uniqueKey = searchString + (trueDefaults ? '-true' : '')
+  const uniqueKey = searchString + (emptyStringAsTrue ? '-true' : '')
 
   if (searchString === '') return {}
   if (!queryObjectCache) queryObjectCache = {}
   if (queryObjectCache[uniqueKey]) return queryObjectCache[uniqueKey]
 
-  const params = new URLSearchParams(searchString) 
+  const params = new URLSearchParams(searchString)
   /** @type {{[key: string]: string|true}} */
-  const result = Object.fromEntries(params.entries())
-  if (trueDefaults) {
-    for (const key in result) {
-      if (!result[key] && result[key] !== '0') result[key] = true
+  const flattened = Object.fromEntries(params.entries())
+  /** @type {{[key: string]: string|true|(string|true)[]}} */
+  const result = {}
+  // Loop through flattened query object.
+  for (const key in flattened) {
+    result[key] = flattened[key]
+    // Convert empty strings to true, if emptyStringAsTrue is true
+    if (emptyStringAsTrue) {
+      if (!flattened[key] && flattened[key] !== '0') result[key] = true
+    }
+    // Convert splayed array items into a array objects, e.g. 'customer.0' = '1' -> 'customer' = ['1']
+    if (parseArrayItems && key.match(/\.\d+$/)) {
+      const baseKey = key.replace(/\.\d+$/, '')
+      const index = Number(key.match(/\.(\d+)$/)?.[1] || '0')
+      if (Array.isArray(result[baseKey])) result[baseKey][index] = flattened[key]
+      else result[baseKey] = [flattened[key]]
+      delete result[key]
     }
   }
 
@@ -1472,18 +1487,21 @@ export function queryArray (searchString) {
 
 /**
  * Parses an object and returns a query string (deep value keys are flatterned, e.g. 'job.location=1')
- * @param {{[key: string]: unknown}} [obj] - query object
+ * @param {{[key: string]: unknown}} obj - query object
  * @param {string} [_path] - path to the object
  * @param {{[key: string]: string}} [_output] - output object
+ * @param {boolean} [concatenateArrays] - concatenate arrays into a comma-separated string, rather than separate  keys
+ *   e.g. { date: [1234567890, 1234567891] } -> 'date=1234567890,1234567891'
  * @returns {string}
  */
-export function queryString (obj, _path='', _output) {
+export function queryString (obj, _path='', _output, concatenateArrays=true) {
   /** @type {{[key: string]: string}} */
   const output = _output || {}
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (typeof obj[key] == 'undefined' || obj[key] === '') continue
+      else if (concatenateArrays && Array.isArray(obj[key])) output[_path + key] = obj[key].join(',')
       else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path + key + '.', output)
       else output[_path + key] = obj[key] + ''
     }

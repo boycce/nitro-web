@@ -14,7 +14,7 @@ export type FilterType = (
 )
 
 type FilterState = {
-  [key: string]: string | true
+  [key: string]: string|true|(string|true)[] // aka queryObject
 }
 
 type FiltersProps = {

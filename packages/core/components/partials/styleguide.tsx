@@ -65,6 +65,12 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         placeholder: 'Select a range...',
       },
       {
+        type: 'date',
+        name: 'dateSingle',
+        mode: 'single',
+        placeholder: 'Select a date...',
+      },
+      {
         type: 'search',
         name: 'search',
         label: 'Keyword Search',

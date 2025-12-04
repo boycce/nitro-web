@@ -61,7 +61,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
         if (key != key2) continue
         // @ts-expect-error
         message = { ...messageQueryMap[key] }
-        if (query[key] !== true) message.text = decodeURIComponent(query[key])
+        if (query[key] !== true) message.text = decodeURIComponent(query[key] as string )
       }
     }
     if (message) setStore(s => ({ ...s, message: message }))

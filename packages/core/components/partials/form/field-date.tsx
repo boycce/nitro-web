@@ -74,7 +74,11 @@ export function FieldDate({
     const arrOfNumbers = typeof value === 'string' 
       ? value.split(/\s*,\s*/g).map(o => parseFloat(o)) 
       : Array.isArray(value) ? value : [value]
-    const out = arrOfNumbers.map(date => isValid(date) ? new Date(date as number) : null) /// changed to null
+      
+    const out = arrOfNumbers.map((date) => {
+      if (typeof date === 'string' && !isNaN(parseFloat(date))) date = parseFloat(date)
+      return isValid(date) ? new Date(date as number) : null /// changed to null
+    })
     return out
   }, [value])
 
