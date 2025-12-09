@@ -65,7 +65,7 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
   return (
     <div 
       onClick={(e) => e.stopPropagation()} 
-      class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[100] ${stateObj.root} ${rootClassName||''}`)} nitro-modal`}
+      class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[1000] ${stateObj.root} ${rootClassName||''}`)} nitro-modal`}
     >
       <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${stateObj.bg}`}></div>
       <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${stateObj.container}`}>

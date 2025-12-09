@@ -531,7 +531,7 @@ export function each (obj, iteratee, context) {
 
 /**
  * Downloads a file
- * @param {string|Blob|File} data
+ * @param {string|Blob|File|Uint8Array<ArrayBuffer>} data
  * @param {string} filename
  * @param {string} [mime]
  * @param {string} [bom]
