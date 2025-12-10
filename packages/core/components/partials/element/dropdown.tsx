@@ -3,7 +3,7 @@ import { forwardRef, cloneElement } from 'react'
 import { getSelectStyle, twMerge } from 'nitro-web'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
-type DropdownProps = {
+export type DropdownProps = {
   allowOverflow?: boolean
   animate?: boolean
   children?: React.ReactNode

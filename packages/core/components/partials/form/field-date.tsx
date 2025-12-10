@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, isValid, parse } from 'date-fns'
 import { getPrefixWidth } from 'nitro-web/util'
-import { Calendar, Dropdown } from 'nitro-web'
+import { Calendar, Dropdown, DropdownProps } from 'nitro-web'
 import { DayPickerProps } from '../element/calendar'
 import { TimePicker } from './field-time'
 
@@ -29,6 +29,8 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
   /** Calendar props */
   DayPickerProps?: DayPickerProps
+  /** Dropdown props */
+  DropdownProps?: DropdownProps
 }
 
 // An array is returned for mode = 'multiple' or 'range'
@@ -53,6 +55,7 @@ export function FieldDate({
   showTime,
   value: valueProp,
   DayPickerProps,
+  DropdownProps,
   ...props
 }: FieldDateProps) {
   // Currently this displays the dates in local timezone and saves in utc. We should allow the user to display the dates in a 
@@ -162,6 +165,7 @@ export function FieldDate({
         </div>
       }
       dir={dir}
+      {...DropdownProps}
     > 
       <div className="grid grid-cols-1">
         {Icon}

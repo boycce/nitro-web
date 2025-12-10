@@ -108,6 +108,11 @@ export function FieldTime({ onChange, value, Icon, dir = 'bottom-left', ...props
 }
 
 export function TimePicker({ date, onChange }: TimePickerProps) {
+  const refs = {
+    hour: useRef<HTMLDivElement>(null),
+    minute: useRef<HTMLDivElement>(null),
+    period: useRef<HTMLDivElement>(null),
+  }
   const lists = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], // hours
     [
@@ -122,6 +127,13 @@ export function TimePicker({ date, onChange }: TimePickerProps) {
   const hour = date ? parseInt(format(date, 'h')) : undefined
   const minute = date ? parseInt(format(date, 'm')) : undefined
   const period = date ? format(date, 'a') : undefined
+
+  // Scroll into view when the date changes
+  useEffect(() => {
+    if (hour !== undefined) scrollIntoView('hour', hour)
+    if (minute !== undefined) scrollIntoView('minute', minute)
+    if (period) scrollIntoView('period', period)
+  }, [date])
   
   const handleTimeChange = (type: 'hour' | 'minute' | 'period', value: string | number) => {
     // Creates a new date object in the local timezone, and calls onChange with the timestamp
@@ -147,13 +159,18 @@ export function TimePicker({ date, onChange }: TimePickerProps) {
     onChange(newDate.getTime())
   }
 
-  function scrollIntoView(type: 'hour' | 'minute' | 'period', value: string | number, element: HTMLElement) {
-    const container = element?.parentElement?.parentElement
-    if (element && container) {
-      const topContainerPadding = 0
-      const scrollTop = element.offsetTop - container.offsetTop - topContainerPadding
-      container.scrollTo({ top: scrollTop, behavior: 'smooth' })
-    }
+  function scrollIntoView (type: 'hour' | 'minute' | 'period', value: string | number) {
+    const container = refs[type].current
+    if (!container) return
+    const element = container.querySelector(`[data-val="${value}"]`) as HTMLElement
+    if (!element) return
+  
+    const target =
+      element.offsetTop
+      - (container.clientHeight / 2)
+      + (element.clientHeight / 2)
+
+    container.scrollTo({ top: target, behavior: 'smooth' })
   }
 
   return (
@@ -164,17 +181,18 @@ export function TimePicker({ date, onChange }: TimePickerProps) {
       return (
         <div 
           key={i}
-          className="w-[60px] py-2 relative overflow-hidden hover:overflow-y-auto border-l border-gray-100 sm-scrollbar first:border-l-0"
+          ref={refs[type]}
+          className="w-[60px] relative overflow-hidden hover:overflow-y-auto border-l border-gray-100 sm-scrollbar first:border-l-0"
         >
-          <div className="w-[60px] absolute flex flex-col items-center">
+          <div className="w-[60px] absolute flex flex-col items-center py-2">
             {/* using absolute since the scrollbar takes up space  */}
             {list.map(item => (
               <div 
                 className="py-[1px] flex group cursor-pointer"
+                data-val={item}
                 key={item}
-                onClick={(e) => {
+                onClick={(_e) => {
                   handleTimeChange(type, item)
-                  scrollIntoView(type, item, e.currentTarget)
                 }}
               >
                 <button 
