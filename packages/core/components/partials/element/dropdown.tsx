@@ -35,7 +35,7 @@ type DropdownProps = {
   maxHeight?: number | string
   toggleCallback?: (isActive: boolean) => void
   /** when keeping active when the children clicked **/
-  keepActiveInClickingChild?: boolean
+  preventCloseOnClickChild?: boolean
 }
 
 export const Dropdown = forwardRef(function Dropdown({
@@ -54,7 +54,7 @@ export const Dropdown = forwardRef(function Dropdown({
   minWidth,
   maxHeight,
   toggleCallback,
-  keepActiveInClickingChild,
+  preventCloseOnClickChild,
 }: DropdownProps, ref) {
   // https://letsbuildui.dev/articles/building-a-dropdown-menu-component-with-react-hooks
   isHoverable = isHoverable && !menuIsOpen
@@ -141,19 +141,15 @@ export const Dropdown = forwardRef(function Dropdown({
     if (e.key && e.key != 'Enter') return
     if (e.key) e.preventDefault() // for button, stops buttons firing twice
 
-    const isChildrenClicked = keepActiveInClickingChild && dropdownRef.current?.contains(e.target as Node)
-
     if (!isHoverable && !menuIsOpen && ((menuToggles || e.key) || !isActive)) {
-      if (isActive && isChildrenClicked) return // keep active when children clicked
+      if (isActive && preventCloseOnClickChild && dropdownRef.current?.contains(e.target as Node)) return // keep active
       setIsActive(!isActive)
     }
   }
 
   function onClick(option: { onClick?: Function, preventCloseOnClick?: boolean }, e: React.MouseEvent) {
     if (option.onClick) option.onClick(e, option)
-    if (!menuIsOpen && !option?.preventCloseOnClick) {
-      setIsActive(!isActive)
-    }
+    if (!menuIsOpen && !option?.preventCloseOnClick) setIsActive(!isActive)
   }
 
   return (
