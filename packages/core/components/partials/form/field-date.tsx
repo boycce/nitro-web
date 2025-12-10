@@ -74,10 +74,7 @@ export function FieldDate({
     
   // Convert the value to an array of valid* dates
   const validDates = useMemo(() => {
-    const arrOfNumbers = typeof value === 'string' 
-      ? value.split(/\s*,\s*/g).map(o => parseFloat(o)) 
-      : Array.isArray(value) ? value : [value]
-      
+    const arrOfNumbers = Array.isArray(value) ? value : [value]
     const out = arrOfNumbers.map((date) => {
       if (typeof date === 'string' && !isNaN(parseFloat(date))) date = parseFloat(date)
       return isValid(date) ? new Date(date as number) : null /// changed to null

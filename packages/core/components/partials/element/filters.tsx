@@ -43,8 +43,8 @@ const debounceTime = 250
 
 export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({ 
   filters, 
-  setState: setState2,
-  state: state2,
+  setState: setStateProp,
+  state: stateProp,
   buttonProps,
   buttonCounterClassName,
   buttonText, 
@@ -56,8 +56,8 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   const navigate = useNavigate()
   const [lastUpdated, setLastUpdated] = useState(0)
   const [debouncedSubmit] = useState(() => debounce(submit, debounceTime))
-  const [state3, setState3] = useState(() => ({ ...queryObject(location.search) }))
-  const [state, setState] = [state2 || state3, setState2 || setState3]
+  const [stateDefault, setStateDefault] = useState(() => ({ ...queryObject(location.search) }))
+  const [state, setState] = [stateProp || stateDefault, setStateProp || setStateDefault]
   const stateRef = useRef(state)
   const locationRef = useRef(location)
   const count = useMemo(() => Object.keys(state).filter((k) => state[k] && filters?.some((f) => f.name === k)).length, [state, filters])
@@ -172,7 +172,7 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
                   }
                   {
                     filter.type !== 'select' && 
-                    <Elements.Field 
+                    <Elements.Field
                       {...filter}
                       class="!mb-0"
                       // `filter.name` is a full path e.g. 'job.location', not just the key `location`

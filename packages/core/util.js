@@ -1433,14 +1433,18 @@ export function pick (obj, keys) {
  * 
  * Parses a query string into an object, or returns the last known matching cache
  * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
- * @param {boolean} [emptyStringAsTrue] - assign true to empty values
- * @param {boolean} [parseArrayItems] - group splayed array items into real arrays, 
- *   e.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
+ * @param {Object} [options] - options
+ * @param {boolean} [options.emptyStringAsTrue] - assign true to empty values
+ * @param {boolean} [options.splitCommaSeparated=true] - split comma-separated values into arrays
+ * @param {boolean} [options.groupArrayIndexes=true] - group splayed array indexes into real arrays, 
+ *   E.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
  * @returns {{[key: string]: string|true|(string|true)[]}} - e.g. { page: '1', book: 'my book', date: [1234567890] }
+ * 
  * todo: maybe add toDeepObject param? be kinda cool to have
  */
-export function queryObject (searchString, emptyStringAsTrue, parseArrayItems=true) {
+export function queryObject (searchString, options={}) {
   if (searchString.startsWith('?')) searchString = searchString.slice(1)
+  const { emptyStringAsTrue = false, splitCommaSeparated = true, groupArrayIndexes = true } = options
   const uniqueKey = searchString + (emptyStringAsTrue ? '-true' : '')
 
   if (searchString === '') return {}
@@ -1459,8 +1463,12 @@ export function queryObject (searchString, emptyStringAsTrue, parseArrayItems=tr
     if (emptyStringAsTrue) {
       if (!flattened[key] && flattened[key] !== '0') result[key] = true
     }
+    // Split comma-separated values into arrays
+    if (splitCommaSeparated && typeof flattened[key] === 'string' && flattened[key].includes(',')) {
+      result[key] = flattened[key].split(',')
+    }
     // Convert splayed array items into a array objects, e.g. 'customer.0' = '1' -> 'customer' = ['1']
-    if (parseArrayItems && key.match(/\.\d+$/)) {
+    if (groupArrayIndexes && key.match(/\.\d+$/)) {
       const baseKey = key.replace(/\.\d+$/, '')
       const index = Number(key.match(/\.(\d+)$/)?.[1] || '0')
       if (Array.isArray(result[baseKey])) result[baseKey][index] = flattened[key]
@@ -1490,19 +1498,21 @@ export function queryArray (searchString) {
  * @param {{[key: string]: unknown}} obj - query object
  * @param {string} [_path] - path to the object
  * @param {{[key: string]: string}} [_output] - output object
- * @param {boolean} [concatenateArrays] - concatenate arrays into a comma-separated string, rather than separate  keys
- *   e.g. { date: [1234567890, 1234567891] } -> 'date=1234567890,1234567891'
+ * @param {Object} [options] - options
+ * @param {boolean} [options.concatenateArrays=true] - will concatenate arrays into a comma-separated string, rather than separate keys, 
+ *   E.g. { date: [1,2] } -> 'date=1,2'
  * @returns {string}
  */
-export function queryString (obj, _path='', _output, concatenateArrays=true) {
+export function queryString (obj, _path='', _output, options={}) {
   /** @type {{[key: string]: string}} */
   const output = _output || {}
+  const { concatenateArrays = true } = options
 
   for (let key in obj) {
     if (obj.hasOwnProperty(key)) {
       if (typeof obj[key] == 'undefined' || obj[key] === '') continue
       else if (concatenateArrays && Array.isArray(obj[key])) output[_path + key] = obj[key].join(',')
-      else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path + key + '.', output)
+      else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path+key+'.', output, options)
       else output[_path + key] = obj[key] + ''
     }
   }

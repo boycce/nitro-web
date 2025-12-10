@@ -25,7 +25,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
 
   useEffect(() => {
     // Autofill the email input from ?email=
-    const query = queryObject(location.search, true)
+    const query = queryObject(location.search, { emptyStringAsTrue: true })
     if (query.email) setState({ ...state, email: query.email as string })
   }, [location.search])
 

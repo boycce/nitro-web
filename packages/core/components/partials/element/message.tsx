@@ -54,7 +54,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
   useEffect(() => {
     // Finds a message in a query string and show it
     let message
-    const query = queryObject(location.search, true)
+    const query = queryObject(location.search, { emptyStringAsTrue: true })
     for (const key in query) {
       if (!query.hasOwnProperty(key)) continue
       for (const key2 in messageQueryMap) {
