@@ -198,7 +198,7 @@ export function each(obj: {
 } | [] | null, iteratee: Function, context?: object): object | [] | null;
 /**
  * Downloads a file
- * @param {string|Blob|File} data
+ * @param {string|Blob|File|Uint8Array<ArrayBuffer>} data
  * @param {string} filename
  * @param {string} [mime]
  * @param {string} [bom]
@@ -206,7 +206,7 @@ export function each(obj: {
  *
  * @link https://github.com/kennethjiang/js-file-download
  */
-export function fileDownload(data: string | Blob | File, filename: string, mime?: string, bom?: string): void;
+export function fileDownload(data: string | Blob | File | Uint8Array<ArrayBuffer>, filename: string, mime?: string, bom?: string): void;
 /**
  * Formats a string into a name
  * @param {string} string
