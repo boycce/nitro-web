@@ -629,13 +629,20 @@ export function pick(obj: {
  *
  * Parses a query string into an object, or returns the last known matching cache
  * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
- * @param {boolean} [emptyStringAsTrue] - assign true to empty values
- * @param {boolean} [parseArrayItems] - group splayed array items into real arrays,
- *   e.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
+ * @param {Object} [options] - options
+ * @param {boolean} [options.emptyStringAsTrue] - assign true to empty values
+ * @param {boolean} [options.splitCommaSeparated=true] - split comma-separated values into arrays
+ * @param {boolean} [options.groupArrayIndexes=true] - group splayed array indexes into real arrays,
+ *   E.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
  * @returns {{[key: string]: string|true|(string|true)[]}} - e.g. { page: '1', book: 'my book', date: [1234567890] }
+ *
  * todo: maybe add toDeepObject param? be kinda cool to have
  */
-export function queryObject(searchString: string, emptyStringAsTrue?: boolean, parseArrayItems?: boolean): {
+export function queryObject(searchString: string, options?: {
+    emptyStringAsTrue?: boolean;
+    splitCommaSeparated?: boolean;
+    groupArrayIndexes?: boolean;
+}): {
     [key: string]: string | true | (string | true)[];
 };
 /**
@@ -649,15 +656,18 @@ export function queryArray(searchString: string): object[];
  * @param {{[key: string]: unknown}} obj - query object
  * @param {string} [_path] - path to the object
  * @param {{[key: string]: string}} [_output] - output object
- * @param {boolean} [concatenateArrays] - concatenate arrays into a comma-separated string, rather than separate  keys
- *   e.g. { date: [1234567890, 1234567891] } -> 'date=1234567890,1234567891'
+ * @param {Object} [options] - options
+ * @param {boolean} [options.concatenateArrays=true] - will concatenate arrays into a comma-separated string, rather than separate keys,
+ *   E.g. { date: [1,2] } -> 'date=1,2'
  * @returns {string}
  */
 export function queryString(obj: {
     [key: string]: unknown;
 }, _path?: string, _output?: {
     [key: string]: string;
-}, concatenateArrays?: boolean): string;
+}, options?: {
+    concatenateArrays?: boolean;
+}): string;
 /**
  * Axios request to the route
  * @param {string} route - e.g. 'post /api/user'
