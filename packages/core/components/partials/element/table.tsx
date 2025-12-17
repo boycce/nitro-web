@@ -208,7 +208,7 @@ export function Table<T extends TableRow>({
         </div>
         {/* Tbody rows */}
         {
-          rows.map((row: T, i: number) => {
+          !isLoading && rows.map((row: T, i: number) => {
             const isSelected = selectedRowIds.includes(row?._id||'')
             return (
               <div 
@@ -282,7 +282,7 @@ export function Table<T extends TableRow>({
           })
         }
         {
-          rows.length == 0 &&
+          (isLoading || rows.length == 0) &&
           <div className='table-row relative'>
             {
               columns.map((col, j) => {
@@ -296,8 +296,7 @@ export function Table<T extends TableRow>({
                   >
                     <div
                       className={twMerge(
-                        'absolute top-0 h-full flex items-center justify-center text-sm',
-                        isLoading ? '' : 'text-gray-500',
+                        'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
                         col.innerClassName
                       )}
                     >
