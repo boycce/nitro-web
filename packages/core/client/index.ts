@@ -25,7 +25,7 @@ export { Accordion } from '../components/partials/element/accordion'
 export { Avatar } from '../components/partials/element/avatar'
 export { Button } from '../components/partials/element/button'
 export { Calendar, type CalendarProps } from '../components/partials/element/calendar'
-export { Dropdown, type DropdownProps } from '../components/partials/element/dropdown'
+export { Dropdown, type DropdownProps, type DropdownOption } from '../components/partials/element/dropdown'
 export { Filters, type FiltersHandleType, type FilterType } from '../components/partials/element/filters'
 export { GithubLink } from '../components/partials/element/github-link'
 export { Initials } from '../components/partials/element/initials'
@@ -47,7 +47,7 @@ export { FieldCurrency, type FieldCurrencyProps } from '../components/partials/f
 export { FieldDate, type FieldDateProps } from '../components/partials/form/field-date'
 export { FieldTime, type FieldTimeProps } from '../components/partials/form/field-time'
 export { Location } from '../components/partials/form/location'
-export { Select, getSelectStyle, type SelectProps } from '../components/partials/form/select'
+export { Select, getSelectStyle, type SelectProps, type SelectOption } from '../components/partials/form/select'
 
 // Component Other Components
 export { IsFirstRender } from '../components/partials/is-first-render'

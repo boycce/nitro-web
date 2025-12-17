@@ -3,6 +3,16 @@ import { forwardRef, cloneElement } from 'react'
 import { getSelectStyle, twMerge } from 'nitro-web'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
+export type DropdownOption = { 
+  label: string|React.ReactNode,
+  onClick?: Function,
+  isSelected?: boolean,
+  icon?: React.ReactNode,
+  iconLeft?: React.ReactNode,
+  /** Prevent the dropdown from closing when the option is clicked */
+  preventCloseOnClick?: boolean,
+  className?: string 
+}
 export type DropdownProps = {
   allowOverflow?: boolean
   animate?: boolean
@@ -11,16 +21,7 @@ export type DropdownProps = {
   css?: string
   /** The direction of the menu **/
   dir?: 'bottom-left'|'bottom-right'|'top-left'|'top-right'
-  options?: { 
-    label: string|React.ReactNode,
-    onClick?: Function,
-    isSelected?: boolean,
-    icon?: React.ReactNode,
-    iconLeft?: React.ReactNode,
-    /** Prevent the dropdown from closing when the option is clicked */
-    preventCloseOnClick?: boolean,
-    className?: string 
-  }[]
+  options?: DropdownOption[]
   /** Whether the dropdown is hoverable **/
   isHoverable?: boolean
   /** The content to render inside the top of the dropdown **/

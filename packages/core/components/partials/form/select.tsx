@@ -20,7 +20,12 @@ type GetSelectStyle = {
   hasError?: boolean
   usePrefixes?: boolean
 }
-
+export type SelectOption = { 
+  value: unknown, 
+  label: string | React.ReactNode, 
+  fixed?: boolean, 
+  data?: { [key: string]: unknown } 
+}
 /** Select (all other props are passed to react-select) **/
 export type SelectProps = {
   /** field name or path on state (used to match errors), e.g. 'date', 'company.email' **/
@@ -36,7 +41,7 @@ export type SelectProps = {
   /** The onChange handler **/
   onChange?: (event: { target: { name: string, value: unknown } }) => void
   /** The options to display in the dropdown, data is used to pass additional data to the option **/
-  options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, data?: { [key: string]: unknown } }[]
+  options: SelectOption[]
   /** The state object to get the value and check errors from **/
   state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
   /** Select variations **/
