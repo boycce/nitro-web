@@ -35,8 +35,8 @@ export type SelectProps = {
   prefix?: string
   /** The onChange handler **/
   onChange?: (event: { target: { name: string, value: unknown } }) => void
-  /** The options to display in the dropdown **/
-  options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, [key: string]: unknown }[]
+  /** The options to display in the dropdown, data is used to pass additional data to the option **/
+  options: { value: unknown, label: string | React.ReactNode, fixed?: boolean, data?: { [key: string]: unknown } }[]
   /** The state object to get the value and check errors from **/
   state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
   /** Select variations **/
