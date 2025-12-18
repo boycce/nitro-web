@@ -2,6 +2,8 @@ import { JSX, useState, useCallback, Fragment } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { Checkbox, queryObject, queryString, twMerge } from 'nitro-web'
 
+export type TableRowType = 'row' | 'loading' | 'empty' | 'thead'
+
 export interface TableColumn {
   label: string
   value: string
@@ -20,7 +22,6 @@ export interface TableColumn {
 export type TableRow = {
   _id?: string
 }
-  
 export type TableProps<T> = {
   columns: TableColumn[]
   rows: T[]
@@ -30,7 +31,7 @@ export type TableProps<T> = {
   rowHeightMin?: number
   rowContentHeightMax?: number
   rowLinesMax?: number
-  rowSideColor?: (row?: T) => { className: string, width: number }
+  rowSideColor?: (row: T|undefined, type: TableRowType) => { className: string, width: number }
   rowGap?: number
   rowOnClick?: (row: T) => void
   columnGap?: number
@@ -123,6 +124,14 @@ export function Table<T extends TableRow>({
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
 
+  const getColumnPadding = useCallback((j: number, row: T|undefined, type: TableRowType) => {
+    const sideColor = j == 0 && rowSideColor ? rowSideColor(row, type) : undefined
+    const sideColorPadding = sideColor /*&& rows.length > 0*/ ? sideColor.width + 5 : 0
+    const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
+    const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+    return { pl, pr, sideColor }
+  }, [rowSideColor, columnPaddingX, columnGap])
+
   return (
     <div 
       style={{ marginTop: -rowGap }}
@@ -137,10 +146,7 @@ export function Table<T extends TableRow>({
           {
             columns.map((col, j) => {
               const disableSort = col.disableSort || selectedRowIds.length
-              const sideColor = j == 0 && rowSideColor ? rowSideColor(undefined) : undefined
-              const sideColorPadding = sideColor && rows.length > 0 ? sideColor.width + 5 : 0
-              const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
-              const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+              const { pl, pr } = getColumnPadding(j, undefined, 'thead')
 
               if (col.isHidden) return <Fragment key={j} />
               return (
@@ -221,10 +227,7 @@ export function Table<T extends TableRow>({
               >
                 {
                   columns.map((col, j) => {
-                    const sideColor = j == 0 && rowSideColor ? rowSideColor(row) : undefined
-                    const pl = j == 0 ? columnPaddingX : columnGap
-                    const pr = j == columns.length - 1 ? columnPaddingX : columnGap
-
+                    const { pl, pr, sideColor } = getColumnPadding(j, row, 'row')
                     if (col.isHidden) return <Fragment key={j} />
                     return (
                       <div
@@ -239,10 +242,8 @@ export function Table<T extends TableRow>({
                         )}
                       >
                         <div 
-                          style={{ 
-                            maxHeight: rowContentHeightMax, 
-                            paddingLeft: sideColor ? sideColor.width + 5 : 0,
-                          }}
+                          // pl:sideColorPadding was originally here
+                          style={{ maxHeight: rowContentHeightMax }} 
                           className={twMerge(
                             rowContentHeightMax ? 'overflow-hidden' : '',
                             getLineClampClassName(col.rowLinesMax),
@@ -286,14 +287,20 @@ export function Table<T extends TableRow>({
           <div className='table-row relative'>
             {
               columns.map((col, j) => {
-                const pl = j == 0 ? columnPaddingX : columnGap
-                const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+                const { pl, pr, sideColor } = getColumnPadding(j, undefined, isLoading ? 'loading' : 'empty')
                 return (
                   <div
                     key={j}
                     style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
                     className={twMerge(_columnClassName, columnClassName, col.className)}
                   >
+                    {
+                      sideColor && 
+                      <div 
+                        className={`absolute top-0 left-0 h-full ${sideColor?.className||''}`} 
+                        style={{ width: sideColor.width }}
+                      />
+                    }
                     <div
                       className={twMerge(
                         'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
