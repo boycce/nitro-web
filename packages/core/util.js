@@ -1243,7 +1243,7 @@ export function pad (num=0, padLeft=0, fixedRight) {
 
 /**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
- * @param {{ [key: string]: string }} query - req.query
+ * @param {{ [key: string]: unknown }} query - req.query
  *   E.g. {
  *     location: '10-RS',
  *     age: '33',
@@ -1286,7 +1286,8 @@ export function parseFilters(query, config) {
   /** 
    * Should match the example returned object above
    * @type {{ 
-   *   [key: string]: string|number|boolean|{ $search: string }|{ $gte: number; $lte?: number; }|{ $in: ObjectId[] } }} */
+   *   [key: string]: string|number|boolean|{ $search: string }|{ $gte?: number; $gt?: number; $lte?: number; $lt?: number; }|
+   *     { $in: ObjectId[] } }} */
   const mongoQuery = {}
 
   // Convert splayed array items into a unified array objects, e.g. 'customer.0' = '1' and 'customer.1' = '2' -> 'customer' = '1,2'
@@ -1300,6 +1301,7 @@ export function parseFilters(query, config) {
   }
 
   for (const key in query) {
+    if (typeof query[key] !== 'string') continue
     const val = query[key]
     const rule = config[key]
 
@@ -1391,7 +1393,10 @@ export function parseSortOptions(query, model, limit = 10, hasMore) {
   // Validate sortBy value
   const sortBy = query.sortBy || 'createdAt'
   const fields = Object.keys(model.fieldsFlattened)
-  if (!fields.includes(sortBy)) {
+  
+  if (!fields.includes(sortBy) && fields.includes(`${sortBy}.0`)) {
+    throw new Error(`"${sortBy}" is an invalid sortBy value for the "${model.name}" model, please use "${sortBy}.0" to sort array fields.`)
+  } else if (!fields.includes(sortBy)) {
     throw new Error(`"${sortBy}" is an invalid sortBy value for the "${model.name}" model.`)
   }
 
