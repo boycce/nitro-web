@@ -527,7 +527,7 @@ export function onChange<T>(setState: React.Dispatch<React.SetStateAction<T>>, e
 export function pad(num?: number, padLeft?: number, fixedRight?: number): string;
 /**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
- * @param {{ [key: string]: string }} query - req.query
+ * @param {{ [key: string]: unknown }} query - req.query
  *   E.g. {
  *     location: '10-RS',
  *     age: '33',
@@ -567,7 +567,7 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  *   }
  */
 export function parseFilters(query: {
-    [key: string]: string;
+    [key: string]: unknown;
 }, config: {
     [key: string]: "string" | "number" | "boolean" | "search" | "dateRange" | EnumArray | {
         rule: "ids";
@@ -577,8 +577,10 @@ export function parseFilters(query: {
     [key: string]: string | number | boolean | {
         $search: string;
     } | {
-        $gte: number;
+        $gte?: number;
+        $gt?: number;
         $lte?: number;
+        $lt?: number;
     } | {
         $in: ObjectId[];
     };
