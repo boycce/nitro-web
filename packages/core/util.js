@@ -1377,7 +1377,7 @@ export function parseFilters(query, config) {
  *     sortBy: 'createdAt' 
  *   }
  * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
- * @param {number} [limit=10] - if limit is falsy, exclude limit and skip to fetch regardless of pagination
+ * @param {number} [limit=10] - pass 0 to exclude limit/skip, regardless of pagination
  * @param {boolean} [hasMore] - hasMore parameter on parseSortOptions has been deprecated.
  * @example returned object (using the examples above):
  *   E.g. {
