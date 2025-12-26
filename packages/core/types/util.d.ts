@@ -497,26 +497,23 @@ export function omit(obj: {
     [key: string]: unknown;
 };
 /**
- * Updates state from an input event (deep state properties are supported)
- * E.g. setState(s => ({ ...s, [e.target.id]: e.target.value }))
- *
+ * @typedef {({target: {name: string, value: unknown}} | [string, unknown])} EventOrPathValue
+ */
+/**
+ * Automatically updates a state object from a field event by using the input name/value (deep paths supported)
+ * E.g. setState(s => ({ ...s, [e.target.name]: e.target.value }))
  * @template T
+ * @param {EventOrPathValue} eventOrPathValue - The input/select change event or [path, value] to update the state with
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue
- *   - The input/select change event or path/value pair to update the state with
+ * @param {(value: unknown) => unknown} [beforeSetValue] - optional function to change the value before setting the state
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  *
- * @example
- *   - <input onChange={(e) => onChange(setState, e)} />
- *   - <input onChange={() => onChange(setState, ['address.name', 'Joe'])} />
+ * @example usage:
+ *   - <input onChange={(e) => onChange(e, setState)} />
+ *   - <input onChange={() => onChange(['address.name', 'Joe'], setState)} />
  */
-export function onChange<T>(setState: React.Dispatch<React.SetStateAction<T>>, eventOrPathValue: {
-    target: {
-        name: string;
-        value: unknown;
-    };
-} | [string, Function | unknown], beforeSetState?: Function): Promise<T>;
+export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.Dispatch<React.SetStateAction<T>>, beforeSetValue?: (value: unknown) => unknown, beforeSetState?: Function): Promise<T>;
 /**
  * Pads a number
  * @param {number} [num=0]
@@ -594,7 +591,7 @@ export function parseFilters(query: {
  *     sortBy: 'createdAt'
  *   }
  * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
- * @param {number} [limit=10] - if limit is falsy, exclude limit and skip to fetch regardless of pagination
+ * @param {number} [limit=10] - pass 0 to exclude limit/skip, regardless of pagination
  * @param {boolean} [hasMore] - hasMore parameter on parseSortOptions has been deprecated.
  * @example returned object (using the examples above):
  *   E.g. {
@@ -812,6 +809,12 @@ export type Box = {
     bottomLeft: Point;
     topRight: Point;
 };
+export type EventOrPathValue = ({
+    target: {
+        name: string;
+        value: unknown;
+    };
+} | [string, unknown]);
 /**
  * Build image URL from image array or object
  */
