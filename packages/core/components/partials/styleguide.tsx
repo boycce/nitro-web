@@ -130,7 +130,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       e.target.value = null // clear the select's selected value
       setTimeout(() => alert('Adding new customer...'), 0)
     }
-    onChange(setState, e)
+    onChange(e, setState)
   }
 
   const onCustomerSearch = (search: string) => {
@@ -187,7 +187,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         <form class="mb-8 text-left">
           <div>
             <label for="firstName2">First Name</label>
-            <Field name="firstName2" state={state} onChange={(e) => onChange(setState, e)} />
+            <Field name="firstName2" state={state} onChange={(e) => onChange(e, setState)} />
           </div>
           <div>
             <label for="email2">Email Address</label>
@@ -264,7 +264,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           iconPos="left" 
           state={filterState}
           onChange={(e) => {
-            onChange(setFilterState, e)
+            onChange(e, setFilterState)
             filtersRef.current?.submit()
           }}
           placeholder="Linked search bar..."
@@ -301,7 +301,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         <div>
           <label for="input2">Toggles</label>
           <Checkbox name="input2" type="toggle" text="Toggle sm" subtext="some additional text here." class="!mb-0" 
-            state={state} onChange={(e) => onChange(setState, e)} />
+            state={state} onChange={(e) => onChange(e, setState)} />
           <Checkbox name="input3" type="toggle" text="Toggle 22px" subtext="some additional text here." size={22} />
         </div>
         <div>
@@ -350,7 +350,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               { value: 'black', label: 'Black' },
               { value: 'white', label: 'White' },
             ], [])}
-            onChange={(e) => onChange(setState, e)}
+            onChange={(e) => onChange(e, setState)}
           />
         </div>
         <div>
@@ -361,7 +361,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             mode="country"
             state={state} 
             options={useMemo(() => [{ value: 'nz', label: 'New Zealand' }, { value: 'au', label: 'Australia' }], [])} 
-            onChange={(e) => onChange(setState, e)}
+            onChange={(e) => onChange(e, setState)}
           />
         </div>
         <div>
@@ -398,7 +398,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             name="currency"
             state={state} 
             options={useMemo(() => (currencies ? getCurrencyOptions(currencies) : [{ value: 'nzd', label: 'New Zealand Dollar' }, { value: 'aud', label: 'Australian Dollar' }]), [])} 
-            onChange={(e) => onChange(setState, e)}
+            onChange={(e) => onChange(e, setState)}
           />
         </div>
       </div>
@@ -407,7 +407,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="firstName">First Name</label>
-          <Field name="firstName" state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="firstName" state={state} onChange={(e) => onChange(e, setState)} />
         </div>
         <div>
           <label for="email">Email Address</label>
@@ -434,7 +434,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
         <div>
           <label for="address">Input Error</label>
-          <Field name="address" placeholder="Address..." state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="address" placeholder="Address..." state={state} onChange={(e) => onChange(e, setState)} />
         </div>
         <div>
           <label for="description">Description</label>
@@ -442,12 +442,12 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
         <div>
           <label for="brandColor">Brand Color</label>
-          <Field name="brandColor" type="color" iconPos="left" state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="brandColor" type="color" iconPos="left" state={state} onChange={(e) => onChange(e, setState)} />
         </div>
         <div>
           <label for="amount">Amount ({state.amount})</label>
           <Field 
-            name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(setState, e)} 
+            name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(e, setState)} 
             // Example of using a custom format and currencies, e.g. 
             format={'¤#,##0.00'} 
             currencies={currencies} 
@@ -459,7 +459,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       <div class="grid grid-cols-1 gap-x-6 mb-4 sm:grid-cols-3">
         <div>
           <label for="date">Date with time</label>
-          <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)} />
         </div>
         <div>
           <label for="date-range">Date range (with prefix & disabled days)</label>
@@ -469,7 +469,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             mode="range" 
             prefix="Date:" 
             state={state} 
-            onChange={(e) => onChange(setState, e)} 
+            onChange={(e) => onChange(e, setState)} 
             DayPickerProps={{
               disabled: { after: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) }
             }} 
@@ -477,11 +477,11 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
         <div>
           <label for="date">Date multi-select (right aligned)</label>
-          <Field name="date" type="date" mode="multiple" state={state} onChange={(e) => onChange(setState, e)} dir="bottom-right" />
+          <Field name="date" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
         </div>
         <div>
           <label for="time">Time</label>
-          <Field name="time" type="time" state={state} onChange={(e) => onChange(setState, e)}  />
+          <Field name="time" type="time" state={state} onChange={(e) => onChange(e, setState)}  />
         </div>
       </div>
 
@@ -489,13 +489,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       <div class="grid grid-cols-3 gap-x-6 mb-4">
         <div>
           <label for="avatar">Avatar</label>
-          <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(setState, e)} awsUrl={injectedConfig.awsUrl} />
+          <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(e, setState)} awsUrl={injectedConfig.awsUrl} />
         </div>
         <div>
           <label for="calendar">Calendar</label>
           <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
             onChange={(value) => {
-              onChange(setState, { target: { name: 'calendar', value: value } })
+              onChange({ target: { name: 'calendar', value: value } }, setState)
             }} 
           />
         </div>
@@ -508,7 +508,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           type="search"
           state={state}
           placeholder="Basic table filter..."
-          onChange={(e) => onChange(setState, e)} 
+          onChange={(e) => onChange(e, setState)} 
           className="!my-0 [&>input]:font-normal [&>input]:text-xs [&>input]:py-1.5" /////todo: need to allow twmerge here
         />
       </div>
@@ -538,7 +538,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           rowGap={8}
           rowHeightMin={42}
           rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
-          rowOnClick={useCallback((row: QuoteExample) => {setStore(s => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
+          rowOnClick={useCallback((row: QuoteExample) => {setStore((s) => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
           generateCheckboxActions={generateCheckboxActions}
           generateTd={generateTd}
           className="mb-5"

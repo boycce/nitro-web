@@ -1,5 +1,6 @@
 import { Topbar, Field, FormError, Button, request, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
+import { Fragment } from 'react'
 
 type resetInstructionsProps = {
   className?: string,
@@ -29,12 +30,12 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
 
   return (
     <div className={className}>
-      <Topbar title={<>Reset your Password</>} />
+      <Topbar title={<Fragment>Reset your Password</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your email address..." />
         </div>
         
         <div class="mb-14">
@@ -76,16 +77,16 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
 
   return (
     <div className={className}>
-      <Topbar title={<>Reset your Password</>} />
+      <Topbar title={<Fragment>Reset your Password</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="password">Your New Password</label>
-          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(e, setState)} />
         </div>
         <div>
           <label for="password2">Repeat Your New Password</label>
-          <Field name="password2" type="password" state={state} onChange={(e) => onChange(setState, e)} />
+          <Field name="password2" type="password" state={state} onChange={(e) => onChange(e, setState)} />
         </div>
 
         <div class="mb-14">

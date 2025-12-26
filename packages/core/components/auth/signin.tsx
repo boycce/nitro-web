@@ -1,5 +1,6 @@
 import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
+import { Fragment } from 'react'
 
 type signinProps = {
   className?: string,
@@ -58,12 +59,12 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
 
   return (
     <div className={className}>
-      <Topbar title={<>Sign in to your Account</>} />
+      <Topbar title={<Fragment>Sign in to your Account</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)}
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(e, setState)}
             placeholder="Your email address..." />
         </div>
         <div>
@@ -71,7 +72,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
             <label for="password">Password</label>
             <Link to="/reset" class="label underline2">Forgot?</Link>
           </div>
-          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)}/>
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(e, setState)}/>
         </div>
         
         <div class="mb-14">

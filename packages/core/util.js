@@ -1166,60 +1166,62 @@ export function omit (obj, fields) {
 }
 
 /**
- * Updates state from an input event (deep state properties are supported)
- * E.g. setState(s => ({ ...s, [e.target.id]: e.target.value }))
- * 
+ * @typedef {({target: {name: string, value: unknown}} | [string, unknown])} EventOrPathValue
+ */
+
+/**
+ * Automatically updates a state object from a field event by using the input name/value (deep paths supported)
+ * E.g. setState(s => ({ ...s, [e.target.name]: e.target.value }))
  * @template T
+ * @param {EventOrPathValue} eventOrPathValue - The input/select change event or [path, value] to update the state with
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {{target: {name: string, value: unknown}}|[string, function|unknown]} eventOrPathValue 
- *   - The input/select change event or path/value pair to update the state with
+ * @param {(value: unknown) => unknown} [beforeSetValue] - optional function to change the value before setting the state
  * @param {Function} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  * 
- * @example
- *   - <input onChange={(e) => onChange(setState, e)} />
- *   - <input onChange={() => onChange(setState, ['address.name', 'Joe'])} />
+ * @example usage:
+ *   - <input onChange={(e) => onChange(e, setState)} />
+ *   - <input onChange={() => onChange(['address.name', 'Joe'], setState)} />
  */
-export function onChange (setState, eventOrPathValue, beforeSetState) {
-  /** @type {unknown|function} */
+export function onChange (eventOrPathValue, setState, beforeSetValue, beforeSetState) {
+  /** @type {unknown} */
   let value
   /** @type {string} */
   let path = ''
-  /** @type {boolean} */
+  /** @type {boolean | undefined} */
   let hasFiles
   
   if (typeof eventOrPathValue === 'object' && 'target' in eventOrPathValue) {
-    const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target) // we need to assume this is an input
-    path = (element.name || element.id)
+    const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target)
+    path = element.name || element.id || ''
     hasFiles = !!element.files
-    value = element.files
-      ? element.files[0]
-      : typeof element._value !== 'undefined'
-        ? element._value
-        : element.type === 'checkbox'
-          ? element.checked
-          : element.value
-
+    value = (
+      element.files
+        ? element.files[0]
+        : typeof element._value !== 'undefined'
+          ? element._value
+          : element.type === 'checkbox'
+            ? element.checked
+            : element.value
+    )
   } else if (Array.isArray(eventOrPathValue)) {
     path = eventOrPathValue[0]
     value = eventOrPathValue[1]
   }
-  
-  // Removing leading zero(s) on number fields
-  // if (element.type == 'number' && !isFunction(value) && (value||'').match(/^0+([1-9])/)) {
-  //   value = value.replace(/^0+([1-9])/, '$1')
-  // }
 
   // Update state
   return new Promise((resolve) => {
     setState((state) => {
+      const newValue = beforeSetValue ? beforeSetValue(value) : value
+      const baseState = { ...state, ...(hasFiles ? { hasFiles } : {}) }
+
       /** @type {{[key: string]: any}} */
-      const { obj: newState, parent, fieldName } = deepSetWithInfo({ ...state, ...(hasFiles ? { hasFiles } : {}) }, path, value)
-      if (beforeSetState) {
-        beforeSetState({ newState, fieldName, parent })
-      }
-      resolve(/** @type {T} */(newState))
-      return /** @type {T} */(newState)
+      const { obj, parent, fieldName } = deepSetWithInfo(baseState, path, newValue)
+      
+      const newState = beforeSetState ? beforeSetState({ state: obj, parent: parent, key: fieldName }) : obj
+
+      resolve(newState)
+      return newState
     })
   })
 }

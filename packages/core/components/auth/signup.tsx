@@ -1,5 +1,6 @@
 import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
+import { Fragment } from 'react'
 
 type signupProps = {
   className?: string,
@@ -35,29 +36,29 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
   
   return (
     <div className={className}>
-      <Topbar title={<>Start your 21 day Free Trial</>} />
+      <Topbar title={<Fragment>Start your 21 day Free Trial</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="name">Your Name</label>
             <Field name="name" placeholder="E.g. Bruce Wayne" state={state} 
-              onChange={(e) => onChange(setState, e)} 
+              onChange={(e) => onChange(e, setState)} 
               errorTitle={/^(name|firstName|lastName)$/} // if different from `name`
             />
           </div>
           <div>
             <label for="business.name">Company Name</label>
-            <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={(e) => onChange(setState, e)} />
+            <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={(e) => onChange(e, setState)} />
           </div>
         </div>
         <div>
           <label for="email">Email Address</label>
-          <Field name="email" type="email" state={state} onChange={(e) => onChange(setState, e)} placeholder="Your email address..." />
+          <Field name="email" type="email" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your email address..." />
         </div>
         <div>
           <label for="password">Password</label>
-          <Field name="password" type="password" state={state} onChange={(e) => onChange(setState, e)}/>
+          <Field name="password" type="password" state={state} onChange={(e) => onChange(e, setState)}/>
         </div>
         
         <div class="mb-14">
