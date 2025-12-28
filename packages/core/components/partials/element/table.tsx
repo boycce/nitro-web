@@ -238,7 +238,7 @@ export function Table<T extends TableRow>({
                           getAlignClass(col.align),
                           columnClassName,
                           col.className,
-                          isSelected && `bg-gray-50 ${columnSelectedClassName||''}`
+                          isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
                         )}
                       >
                         <div 
