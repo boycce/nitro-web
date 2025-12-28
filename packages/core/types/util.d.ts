@@ -788,12 +788,17 @@ export function toArray<T>(variable: T | undefined): (T extends any[] ? T : T[])
  */
 export function trim(string: string): string;
 /**
+ * Merge class conflicts together, but protect groups of classes from being merged together in the same argument. E.g. `(mb-1 mb-2) mx-1`
+ * @param {string[]} args
+ * @returns {string}
+ */
+export function twMerge(...args: string[]): string;
+/**
  * Capitalize the first letter of a string
  * @param {string} string
  * @returns {string}
  */
 export function ucFirst(string: string): string;
-export const twMerge: (...classLists: import("tailwind-merge").ClassNameValue[]) => string;
 /**
  * Returns a list of response errors
  */
