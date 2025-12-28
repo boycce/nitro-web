@@ -11,14 +11,14 @@
     "./client/imgs/*": "./client/imgs/*",
     "./client/globals": "./client/globals.ts",
     "./server": {
-      "import": "./server/index.js",
+      "import": "./server/index.js", 
       "types": "./types/server/index.d.ts"
     },
     "./types": "./types.ts",
     "./.eslintrc.json": "./.eslintrc.json",
     "./tsconfig.json": "./tsconfig.json",
     "./util": {
-      "import": "./util.js",
+      "import": "./util.js", 
       "types": "./types/util.d.ts"
     }
   },
