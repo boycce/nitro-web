@@ -1877,7 +1877,7 @@ const customTailwindMerge = createTailwindMerge(() => {
 
 /**
  * Merge class conflicts together, but protect groups of classes from being merged together in the same argument. E.g. `(mb-1 mb-2) mx-1`
- * @param {(string|undefined)[]} args
+ * @param {(string|null|undefined|false|0|0n)[]} args  - false, 0, 0n are considered undefined
  * @returns {string}
  */
 export function twMerge(...args) {
