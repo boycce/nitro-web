@@ -1,6 +1,6 @@
 {
   "name": "nitro-web",
-  "version": "0.0.141",
+  "version": "0.0.142",
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
@@ -11,14 +11,14 @@
     "./client/imgs/*": "./client/imgs/*",
     "./client/globals": "./client/globals.ts",
     "./server": {
-      "import": "./server/index.js", 
+      "import": "./server/index.js",
       "types": "./types/server/index.d.ts"
     },
     "./types": "./types.ts",
     "./.eslintrc.json": "./.eslintrc.json",
     "./tsconfig.json": "./tsconfig.json",
     "./util": {
-      "import": "./util.js", 
+      "import": "./util.js",
       "types": "./types/util.d.ts"
     }
   },

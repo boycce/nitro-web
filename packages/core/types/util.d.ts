@@ -789,10 +789,10 @@ export function toArray<T>(variable: T | undefined): (T extends any[] ? T : T[])
 export function trim(string: string): string;
 /**
  * Merge class conflicts together, but protect groups of classes from being merged together in the same argument. E.g. `(mb-1 mb-2) mx-1`
- * @param {(string|undefined)[]} args
+ * @param {(string|null|undefined|false|0|0n)[]} args  - false, 0, 0n are considered undefined
  * @returns {string}
  */
-export function twMerge(...args: (string | undefined)[]): string;
+export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[]): string;
 /**
  * Capitalize the first letter of a string
  * @param {string} string
