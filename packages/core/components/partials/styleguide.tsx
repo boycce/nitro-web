@@ -538,7 +538,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               state={state}
               placeholder="Basic table filter..."
               onChange={(e) => onChange(e, setState)} 
-              className="!my-0 [&>input]:font-normal [&>input]:text-xs [&>input]:py-1.5" /////todo: need to allow twmerge here
+              className="my-0 [&>input]:font-normal [&>input]:text-xs [&>input]:py-1.5"
             />
           </div>
           <Table

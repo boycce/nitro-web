@@ -2,7 +2,7 @@ import _axios from 'axios'
 import axiosRetry from 'axios-retry'
 import dateformat from 'dateformat'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
-import { twMerge as _twMerge } from 'tailwind-merge'
+import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
 
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
@@ -1817,10 +1817,8 @@ export function trim (string) {
   return string.trim().replace(/\n\s+\n/g, '\n\n')
 }
 
-import { createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
-
 // Create a custom twMerge instance
-export const twMerge = createTailwindMerge(() => {
+const customTailwindMerge = createTailwindMerge(() => {
   const config = getDefaultConfig()
 
   /**
@@ -1875,17 +1873,83 @@ export const twMerge = createTailwindMerge(() => {
       'font-size': [...(config.classGroups['font-size'] || []), 'text-button-base', 'text-input-base'],
     },
   }
-  // console.dir(
-  //   newSpacingSizes(['input-x', 'input-y', 'input-before', 'input-after']),
-  //   { depth: null }
-  // )
-  // console.log(customTwMerge('mb-1 mb-2 mb-input-x')) // mb-input-x
-  // console.log(customTwMerge('mb-1 mb-2 my-input-y')) // my-input-y
-  // console.log(customTwMerge('mb-1 my-input-y mb-2')) // my-input-y mb-2 
-  // console.log(customTwMerge('mb-1 my-input-y mb-2 my-input-x')) // my-input-x
-  // console.log(customTwMerge('mx-1 my-input-y mb-2 my-input-x')) // mx-1 my-input-x
-  // console.log(customTwMerge('text-xs text-base text-input text-button-base'))
 })
+
+/**
+ * Merge class conflicts together, but protect groups of classes from being merged together in the same argument. E.g. `(mb-1 mb-2) mx-1`
+ * @param {string[]} args
+ * @returns {string}
+ */
+export function twMerge(...args) {
+  const raw = twJoin(args)
+  if (!raw.includes('(')) return customTailwindMerge(raw)
+
+  // 1) Tokenize: either "(...)" group chunks or normal non-space tokens.
+  /** @type {{ cls: string, groupId: number }[]} */
+  const tokens = []
+  let groupId = 0
+
+  const re = /\(([^()]*)\)|(\S+)/g
+  for (let m; (m = re.exec(raw)); ) {
+    const groupText = m[1]
+    const single = m[2]
+
+    if (groupText != null) {
+      const id = ++groupId
+      for (const cls of groupText.trim().split(/\s+/).filter(Boolean)) {
+        tokens.push({ cls: cls, groupId: id })
+      }
+    } else if (single) {
+      tokens.push({ cls: single, groupId: 0 })
+    }
+  }
+
+  // 3) Merge, except don't merge-away conflicts inside the same "( ... )" group.
+  /** @type {(string|null)[]} */
+  const out = []
+  /** @type {number[]} */
+  const groupIds = []
+
+  for (const t of tokens) {
+    for (let i = out.length - 1; i >= 0; i--) {
+      const prev = out[i]
+      const next = t.cls
+      if (!prev) continue
+
+      // Does next override prev, according to tailwind-merge?
+      const parts = customTailwindMerge(`${prev} ${next}`).trim().split(/\s+/).filter(Boolean)
+      const isOverride = !parts.includes(prev) && parts.includes(next)
+
+      if (isOverride) {
+        const sameProtectedGroup = t.groupId !== 0 && t.groupId === groupIds[i]
+        if (!sameProtectedGroup) out[i] = null
+      }
+    }
+
+    out.push(t.cls)
+    groupIds.push(t.groupId)
+  }
+
+  return out.filter(Boolean).join(' ')
+
+  // const testCases = [
+  //   [['mb-1 mb-2 mb-input-x'], 'mb-input-x'],
+  //   [['mb-1 mb-2 my-input-y'], 'my-input-y'],
+  //   [['mb-1 my-input-y mb-2'], 'my-input-y mb-2'],
+  //   [['mb-1 my-input-y mb-2 my-input-x'], 'my-input-x'],
+  //   [['mx-1 my-input-y mb-2 my-input-x'], 'mx-1 my-input-x'],
+  //   [['text-xs text-nonexistent text-input-base'], 'text-nonexistent text-input-base'],
+  //   [['(mb-1 mb-input-x) mx-1 mx-2', ''], 'mb-1 mb-input-x mx-2'],
+  //   [['(mb-1 mb-input-x) mx-1 mx-2', 'mb-2'], 'mx-2 mb-2'],
+  // ]
+  
+  // testCases.forEach(testCase => {
+  //   const value = twMerge(...testCase[0])
+  //   if (value !== testCase[1]) {
+  //     console.log(`Test: ${testCase[1]}, received: ${value}`)
+  //   }
+  // })
+}
 
 /**
  * Capitalize the first letter of a string

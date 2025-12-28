@@ -157,7 +157,10 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
 
 function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
   return (
-    <div css={style} className={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after grid grid-cols-1 nitro-field ${className || ''}`)}>
+    <div
+      css={style}
+      className={twMerge('(mt-2.5 mb-6 mt-input-before mb-input-after) grid grid-cols-1 nitro-field', className || '')}
+    >
       {children}
       {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
