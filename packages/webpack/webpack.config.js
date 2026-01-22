@@ -28,6 +28,16 @@ const nitroVersion = _require('./package.json').version
 //   retryCondition: (e) =>  e.code == 'ECONNREFUSED',
 // })
 
+// Patch console.warn to stop optimizeUniversalDefaults polluting output during bundling.
+// https://github.com/tailwindlabs/tailwindcss/blob/v3/src/featureFlags.js#L55
+// https://github.com/tailwindlabs/tailwindcss/blob/v3/src/util/log.js#L12
+const warnOriginal = console.warn
+console.warn = (arg1, arg2, arg3, ...args) => {
+  if (!arg1) return // remove empty console.warn
+  else if (typeof arg3 === 'string' && arg3.match(/experimental/i)) return // remove main messages
+  else warnOriginal(arg1, arg2, arg3, ...args)
+}
+
 // process.traceDeprecation = true
 export const getConfig = (config) => {
   const { client, name='', pwd, env='development', homepage, publicPath, version } = config
