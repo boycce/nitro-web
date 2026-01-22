@@ -150,7 +150,7 @@ export function FieldDate({
       minWidth={0}
       menuContent={
         <div className="flex">
-          <Calendar 
+          <Calendar
             // Calendar actually accepts an array of dates, but the type is not typed correctly
             {...{ mode: mode, value: validDates as any, numberOfMonths: numberOfMonths, month: month }}
             {...DayPickerProps}
@@ -158,7 +158,10 @@ export function FieldDate({
             onChange={onCalendarChange} 
             className="pt-1 pb-2 px-3" 
           />
-          {!!showTime && mode == 'single' && <TimePicker date={validDates?.[0] ?? undefined} onChange={onCalendarChange} />}
+          {
+            !!showTime && mode == 'single' &&
+            <TimePicker date={validDates?.[0] ?? undefined} onChange={onCalendarChange} className="border-l border-gray-100 min-h-[0]" />
+          }
         </div>
       }
       dir={dir}

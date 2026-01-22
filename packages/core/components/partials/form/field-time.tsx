@@ -1,5 +1,5 @@
 import { format, parse } from 'date-fns'
-import { Button, Dropdown } from 'nitro-web'
+import { Button, Dropdown, twMerge } from 'nitro-web'
 import { dayButtonClassName } from '../element/calendar'
 
 type Timestamp = number // timestamp on epoch day
@@ -19,6 +19,7 @@ type TimePickerProps = {
   date?: Date
   onChange: (value: Timestamp) => void
   // tz?: string
+  className?: string
 }
 
 export function FieldTime({ onChange, value, Icon, dir = 'bottom-left', ...props }: FieldTimeProps) {
@@ -107,7 +108,7 @@ export function FieldTime({ onChange, value, Icon, dir = 'bottom-left', ...props
   )
 }
 
-export function TimePicker({ date, onChange }: TimePickerProps) {
+export function TimePicker({ date, onChange, className }: TimePickerProps) {
   const refs = {
     hour: useRef<HTMLDivElement>(null),
     minute: useRef<HTMLDivElement>(null),
@@ -174,41 +175,44 @@ export function TimePicker({ date, onChange }: TimePickerProps) {
   }
 
   return (
-    lists.map((list, i) => {
-      const type = i === 0 ? 'hour' : i === 1 ? 'minute' : 'period'
-      const currentValue = i === 0 ? hour : i === 1 ? minute : period
-
-      return (
-        <div 
-          key={i}
-          ref={refs[type]}
-          className="w-[60px] relative overflow-hidden hover:overflow-y-auto border-l border-gray-100 sm-scrollbar first:border-l-0"
-        >
-          <div className="w-[60px] absolute flex flex-col items-center py-2">
-            {/* using absolute since the scrollbar takes up space  */}
-            {list.map(item => (
-              <div 
-                className="py-[1px] flex group cursor-pointer"
-                data-val={item}
-                key={item}
-                onClick={(_e) => {
-                  handleTimeChange(type, item)
-                }}
-              >
-                <button 
-                  key={item}
-                  className={
-                    `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-gray-100 `
-                    + (item === currentValue ? '!bg-input-border-focus text-white' : '')
-                  }
-                >
-                  {item.toString().padStart(2, '0').toLowerCase()}
-                </button>
+    <div className={twMerge('flex justify-center min-h-[250px]', className)}>
+      {
+        lists.map((list, i) => {
+          const type = i === 0 ? 'hour' : i === 1 ? 'minute' : 'period'
+          const currentValue = i === 0 ? hour : i === 1 ? minute : period
+          return (
+            <div 
+              key={i}
+              ref={refs[type]}
+              className="w-[60px] relative overflow-hidden hover:overflow-y-auto border-l border-gray-100 sm-scrollbar first:border-l-0"
+            >
+              <div className="w-[60px] absolute flex flex-col items-center py-2">
+                {/* using absolute since the scrollbar takes up space  */}
+                {list.map(item => (
+                  <div 
+                    className="py-[1px] flex group cursor-pointer"
+                    data-val={item}
+                    key={item}
+                    onClick={(_e) => {
+                      handleTimeChange(type, item)
+                    }}
+                  >
+                    <button 
+                      key={item}
+                      className={
+                        `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-gray-100 `
+                        + (item === currentValue ? '!bg-input-border-focus text-white' : '')
+                      }
+                    >
+                      {item.toString().padStart(2, '0').toLowerCase()}
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )
-    })
+            </div>
+          )
+        })
+      }
+    </div>
   )
 }

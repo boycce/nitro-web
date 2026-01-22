@@ -5,6 +5,8 @@ import {
 import { date, getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
 
+import { TimePicker } from './form/field-time'
+
 const perPage = 10
 const statusColors = function(status: string) {
   return {
@@ -60,7 +62,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     date: Date.now(),
     'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
     'date-time': Date.now(),
-    time: null,
+    time: undefined,
     calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
     firstName: 'Bruce',
     tableFilter: '',
@@ -480,7 +482,9 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
             <div>
               <label for="date">Date with time</label>
-              <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)} />
+              <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)} 
+                // DropdownProps={{ menuIsOpen: true }} 
+              />
             </div>
             <div>
               <label for="date-range">Date range (with prefix & disabled days)</label>
@@ -503,6 +507,12 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             <div>
               <label for="time">Time</label>
               <Field name="time" type="time" state={state} onChange={(e) => onChange(e, setState)}  />
+            </div>
+            <div>
+              <label for="time">Standalone TimePicker</label>
+              <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2">
+                <TimePicker date={state.time || new Date()} onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} className="min-h-[150]" />
+              </div>
             </div>
           </div>
         </div>

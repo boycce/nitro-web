@@ -159,6 +159,7 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
   return (
     <div
       css={style}
+      // todo: add (mt-2.5 mb-6 mt-input-before mb-input-after) as export? fieldSpacing?
       className={twMerge('(mt-2.5 mb-6 mt-input-before mb-input-after) grid grid-cols-1 nitro-field', className || '')}
     >
       {children}
