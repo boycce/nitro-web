@@ -1,6 +1,7 @@
-import { JSX, useState, useCallback, Fragment } from 'react'
+import { JSX, useState, useCallback, Fragment, useMemo, useEffect } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { Checkbox, queryObject, queryString, twMerge } from 'nitro-web'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 export type TableRowType = 'row' | 'loading' | 'empty' | 'thead'
 
@@ -78,6 +79,11 @@ export function Table<T extends TableRow>({
     'first:border-l last:border-r border-t-0 box-border'
   const [rand] = useState(() => new Date().getTime() + Math.random())
 
+  const rowsToRender = useMemo(() => {
+    // 1) Only show the first row when loading (content hidden), 2) an empty row when there are no records, or all rows
+    return rows.length > 0 ? (isLoading ? rows.slice(0, 1) : rows) : [{ _id: '' }] as unknown as T[]
+  }, [rows, isLoading])
+
   const columns = useMemo(() => {
     const checkboxCol: TableColumn = { value: 'checkbox', label: '', disableSort: true }
     const cols = (generateCheckboxActions ? [checkboxCol, ...columnsProp] : columnsProp).map((col, _i) => ({
@@ -92,7 +98,7 @@ export function Table<T extends TableRow>({
 
   const onSelect = useCallback((idOrAll: string, checked: boolean) => {
     setSelectedRowIds((o) => {
-      if (idOrAll == 'all' && checked) return (rows ?? []).map(row => row?._id||'')
+      if (idOrAll == 'all' && checked) return (rows ?? []).map(row => row._id || '')
       else if (idOrAll == 'all' && !checked) return []
       else if (o.includes(idOrAll) && !checked) return o.filter(id => id != idOrAll)
       else if (!o.includes(idOrAll) && checked) return [...o, idOrAll]
@@ -106,7 +112,7 @@ export function Table<T extends TableRow>({
   }, [])
 
   // Reset selected rows when the location changes, or the number of rows changed (e.g. when a row is removed)
-  useEffect(() => setSelectedRowIds([]), [location.key, (rows ?? []).map(row => row?._id||'').join(',')])
+  useEffect(() => setSelectedRowIds([]), [location.key, (rows ?? []).map(row => row._id || '').join(',')])
 
   // --- Sorting ---
 
@@ -124,8 +130,8 @@ export function Table<T extends TableRow>({
     navigate(location.pathname + queryStr, { replace: true })
   }, [location.pathname, query, sort, sortBy])
 
-  const getColumnPadding = useCallback((j: number, row: T|undefined, type: TableRowType) => {
-    const sideColor = j == 0 && rowSideColor ? rowSideColor(row, type) : undefined
+  const getColumnPadding = useCallback((j: number, row: T|undefined, rowType: TableRowType) => {
+    const sideColor = j == 0 && rowSideColor ? rowSideColor(row, rowType) : undefined
     const sideColorPadding = sideColor /*&& rows.length > 0*/ ? sideColor.width + 5 : 0
     const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
     const pr = j == columns.length - 1 ? columnPaddingX : columnGap
@@ -214,8 +220,8 @@ export function Table<T extends TableRow>({
         </div>
         {/* Tbody rows */}
         {
-          !isLoading && rows.map((row: T, i: number) => {
-            const isSelected = selectedRowIds.includes(row?._id||'')
+          rowsToRender.map((row: T, i: number) => {
+            const isSelected = selectedRowIds.includes(row._id || '')
             return (
               <div 
                 key={`${row._id}-${i}`}
@@ -227,7 +233,8 @@ export function Table<T extends TableRow>({
               >
                 {
                   columns.map((col, j) => {
-                    const { pl, pr, sideColor } = getColumnPadding(j, row, 'row')
+                    const rowType = row._id ? 'row' : isLoading ? 'loading' : 'empty'
+                    const { pl, pr, sideColor } = getColumnPadding(j, isLoading ? undefined : row, rowType)
                     if (col.isHidden) return <Fragment key={j} />
                     return (
                       <div
@@ -260,18 +267,31 @@ export function Table<T extends TableRow>({
                             />
                           }
                           {
-                            col.value == 'checkbox' 
-                              ? <Checkbox 
-                                  size={checkboxSize} 
-                                  name={`checkbox-${row._id}`} 
-                                  onChange={(e) => onSelect(row?._id || '', e.target.checked)}
-                                  checked={selectedRowIds.includes(row?._id || '')}
-                                  onClick={(e) => e.stopPropagation()}
-                                  hitboxPadding={5}
-                                  className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
-                                  checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
-                                />
-                              : generateTd(col, row, i, i == rows.length - 1)
+                            // Rows (content hidden when loading)
+                            row._id &&
+                            <div className={isLoading ? 'opacity-0 pointer-events-none' : ''}>
+                              {
+                                col.value == 'checkbox'
+                                  ? <Checkbox 
+                                      size={checkboxSize} 
+                                      name={`checkbox-${row._id}`} 
+                                      onChange={(e) => onSelect(row?._id || '', e.target.checked)}
+                                      checked={selectedRowIds.includes(row?._id || '')}
+                                      onClick={(e) => e.stopPropagation()}
+                                      hitboxPadding={5}
+                                      className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
+                                      checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
+                                    />
+                                  : generateTd(col, row, i, i == rows.length - 1)
+                              }
+                            </div>
+                          }
+                          {
+                            // Show "loading" or "no records" text in the first column
+                            j == 0 && (isLoading || !row._id) &&
+                            <div className={'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500'}>
+                              { isLoading ? <>Loading<span className="relative ml-[2px] loading-dots" /></> : 'No records found.' }
+                            </div>
                           }
                         </div>
                       </div>
@@ -281,39 +301,6 @@ export function Table<T extends TableRow>({
               </div>
             )
           })
-        }
-        {
-          (isLoading || rows.length == 0) &&
-          <div className='table-row relative'>
-            {
-              columns.map((col, j) => {
-                const { pl, pr, sideColor } = getColumnPadding(j, undefined, isLoading ? 'loading' : 'empty')
-                return (
-                  <div
-                    key={j}
-                    style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
-                    className={twMerge(_columnClassName, columnClassName, col.className)}
-                  >
-                    {
-                      sideColor && 
-                      <div 
-                        className={`absolute top-0 left-0 h-full ${sideColor?.className||''}`} 
-                        style={{ width: sideColor.width }}
-                      />
-                    }
-                    <div
-                      className={twMerge(
-                        'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500',
-                        col.innerClassName
-                      )}
-                    >
-                      { j == 0 && (isLoading ? <>Loading<span className="relative ml-[2px] loading-dots" /></> : 'No records found.') }
-                    </div>
-                  </div>
-                )
-              })
-            }
-          </div>
         }
       </div>
     </div>
