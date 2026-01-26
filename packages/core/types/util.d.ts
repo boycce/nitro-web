@@ -111,17 +111,12 @@ export function currency(cents: number, decimals?: number, decimalsMinimum?: num
 export function currencyToCents(currency: string): string;
 /**
  * Returns a formatted date string
- * @param {number|Date} [date] - number can be in seconds or milliseconds (UTC)
- * @param {string} [format] - e.g. "dd mmmm yy" (https://github.com/felixge/node-dateformat#mask-options)
+ * @param {number|Date} [date] - timestamp or date
+ * @param {string} [pattern] - e.g. "dd mmmm yy" (https://date-fns.org/v4.1.0/docs/format#)
  * @param {string} [timezone] - convert a UTC date to a particular timezone.
  * @returns {string}
- *
- * Note on the timezone conversion:
- * Timezone conversion relies on parsing the toLocaleString result, e.g. 4/10/2012, 5:10:30 PM.
- * A older browser may not accept en-US formatted date string to its Date constructor, and it may
- * return unexpected result (it may ignore daylight saving).
  */
-export function date(date?: number | Date, format?: string, timezone?: string): string;
+export function date(date?: number | Date, pattern?: string, timezone?: string): string;
 /**
  * @template {(...args: any[]) => any} T
  * Creates a debounced function that delays invoking `func` until after `wait`
