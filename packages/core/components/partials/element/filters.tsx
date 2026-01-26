@@ -15,7 +15,7 @@ export type FilterType = (
 )
 
 type FilterState = {
-  [key: string]: unknown
+  [key: string]: any
 }
 
 type FiltersProps = {
@@ -35,10 +35,6 @@ type FiltersProps = {
   buttonCounterClassName?: string
   dropdownProps?: Partial<React.ComponentProps<typeof Dropdown>>
   dropdownFiltersClassName?: string
-}
-
-export type FiltersHandleType = {
-  submit: (includePagination?: boolean) => void
 }
 
 const debounceTime = 250
