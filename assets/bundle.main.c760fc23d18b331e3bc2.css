@@ -1341,9 +1341,6 @@ label, .label {
 .h-\[1rem\] {
   height: 1rem;
 }
-.h-\[250px\] {
-  height: 250px;
-}
 .h-\[25px\] {
   height: 25px;
 }
@@ -1371,11 +1368,20 @@ label, .label {
 .min-h-12 {
   min-height: 3rem;
 }
+.min-h-\[0\] {
+  min-height: 0;
+}
 .min-h-\[1\.4em\] {
   min-height: 1.4em;
 }
 .min-h-\[100\%\] {
   min-height: 100%;
+}
+.min-h-\[150\] {
+  min-height: 150;
+}
+.min-h-\[250px\] {
+  min-height: 250px;
 }
 .min-h-\[300px\] {
   min-height: 300px;
