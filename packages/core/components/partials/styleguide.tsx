@@ -95,7 +95,8 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     }
   }
 
-  function indirectlyChangeTheState() {
+  function indirectlyChangeTheState(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault()
     // Change the state indirectly to test the inputs reactivity
     setState((s: typeof state) => { 
       if (s.firstName == 'Bruce') return getState(true)
