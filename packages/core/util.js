@@ -3,6 +3,7 @@ import axiosRetry from 'axios-retry'
 import { format } from 'date-fns'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
+export { TZDate } from '@date-fns/tz'
 
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
