@@ -15,128 +15,74 @@ type NumericFormatProps = React.InputHTMLAttributes<HTMLInputElement> & {
   prefix?: string;
 }
 
-export type FieldCurrencyProps = NumericFormatProps & {
+type Currencies = { [key: string]: { symbol: string, digits: number } }
+type Cents = string|number|null
+export type FieldCurrencyProps = Omit<NumericFormatProps, 'onChange' | 'value' | 'defaultValue'> & {
   name: string
   /** name is applied if id is not provided */
   id?: string
   /** currency iso, e.g. 'nzd' */
   currency: string
   /** override the default currencies array used to lookup currency symbol and digits, e.g. {nzd: { symbol: '$', digits: 2 }} */
-  currencies?: { [key: string]: { symbol: string, digits: number } }, 
+  currencies?: Currencies, 
   /** override the default CLDR country currency format, e.g. '¤#,##0.00' */
   format?: string, 
-  onChange?: (event: { target: { name: string, value: string|number|null } }) => void
+  onChange?: (event: { target: { name: string, value: Cents } }) => void
   /** value should be in cents */
-  value?: string|number|null
-  defaultValue?: number | string | null
+  value?: Cents
+  defaultValue?: Cents // defined to just fix typescript error
 }
 
-export function FieldCurrency({ currency='nzd', currencies, format, onChange, value, defaultValue, ...props }: FieldCurrencyProps) {
+export function FieldCurrency({ currency='nzd', currencies, format, onChange: onChangeProp, ...props }: FieldCurrencyProps) {
   const [dontFix, setDontFix] = useState(false)
-  const [settings, setSettings] = useState(() => getCurrencySettings(currency))
-  const [dollars, setDollars] = useState(() => toDollars(value, true, settings))
+  const [lastBlurred, setLastBlurred] = useState(0)
+  const [settings, setSettings] = useState(() => getCurrencySettings(currency, currencies, format, props.name))
   const [prefixWidth, setPrefixWidth] = useState(0)
-  const ref = useRef({ settings, dontFix }) // was null
+  const ref = useRef({ dontFix }) // was null
   const id = props.id || props.name
-  ref.current = { settings, dontFix }
+  ref.current = { dontFix }
 
+  // Since value and onChange are optional, we need need to create an internal value state
+  const [internalValue, setInternalValue] = useState<FieldCurrencyProps['value']>(props.value ?? props.defaultValue)
+  const inputValue = useMemo(() => to('dollars', internalValue, settings), [internalValue, settings.key, lastBlurred])
+  
+  // Update the internal value when the value changes outside of the component
   useEffect(() => {
-    if (settings.currency !== currency) {
-      const settings = getCurrencySettings(currency)
-      setSettings(settings)
-      setDollars(toDollars(value, true, settings)) // required latest _settings
-    }
-  }, [currency])
+    if (internalValue !== (props.value ?? props.defaultValue)) setInternalValue(props.value ?? props.defaultValue)
+  }, [props.value])
 
+  // Update the settings if the setting parameters change
   useEffect(() => {
-    if (ref.current.dontFix) {
-      setDollars(toDollars(value))
-      setDontFix(false)
-    } else {
-      setDollars(toDollars(value, true))
-    }
-  }, [value])
+    const _settings = getCurrencySettings(currency, currencies, format, props.name)
+    if (settings.key !== _settings.key) setSettings(_settings)
+  }, [currency, currencies, format])
 
+  // Get the prefix content width
   useEffect(() => {
-    // Get the prefix content width
     setPrefixWidth(settings.prefix ? getPrefixWidth(settings.prefix, 1) : 0)
   }, [settings.prefix])
 
-  function toCents(value?: string|number|null) {
-    const maxDecimals = ref.current.settings.maxDecimals
+  function to(type: 'dollars' | 'cents', value?: Cents, settings?: { maxDecimals?: number }) {
+    const maxDecimals = settings?.maxDecimals
     const parsed = parseFloat(value + '')
     if (!parsed && parsed !== 0) return null
     if (!maxDecimals) return parsed
-    const value2 = Math.round(parsed * Math.pow(10, maxDecimals)) // e.g. 1.23 => 123
-    // console.log('toCents', parsed, value2)
-    return value2
+
+    const value2 = type === 'dollars' 
+      ? parsed / Math.pow(10, maxDecimals) 
+      : parsed * Math.pow(10, maxDecimals) // e.g. 1.23 => 123
+
+    // dont fix when the user is typing.
+    if (type === 'dollars' && ref.current.dontFix) { setDontFix(false) }
+
+    // console.log('to', type, value, value2)
+    return type === 'cents' || ref.current.dontFix ? value2 : value2.toFixed(maxDecimals)
   }
 
-  function toDollars(value?: string|number|null, toFixed?: boolean, settings?: { maxDecimals?: number }) {
-    const maxDecimals = (settings || ref.current.settings).maxDecimals
-    const parsed = parseFloat(value + '')
-    if (!parsed && parsed !== 0) return null
-    if (!maxDecimals) return parsed
-    const value2 = parsed / Math.pow(10, maxDecimals) // e.g. 1.23 => 123
-    // console.log('toDollars', value, value2)
-    return toFixed ? value2.toFixed(maxDecimals) : value2
-  }
-
-  function getCurrencySettings(currency: string) {
-    // parse CLDR currency string format, e.g. '¤#,##0.00'
-    const output: { 
-      currency: string,           // e.g. 'nzd'
-      decimalSeparator?: string,  // e.g. '.'
-      thousandSeparator?: string, // e.g. ','
-      minDecimals?: number,       // e.g. 2
-      maxDecimals?: number,       // e.g. 2
-      prefix?: string,            // e.g. '$'
-      suffix?: string             // e.g. ''
-    } = { currency }
-
-    let _format = format || defaultFormat
-    const _currencies = currencies ?? defaultCurrencies
-    const currencyObject = _currencies[currency as keyof typeof _currencies]
-    if (!currencyObject && currencies) {
-      console.error(
-        `The currency field "${props.name}" is using the currency "${currency}" which is not found in your currencies object`
-      )
-    } else if (!currencyObject && !currencies) {
-      console.error(
-        `The currency field "${props.name}" is using the currency "${currency}" which is not found in the 
-        default currencies, please provide a currencies object.`
-      )
-    }
-    const symbol = currencyObject ? currencyObject.symbol : ''
-    const digits = currencyObject ? currencyObject.digits : 2
-
-    // Check for currency symbol (¤) and determine its position
-    if (_format.indexOf('¤') !== -1) {
-      const position = _format.indexOf('¤') === 0 ? 'prefix' : 'suffix'
-      output[position] = symbol
-      _format = _format.replace('¤', '')
-    }
-
-    // Find and set the thousands separator
-    const thousandMatch = _format.match(/[^0-9#]/)
-    if (thousandMatch) output.thousandSeparator = thousandMatch[0]
-
-    // Find and set the decimal separator and fraction digits
-    const decimalMatch = _format.match(/0[^0-9]/)
-    if (decimalMatch) {
-      output.decimalSeparator = decimalMatch[0].slice(1)
-      if (typeof digits !== 'undefined') {
-        output.minDecimals = digits
-        output.maxDecimals = digits
-      } else {
-        const fractionDigits = _format.split(output.decimalSeparator)[1]
-        if (fractionDigits) {
-          output.minDecimals = fractionDigits.length 
-          output.maxDecimals = fractionDigits.length
-        }
-      }
-    }
-    return output
+  function onChange(source: 'event' | 'prop', floatValue?: number) {
+    if (source === 'event') setDontFix(true)
+    if (onChangeProp) onChangeProp({ target: { name: props.name, value: to('cents', floatValue, settings) }})
+    else setInternalValue(to('cents', floatValue, settings))
   }
 
   return (
@@ -148,25 +94,85 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange, va
         decimalSeparator={settings.decimalSeparator}
         thousandSeparator={settings.thousandSeparator}
         decimalScale={settings.maxDecimals}
-        onValueChange={!onChange ? undefined : ({ floatValue }, e) => {
-          // console.log('onValueChange', floatValue, e)
-          if (e.source === 'event') setDontFix(true)
-          onChange({ target: { name: props.name, value: toCents(floatValue) }})
-        }}
-        onBlur={() => { setDollars(toDollars(value, true))}}
+        onValueChange={({ floatValue }, e) => onChange(e.source, floatValue)}
+        onBlur={() => { setLastBlurred(Date.now())}}
         placeholder={props.placeholder || '0.00'}
-        value={dollars}
+        value={inputValue}
         style={{ textIndent: `${prefixWidth}px` }}
         type="text"
-        defaultValue={defaultValue}
       />
       <span
-        class={`absolute top-0 bottom-0 left-[12px] left-input-x inline-flex items-center select-none text-gray-500 text-input-base ${dollars !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
+        class={`absolute top-0 bottom-0 left-[12px] left-input-x inline-flex items-center select-none text-gray-500 text-input-base ${inputValue !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
       >
         {settings.prefix || settings.suffix}
       </span>
     </div>
   )
+}
+
+function getCurrencySettings(currency: string, currencies?: Currencies, format?: string, name?: string) {
+  // parse CLDR currency string format, e.g. '¤#,##0.00'
+  const output: { 
+    key?: string               
+    currency: string,           // e.g. 'nzd'
+    decimalSeparator?: string,  // e.g. '.'
+    thousandSeparator?: string, // e.g. ','
+    minDecimals?: number,       // e.g. 2
+    maxDecimals?: number,       // e.g. 2
+    prefix?: string,            // e.g. '$'
+    suffix?: string             // e.g. ''
+  } = { currency }
+
+  let _format = format || defaultFormat
+  const _currencies = currencies ?? defaultCurrencies
+  const currencyObject = _currencies[currency as keyof typeof _currencies]
+  if (!currencyObject && currencies) {
+    console.error(
+      `The currency field "${name||''}" is using the currency "${currency}" which is not found in your currencies object`
+    )
+  } else if (!currencyObject && !currencies) {
+    console.error(
+      `The currency field "${name||''}" is using the currency "${currency}" which is not found in the 
+      default currencies, please provide a currencies object.`
+    )
+  }
+  const symbol = currencyObject ? currencyObject.symbol : ''
+  const digits = currencyObject ? currencyObject.digits : 2
+
+  // Check for currency symbol (¤) and determine its position
+  if (_format.indexOf('¤') !== -1) {
+    const position = _format.indexOf('¤') === 0 ? 'prefix' : 'suffix'
+    output[position] = symbol
+    _format = _format.replace('¤', '')
+  }
+
+  // Find and set the thousands separator
+  const thousandMatch = _format.match(/[^0-9#]/)
+  if (thousandMatch) output.thousandSeparator = thousandMatch[0]
+
+  // Find and set the decimal separator and fraction digits
+  const decimalMatch = _format.match(/0[^0-9]/)
+  if (decimalMatch) {
+    output.decimalSeparator = decimalMatch[0].slice(1)
+    if (typeof digits !== 'undefined') {
+      output.minDecimals = digits
+      output.maxDecimals = digits
+    } else {
+      const fractionDigits = _format.split(output.decimalSeparator)[1]
+      if (fractionDigits) {
+        output.minDecimals = fractionDigits.length 
+        output.maxDecimals = fractionDigits.length
+      }
+    }
+  }
+
+  // create stable key from final output
+  output.key = Object.keys(output)
+    .filter(k => k !== 'key')
+    .sort()
+    .map(k => `${k}:${output[k as keyof typeof output] ?? ''}`)
+    .join('|')
+  return output
 }
 
 export const defaultCurrencies: { [key: string]: { name: string, symbol: string, digits: number } } = {

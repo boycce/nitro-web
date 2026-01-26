@@ -1,4 +1,5 @@
-import { forwardRef, Dispatch, SetStateAction, useRef, useEffect, useImperativeHandle } from 'react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dispatch, SetStateAction, useRef, useEffect, useLayoutEffect } from 'react'
 import { Button, Dropdown, Field, Select, type FieldProps, type SelectProps } from 'nitro-web'
 import { camelCaseToTitle, debounce, omit, queryString, queryObject, twMerge } from 'nitro-web/util'
 import { ListFilterIcon } from 'lucide-react'
@@ -14,10 +15,11 @@ export type FilterType = (
 )
 
 type FilterState = {
-  [key: string]: string|true|(string|true)[] // aka queryObject
+  [key: string]: unknown
 }
 
 type FiltersProps = {
+  /** State passed to the component, values must be processed, i.e. real numbers for dates, etc. */
   state?: FilterState
   setState?: Dispatch<SetStateAction<FilterState>>
   filters?: FilterType[]
@@ -41,26 +43,23 @@ export type FiltersHandleType = {
 
 const debounceTime = 250
 
-export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({ 
+export function Filters({ 
   filters, 
   setState: setStateProp,
-  state: stateProp,
+  state: stateProp, // state passed
   buttonProps,
   buttonCounterClassName,
   buttonText, 
   dropdownProps, 
   dropdownFiltersClassName,
   elements,
-}, ref) => {
+}: FiltersProps) {
   const location = useLocation()
-  const navigate = useNavigate()
   const [lastUpdated, setLastUpdated] = useState(0)
-  const [debouncedSubmit] = useState(() => debounce(submit, debounceTime))
-  const [stateDefault, setStateDefault] = useState(() => ({ ...queryObject(location.search) }))
+  const [stateDefault, setStateDefault] = useState<FilterState>(() => processState({ ...queryObject(location.search) }, filters))
   const [state, setState] = [stateProp || stateDefault, setStateProp || setStateDefault]
-  const stateRef = useRef(state)
-  const locationRef = useRef(location)
   const count = useMemo(() => Object.keys(state).filter((k) => state[k] && filters?.some((f) => f.name === k)).length, [state, filters])
+  const pushChangesToPath = usePushChangesToPath(state)
 
   const Elements = {
     Button: elements?.Button || Button,
@@ -69,29 +68,11 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     Select: elements?.Select || Select,
     FilterIcon: elements?.FilterIcon || ListFilterIcon,
   }
-
-  useImperativeHandle(ref, () => ({
-    submit: debouncedSubmit,
-  }))
   
-  useEffect(() => {
-    return () => debouncedSubmit.cancel()
-  }, [])
-  
-  useEffect(() => {
-    stateRef.current = state
-  }, [state])
-  
-  useEffect(() => {
-    locationRef.current = location
-  }, [location])
-
-  useEffect(() => {
-    // Only update the state if the filters haven't been input changed in the last 500ms
+  useLayoutEffect(() => {
+    // Only update the state if the filters haven't been input changed in the last 500ms (calls initially since lastUpdated is 0)
     if (Date.now() - lastUpdated > (debounceTime + 250)) {
-      setState(() => ({
-        ...queryObject(location.search),
-      }))
+      setState(() => processState({ ...queryObject(location.search) }, filters))
     }
   }, [location.search])
 
@@ -110,21 +91,15 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
   async function onInputChange(e: {target: {name: string, value: unknown}}) {
     // console.log('onInputChange', e.target.name, e.target.value)
     // the state is flattened for the query string, so here we se full paths as the key names e.g. 'job.location': '10')
-    setState((s) => ({ ...s, [e.target.name]: e.target.value as string })) 
+    setState((s) => ({ ...s, [e.target.name]: e.target.value as unknown })) 
     onAfterChange()
   }
 
   function onAfterChange() {
     setLastUpdated(Date.now())
-    debouncedSubmit()
+    pushChangesToPath()
   }
 
-  // Update the URL by replacing the current entry in the history stack
-  function submit(includePagination?: boolean) {
-    const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
-    navigate(locationRef.current.pathname + queryStr, { replace: true })
-  }
-  
   function getBasisWidth(width: 'full' | 'half' | 'third' | 'quarter' | 'fifth') {
     // Need to splay out the classnames for tailwind to work
     if (width == 'full') return 'w-full'
@@ -132,6 +107,40 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
     else if (width == 'third') return 'shrink basis-[calc(33.33%-8px)]'
     else if (width == 'quarter') return 'shrink basis-[calc(25%-8px)]'
     else if (width == 'fifth') return 'shrink basis-[calc(20%-8px)]'
+  }
+
+  function processState(state: FilterState, filters: FilterType[]|undefined) {
+    // Since queryObject returns a string|true|(string|true)[], we need to parse the values to the correct type for the Fields/Selects
+    const output: FilterState = {...state}
+    for (const filter of filters || []) {
+      const name = filter.name
+      // Undefined values
+      if (typeof state[name] === 'undefined') {
+        output[name] = undefined
+      
+      // Date single needs to be null|string
+      } else if (filter.type === 'date' && (filter.mode === 'single' || filter.mode === 'time')) {
+        output[name] = parseDateValue(state[name], name)
+
+      } else if (filter.type === 'date' && (filter.mode === 'range' || filter.mode === 'multiple')) {
+        if (!state[name]) state[name] = undefined
+        else if (!Array.isArray(state[name])) console.error(`The "${name}" filter expected an array, received:`, state[name])
+        else output[name] = state[name].map((v, i) => parseDateValue(v, name + '.' + i))
+
+      // Remaining filters should accept text values
+      } else {
+        output[filter.name] = state[filter.name] + ''
+      }
+    }
+    return output
+  }
+
+  function parseDateValue(input: unknown, name: string) {
+    const number = parseFloat(input + '')
+    if (typeof input === 'undefined') return undefined
+    else if (input === null) return null
+    if (isNaN(number)) console.error(`The "${name}" filter expected a number, received:`, input)
+    else return number
   }
 
   return (
@@ -153,35 +162,26 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
           </div> */}
           <div class={twMerge(`flex flex-wrap gap-[16px] p-[16px] pb-6 ${dropdownFiltersClassName || ''}`)}>
             {
-              filters?.map(({label, width='full', rowClassName, ...filter}, i) => (
-                <div key={i} class={twMerge(getBasisWidth(width), rowClassName || '')}>
-                  <div class="flex justify-between"> 
-                    <label for={filter.id || filter.name}>{label || camelCaseToTitle(filter.name)}</label>
-                    <a href="#" class="label font-normal text-secondary underline" onClick={(e) => reset(e, filter)}>Reset</a>
+              filters?.map(({label, width='full', rowClassName, ...filter}, i) => {
+                // `filter.name` is a full path e.g. 'job.location', not just the key `location`
+                const common = { className: '!mb-0', onChange: onInputChange  }
+                return (
+                  <div key={i} class={twMerge(getBasisWidth(width), rowClassName || '')}>
+                    <div class="flex justify-between"> 
+                      <label for={filter.id || filter.name}>{label || camelCaseToTitle(filter.name)}</label>
+                      <a href="#" class="label font-normal text-secondary underline" onClick={(e) => reset(e, filter)}>Reset</a>
+                    </div>
+                    {
+                      // Note: ignore typings for field, it has been sanitised in processState()
+                      filter.type === 'select' 
+                        ? <Elements.Select {...filter} {...common} value={state[filter.name] ?? ''} type={undefined} />
+                        : filter.type === 'date' 
+                          ? <Elements.Field {...filter} {...common} value={state[filter.name] as null ?? null} /> 
+                          : <Elements.Field {...filter} {...common} value={state[filter.name] as string ?? ''} />
+                    }
                   </div>
-                  {
-                    filter.type === 'select' && 
-                    <Elements.Select
-                      {...filter}
-                      class="!mb-0"
-                      // `filter.name` is a full path e.g. 'job.location', not just the key `location`
-                      value={typeof state[filter.name] === 'undefined' ? '' : state[filter.name]} 
-                      onChange={onInputChange}
-                      type={undefined}
-                    />
-                  }
-                  {
-                    filter.type !== 'select' && 
-                    <Elements.Field
-                      {...filter}
-                      class="!mb-0"
-                      // `filter.name` is a full path e.g. 'job.location', not just the key `location`
-                      value={typeof state[filter.name] === 'undefined' ? '' : state[filter.name] as string} 
-                      onChange={onInputChange}
-                    />
-                  }
-                </div>
-              ))
+                )
+              })
             }
           </div>
         </div>
@@ -207,6 +207,35 @@ export const Filters = forwardRef<FiltersHandleType, FiltersProps>(({
       </Elements.Button>
     </Elements.Dropdown>
   )
-})
+}
 
 Filters.displayName = 'Filters'
+
+export function usePushChangesToPath(state: { [key: string]: unknown }) {
+  // Return a debounced function which updates the query path using the state
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [debouncedPush] = useState(() => debounce(push, debounceTime))
+  const stateRef = useRef(state)
+  const locationRef = useRef(location)
+
+  useEffect(() => {
+    locationRef.current = location
+  }, [location])
+
+  useEffect(() => {
+    return () => debouncedPush.cancel()
+  }, [])
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
+
+  // Update the URL by replacing the current entry in the history stack
+  function push(includePagination?: boolean) {
+    const queryStr = queryString(omit(stateRef.current, includePagination ? [] : ['page']))
+    navigate(locationRef.current.pathname + queryStr, { replace: true })
+  }
+
+  return debouncedPush
+}

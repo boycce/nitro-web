@@ -17,6 +17,7 @@ export const roleOptions = [
 ]
 
 /** @type {{ [key: string]: Country }} */
+// dateformats: https://date-fns.org/v4.1.0/docs/format#
 export const countries = {
   nz: {
     currency: 'nzd',
@@ -26,10 +27,10 @@ export const countries = {
       percentage: '¤#,##0.00%',
     },
     dateFormats: {
-      full: 'dddd, D MMMM YYYY',
-      long: 'D MMMM YYYY',
-      medium: 'D/MM/YYYY',
-      short: 'D/MM/YY',
+      full: 'eeee, d MMMM yyyy', // 'Friday, 1 December 2026' (was 'dddd, D MMMM YYYY') 
+      long: 'd MMMM yyyy', // '1 December 2026' (was 'D MMMM YYYY') 
+      medium: 'dd/MM/yyyy', // '01/12/2026' (was 'D/MM/YYYY') 
+      short: 'dd/MM/yy', // '01/12/26' (was 'D/MM/YY') 
     },
   },
   au: {
@@ -40,10 +41,10 @@ export const countries = {
       percentage: '¤#,##0.00%',
     },
     dateFormats: {
-      full: 'dddd, D MMMM YYYY',
-      long: 'D MMMM YYYY',
-      medium: 'D/MM/YYYY',
-      short: 'D/MM/YY',
+      full: 'eeee, d MMMM yyyy', // 'Friday, 26 January 2026' (was 'dddd, D MMMM YYYY') 
+      long: 'd MMMM yyyy', // '26 January 2026' (was 'D MMMM YYYY') 
+      medium: 'dd/MM/yyyy', // '26/01/2026' (was 'D/MM/YYYY') 
+      short: 'dd/MM/yy', // '26/01/26' (was 'D/MM/YY') 
     },
   },
 }

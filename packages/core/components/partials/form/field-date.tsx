@@ -1,23 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { format, isValid, parse } from 'date-fns'
+import { tz as _tz, TZDate } from '@date-fns/tz'
 import { getPrefixWidth } from 'nitro-web/util'
-import { Calendar, Dropdown, DropdownProps } from 'nitro-web'
+import { Button, Calendar, Dropdown, DropdownProps, TimePicker } from 'nitro-web'
 import { DayPickerProps } from '../element/calendar'
-import { TimePicker } from './field-time'
 
-type Mode = 'single' | 'multiple' | 'range'
+type Timestamp = null | number
+type TimestampArray = null | Timestamp[]
 type DropdownRef = {
   setIsActive: (value: boolean) => void
 }
 
-type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange'> & {
+type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value' | 'defaultValue'> & {
   /** field name or path on state (used to match errors), e.g. 'date', 'company.email' **/
   name: string
-  /** mode of the date picker */
-  mode: Mode
   /** name is used as the id if not provided */
   id?: string
-  /** show the time picker */
+  /** mode of the date picker */
+  mode: 'single' | 'multiple' | 'range' | 'time'
+  /** show the time picker for single mode*/
   showTime?: boolean
   /** prefix to add to the input */
   prefix?: string
@@ -31,116 +32,150 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
   DayPickerProps?: DayPickerProps
   /** Dropdown props */
   DropdownProps?: DropdownProps
+  /** timezone to use for the date picker */
+  tz?: string
 }
 
-// An array is returned for mode = 'multiple' or 'range'
-export type FieldDateProps = (
-  | ({ mode: 'single' } & PreFieldDateProps & {
-      onChange?: (e: { target: { name: string, value: null|number } }) => void
-      value?: null|number|string
-    })
-  | ({ mode: 'multiple' | 'range' } & PreFieldDateProps & { 
-      onChange?: (e: { target: { name: string, value: (null|number)[] } }) => void 
-      value?: null|number|string|(null|number|string)[]
-    })
-)
+// Discriminated union types based on mode
+type FieldDatePropsSingle = PreFieldDateProps & {
+  mode: 'single' | 'time'
+  defaultValue?: Timestamp
+  onChange?: (e: { target: { name: string, value: Timestamp } }) => void
+  value?: Timestamp // gracefully handles falsey values
+}
+
+type FieldDatePropsMultiple = PreFieldDateProps & {
+  mode: 'multiple' | 'range'
+  defaultValue?: TimestampArray
+  onChange?: (e: { target: { name: string, value: TimestampArray } }) => void
+  value?: TimestampArray // gracefully handles falsey values
+}
+
+export type FieldDateProps = FieldDatePropsSingle | FieldDatePropsMultiple
+const errors: string[] = []
 
 export function FieldDate({
   dir = 'bottom-left',
   Icon,
-  mode,
   numberOfMonths,
   onChange: onChangeProp,
   prefix = '',
   showTime,
-  value: valueProp,
   DayPickerProps,
   DropdownProps,
+  tz,
   ...props
 }: FieldDateProps) {
-  // Currently this displays the dates in local timezone and saves in utc. We should allow the user to display the dates in a 
-  // different timezone.
-  const localePattern = `d MMM yyyy${showTime && mode == 'single' ? ' hh:mmaa' : ''}`
+  const [month, setMonth] = useState<number|undefined>()
+  const [preventInputValueUpdates, setPreventInputValueUpdates] = useState(false)
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
-  const [month, setMonth] = useState<number|undefined>()
-  const [lastUpdated, setLastUpdated] = useState(0)
+  const pattern = props.mode == 'time' ? 'hh:mmaa' :  `d MMM yyyy${showTime && props.mode == 'single' ? ' hh:mmaa' : ''}`
   const id = props.id || props.name
 
-  // Since value and onChange are optional, we need to hold the value in state if not provided
-  const [internalValue, setInternalValue] = useState<typeof valueProp>(valueProp)
-  const value = valueProp ?? internalValue
-  const onChange = onChangeProp ?? ((e: { target: { name: string, value: any } }) => setInternalValue(e.target.value))
-    
-  // Convert the value to an array of valid* dates
-  const validDates = useMemo(() => {
-    const arrOfNumbers = Array.isArray(value) ? value : [value]
-    const out = arrOfNumbers.map((date) => {
-      if (typeof date === 'string' && !isNaN(parseFloat(date))) date = parseFloat(date)
-      return isValid(date) ? new Date(date as number) : null /// changed to null
-    })
-    return out
-  }, [value])
-
-  // Hold the input value in state
-  const [inputValue, setInputValue] = useState(() => getInputValue(validDates))
-
-  // Update the date's inputValue (text) when the value changes outside of the component
+  // Since value and onChange are optional, we need need to create an internal value state
+  const [internalValue, setInternalValue] = useState<Timestamp[]>(() => preInternalValue(props))
+  const inputValue = useMemo(() => getInputValue(internalValue), [internalValue])
+  const [inputValueSticky, setInputValueSticky] = useState(() => inputValue)
+  
+  // Update the internal value when the value changes outside of the component
   useEffect(() => {
-    if (new Date().getTime() > lastUpdated + 100) setInputValue(getInputValue(validDates))
-  }, [validDates])
+    const newValue = preInternalValue(props)
+    for (let i=0; i<Math.max(internalValue.length, newValue.length); i++) {
+      if (internalValue[i] !== newValue[i]) {
+        setInternalValue(newValue)
+        break
+      }
+    }
+  }, [props.value])
+  
+  // Only update the sticky input when the input is blurred
+  useEffect(() => {
+    if (!preventInputValueUpdates) setInputValueSticky(inputValue)
+  }, [inputValue, preventInputValueUpdates])
 
   // Get the prefix content width
   useEffect(() => {
     setPrefixWidth(getPrefixWidth(prefix, 4))
   }, [prefix])
 
-  function onCalendarChange(value: null|number|(null|number)[]) {
-    if (mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
-    setInputValue(getInputValue(value))
-    // Update the value
-    onChange({ target: { name: props.name, value: getOutputValue(value) } })
-    setLastUpdated(new Date().getTime())
+  function preInternalValue(props: FieldDateProps) {
+    // Even though we are using types, the value may be different coming from the state, so lets sanitise/parse it.
+    // We need to use props.* to get type narrowing.
+    switch (props.mode) {
+      case 'single':
+      case 'time': {
+        const value = props?.value ?? props?.defaultValue
+        return [value && isValid(value) ? new Date(value).getTime() : null]
+      }
+      case 'multiple':
+      case 'range': {
+        const value = props.value ?? props?.defaultValue
+        if (!value || !Array.isArray(value)) {
+          const error = `FieldDate: ${props.name} value needs to be an array for mode 'multiple' or 'range', received`
+          if (value && !errors.includes(error)) { errors.push(error); console.error(error, value) }
+          return []
+        } else {
+          return value.map((timestamp) => {
+            return timestamp && isValid(timestamp) ? new Date(timestamp).getTime() : null
+          })
+        }
+      }
+    }
+  }
+
+  function getInputValue(value: Timestamp[]) {
+    return value.map(o => date(o, pattern, tz)).join(props.mode == 'range' ? ' - ' : ', ')
+  }
+
+  function onChange<T>(value: T) {
+    if (props.mode == 'single' && !showTime) dropdownRef.current?.setIsActive(false) // Close the dropdown
+    if (onChangeProp) onChangeProp({ target: { name: props.name, value: value as any } }) // type enforced in the parameter
+    else setInternalValue(preInternalValue({ ...props, value: value } as FieldDateProps))
   }
 
   function onInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     // Calls onChange (should update state, thus updating the value) with "raw" values
-    setInputValue(e.target.value) // keep the input value in sync
+    setInputValueSticky(e.target.value) // keep the sticky input value in sync
+    setPreventInputValueUpdates(true)
 
-    let split = e.target.value.split(/-|,/).map(o => {
-      const date = parse(o.trim(), localePattern, new Date())
-      return isValid(date) ? date : null
+    // Parse the datestring into timestamps
+    let timestamps = e.target.value.split(/-|,/).map(o => {
+      return parseDateString(o.trim(), pattern, tz)
     })
-    
-    // For single/range we need limit the array
-    if (mode == 'range' && split.length > 1) split.length = 2
-    else if (mode == 'multiple') split = split.filter(o => o) // remove invalid dates
 
-    // Swap dates if needed
-    if (mode == 'range' && (split[0] || 0) > (split[1] || 0)) split = [split[0], split[0]]
+    // For range mode we need limit the array to 2
+    if (props.mode == 'range' && timestamps.length > 1) timestamps.length = 2
 
-    // Set month
-    for (let i=split.length; i--;) {
-      if (split[i]) setMonth((split[i] as Date).getTime())
-      break
+    // Swap range dates if needed
+    if (props.mode == 'range' && (timestamps[0] || 0) > (timestamps[1] || 0)) timestamps = [timestamps[0], timestamps[0]]
+
+    // Remove/nullify invalid dates
+    if (props.mode == 'range') timestamps = timestamps.map(o => o ?? null)
+    else if (props.mode == 'multiple') timestamps = timestamps.filter(o => o)
+
+    // Set month for date mode
+    if (props.mode != 'time') {
+      for (let i=timestamps.length; i--;) {
+        if (timestamps[i]) setMonth(timestamps[i] as number)
+        break
+      }
     }
     
     // Update the value
-    const value = mode == 'single' ? split[0]?.getTime() ?? null : split.map(d => d?.getTime() ?? null)
-    onChange({ target: { name: props.name, value: getOutputValue(value) }})
-    setLastUpdated(new Date().getTime())
-  } 
+    const value = props.mode == 'single' || props.mode == 'time' ? timestamps[0] ?? null : timestamps
+    onChange(value)
+  }
 
-  function getInputValue(value: Date|number|null|(Date|number|null)[]) {
-    const _dates = Array.isArray(value) ? value : [value]
-    return _dates.map(o => o ? format(o, localePattern) : '').join(mode == 'range' ? ' - ' : ', ')
+  function onNowClick() {
+    onChange(new Date().getTime())
   }
   
-  function getOutputValue(value: Date|number|null|(Date|number|null)[]): any {
-    // console.log(value)
-    return value
+  // Common props for the Calendar component
+  const commonCalendarProps = { 
+    className: 'pt-1 pb-2 px-3', month: month, numberOfMonths: numberOfMonths, preserveTime: !!showTime, tz: tz, ...DayPickerProps,
   }
-
+  
   return (
     <Dropdown
       ref={dropdownRef}
@@ -148,23 +183,34 @@ export function FieldDate({
       // animate={false}
       // menuIsOpen={true}
       minWidth={0}
+      dir={dir}
       menuContent={
-        <div className="flex">
-          <Calendar
-            // Calendar actually accepts an array of dates, but the type is not typed correctly
-            {...{ mode: mode, value: validDates as any, numberOfMonths: numberOfMonths, month: month }}
-            {...DayPickerProps}
-            preserveTime={!!showTime} 
-            onChange={onCalendarChange} 
-            className="pt-1 pb-2 px-3" 
-          />
+        <div>
+          <div className="flex">
+            {
+              props.mode == 'single' &&
+              <Calendar {...commonCalendarProps} mode="single" value={internalValue[0]} onChange={onChange<Timestamp>} />
+            }
+            {
+              (props.mode == 'range' || props.mode == 'multiple') &&
+              <Calendar {...commonCalendarProps} mode={props.mode} value={internalValue} onChange={onChange<TimestampArray>} />
+            }
+            {
+              (props.mode == 'time' || (!!showTime && props.mode == 'single')) &&
+              <TimePicker value={internalValue?.[0]} onChange={onChange<Timestamp>} 
+                className={`border-l border-gray-100 ${props.mode == 'single' ? 'min-h-[0]' : ''}`} 
+              />
+            }
+          </div>
           {
-            !!showTime && mode == 'single' &&
-            <TimePicker date={validDates?.[0] ?? undefined} onChange={onCalendarChange} className="border-l border-gray-100 min-h-[0]" />
+            props.mode == 'time' && 
+            <div className="flex justify-between p-2 border-t border-gray-100">
+              <Button color="secondary" size="xs" onClick={() => onNowClick()}>Now</Button>
+              <Button color="primary" size="xs" onClick={() => dropdownRef.current?.setIsActive(false)}>Done</Button>
+            </div>
           }
         </div>
       }
-      dir={dir}
       {...DropdownProps}
     > 
       <div className="grid grid-cols-1">
@@ -176,19 +222,44 @@ export function FieldDate({
             {prefix}
           </span>
         }
-        <input 
+        <input
           {...props}
           key={'k' + prefixWidth}
           id={id}
           autoComplete="off" 
-          className={(props.className||'')}// + props.className?.includes('is-invalid') ? ' is-invalid' : ''} 
-          onBlur={() => setInputValue(getInputValue(validDates))} // onChange should of updated the value -> validValue by this point
+          className={(props.className || '')}// + props.className?.includes('is-invalid') ? ' is-invalid' : ''} 
           onChange={onInputChange}
+          onBlur={() => setPreventInputValueUpdates(false)}
           style={{ textIndent: prefixWidth + 'px' }}
           type="text"
-          value={inputValue}
+          value={inputValueSticky} // allways controlled
+          defaultValue={undefined}
         />
       </div>
     </Dropdown>
   )
+}
+
+/**
+ * Parse a date string into a timestamp, optionally, from another timezone
+ * @param value - date string to parse
+ * @param pattern - date format pattern
+ * @param [referenceDate] - required if value doesn't contain a date, e.g. for time only
+ * @param [tz] - timezone
+ */
+function parseDateString(value: string, pattern: string, tz?: string, referenceDate?: Date) {
+  const parsedDate = parse(value.trim(), pattern, referenceDate ?? new Date(), tz ? { in: _tz(tz) } : undefined)
+  if (!isValid(parsedDate)) return null
+  else return parsedDate.getTime()
+}
+
+/**
+ * Returns a formatted date string
+ * @param [value] - timestamp or date
+ * @param [format] - e.g. "dd mmmm yy" (https://date-fns.org/v4.1.0/docs/format#)
+ * @param [tz] - display in this timezone
+ */
+export function date(value?: null|number|Date, pattern?: string, tz?: string) {
+  if (!value || !isValid(value)) return ''
+  return format((tz ? new TZDate(value as number, tz) : value), pattern ?? 'do MMMM')
 }

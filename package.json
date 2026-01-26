@@ -4,10 +4,10 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev -w packages/example",
+    "dev": "isDemo=true npm run dev -w packages/example",
     "dev:client": "isDemo=true npm run dev:client -w packages/example",
     "dev:client-only": "isDemo=true isStatic=true npm run dev:client -w packages/example",
-    "dev:server": "npm run dev:server -w packages/example",
+    "dev:server": "isDemo=true npm run dev:server -w packages/example",
     "build": "isDemo=true isStatic=true npm run build -w packages/example",
     "major": "npm run major -w packages/core",
     "minor": "npm run minor -w packages/core",

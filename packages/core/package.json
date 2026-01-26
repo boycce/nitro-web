@@ -29,14 +29,14 @@
     "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
+    "@date-fns/tz": "^1.4.1",
     "@hokify/axios": "^0.19.1",
     "axios": "^1.9.0",
     "axios-retry": "^3.3.1",
     "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
-    "date-fns": "^3.6.0",
-    "dateformat": "^5.0.3",
+    "date-fns": "^4.1.0",
     "dotenv": "^14.3.2",
     "express": "^4.17.1",
     "express-fileupload": "^1.1.6",
@@ -53,7 +53,6 @@
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@types/dateformat": "^5.0.3",
     "@typescript-eslint/eslint-plugin": "^8.18.1"
   },
   "peerDependencies": {

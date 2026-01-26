@@ -1,11 +1,9 @@
 import { 
-  Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, 
-  Filters, FiltersHandleType, FilterType, Table, TableColumn,
+  Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
+  Filters, FiltersHandleType, FilterType, Table, TableColumn, usePushChangesToPath,
 } from 'nitro-web'
 import { date, getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
-
-import { TimePicker } from './form/field-time'
 
 const perPage = 10
 const statusColors = function(status: string) {
@@ -37,6 +35,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
   const [, setStore] = useTracked()
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
+
   // Tip: handy when developing or updating components, you can hide/show the groups you want to see
   const groups = [
     'Links',
@@ -47,32 +46,65 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     'Selects',
     'Inputs',
     'Date Inputs',
-    'File Inputs & Calendar',
+    'File Inputs & Calendar & Time',
     'Tables',
     'Modals',
     'Custom Components',
   ]
-  const [state, setState] = useState({
-    address: '',
-    amount: 100,
-    brandColor: '#F3CA5F',
-    colorsMulti: ['blue', 'green'],
-    country: 'nz',
-    currency: 'nzd',
-    date: Date.now(),
-    'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
-    'date-time': Date.now(),
-    time: undefined,
-    calendar: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
-    firstName: 'Bruce',
-    tableFilter: '',
-    errors: [
-      { title: 'address', detail: 'Address is required' },
-    ],
-  })
+  const [state, setState] = useState(() => getState())
+
+  function getState(useOldValues?: boolean) {
+    return !useOldValues ? {
+      address: '',
+      amount: 100,
+      brandColor: '#F3CA5F',
+      colorsMulti: ['blue', 'green'],
+      country: 'nz',
+      currency: 'nzd',
+      date: Date.now(),
+      'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
+      'date-multiple': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 2],
+      'date-time': Date.now(),//////
+      time: Date.now(),
+      'calendar-single': Date.now(),
+      'calendar-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
+      firstName: 'Bruce',
+      tableFilter: '',
+      errors: [
+        { title: 'address', detail: 'Address is required' },
+      ],
+    } : {
+      address: '',
+      amount: 200,
+      brandColor: '#8656ED',
+      colorsMulti: ['blue'],
+      country: 'au',
+      currency: 'btc', 
+      date: Date.now() + 1000 * 60 * 60 * 24 * 1.2,
+      'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 5.2],
+      'date-multiple': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
+      'date-time': Date.now() + 1000 * 60 * 60 * 24 * 2.2,
+      time: Date.now() + 1000 * 60 * 60 * 1.2,
+      'calendar-single': Date.now(),
+      'calendar-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
+      firstName: 'John',
+      tableFilter: '',
+      errors: [
+        { title: 'address', detail: 'Address is required' },
+      ],
+    }
+  }
+
+  function indirectlyChangeTheState() {
+    // Change the state indirectly to test the inputs reactivity
+    setState((s: typeof state) => { 
+      if (s.firstName == 'Bruce') return getState(true)
+      else return getState(false)
+    })
+  }
 
   const [filterState, setFilterState] = useState({})
-  const filtersRef = useRef<FiltersHandleType>(null)
+  const pushChangesToPath = usePushChangesToPath(filterState)
   const filters = useMemo(() => {
     const filters: FilterType[] = [
       { 
@@ -202,7 +234,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
         <p class="mb-3">
           Components are styled using&nbsp;
-          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
+          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. {injectedConfig.isDemo && <><a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state</>}
         </p>
       </div>
 
@@ -250,8 +282,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <h2 class="h3">Filters</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
             {/* Filter dropdown */}
-            <Filters 
-              ref={filtersRef} 
+            <Filters
               filters={filters} 
               state={filterState} 
               setState={setFilterState}
@@ -265,10 +296,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               name="search"
               id="search2"
               iconPos="left" 
-              state={filterState}
+              state={filterState} 
               onChange={(e) => {
-                onChange(e, setFilterState)
-                filtersRef.current?.submit()
+                onChange(e, setFilterState) // update the filter state first
+                pushChangesToPath()
               }}
               placeholder="Linked search bar..."
             />
@@ -466,7 +497,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             <div>
               <label for="amount">Amount ({state.amount})</label>
               <Field 
-                name="amount" type="currency" state={state} currency={state.currency || 'nzd'} onChange={(e) => onChange(e, setState)} 
+                name="amount" type="currency" state={state} currency={state.currency || 'nzd'} 
                 // Example of using a custom format and currencies, e.g. 
                 format={'¤#,##0.00'} 
                 currencies={currencies} 
@@ -482,11 +513,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
             <div>
               <label for="date">Date with time</label>
-              <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)} 
+              <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)}
+                // Testing timezone support:
+                // tz="Pacific/Honolulu"
                 // DropdownProps={{ menuIsOpen: true }} 
               />
             </div>
-            <div>
+           <div>
               <label for="date-range">Date range (with prefix & disabled days)</label>
               <Field 
                 name="date-range" 
@@ -502,37 +535,48 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             </div>
             <div>
               <label for="date">Date multi-select (right aligned)</label>
-              <Field name="date" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
+              <Field name="date-multiple" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
             </div>
             <div>
               <label for="time">Time</label>
-              <Field name="time" type="time" state={state} onChange={(e) => onChange(e, setState)}  />
-            </div>
-            <div>
-              <label for="time">Standalone TimePicker</label>
-              <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2">
-                <TimePicker date={state.time || new Date()} onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} className="min-h-[150]" />
-              </div>
+              <Field name="time" type="date" mode="time" state={state} onChange={(e) => onChange(e, setState)}  
+                // Testing timezone support:
+                // tz="Pacific/Honolulu"
+              />
             </div>
           </div>
         </div>
       )}
 
-      {groups.includes('File Inputs & Calendar') && (
+      {groups.includes('File Inputs & Calendar & Time') && (
         <div>
-          <h2 class="h3">File Inputs & Calendar</h2>
+          <h2 class="h3">File Inputs & Calendar & Time</h2>
           <div class="grid grid-cols-3 gap-x-6">
             <div>
               <label for="avatar">Avatar</label>
               <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(e, setState)} awsUrl={injectedConfig.awsUrl} />
             </div>
             <div>
-              <label for="calendar">Calendar</label>
-              <Calendar mode="range" value={state.calendar} numberOfMonths={1} 
-                onChange={(value) => {
-                  onChange({ target: { name: 'calendar', value: value } }, setState)
-                }} 
+              <label for="calendar">
+                Calendar
+                {/* {'  ' +  new Date(state['calendar-single'] || '')?.toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' })} */}
+              </label>
+              <Calendar mode="range" value={state['calendar-range']} numberOfMonths={1} 
+                onChange={(value) => onChange({ target: { name: 'calendar-range', value: value } }, setState)}
+                // Testing timezone support:
+                // tz="Pacific/Honolulu"
+                // preserveTime={true}
               />
+            </div>
+            <div>
+              <label for="time">TimePicker</label>
+              <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2">
+                <TimePicker value={state.time} className="min-h-[150]"
+                  onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} 
+                  // Testing timezone support:
+                  // tz="Pacific/Honolulu"
+                />
+              </div>
             </div>
           </div>
         </div>

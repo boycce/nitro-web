@@ -1,6 +1,6 @@
 import _axios from 'axios'
 import axiosRetry from 'axios-retry'
-import dateformat from 'dateformat'
+import { format } from 'date-fns'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
 
@@ -194,31 +194,16 @@ export function currencyToCents (currency) {
 
 /**
  * Returns a formatted date string
- * @param {number|Date} [date] - number can be in seconds or milliseconds (UTC)
- * @param {string} [format] - e.g. "dd mmmm yy" (https://github.com/felixge/node-dateformat#mask-options)
+ * @param {number|Date} [date] - timestamp or date
+ * @param {string} [pattern] - e.g. "dd mmmm yy" (https://date-fns.org/v4.1.0/docs/format#)
  * @param {string} [timezone] - convert a UTC date to a particular timezone.
  * @returns {string}
- * 
- * Note on the timezone conversion:
- * Timezone conversion relies on parsing the toLocaleString result, e.g. 4/10/2012, 5:10:30 PM.
- * A older browser may not accept en-US formatted date string to its Date constructor, and it may
- * return unexpected result (it may ignore daylight saving).
  */
-export function date (date, format, timezone) {
-  if (!date) return 'Date?'
-
-  // Get the milliseconds
-  let milliseconds = 0
-  if (typeof date === 'number') {
-    if (date < 9999999999) milliseconds = date * 1000
-    else milliseconds = date
-  } else if (isDate(date)) {
-    milliseconds = date.getTime()
-  }
-  if (timezone) {
-    milliseconds = new Date(new Date(milliseconds).toLocaleString('en-US', { timeZone: timezone })).getTime()
-  }
-  return dateformat(milliseconds, format || 'dS mmmm')
+export function date (date, pattern, timezone) {
+  if (!date) return ''
+  const timestamp = typeof date === 'number' ? date : isDate(date) ? date?.getTime() : 0
+  const timestampInTz = timezone ? new Date(new Date(timestamp).toLocaleString('en-US', { timeZone: timezone })).getTime() : timestamp
+  return format(timestampInTz, pattern ?? 'do MMMM')
 }
 
 /**
