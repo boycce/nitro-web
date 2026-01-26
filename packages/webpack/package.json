@@ -1,6 +1,6 @@
 {
   "name": "@nitro-web/webpack",
-  "version": "0.0.147",
+  "version": "0.0.148",
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "main": "./webpack.config.js",
