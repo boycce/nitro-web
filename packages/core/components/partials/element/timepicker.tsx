@@ -1,3 +1,4 @@
+import { useRef, useMemo, useEffect } from 'react'
 import { isValid, format } from 'date-fns'
 import { TZDate } from '@date-fns/tz'
 import { twMerge } from 'nitro-web'
@@ -9,9 +10,12 @@ export type TimePickerProps = {
   onChange?: (value: Timestamp) => void
   tz?: string
   value?: Timestamp
+  /** "Reactive" reference timestamp to use for the time picker's date. Precedence order: `referenceTimestamp`, `value`, or today */
+  referenceTimestamp?: Timestamp
 }
 
-export function TimePicker({ value, onChange, className, tz }: TimePickerProps) {
+export function TimePicker({ value, onChange, className, tz, referenceTimestamp }: TimePickerProps) {
+  const [internallyChanged, setInternallyChanged] = useState<Timestamp>()
   const refs = {
     hour: useRef<HTMLDivElement>(null),
     minute: useRef<HTMLDivElement>(null),
@@ -29,8 +33,32 @@ export function TimePicker({ value, onChange, className, tz }: TimePickerProps) 
 
   // Convert the value to an valid* date
   const internalValue = useMemo(() => {
-    return value && isValid(value) ? new TZDate(value, tz) : undefined
-  }, [value])
+    if (!value || !isValid(value)) return undefined
+    const date = new TZDate(value, tz)
+
+    // Carry over the date from the referenceTimestamp, if provided
+    if (referenceTimestamp && isValid(referenceTimestamp)) {
+      const referenceDate = new TZDate(referenceTimestamp, tz)
+      const originalTime = date.getTime()
+      date.setDate(referenceDate.getDate())
+      date.setMonth(referenceDate.getMonth())
+      date.setFullYear(referenceDate.getFullYear())
+      // If the time has changed, update the value
+      if (originalTime !== date.getTime()) {
+        setInternallyChanged(date.getTime())
+      }
+    }
+
+    return date
+  }, [value, tz, referenceTimestamp])
+
+  // Update the value when the changedValue changes
+  useEffect(() => {
+    if (internallyChanged && isValid(internallyChanged)) {
+      onChange?.(internallyChanged)
+      setInternallyChanged(undefined)
+    }
+  }, [internallyChanged])
   
   // Get current values from date or use defaults
   const hour = useMemo(() => internalValue ? parseInt(format(internalValue, 'h')) : undefined, [internalValue])

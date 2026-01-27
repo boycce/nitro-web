@@ -62,12 +62,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       country: 'nz',
       currency: 'nzd',
       date: Date.now(),
-      'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
-      'date-multiple': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 2],
-      'date-time': Date.now(),//////
+      dateRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
+      dateMultiple: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 2],
+      dateTime: Date.now(),
       time: Date.now(),
-      'calendar-single': Date.now(),
-      'calendar-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
+      timeReference: Date.now(),
+      calendarSingle: Date.now(),
+      calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
       firstName: 'Bruce',
       tableFilter: '',
       errors: [
@@ -81,12 +82,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       country: 'au',
       currency: 'btc', 
       date: Date.now() + 1000 * 60 * 60 * 24 * 1.2,
-      'date-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 5.2],
-      'date-multiple': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
-      'date-time': Date.now() + 1000 * 60 * 60 * 24 * 2.2,
+      dateRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 5.2],
+      dateMultiple: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
+      dateTime: Date.now() + 1000 * 60 * 60 * 24 * 2.2,
       time: Date.now() + 1000 * 60 * 60 * 1.2,
-      'calendar-single': Date.now(),
-      'calendar-range': [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
+      timeReference: Date.now() + 1000 * 60 * 60 * 1.2,
+      calendarSingle: Date.now(),
+      calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
       firstName: 'John',
       tableFilter: '',
       errors: [
@@ -110,7 +112,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     const filters: FilterType[] = [
       { 
         type: 'date',
-        name: 'dateRange',
+        name: 'dateRange2',
         mode: 'range',
         placeholder: 'Select a range...',
       },
@@ -513,17 +515,17 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <h2 class="h3">Date Inputs</h2>
           <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
             <div>
-              <label for="date">Date with time</label>
-              <Field name="date-time" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)}
+              <label for="dateTime">Date with time</label>
+              <Field name="dateTime" type="date" mode="single" showTime={true} state={state} onChange={(e) => onChange(e, setState)}
                 // Testing timezone support:
                 // tz="Pacific/Honolulu"
                 // DropdownProps={{ menuIsOpen: true }} 
               />
             </div>
            <div>
-              <label for="date-range">Date range (with prefix & disabled days)</label>
+              <label for="dateRange">Date range (with prefix & disabled days)</label>
               <Field 
-                name="date-range" 
+                name="dateRange" 
                 type="date" 
                 mode="range" 
                 prefix="Date:" 
@@ -535,14 +537,23 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               />
             </div>
             <div>
-              <label for="date">Date multi-select (right aligned)</label>
-              <Field name="date-multiple" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
+              <label for="dateMultiple">Date multi-select (right aligned)</label>
+              <Field name="dateMultiple" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
             </div>
             <div>
-              <label for="time">Time</label>
+              <label for="time">Time: {date(state.time, 'dd MMM hh:mmaa')}</label>
               <Field name="time" type="date" mode="time" state={state} onChange={(e) => onChange(e, setState)}  
                 // Testing timezone support:
                 // tz="Pacific/Honolulu"
+              />
+            </div>
+            <div>
+              <label for="timeReference">Time: {date(state.timeReference, 'dd MMM hh:mmaa')} (with date reference)</label>
+              <Field name="timeReference" type="date" mode="time" state={state} onChange={(e) => onChange(e, setState)}  
+                // Testing timezone support:
+                // tz="Pacific/Honolulu"
+                // referenceTimestamp={useMemo(() => new Date().getTime() + 1000 * 60 * 60 * 24 * 5, [])}
+                referenceTimestamp={state.dateTime}
               />
             </div>
           </div>
@@ -560,10 +571,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             <div>
               <label for="calendar">
                 Calendar
-                {/* {'  ' +  new Date(state['calendar-single'] || '')?.toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' })} */}
+                {/* {'  ' +  new Date(state.calendarSingle || '')?.toLocaleString('en-US', { timeZone: 'Pacific/Honolulu' })} */}
               </label>
-              <Calendar mode="range" value={state['calendar-range']} numberOfMonths={1} 
-                onChange={(value) => onChange({ target: { name: 'calendar-range', value: value } }, setState)}
+              <Calendar mode="range" value={state.calendarRange} numberOfMonths={1} 
+                onChange={(value) => onChange({ target: { name: 'calendarRange', value: value } }, setState)}
                 // Testing timezone support:
                 // tz="Pacific/Honolulu"
                 // preserveTime={true}
@@ -571,13 +582,16 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             </div>
             <div>
               <label for="time">TimePicker</label>
-              <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2">
-                <TimePicker value={state.time} className="min-h-[150]"
+              {/* <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2"> */}
+                <TimePicker
+                  value={state.time} 
+                  className="min-h-[150] mt-2.5 mb-6 mt-input-before mb-input-after pt-2"
                   onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} 
                   // Testing timezone support:
                   // tz="Pacific/Honolulu"
+                  // referenceTimestamp={new Date().getTime() + 1000 * 60 * 60 * 24 * 5}
                 />
-              </div>
+              {/* </div> */}
             </div>
           </div>
         </div>

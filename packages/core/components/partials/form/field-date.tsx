@@ -34,6 +34,8 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
   DropdownProps?: DropdownProps
   /** timezone to use for the date picker */
   tz?: string
+  /** Reference timestamp to use for the time picker's date. Precedence order: `referenceTimestamp`, `value`, or today */
+  referenceTimestamp?: Timestamp
 }
 
 // Discriminated union types based on mode
@@ -64,6 +66,7 @@ export function FieldDate({
   DayPickerProps,
   DropdownProps,
   tz,
+  referenceTimestamp,
   ...props
 }: FieldDateProps) {
   const [month, setMonth] = useState<number|undefined>()
@@ -141,7 +144,7 @@ export function FieldDate({
 
     // Parse the datestring into timestamps
     let timestamps = e.target.value.split(/-|,/).map(o => {
-      return parseDateString(o.trim(), pattern, tz)
+      return parseDateString(o.trim(), pattern, tz, referenceTimestamp)
     })
 
     // For range mode we need limit the array to 2
@@ -168,7 +171,10 @@ export function FieldDate({
   }
 
   function onNowClick() {
-    onChange(new Date().getTime())
+    // Use the browser's local time and parse it into the timezone
+    const [hours, minutes, seconds] = [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()]
+    const nowInTz = parseDateString(`${hours}:${minutes}:${seconds}`, 'hh:mm:ss', tz, referenceTimestamp)
+    onChange(nowInTz)
   }
   
   // Common props for the Calendar component
@@ -198,7 +204,8 @@ export function FieldDate({
             {
               (props.mode == 'time' || (!!showTime && props.mode == 'single')) &&
               <TimePicker value={internalValue?.[0]} onChange={onChange<Timestamp>} 
-                className={`border-l border-gray-100 ${props.mode == 'single' ? 'min-h-[0]' : ''}`} 
+                className={`border-l border-gray-100 ${props.mode == 'single' ? 'min-h-[0]' : ''}`}
+                referenceTimestamp={referenceTimestamp}
               />
             }
           </div>
@@ -247,8 +254,8 @@ export function FieldDate({
  * @param [referenceDate] - required if value doesn't contain a date, e.g. for time only
  * @param [tz] - timezone
  */
-function parseDateString(value: string, pattern: string, tz?: string, referenceDate?: Date) {
-  const parsedDate = parse(value.trim(), pattern, referenceDate ?? new Date(), tz ? { in: _tz(tz) } : undefined)
+function parseDateString(value: string, pattern: string, tz?: string, referenceTimestamp?: Timestamp) {
+  const parsedDate = parse(value.trim(), pattern, referenceTimestamp ?? new Date(), tz ? { in: _tz(tz) } : undefined)
   if (!isValid(parsedDate)) return null
   else return parsedDate.getTime()
 }
