@@ -803,6 +803,7 @@ export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[])
  * @returns {string}
  */
 export function ucFirst(string: string): string;
+export { TZDate } from "@date-fns/tz";
 /**
  * Returns a list of response errors
  */
