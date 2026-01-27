@@ -118,6 +118,15 @@ export function currencyToCents(currency: string): string;
  */
 export function date(date?: number | Date, pattern?: string, timezone?: string): string;
 /**
+ * Get the same time in a given timezone, and optionally, set the time relative to the timezone (e.g. via timesString = '13:00')
+ * @param {number|Date} date - timestamp or date
+ * @param {string} [timezone] - defaults to local timezone
+ * @param {string} [timeString] - 24h time string to change the time to in the new timezone, e.g. '13:00' or '13:00:01'
+ *
+ * @link https://github.com/date-fns/tz
+ */
+export function dateInTimezone(date: number | Date, timezone?: string, timeString?: string): number;
+/**
  * @template {(...args: any[]) => any} T
  * Creates a debounced function that delays invoking `func` until after `wait`
  * milliseconds have elapsed since the last time the debounced function was invoked.
@@ -794,7 +803,6 @@ export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[])
  * @returns {string}
  */
 export function ucFirst(string: string): string;
-export { TZDate } from "@date-fns/tz";
 /**
  * Returns a list of response errors
  */
