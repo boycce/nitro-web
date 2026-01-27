@@ -1,9 +1,9 @@
 import _axios from 'axios'
 import axiosRetry from 'axios-retry'
 import { format } from 'date-fns'
+import { TZDate } from '@date-fns/tz'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
-export { TZDate } from '@date-fns/tz'
 
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
@@ -205,6 +205,51 @@ export function date (date, pattern, timezone) {
   const timestamp = typeof date === 'number' ? date : isDate(date) ? date?.getTime() : 0
   const timestampInTz = timezone ? new Date(new Date(timestamp).toLocaleString('en-US', { timeZone: timezone })).getTime() : timestamp
   return format(timestampInTz, pattern ?? 'do MMMM')
+}
+
+/**
+ * Get the same time in a given timezone, and optionally, set the time relative to the timezone (e.g. via timesString = '13:00')
+ * @param {number|Date} date - timestamp or date
+ * @param {string} [timezone] - defaults to local timezone
+ * @param {string} [timeString] - 24h time string to change the time to in the new timezone, e.g. '13:00' or '13:00:01'
+ * 
+ * @link https://github.com/date-fns/tz
+ */
+export function dateInTimezone (date, timezone, timeString) {
+  const _date = new Date(typeof date === 'number' ? date : date.getTime())
+
+  // Create a date in a given timezone using the same time
+  const dateInTz = new TZDate(
+    _date.getFullYear(),
+    _date.getMonth(),
+    _date.getDate(),
+    _date.getHours(),
+    _date.getMinutes(),
+    _date.getSeconds(),
+    /**@type {string}*/(timezone ?? 0) // will think its just milliseconds if undefined
+  )
+  
+  // If a time string is provided, change the time
+  if (timeString) {
+    const timeParts = timeString.split(':') 
+    const msg = `dateInTimezone: Invalid time string, please use a 24h format "13:00", received: "${timeString}"`
+    if (timeParts.length < 2 || timeParts.length > 3) throw new Error(msg)
+    const [hours, minutes, seconds] = timeParts.map((value, index) => {
+      const num = parseFloat(value)
+      if (isNaN(num) || (index === 0 && (num > 23 || num < 0)) || (index > 0 && (num > 59 || num < 0))) throw new Error(msg)
+      return num
+    })
+    dateInTz.setHours(hours)
+    dateInTz.setMinutes(minutes)
+    dateInTz.setSeconds(seconds || 0)
+  }
+  return dateInTz.getTime()
+  
+  // // test (both should be different, second )
+  // console.log(
+  //   new Date(dateInTimezone(new Date(), 'America/New_York', '13:00')),
+  //   new Date(dateInTimezone(new Date())) // uses local timezone
+  // )
 }
 
 /**
