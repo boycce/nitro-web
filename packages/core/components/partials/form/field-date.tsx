@@ -205,7 +205,7 @@ export function FieldDate({
               (props.mode == 'time' || (!!showTime && props.mode == 'single')) &&
               <TimePicker value={internalValue?.[0]} onChange={onChange<Timestamp>} 
                 className={`border-l border-gray-100 ${props.mode == 'single' ? 'min-h-[0]' : ''}`}
-                referenceTimestamp={referenceTimestamp}
+                referenceTimestamp={referenceTimestamp} tz={tz}
               />
             }
           </div>
