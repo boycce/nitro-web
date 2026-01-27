@@ -5,6 +5,9 @@ import { TZDate } from '@date-fns/tz'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
 
+// Re-export TZDate
+export { TZDate } from '@date-fns/tz'
+
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
 /**
