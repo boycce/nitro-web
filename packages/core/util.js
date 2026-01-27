@@ -218,6 +218,9 @@ export function date (date, pattern, timezone) {
 export function dateInTimezone (date, timezone, timeString) {
   const _date = new Date(typeof date === 'number' ? date : date.getTime())
 
+  // No effect if no timezone or timeString provided
+  if (!timezone && !timeString) throw new Error('dateInTimezone: Please pass a timezone and/or timeString.')
+
   // Create a date in a given timezone using the same time
   const dateInTz = new TZDate(
     _date.getFullYear(),
