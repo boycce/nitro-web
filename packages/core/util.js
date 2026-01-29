@@ -1572,16 +1572,26 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {{preventDefault?: function}} [event] - event to prevent default
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
+ * @param {Object} [options] - options
+ * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
+ * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
  * @returns {Promise<any>}
  * 
  * @example
  *   - request('post /api/user', { name: 'John' })
  *   - request(`get  /api/user/${id}`, undefined, e, isLoading)
+ * 
+ * @warning
+ *   If wanting to use axios directly in your project rather than request(), make sure to manually handle:
+ *   - error formnatting via util.getResponseErrors(errs)
+ *   - loading states
+ *   - using the correct axios instance via util.axios()
  */
-export async function request (route, data, event, isLoading, setState) {
+export async function request (route, data, event, isLoading, setState, options={}) {
   try {
     if (event?.preventDefault) event.preventDefault()
     const uri = route.replace(/^(post|put|delete|get) /, '')
+    const axiosConfig = { withCredentials: true, ...(options.axiosConfig || {}) }
     const method =
       /** @type {'post'|'put'|'delete'|'get'} */ (
         (route.match(/^(post|put|delete|get) /)?.[1] || 'post').trim()
@@ -1611,9 +1621,10 @@ export async function request (route, data, event, isLoading, setState) {
     const formData2 = hasFiles ? formData({ ...data }, { allowEmptyArrays: true, indices: true }) : undefined
 
     // send the request
+    const axiosFn = axios()[method]
     const axiosPromise = (method === 'get' || method === 'delete') 
-      ? axios()[method](uri, { withCredentials: true })
-      : axios()[method](uri, formData2 || data, { withCredentials: true })
+      ? axiosFn(uri, axiosConfig)
+      : axiosFn(uri, formData2 || data, axiosConfig)
 
     const [res] = await Promise.allSettled([
       axiosPromise,
