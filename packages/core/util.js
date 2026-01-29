@@ -1574,6 +1574,7 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
  * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
+ * @param {number} [options.axiosConfig.timeout] - overwrite timeout
  * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
  * @returns {Promise<any>}
  * 
