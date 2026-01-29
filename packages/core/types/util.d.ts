@@ -679,20 +679,26 @@ export function queryString(obj: {
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
- * @param {Object} [options.axios] - axios options
- * @param {boolean} [options.axios.withCredentials=true] - whether to send cookies with the request
+ * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
+ * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
  * @returns {Promise<any>}
  *
  * @example
  *   - request('post /api/user', { name: 'John' })
  *   - request(`get  /api/user/${id}`, undefined, e, isLoading)
+ *
+ * @warning
+ *   If wanting to use axios directly in your project rather than request(), make sure to manually handle:
+ *   - error formnatting via util.getResponseErrors(errs)
+ *   - loading states
+ *   - using the correct axios instance via util.axios()
  */
 export function request(route: string, data?: {
     [key: string]: any;
 }, event?: {
     preventDefault?: Function;
 }, isLoading?: [boolean, (value: boolean) => void], setState?: SetState, options?: {
-    axios?: {
+    axiosConfig?: {
         withCredentials?: boolean;
     };
 }): Promise<any>;
