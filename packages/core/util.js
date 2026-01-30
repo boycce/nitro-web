@@ -1573,8 +1573,7 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
- * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
- * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
+ * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
  * @returns {Promise<any>}
  * 
  * @example
