@@ -679,8 +679,7 @@ export function queryString(obj: {
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
- * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
- * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
+ * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
  * @returns {Promise<any>}
  *
  * @example
@@ -698,9 +697,7 @@ export function request(route: string, data?: {
 }, event?: {
     preventDefault?: Function;
 }, isLoading?: [boolean, (value: boolean) => void], setState?: SetState, options?: {
-    axiosConfig?: {
-        withCredentials?: boolean;
-    };
+    axiosConfig?: AxiosRequestConfig;
 }): Promise<any>;
 /**
  * Removes undefined from an array or object
