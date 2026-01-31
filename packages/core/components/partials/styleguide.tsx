@@ -1,9 +1,10 @@
 import { 
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
-  Filters, FiltersHandleType, FilterType, Table, TableColumn, usePushChangesToPath,
+  Filters, FilterType, Table, TableColumn, usePushChangesToPath,
 } from 'nitro-web'
-import { date, getCountryOptions, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
+import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
+import React from 'react'
 
 const perPage = 10
 const statusColors = function(status: string) {
@@ -237,7 +238,12 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
         <p class="mb-3">
           Components are styled using&nbsp;
-          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. {injectedConfig.isDemo && <><a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state</>}
+          <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
+          {injectedConfig.isDemo && 
+            <React.Fragment>
+              <a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state
+            </React.Fragment>
+          }
         </p>
       </div>
 
@@ -266,7 +272,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 // menuIsOpen={true}
                 dir="bottom-right"
                 minWidth="330px" 
-                options={[{ label: <><b>New Customer</b> / Add <b>Bruce Lee</b></>, className: 'border-bottom-with-space' }, ...options]}
+                options={[
+                  { 
+                    label: <React.Fragment><b>New Customer</b> / Add <b>Bruce Lee</b></React.Fragment>, 
+                    className: 'border-bottom-with-space',
+                  }, 
+                  ...options,
+                ]}
               >
                 <Button color="white" IconRight="v" class="gap-x-3">Dropdown bottom-right</Button>
               </Dropdown>
@@ -429,10 +441,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                     fixed: true,
                     value: '0',
                     label: (
-                      <>
+                      <React.Fragment>
                         <b>New Customer</b> (and clear select)
-                        {customerSearch ? <> / Add <b>{ucFirst(customerSearch)}</b></> : ''}
-                      </>
+                        {customerSearch ? <React.Fragment> / Add <b>{ucFirst(customerSearch)}</b></React.Fragment> : ''}
+                      </React.Fragment>
                     ), 
                   },
                   { value: '1', label: 'Iron Man Industries' },
@@ -446,7 +458,10 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               <Select 
                 name="currency"
                 state={state} 
-                options={useMemo(() => (currencies ? getCurrencyOptions(currencies) : [{ value: 'nzd', label: 'New Zealand Dollar' }, { value: 'aud', label: 'Australian Dollar' }]), [])} 
+                options={useMemo(() => (currencies ? getCurrencyOptions(currencies) : [
+                  { value: 'nzd', label: 'New Zealand Dollar' }, 
+                  { value: 'aud', label: 'Australian Dollar' },
+                ]), [])} 
                 onChange={(e) => onChange(e, setState)}
               />
             </div>
@@ -522,7 +537,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 // DropdownProps={{ menuIsOpen: true }} 
               />
             </div>
-           <div>
+            <div>
               <label for="dateRange">Date range (with prefix & disabled days)</label>
               <Field 
                 name="dateRange" 
@@ -532,13 +547,14 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 state={state} 
                 onChange={(e) => onChange(e, setState)} 
                 DayPickerProps={{
-                  disabled: { after: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) }
+                  disabled: { after: new Date(Date.now() + 1000 * 60 * 60 * 24 * 45) },
                 }} 
               />
             </div>
             <div>
               <label for="dateMultiple">Date multi-select (right aligned)</label>
-              <Field name="dateMultiple" type="date" mode="multiple" state={state} onChange={(e) => onChange(e, setState)} dir="bottom-right" />
+              <Field name="dateMultiple" type="date" mode="multiple" state={state} 
+                onChange={(e) => onChange(e, setState)} dir="bottom-right" />
             </div>
             <div>
               <label for="time">Time: {date(state.time, 'dd MMM hh:mmaa')}</label>
@@ -583,14 +599,14 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             <div>
               <label for="time">TimePicker</label>
               {/* <div className="mt-2.5 mb-6 mt-input-before mb-input-after pt-2"> */}
-                <TimePicker
-                  value={state.time} 
-                  className="min-h-[150] mt-2.5 mb-6 mt-input-before mb-input-after pt-2"
-                  onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} 
-                  // Testing timezone support:
-                  // tz="Pacific/Honolulu"
-                  // referenceTimestamp={new Date().getTime() + 1000 * 60 * 60 * 24 * 5}
-                />
+              <TimePicker
+                value={state.time} 
+                className="min-h-[150] mt-2.5 mb-6 mt-input-before mb-input-after pt-2"
+                onChange={(value) => onChange({ target: { name: 'time', value: value }}, setState)} 
+                // Testing timezone support:
+                // tz="Pacific/Honolulu"
+                // referenceTimestamp={new Date().getTime() + 1000 * 60 * 60 * 24 * 5}
+              />
               {/* </div> */}
             </div>
           </div>
@@ -650,7 +666,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       )}
 
       {groups.includes('Modals') && (
-        <>
+        <React.Fragment>
           <div>
             <h2 class="h3">Modals</h2>
             <div class="mb-6"><Button color="primary" onClick={() => setShowModal1(true)}>Modal (default)</Button></div>
@@ -673,13 +689,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               <Button color="primary" onClick={() => setShowModal1(false)}>Save</Button>
             </div>
           </Modal>
-        </>
+        </React.Fragment>
       )}
 
       {groups.includes('Custom Components') && (
-        <>
+        <React.Fragment>
           {children}
-        </>
+        </React.Fragment>
       )}
 
       <GithubLink filename={__filename} />
