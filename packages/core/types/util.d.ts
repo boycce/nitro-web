@@ -191,6 +191,22 @@ export function deepSetWithInfo<T>(_obj: T, path: string, value: unknown | Funct
     fieldName: string;
 };
 /**
+ * Recursively traverses arrays and plain objects and replaces
+ * every value strictly equal to "{VALUE}".
+ *
+ * - Does not mutate the original input
+ * - Only traverses plain objects and arrays
+ * - Throws if a circular reference is detected
+ *
+ * @template T
+ * @param {T} input
+ * @param {any} matchingValue
+ * @param {any} value
+ * @returns {T}
+ * @throws {Error}
+ */
+export function deepSetWithMatch<T>(input: T, matchingValue: any, value: any): T;
+/**
  * Iterates over an object or array
  * @param {{[key: string]: any}|[]|null} obj
  * @param {function} iteratee
@@ -528,63 +544,86 @@ export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.
 export function pad(num?: number, padLeft?: number, fixedRight?: number): string;
 /**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
+ *   - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
+ *   - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
  * @param {{ [key: string]: unknown }} query - req.query
- *   E.g. {
- *     location: '10-RS',
- *     age: '33',
- *     isDeleted: 'false',
- *     search: 'John Doe',
- *     createdAt: '1749038400000,1749729600000',
- *     status: 'incomplete',
- *     bookingDate: '14'
- *     isActive: 'true',
- *     customer.0: '69214ce7ab121fb3726965a1', // splayed array items
- *   }
- * @param {{
- *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId }
- * }} config - allowed filters and their rules
- *   E.g. {
- *     location: 'string',
- *     age: 'number',
- *     isDeleted: 'boolean',
- *     search: 'search',
- *     createdAt: 'dateRange',
- *     status: ['incomplete', 'complete'],       // EnumArray
- *     bookingDate: [11, 14, 33],                // EnumArray
- *     isActive: [true, false],                  // EnumArray
- *     customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
- *   }
- * @example returned object (using the examples above):
- *   E.g. {
- *     location: '10-RS',
- *     age: 33,
- *     isDeleted: false,
- *     search: { $search: 'John' },
- *     createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
- *     status: 'incomplete',
- *     bookingDate: 14,
- *     isActive: true,
- *     customer: { $in: [new ObjectId('1234567890')] },
- *   }
+ * @param {{ [key: string]: (
+ *     'string'
+ *     | 'number'
+ *     | 'boolean'
+ *     | 'dateRange'
+ *     | EnumArray
+ *     | { rule: 'ids', parseId: parseId }
+ *     | 'text'
+ *     | { rule: 'text', numberFields: string[] }
+ *     | { rule: 'search' } & SearchOperators
+ *   )}} config - object of allowed filter/rule pairs.
+ *
+ * Examples:
+ *
+ * @example query = {
+ *   location: '10-RS',
+ *   age: '33',
+ *   isDeleted: 'false',
+ *   createdAt: '1749038400000,1749729600000',
+ *   status: 'incomplete',
+ *   customer.0: '69214ce7ab121fb3726965a1', // splayed array items
+ *   text: 'John Doe',
+ *   text: '15',
+ *   search: 'John Doe',
+ * }
+ * @example config = {
+ *   location: 'string',
+ *   age: 'number',
+ *   isDeleted: 'boolean',
+ *   createdAt: 'dateRange',
+ *   status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
+ *   customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
+ *   text: 'text',
+ *   text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
+ *   search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
+ * }
+ * @example returned MongoDB query object = {
+ *   location: '10-RS',
+ *   age: 33,
+ *   isDeleted: false,
+ *   createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
+ *   status: 'incomplete',
+ *   customer: { $in: [new ObjectId('1234567890')] },
+ *   $text: { $search: 'John Doe' },
+ *   $or: [{ $text: { $search: '15' }}, { age: 15 }],
+ *   $search: { text: { query: "John Doe", path: ['firstName'] }},
+ * }
  */
 export function parseFilters(query: {
     [key: string]: unknown;
 }, config: {
-    [key: string]: "string" | "number" | "boolean" | "search" | "dateRange" | EnumArray | {
+    [key: string]: ("string" | "number" | "boolean" | "dateRange" | EnumArray | {
         rule: "ids";
         parseId: parseId;
-    };
+    } | "text" | {
+        rule: "text";
+        numberFields: string[];
+    } | ({
+        rule: "search";
+    } & SearchOperators));
 }): {
-    [key: string]: string | number | boolean | {
-        $search: string;
-    } | {
+    [key: string]: string | number | boolean | SearchOperators | {
         $gte?: number;
         $gt?: number;
         $lte?: number;
         $lt?: number;
     } | {
         $in: ObjectId[];
-    };
+    } | {
+        $search: string;
+    } | ({
+        $text: {
+            $search: string;
+        };
+    } | {
+        [key: string]: number;
+    })[];
 };
 /**
  * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
@@ -879,6 +918,12 @@ export type parseId = (value: string) => ObjectId;
  * - an array of strings, numbers or booleans
  */
 export type EnumArray = (string | number | boolean)[];
+/**
+ * - https://mongodb.com/docs/atlas/atlas-search/operators-and-collectors/
+ */
+export type SearchOperators = {
+    [key: string]: any;
+};
 export type NitroError = {
     title: string;
     detail: string;
