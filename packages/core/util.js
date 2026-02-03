@@ -46,6 +46,9 @@ let scrollbarCache
 /** @type {boolean|undefined} */
 let axiosNonce
 
+/** @type {AxiosInstance|undefined} */
+let axiosInstance
+
 /**
  * Returns a monastery schema which matches the Google autocomplete output
  */
@@ -84,6 +87,8 @@ export function addressSchema () {
 
 /**
  * Returns an axios instance for the client
+ * @param {object} [options] - Options for the axios instance
+ * @param {import('https').AgentOptions} [options.agentOptions={ keepAlive: true }] - Options for the https agent
  * @returns {AxiosInstanceWithRetry}
  * 
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
@@ -92,18 +97,31 @@ export function addressSchema () {
  *   axios().defaults.baseURL = 'https://example.com'
  * ```
  */
-export function axios () {
-  if (!axiosNonce && typeof window !== 'undefined') {
-    // Remove mobile specific protocol and subdomain
-    const clientOrigin = window.document.location.origin.replace(/^(capacitor|https):\/\/(mobile\.)?/, 'https://')
-    axiosNonce = true
-    _axios.defaults.baseURL = clientOrigin
-    _axios.defaults.headers.desktop = true
-    _axios.defaults.withCredentials = true
-    _axios.defaults.timeout = 60000
-    axiosRetry(_axios, { retries: 0, retryDelay: (/*i*/) => 300 })
+export function axios ({ agentOptions } = { agentOptions: { keepAlive: true } }) {
+  // On the client, add retries and set the baseURL
+  if (typeof window !== 'undefined') {
+    if (!axiosNonce) {
+      // Remove mobile specific protocol and subdomain
+      const clientOrigin = window.document.location.origin.replace(/^(capacitor|https):\/\/(mobile\.)?/, 'https://')
+      axiosNonce = true
+      _axios.defaults.baseURL = clientOrigin
+      _axios.defaults.headers.desktop = true
+      _axios.defaults.withCredentials = true
+      _axios.defaults.timeout = 60000
+      axiosRetry(_axios, { retries: 0, retryDelay: (/*i*/) => 300 })
+    }
+    return _axios
+
+  // On the server, reuse the existing axios instance to maintain keep-alive (for Azure SNAT Port Exhaustion, and speed up requests)
+  } else {
+    if (!axiosInstance) {
+      const https = require('https') // eslint-disable-line
+      axiosInstance = _axios.create({
+        httpsAgent: new https.Agent({ ...agentOptions }),
+      })
+    }
+    return axiosInstance
   }
-  return _axios
 }
 
 /**
