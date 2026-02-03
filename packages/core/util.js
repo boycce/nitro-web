@@ -88,7 +88,8 @@ export function addressSchema () {
 /**
  * Returns an axios instance for the client
  * @param {object} [options] - Options for the axios instance
- * @param {import('https').AgentOptions} [options.agentOptions={ keepAlive: true }] - Options for the https agent
+ * @param {import('axios').CreateAxiosDefaults} [options.serverConfig] - Options for the axios instance creation on the server, 
+ *   e.g. { httpsAgent: new https.Agent({ keepAlive: true }) }
  * @returns {AxiosInstanceWithRetry}
  * 
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
@@ -97,7 +98,7 @@ export function addressSchema () {
  *   axios().defaults.baseURL = 'https://example.com'
  * ```
  */
-export function axios ({ agentOptions } = { agentOptions: { keepAlive: true } }) {
+export function axios ({ serverConfig } = {}) {
   // On the client, add retries and set the baseURL
   if (typeof window !== 'undefined') {
     if (!axiosNonce) {
@@ -112,15 +113,11 @@ export function axios ({ agentOptions } = { agentOptions: { keepAlive: true } })
     }
     return _axios
 
-  // On the server, reuse the existing axios instance to maintain keep-alive (for Azure SNAT Port Exhaustion, and speed up requests)
+  // On the server, we can create an axios instance if we want to maintain keep-alive (for Azure SNAT Port Exhaustion / speed up requests)
+  // E.g. axios({ serverConfig: { httpsAgent: new https.Agent({ keepAlive: true }) } })
   } else {
-    if (!axiosInstance) {
-      const https = require('https') // eslint-disable-line
-      axiosInstance = _axios.create({
-        httpsAgent: new https.Agent({ ...agentOptions }),
-      })
-    }
-    return axiosInstance
+    if (!axiosInstance && serverConfig) axiosInstance = _axios.create(serverConfig)
+    return axiosInstance || _axios
   }
 }
 
