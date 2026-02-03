@@ -51,7 +51,8 @@ export function addressSchema(): {
 /**
  * Returns an axios instance for the client
  * @param {object} [options] - Options for the axios instance
- * @param {import('https').AgentOptions} [options.agentOptions={ keepAlive: true }] - Options for the https agent
+ * @param {import('axios').CreateAxiosDefaults} [options.serverConfig] - Options for the axios instance creation on the server,
+ *   e.g. { httpsAgent: new https.Agent({ keepAlive: true }) }
  * @returns {AxiosInstanceWithRetry}
  *
  * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
@@ -60,8 +61,8 @@ export function addressSchema(): {
  *   axios().defaults.baseURL = 'https://example.com'
  * ```
  */
-export function axios({ agentOptions }?: {
-    agentOptions?: import("https").AgentOptions;
+export function axios({ serverConfig }?: {
+    serverConfig?: import("axios").CreateAxiosDefaults;
 }): AxiosInstanceWithRetry;
 /**
  * Builds the url with params
