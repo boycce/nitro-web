@@ -108,8 +108,7 @@ export function FieldDate({
     switch (props.mode) {
       case 'single':
       case 'time': {
-        const value = props?.value ?? props?.defaultValue
-        return [value && isValid(value) ? new Date(value).getTime() : null]
+        return [getStringValue(props.value, props.defaultValue)]
       }
       case 'multiple':
       case 'range': {
@@ -125,6 +124,11 @@ export function FieldDate({
         }
       }
     }
+  }
+
+  function getStringValue(value?: Timestamp, defaultValue?: Timestamp) {
+    const value2 = value ?? defaultValue
+    return value2 && isValid(value2) ? new Date(value2).getTime() : null
   }
 
   function getInputValue(value: Timestamp[]) {
@@ -173,7 +177,7 @@ export function FieldDate({
   function onNowClick() {
     // Use the browser's local time and parse it into the timezone
     const [hours, minutes, seconds] = [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()]
-    const nowInTz = parseDateString(`${hours}:${minutes}:${seconds}`, 'hh:mm:ss', tz, referenceTimestamp)
+    const nowInTz = parseDateString(`${hours}:${minutes}:${seconds}`, 'HH:mm:ss', tz)
     onChange(nowInTz)
   }
   
@@ -203,9 +207,15 @@ export function FieldDate({
             }
             {
               (props.mode == 'time' || (!!showTime && props.mode == 'single')) &&
-              <TimePicker value={internalValue?.[0]} onChange={onChange<Timestamp>} 
+              <TimePicker
+                // The `value` needs to be updated before or at the same time as `referenceTimestamp`, otherwise the
+                // useffect in the timepicker will use the previous `value`
+                value={getStringValue(props.value, props.defaultValue)} 
+                onChange={onChange<Timestamp>} 
                 className={`border-l border-gray-100 ${props.mode == 'single' ? 'min-h-[0]' : ''}`}
-                referenceTimestamp={referenceTimestamp} tz={tz}
+                referenceTimestamp={referenceTimestamp} 
+                tz={tz}
+                // _data={{ name: props.name }}
               />
             }
           </div>

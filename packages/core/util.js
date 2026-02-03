@@ -29,6 +29,7 @@ export { TZDate } from '@date-fns/tz'
 /** @typedef {object} ObjectId */
 /** @typedef {(value: string) => ObjectId} parseId */
 /** @typedef {(string|number|boolean)[]} EnumArray - an array of strings, numbers or booleans */
+/** @typedef {{ [key: string]: any }} SearchOperators - https://mongodb.com/docs/atlas/atlas-search/operators-and-collectors/ */
 /** @typedef {{ title: string, detail: string }} NitroError */
 /** @typedef {{ toJSON: () => { message: string } }} MongoError */
 /** @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors */
@@ -538,6 +539,56 @@ export function deepSetWithInfo(_obj, path, value) {
     parent: parent,
     fieldName: chunks.pop() ?? '',
   }
+}
+
+/**
+ * Recursively traverses arrays and plain objects and replaces
+ * every value strictly equal to "{VALUE}".
+ *
+ * - Does not mutate the original input
+ * - Only traverses plain objects and arrays
+ * - Throws if a circular reference is detected
+ *
+ * @template T
+ * @param {T} input
+ * @param {any} matchingValue
+ * @param {any} value
+ * @returns {T}
+ * @throws {Error}
+ */
+export function deepSetWithMatch(input, matchingValue, value) {
+  const seen = new WeakMap()
+
+  /**
+   * @param {*} input2
+   * @returns {*}
+   */
+  function walk(input2) {
+    if (input2 === matchingValue) return value
+
+    if (Array.isArray(input2)) {
+      return input2.map(walk)
+    }
+
+    if (input2 && typeof input2 === 'object') {
+      const proto = Object.getPrototypeOf(input2)
+      if (proto !== Object.prototype && proto !== null) return input2
+      if (seen.has(input2)) throw new Error('Circular reference detected')
+
+      /** @type {{ [key: string]: any }} */
+      const result = {}
+      seen.set(input2, result)
+
+      for (const key of Object.keys(input2)) {
+        result[key] = (walk(input2[key]))
+      }
+      return result
+    }
+
+    return input2
+  }
+
+  return /** @type {T} */ (walk(input))
 }
 
 /**
@@ -1282,54 +1333,77 @@ export function pad (num=0, padLeft=0, fixedRight) {
 
 /**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
+ *   - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
+ *   - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
  * @param {{ [key: string]: unknown }} query - req.query
- *   E.g. {
- *     location: '10-RS',
- *     age: '33',
- *     isDeleted: 'false',
- *     search: 'John Doe',
- *     createdAt: '1749038400000,1749729600000',
- *     status: 'incomplete',
- *     bookingDate: '14'
- *     isActive: 'true',
- *     customer.0: '69214ce7ab121fb3726965a1', // splayed array items
- *   }
- * @param {{ 
- *   [key: string]: 'string'|'number'|'boolean'|'search'|'dateRange'|EnumArray|{ rule: 'ids', parseId: parseId } 
- * }} config - allowed filters and their rules
- *   E.g. {
- *     location: 'string',
- *     age: 'number',
- *     isDeleted: 'boolean',
- *     search: 'search',  
- *     createdAt: 'dateRange',
- *     status: ['incomplete', 'complete'],       // EnumArray
- *     bookingDate: [11, 14, 33],                // EnumArray
- *     isActive: [true, false],                  // EnumArray
- *     customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
- *   }
- * @example returned object (using the examples above):
- *   E.g. {
- *     location: '10-RS',
- *     age: 33,
- *     isDeleted: false,
- *     search: { $search: 'John' },
- *     createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
- *     status: 'incomplete',
- *     bookingDate: 14,
- *     isActive: true,
- *     customer: { $in: [new ObjectId('1234567890')] },
- *   }
+ * @param {{ [key: string]: (
+ *     'string'
+ *     | 'number'
+ *     | 'boolean'
+ *     | 'dateRange'
+ *     | EnumArray
+ *     | { rule: 'ids', parseId: parseId }
+ *     | 'text'
+ *     | { rule: 'text', numberFields: string[] }
+ *     | { rule: 'search' } & SearchOperators
+ *   )}} config - object of allowed filter/rule pairs.
+ * 
+ * Examples:
+ * 
+ * @example query = {
+ *   location: '10-RS',
+ *   age: '33',
+ *   isDeleted: 'false',
+ *   createdAt: '1749038400000,1749729600000',
+ *   status: 'incomplete',
+ *   customer.0: '69214ce7ab121fb3726965a1', // splayed array items
+ *   text: 'John Doe',
+ *   text: '15',
+ *   search: 'John Doe',
+ * }
+ * @example config = {
+ *   location: 'string',
+ *   age: 'number',
+ *   isDeleted: 'boolean',
+ *   createdAt: 'dateRange',
+ *   status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
+ *   customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
+ *   text: 'text',
+ *   text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
+ *   search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
+ * }
+ * @example returned MongoDB query object = {
+ *   location: '10-RS',
+ *   age: 33,
+ *   isDeleted: false,
+ *   createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
+ *   status: 'incomplete',
+ *   customer: { $in: [new ObjectId('1234567890')] },
+ *   $text: { $search: 'John Doe' },
+ *   $or: [{ $text: { $search: '15' }}, { age: 15 }],
+ *   $search: { text: { query: "John Doe", path: ['firstName'] }},
+ * }
  */
 export function parseFilters(query, config) {
-  /** 
+  /**
    * Should match the example returned object above
    * @type {{ 
-   *   [key: string]: string|number|boolean|{ $search: string }|{ $gte?: number; $gt?: number; $lte?: number; $lt?: number; }|
-   *     { $in: ObjectId[] } }} */
-  const mongoQuery = {}
+   *   [key: string]: (
+   *     string
+   *     | number
+   *     | boolean
+   *     | { $gte?: number; $gt?: number; $lte?: number; $lt?: number; }
+   *     | (string|number|boolean)
+   *     | { $in: ObjectId[] } 
+   *     | { $search: string }                                              // key=$text
+   *     | ({ $text: { $search: string } } | { [key: string]: number })[]   // key=$or
+   *     | SearchOperators                                                  // key=$search
+   *   )
+   * }} */
+  const returnedMongoQuery = {}
 
-  // Convert splayed array items into a unified array objects, e.g. 'customer.0' = '1' and 'customer.1' = '2' -> 'customer' = '1,2'
+  // Convert splayed array items into a unified array objects,
+  // E.g. 'customer.0' = '1' and 'customer.1' = '2' -> 'customer' = '1,2'
   for (const key in query) {
     if (key.match(/\.\d+$/)) {
       const baseKey = key.replace(/\.\d+$/, '')
@@ -1341,7 +1415,7 @@ export function parseFilters(query, config) {
 
   for (const key in query) {
     if (typeof query[key] !== 'string') continue
-    const val = query[key]
+    const val = query[key].trim()
     const rule = config[key]
 
     if (!rule) {
@@ -1349,24 +1423,26 @@ export function parseFilters(query, config) {
 
     } else if (rule === 'string') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
-      mongoQuery[key] = val
+      returnedMongoQuery[key] = val
 
     } else if (rule === 'number') {
       const num = parseFloat(val)
       if (isNaN(num)) throw new Error(`The "${key}" filter should be a number, but received "${val}".`)
-      mongoQuery[key] = num
+      returnedMongoQuery[key] = num
 
     } else if (rule === 'boolean') {
       const bool = val === 'true' ? true : val === 'false' ? false : undefined
       if (bool === undefined) throw new Error(`The "${key}" filter should be a boolean, but received "${val}".`)
-      mongoQuery[key] = bool
+      returnedMongoQuery[key] = bool
 
-    } else if (rule === 'search') {
-      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
-      mongoQuery['$text'] = { $search: '"' + val + '"' }
+    } else if (rule === 'dateRange') {
+      const [start, end] = val.split(',').map(Number)
+      if (isNaN(start) && isNaN(end)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a date range.`)
+      else if (isNaN(start)) returnedMongoQuery[key] = { $gte: 0, $lte: end }
+      else if (isNaN(end)) returnedMongoQuery[key] = { $gte: start }
+      else returnedMongoQuery[key] = { $gte: start, $lte: end }
 
-    // Enums
-    } else if (Array.isArray(rule)) {
+    } else if (Array.isArray(rule)) { // Enum
       // Detetect the entire array's type from the first item
       const type = typeof rule[0]
       if (!['string', 'number', 'boolean'].includes(type)) {
@@ -1377,11 +1453,10 @@ export function parseFilters(query, config) {
         let valParsed = /** @type {string|number|boolean|undefined} */(val)
         if (type === 'number') valParsed = parseFloat(val)
         else if (type === 'boolean') valParsed = val === 'true' ? true : val === 'false' ? false : undefined
-        if (valParsed === ruleItem) mongoQuery[key] = valParsed
+        if (valParsed === ruleItem) returnedMongoQuery[key] = valParsed
       }
     
-    // Ids
-    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') {
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') { // ids
       if (!rule.parseId) {
         throw new Error(`The "${key}" filter has an invalid rule. Expected a parseId function.`)
       }
@@ -1390,21 +1465,39 @@ export function parseFilters(query, config) {
         else return rule.parseId(id)
       })
       if (!ids.length) throw new Error(`Please pass at least one id to the "${key}" filter.`)
-      mongoQuery[key] = { $in: ids }
+      returnedMongoQuery[key] = { $in: ids }
 
-    } else if (rule === 'dateRange') {
-      const [start, end] = val.split(',').map(Number)
-      if (isNaN(start) && isNaN(end)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a date range.`)
-      else if (isNaN(start)) mongoQuery[key] = { $gte: 0, $lte: end }
-      else if (isNaN(end)) mongoQuery[key] = { $gte: start }
-      else mongoQuery[key] = { $gte: start, $lte: end }
+    } else if (rule === 'text') {
+      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      returnedMongoQuery['$text'] = { $search: '"' + val + '"' }
 
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'text') {
+      if (typeof val !== 'string') {
+        throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      } else if (!Array.isArray(rule.numberFields) || !rule.numberFields.length) {
+        throw new Error(`The "${key}" filter has an invalid rule. Expected an numberFields to be a non-empty array.`)
+      }
+      const ors = []
+      const num = parseFloat(val)
+      ors.push({ $text: { $search: val } })
+      if (!isNaN(num)) {
+        for (const field of rule.numberFields) {
+          ors.push({ [field]: num })
+        }
+      }
+      returnedMongoQuery.$or = ors
+
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'search') {
+      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      const output = /** @type {SearchOperators} */(deepSetWithMatch(rule, '{VALUE}', val)) // replace {VALUE} with the value
+      delete output.rule // need to remove rule from the object
+      returnedMongoQuery['$search'] = output
     } else {
       throw new Error(`Unknown filter type "${rule}" in the config.`)
     }
   }
 
-  return mongoQuery
+  return returnedMongoQuery
 }
 
 /**
@@ -1573,9 +1666,13 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
+<<<<<<< HEAD
  * @param {Object} [options.axiosConfig] - axios config, see https://axios-http.com/docs/req_config
  * @param {number} [options.axiosConfig.timeout] - overwrite timeout
  * @param {boolean} [options.axiosConfig.withCredentials=true] - whether to send cookies with the request
+=======
+ * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
+>>>>>>> 6a8e7a38f22f746f7f5dbe96b17cfb2f293fd2fe
  * @returns {Promise<any>}
  * 
  * @example
