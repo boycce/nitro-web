@@ -176,6 +176,17 @@ export function camelCaseToHypen (str) {
 }
 
 /**
+ * Converts hypen case to title case
+ * @param {string} str
+ * @param {boolean} [justCapitaliseFirst] - Just capitalise the first letter
+ * @returns {string}
+ */
+export function hypenCaseToTitle (str, justCapitaliseFirst) {
+  if (justCapitaliseFirst) return ucFirst(str.replace(/-/g, ' '))
+  else return str.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
+}
+
+/**
  * Capitalises a string
  * @param {string} [str]
  * @returns {string}
