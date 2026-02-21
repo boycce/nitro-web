@@ -1,8 +1,10 @@
-// Todo: show correct message type, e.g. error, warning, info, success `${store.message.type || 'success'}`
-import { isObject, isString, queryObject } from 'nitro-web/util'
+import { queryObject, twMerge } from 'nitro-web/util'
+import { IsFirstRender } from 'nitro-web'
 import { X, CircleCheck } from 'lucide-react'
 import { MessageObject } from 'nitro-web/types'
-import { twMerge } from 'nitro-web'
+import React from 'react'
+
+let messageInstanceCount = 0
 
 type MessageProps = {
   className?: string
@@ -10,24 +12,53 @@ type MessageProps = {
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 }
 /**
- * Shows a message
- * Triggered by navigating to a link with a valid query string, or by setting store.message to a string or more explicitly, to an object
+ * Shows a message by store.message or query param.
+ *   - A tilde ~ is appended so we can keep clicking links and seeing the message again
+ * 
+ * Showing a message by store.message:
+ * 
+ *   The store.message value can be a string or an object with the following properties:
+ *   - @param {string} text - The text of the message
+ *   - @param {'error' | 'warning' | 'info' | 'success'} [type] 
+ *   - @param {number} [timeout] - The timeout in milliseconds to hide the message
+ *   
+ *   @example
+ *     setStore({ message: 'Added successfully.' })
+ *     setStore({ message: { type: 'error', default: 'Sorry, there was an error.' } })
+ *     setStore({ message: { type: 'success', text: 'Added successfully.', timeout: 5000 } })
+ *     setStore({ message: '' }) (Clears the message)
+ * 
+ * Showing a message by query param:
+ *   
+ *   @example
+ *     /?error                   (Shows 'Sorry, there was an error.')
+ *     /?error=Woops             (Shows 'Woops'
+ *     /?added                   (Shows the default text for the 'added' message type)
  **/
 export function Message({ className, classNameWrapper, position='top-right' }: MessageProps) {
-  const devDontHide = false
   const [store, setStore] = useTracked()
   const [visible, setVisible] = useState(false)
+  const [messageObject, setMessageObject] = useState<MessageObject>()
   const location = useLocation()
-  const messageQueryMap = {
-    'added': { type: 'success', text: 'Added successfully 👍️' },
-    'created': { type: 'success', text: 'Created successfully 👍️' },
-    'error': { type: 'error', text: 'Sorry, there was an error' },
-    'oauth-error': { type: 'error', text: 'There was an error trying to signin, please try again' },
-    'removed': { type: 'success', text: 'Removed' },
+  const navigate = useNavigate()
+  const isFirstRender = IsFirstRender()
+
+  const queryDefaultMap: Record<string, MessageObject> = {
+    // Primary message types:
+    'error': { type: 'error', text: 'Sorry, there was an error.' },
+    'warning': { type: 'warning', text: '' },
+    'info': { type: 'info', text: '' },
+    'success': { type: 'success', text: '' },
+
+    // Predefined message types:
+    'added': { type: 'success', text: 'Added successfully.' },
+    'created': { type: 'success', text: 'Created successfully.' },
+    'oauth-error': { type: 'error', text: 'There was an error trying to signin, please try again.' },
+    'removed': { type: 'success', text: 'Removed.' },
     'signin': { type: 'error', text: 'Please sign in to access this page' },
-    'updated': { type: 'success', text: 'Updated successfully' },
-    'unauth': { type: 'error', text: 'You are unauthorised' },
-  }
+    'unauth': { type: 'error', text: 'You are unauthorised.' },
+    'updated': { type: 'success', text: 'Updated successfully.' },
+  } 
   const colorMap = {
     'error': 'text-danger',
     'warning': 'text-warning',
@@ -42,69 +73,112 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     'bottom-center': ['sm:items-end sm:justify-center', 'sm:translate-y-1'],
     'bottom-right': ['sm:items-end sm:justify-end', 'sm:translate-y-0 sm:translate-x-1'],
   }
-  const color = colorMap[(store.message as MessageObject)?.type || 'success']
+  const color = colorMap[messageObject?.type || 'success']
   const positionArr = positionMap[(position as keyof typeof positionMap)]
 
   useEffect(() => {
-    return () => {
-      setStore(s => ({ ...s, message: '' }))
-    }
-  }, [])
+    // Listen for query changes
+    const query = queryObject(location.search, { emptyStringAsTrue: false })
 
-  useEffect(() => {
-    // Finds a message in a query string and show it
-    let message
-    const query = queryObject(location.search, { emptyStringAsTrue: true })
+    // Show the first found message from a query string
     for (const key in query) {
       if (!query.hasOwnProperty(key)) continue
-      for (const key2 in messageQueryMap) {
-        if (key != key2) continue
-        // @ts-expect-error
-        message = { ...messageQueryMap[key] }
-        if (query[key] !== true) message.text = decodeURIComponent(query[key] as string )
+      if (!Object.keys(queryDefaultMap).includes(key)) continue
+      const defaultMessageObject = queryDefaultMap[key as keyof typeof queryDefaultMap]
+      if (Array.isArray(query[key])) continue
+      const rawQueryValue = query[key] as string
+      
+      if (rawQueryValue.match(/=$/) && !isFirstRender) {
+        // Only show if first render, otherwise skip internal tracking of the message
+        continue
       }
+
+      // Parse the raw text value into a message object (remove the bust '~' if present)
+      const queryValueDecoded = decodeURIComponent(rawQueryValue).replace(/~$/, '') // replaces + => ' '
+      const newMessageObject = parseRawValue(queryValueDecoded, defaultMessageObject)
+      setStore(s => ({ ...s, message: newMessageObject }))
+      setMessageObject(() => newMessageObject)
+
+      // Add the bust '~' value in the query param, so the user can see the message again when clicking the same link
+      const newQuery = new URLSearchParams(location.search)
+      newQuery.set(key, queryValueDecoded + '~')
+
+      // Build query string with encodeURIComponent to preserve %20 for spaces
+      const parts = []
+      for (const [k, v] of newQuery.entries()) {
+        parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(v))
+      }
+      navigate(
+        { pathname: location.pathname, search: parts.length ? '?' + parts.join('&') : '' },
+        { replace: true }
+      )
+      break
     }
-    if (message) setStore(s => ({ ...s, message: message }))
   }, [location.search])
 
   useEffect(() => {
-    // Message detection and autohiding
-    const now = new Date().getTime()
-    const messageObject = store.message as MessageObject
-
-    if (!store.message) {
-      return
-    // Convert a string into a message object
-    } else if (isString(store.message)) {
-      setStore(s => ({ ...s, message: { type: 'success', text: store.message as string, date: now }}))
-    // Add a date to the message
-    } else if (!messageObject.date) {
-      setStore(s => ({ ...s, message: { ...messageObject, date: now }}))
-    // Show message and hide it again after some time. Send back cleanup if store.message changes
-    } else if (messageObject && now - 500 < messageObject.date) {
-      const timeout1 = setTimeout(() => setVisible(true), 50)
-      if (messageObject.timeout !== 0 && !devDontHide) var timeout2 = setTimeout(hide, messageObject.timeout || 5000)
-      return () => {
-        clearTimeout(timeout1)
-        clearTimeout(timeout2)
-      }
+    // Listen for store.message changes (onload this may be )
+    if (!isAlreadyShown(store.message)) {
+      // If not skipped on first render, this will override the query param message above onload
+      if (isFirstRender) return
+      const newMessageObject = parseRawValue(store.message || '')
+      setMessageObject(() => newMessageObject)
+      setStore(s => ({ ...s, message: newMessageObject }))
     }
   }, [JSON.stringify(store.message)])
 
+  useEffect(() => {
+    // Listen for internal messageObject changes, and show and hide message
+    if (!messageObject) return
+    const timeout1 = setTimeout(() => setVisible(true), 50)
+    const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => setVisible(false), messageObject.timeout || 5000) : undefined
+    return () => {
+      clearTimeout(timeout1)
+      clearTimeout(timeout2)
+    }
+  }, [JSON.stringify(messageObject)])
+
+  useEffect(() => {
+    messageInstanceCount++
+    if (messageInstanceCount > 1) console.error('Nitro: Multiple <Message /> instances can show duplicate notifications.')
+    return () => {
+      messageInstanceCount--
+    }
+  }, [])
+
   function hide() {
     setVisible(false)
-    setTimeout(() => setStore(s => ({ ...s, message: undefined })), 250)
+    setTimeout(() => setMessageObject(undefined), 250)
   }
-
+  
+  function isAlreadyShown(value?: string | MessageObject) {
+    if (!value) return false
+    else if (typeof value === 'string') return false
+    // else if (typeof value === 'string' && value.match(/_$/)) return true //
+    else if (typeof value === 'object' && value._date) return true
+  }
+  
+  function parseRawValue(value: string | MessageObject, defaultMessageObject?: MessageObject): MessageObject | undefined {
+    // @param defaultMessageObject - default message object to extend from, used for query changes
+    if (typeof value === 'string') {
+      if (!value && !defaultMessageObject?.text) return
+      else if (defaultMessageObject) return { ...defaultMessageObject, text: value || defaultMessageObject.text, _date: Date.now() }
+      else return { type: 'success', text: value, _date: Date.now() }
+    } else if (typeof value === 'object') {
+      if (!value.text) return
+      else return { ...value, _date: Date.now() }
+    }
+  }
+  
   return (
-    <>
+    <React.Fragment>
       {/* Global notification live region, render this permanently at the end of the document */}
       <div
         aria-live="assertive"
         className={`${twMerge(`pointer-events-none items-end justify-center fixed inset-0 flex px-4 py-6 sm:p-6 z-[101] nitro-message ${positionArr[0]} ${classNameWrapper || ''}`)}`}
       >
         <div className="flex flex-col items-center space-y-4">
-          {isObject(store.message) && (
+          {messageObject && (
             <div className={twMerge(
               'overflow-hidden translate-y-[0.5rem] opacity-0 pointer-events-auto max-w-[350px] rounded-md bg-white shadow-lg ring-1 ring-black/5 transition text-sm font-medium text-gray-900',
               positionArr[1],
@@ -117,7 +191,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
                     <CircleCheck aria-hidden="true" size={19} className={`${color}`} />
                   </div>
                   <div className="flex flex-1 items-center min-h-[1.4em]">
-                    <p>{typeof store.message === 'object' && store.message?.text}</p>
+                    <p>{messageObject.text}</p>
                   </div>
                   <div className="flex items-center shrink-0 min-h-[1.4em]">
                     <button
@@ -136,6 +210,6 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
           )}
         </div>
       </div>
-    </>
+    </React.Fragment>
   )
 }

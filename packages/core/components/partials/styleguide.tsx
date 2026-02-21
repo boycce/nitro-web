@@ -1,6 +1,7 @@
 import { 
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
   Filters, FilterType, Table, TableColumn, usePushChangesToPath,
+  Message,
 } from 'nitro-web'
 import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
@@ -50,7 +51,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     'Date Inputs',
     'File Inputs & Calendar & Time',
     'Tables',
-    'Modals',
+    'Modals & Notifications',
     'Custom Components',
   ]
   const [state, setState] = useState(() => getState())
@@ -681,13 +682,23 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Modals') && (
+      {groups.includes('Modals & Notifications') && (
         <React.Fragment>
           <div>
-            <h2 class="h3">Modals</h2>
-            <div class="mb-6"><Button color="primary" onClick={() => setShowModal1(true)}>Modal (default)</Button></div>
+            <h2 class="h3">Modals & Notifications</h2>
+            <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
+              <Button color="primary" onClick={() => setShowModal1(true)}>Modal (default)</Button>
+              <Button color="danger" onClick={() => setStore({ message: { text: 'Removed.', type: 'error' }}) }>Notification error</Button>
+              <Button color="warning" onClick={() => setStore({ message: { text: 'Warning.', type: 'warning' }}) }>Notification warning</Button>{/*eslint-disable-line*/}
+              <Button color="info" onClick={() => setStore({ message: { text: 'Info.', type: 'info' }}) }>Notification info</Button>
+              <Button color="success" onClick={() => setStore({ message: 'Success.' })}>Notification success</Button>
+            </div>
           </div>
-      
+
+          {/* Create a Message instance (setup once in the layout file, recommended approach) */}
+          {/* <Message position="top-right" />*/}
+
+          {/* Create a Modal instance */}
           <Modal show={showModal1} setShow={setShowModal1}>
             <h3 class="h3">Edit Profile</h3>
             <p class="mb-5">An example modal containing a basic form for editing profiles.</p>

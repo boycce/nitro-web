@@ -44,10 +44,10 @@ export type MonasteryImage = {
 }
 
 export type MessageObject = {
-  date?: number
   text: string | React.ReactNode
   type?: 'error' | 'info' | 'success' | 'warning'
   timeout?: number
+  _date?: number // internal usage only
 }
 
 export type Store = {
