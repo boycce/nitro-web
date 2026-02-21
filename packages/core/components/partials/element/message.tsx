@@ -11,6 +11,7 @@ type MessageProps = {
   classNameWrapper?: string
   position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
 }
+
 /**
  * Shows a message by store.message or query param.
  *   - A tilde ~ is appended so we can keep clicking links and seeing the message again
