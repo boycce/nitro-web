@@ -42,7 +42,8 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     'Links',
     'Dropdowns',
     'Filters',
-    'Buttons',
+    'Button Colors & Sizes',
+    'Button Icons',
     'Varients',
     'Selects',
     'Inputs',
@@ -322,20 +323,35 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Buttons') && (
+      {groups.includes('Button Colors & Sizes') && (
         <div>
-          <h2 class="h3">Buttons</h2>
+          <h2 class="h3">Button Colors & Sizes</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
+            {/* Colors */}
             <div><Button color="primary">primary (default)</Button></div>
             <div><Button color="secondary">secondary button</Button></div>
             <div><Button color="black">black button</Button></div>
             <div><Button color="dark">dark button</Button></div>
             <div><Button color="white">white button</Button></div>
             <div><Button color="clear">clear button</Button></div>
-            <div><Button color="primary" size="xs">*-xs button</Button></div>
-            <div><Button color="primary" size="sm">*-sm button</Button></div>
-            <div><Button color="primary">*-md (default)</Button></div>
+            <div><Button color="danger">danger button</Button></div>
+            <div><Button color="warning">warning button</Button></div>
+            <div><Button color="info">info button</Button></div>
+            <div><Button color="success">success button</Button></div>
+            {/* Sizes */}
             <div><Button color="primary" size="lg">*-lg button</Button></div>
+            <div><Button color="primary">*-md (default)</Button></div>
+            <div><Button color="primary" size="sm">*-sm button</Button></div>
+            <div><Button color="primary" size="xs">*-xs button</Button></div>
+          </div>
+        </div>
+      )}
+
+      {groups.includes('Button Icons') && (
+        <div>
+          <h2 class="h3">Button Icons</h2>
+          <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
+            {/* Icons */}
             <div><Button IconLeft={<Check size={19} className="-my-5" />}>IconLeft</Button></div>
             <div><Button IconLeft={<Check size={19} className="-my-5" />} 
               className="w-[160px]">IconLeft 160px</Button></div>
@@ -343,7 +359,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               className="w-[190px]">IconLeftEnd 190px</Button></div>
             <div><Button IconRight="v">IconRight</Button></div>
             <div><Button IconRightEnd="v" className="w-[190px]">IconRightEnd 190px</Button></div>
-            <div><Button color="primary" IconRight="v" isLoading>primary isLoading</Button></div>
+            <div><Button color="primary" IconRight="v" isLoading></Button></div>
             <div><Button IconCenter={<FileEditIcon size={18}/>}></Button></div>
             <div><Button size="sm" IconCenter={<FileEditIcon size={16}/>}></Button></div>
             <div><Button size="xs" IconCenter={<FileEditIcon size={14}/>}></Button></div>

@@ -2,7 +2,7 @@ import { twMerge } from 'nitro-web'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
 interface Button extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  color?: 'primary'|'secondary'|'black'|'dark'|'white'|'clear'|'custom'
+  color?: 'primary'|'secondary'|'black'|'dark'|'white'|'clear'|'danger'|'warning'|'info'|'success'|'custom'
   size?: 'xs'|'sm'|'md'|'lg'|'custom'
   customColor?: string
   customSize?: string
@@ -47,6 +47,10 @@ export function Button({
     'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
     'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black', // maybe change to text-foreground
     'clear': 'hover:bg-gray-50 ring-gray-300 hover:text-foreground [&>.loader]:border-foreground !shadow-none',
+    'danger': 'bg-danger hover:bg-danger-hover ring-transparent text-white [&>.loader]:border-white',
+    'warning': 'bg-warning hover:bg-warning-hover ring-transparent text-white [&>.loader]:border-white',
+    'info': 'bg-info hover:bg-info-hover ring-transparent text-white [&>.loader]:border-white',
+    'success': 'bg-success hover:bg-success-hover ring-transparent text-white [&>.loader]:border-white',
   }
   
   // Button sizes (px is better for height consistency)

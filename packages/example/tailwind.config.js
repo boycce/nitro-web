@@ -36,12 +36,16 @@ export default {
         'link-hover': colors.blue[200],
         'link-focus': colors.blue[200],
         'foreground': colors.gray[900],
-        // Nitro error & alert colors
+        // Nitro feedback colors
         'danger': colors.red[500],
         'danger-foreground': colors.red[600],
+        'danger-hover': lighten(colors.red[500], 0.05),
         'warning': colors.yellow[500],
+        'warning-hover': lighten(colors.yellow[500], 0.05),
         'info': colors.blue[500],
+        'info-hover': lighten(colors.blue[500], 0.05),
         'success': colors.green[500],
+        'success-hover': lighten(colors.green[500], 0.05),
         // Nitro element colors
         'input': colors.gray[900],
         'input-placeholder': colors.gray[400],
