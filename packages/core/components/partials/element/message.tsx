@@ -1,15 +1,26 @@
 import { queryObject, twMerge } from 'nitro-web/util'
 import { IsFirstRender } from 'nitro-web'
-import { X, CircleCheck } from 'lucide-react'
+import { X, CircleCheck, Info, TriangleAlert, CircleX } from 'lucide-react'
 import { MessageObject } from 'nitro-web/types'
-import React from 'react'
+import React, { useMemo } from 'react'
 
 let messageInstanceCount = 0
+
+type MessagePosition = 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+
+type MessageIcon = {
+  color: string
+  icon: React.ComponentType<{ size?: number; className?: string; 'aria-hidden'?: boolean }>
+  position: MessagePosition
+}
+
+export type MessageIcons = Partial<{[key: string]: Partial<MessageIcon>}>
 
 type MessageProps = {
   className?: string
   classNameWrapper?: string
-  position?: 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right'
+  icons?: MessageIcons
+  position?: MessagePosition
 }
 
 /**
@@ -36,7 +47,7 @@ type MessageProps = {
  *     /?error=Woops             (Shows 'Woops'
  *     /?added                   (Shows the default text for the 'added' message type)
  **/
-export function Message({ className, classNameWrapper, position='top-right' }: MessageProps) {
+export function Message({ className, classNameWrapper, icons: iconsProp, position }: MessageProps) {
   const [store, setStore] = useTracked()
   const [visible, setVisible] = useState(false)
   const [messageObject, setMessageObject] = useState<MessageObject>()
@@ -50,7 +61,6 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     'warning': { type: 'warning', text: '' },
     'info': { type: 'info', text: '' },
     'success': { type: 'success', text: '' },
-
     // Predefined message types:
     'added': { type: 'success', text: 'Added successfully.' },
     'created': { type: 'success', text: 'Created successfully.' },
@@ -59,14 +69,8 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     'signin': { type: 'error', text: 'Please sign in to access this page' },
     'unauth': { type: 'error', text: 'You are unauthorised.' },
     'updated': { type: 'success', text: 'Updated successfully.' },
-  } 
-  const colorMap = {
-    'error': 'text-danger',
-    'warning': 'text-warning',
-    'info': 'text-info',
-    'success': 'text-success',
   }
-  const positionMap = {
+  const positionMap: Record<MessagePosition, [string, string]> = {
     'top-left': ['sm:items-start sm:justify-start', 'sm:translate-y-0  sm:translate-x-[-0.5rem]'],
     'top-center': ['sm:items-start sm:justify-center', 'sm:translate-y-[-0.5rem]'],
     'top-right': ['sm:items-start sm:justify-end', 'sm:translate-y-0 sm:translate-x-1'],
@@ -74,8 +78,30 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     'bottom-center': ['sm:items-end sm:justify-center', 'sm:translate-y-1'],
     'bottom-right': ['sm:items-end sm:justify-end', 'sm:translate-y-0 sm:translate-x-1'],
   }
-  const color = colorMap[messageObject?.type || 'success']
-  const positionArr = positionMap[(position as keyof typeof positionMap)]
+
+  const defaultIcons: Record<string, MessageIcon> = {
+    error: { color: 'text-danger', icon: CircleX, position: 'top-right' },
+    warning: { color: 'text-warning', icon: TriangleAlert, position: 'top-right' },
+    info: { color: 'text-info', icon: Info, position: 'top-right' },
+    success: { color: 'text-success', icon: CircleCheck, position: 'top-right' },
+  } 
+
+  const icons = useMemo(() => {
+    const result: Record<string, MessageIcon> = { ...defaultIcons }
+    if (iconsProp) {
+      for (const type in iconsProp) {
+        result[type] = {
+          color: iconsProp[type]?.color ?? result[type]?.color,
+          icon: iconsProp[type]?.icon ?? result[type]?.icon,
+          position: iconsProp[type]?.position ?? result[type]?.position,
+        }
+      }
+    }
+    return result
+  }, [iconsProp])
+
+  const icon = icons[messageObject?.type || 'success']
+  const positionArr = positionMap[position ?? icon?.position ?? 'top-right']
 
   useEffect(() => {
     // Listen for query changes
@@ -131,7 +157,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
   useEffect(() => {
     // Listen for internal messageObject changes, and show and hide message
     if (!messageObject) return
-    const timeout1 = setTimeout(() => setVisible(true), 50)
+    const timeout1 = setTimeout(() => setVisible(true), 20)
     const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => setVisible(false), messageObject.timeout || 5000) : undefined
     return () => {
       clearTimeout(timeout1)
@@ -151,26 +177,7 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
     setVisible(false)
     setTimeout(() => setMessageObject(undefined), 250)
   }
-  
-  function isAlreadyShown(value?: string | MessageObject) {
-    if (!value) return false
-    else if (typeof value === 'string') return false
-    // else if (typeof value === 'string' && value.match(/_$/)) return true //
-    else if (typeof value === 'object' && value._date) return true
-  }
-  
-  function parseRawValue(value: string | MessageObject, defaultMessageObject?: MessageObject): MessageObject | undefined {
-    // @param defaultMessageObject - default message object to extend from, used for query changes
-    if (typeof value === 'string') {
-      if (!value && !defaultMessageObject?.text) return
-      else if (defaultMessageObject) return { ...defaultMessageObject, text: value || defaultMessageObject.text, _date: Date.now() }
-      else return { type: 'success', text: value, _date: Date.now() }
-    } else if (typeof value === 'object') {
-      if (!value.text) return
-      else return { ...value, _date: Date.now() }
-    }
-  }
-  
+
   return (
     <React.Fragment>
       {/* Global notification live region, render this permanently at the end of the document */}
@@ -189,7 +196,11 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
               <div className="p-3">
                 <div className="flex items-start gap-3 leading-[1.4em]">
                   <div className="flex items-center shrink-0 min-h-[1.4em]">
-                    <CircleCheck aria-hidden="true" size={19} className={`${color}`} />
+                    {React.createElement(icon.icon, {
+                      'aria-hidden': true,
+                      size: 19,
+                      className: icon.color,
+                    })}
                   </div>
                   <div className="flex flex-1 items-center min-h-[1.4em]">
                     <p>{messageObject.text}</p>
@@ -213,4 +224,22 @@ export function Message({ className, classNameWrapper, position='top-right' }: M
       </div>
     </React.Fragment>
   )
+}
+
+function isAlreadyShown(value?: string | MessageObject) {
+  if (!value) return false
+  if (typeof value === 'string') return false
+  if (typeof value === 'object' && value._date) return true
+}
+
+function parseRawValue(value: string | MessageObject, defaultMessageObject?: MessageObject): MessageObject | undefined {
+  if (typeof value === 'string') {
+    if (!value && !defaultMessageObject?.text) return
+    if (defaultMessageObject) return { ...defaultMessageObject, text: value || defaultMessageObject.text, _date: Date.now() }
+    return { type: 'success', text: value, _date: Date.now() }
+  }
+  if (typeof value === 'object') {
+    if (!value.text) return
+    return { ...value, _date: Date.now() }
+  }
 }

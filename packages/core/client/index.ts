@@ -29,7 +29,7 @@ export { Dropdown, type DropdownProps, type DropdownOption } from '../components
 export { Filters, type FilterType, usePushChangesToPath } from '../components/partials/element/filters'
 export { GithubLink } from '../components/partials/element/github-link'
 export { Initials } from '../components/partials/element/initials'
-export { Message } from '../components/partials/element/message'
+export { Message, type MessageIcons } from '../components/partials/element/message'
 export { Modal } from '../components/partials/element/modal'
 export { Sidebar, type SidebarProps } from '../components/partials/element/sidebar'
 export { TimePicker, type TimePickerProps } from '../components/partials/element/timepicker'

@@ -5,7 +5,7 @@ export default {
     // extend default middleware here...
     isBatman: (_route: unknown, store: { user?: { isBatman?: boolean } }) => {
       if (store.user?.isBatman) return
-      else return { redirect: '/signin?error=You are not Batman!' }
+      else return { redirect: '/signin?error=Only account holders of Wayne Enterprises can access this page.' }
     },
   },
 }
