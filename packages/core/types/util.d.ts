@@ -95,6 +95,13 @@ export function camelCaseToTitle(str: string, captialiseFirstOnly?: boolean): st
  */
 export function camelCaseToHypen(str: string): string;
 /**
+ * Converts hypen case to title case
+ * @param {string} str
+ * @param {boolean} [justCapitaliseFirst] - Just capitalise the first letter
+ * @returns {string}
+ */
+export function hypenCaseToTitle(str: string, justCapitaliseFirst?: boolean): string;
+/**
  * Capitalises a string
  * @param {string} [str]
  * @returns {string}
