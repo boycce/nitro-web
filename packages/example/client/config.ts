@@ -1,11 +1,12 @@
+import type { Store, Config } from 'types'
 export default { 
-  ...INJECTED_CONFIG as import('types').Config,
+  ...INJECTED_CONFIG as Config,
 
   middleware: {
-    // extend default middleware here...
-    isBatman: (_route: unknown, store: { user?: { isBatman?: boolean } }) => {
-      if (store.user?.isBatman) return
-      else return { redirect: '/signin?error=Only account holders of Wayne Enterprises can access this page.' }
+    // extend or override default middleware here...
+    hasExecutiveAccess: (_route: unknown, store: Store) => {
+      if (store.user?.type === 'admin') return
+      else return { redirect: '?error=Only executive account holders of Wayne Enterprises can access this page.' }
     },
   },
 }

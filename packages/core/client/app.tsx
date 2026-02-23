@@ -38,6 +38,9 @@ type RouteWithPolicies = Route & {
   [key: string]: true | string | (string | true)[]
 }
 
+let lastRedirectUrl = ''
+let lastRedirectTimesForSameUrl: number[] = []
+
 export async function setupApp(config: Config, storeContainer: StoreContainer, layouts: React.FC<LayoutProps>[]) {
   if (!layouts) throw new Error('layouts are required')
   if (!(window as unknown as { useTracked: unknown }).useTracked) {
@@ -207,7 +210,8 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
             <RouteComponent route={route} config={config} />
           ),
           path: route.path,
-          loader: async () => { // request
+          loader: async ({ request }: { request: Request }) => { // request
+            catchRedirectLoop(request, route.name)
             // wait for container/exposedStoreData to be setup (note that this causes ReactRouter to re-render, but not the page)
             if (!nonce) {
               nonce = true 
@@ -216,7 +220,13 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
             for (const key of route.middleware) {
               const error = settings.middleware[key](route, exposedStoreData || {})
               if (error && error.redirect) {
-                return redirect(error.redirect)
+                // Redirect() will use the new pathname instead of the current one for values without a pathname causing guard 
+                // redirect loops! We assume these query string redirects are intended to be relative to the current path.
+                if (error.redirect.startsWith('?')) {
+                  return redirect(window.location.pathname + error.redirect)
+                } else {
+                  return redirect(error.redirect)
+                }
               }
             }
             return null
@@ -267,6 +277,22 @@ function scrollbarElement() {
   // main element that has page scrollbar
   // this needs to be non-body element otherwise the Modal.jsx doesn't open/close smoothly
   return document.getElementById('app') // was window.scrollY
+}
+
+function catchRedirectLoop(request: Request, routeName: string) {
+  if (request.url === lastRedirectUrl) {
+    const lastRedirectTime = lastRedirectTimesForSameUrl[lastRedirectTimesForSameUrl.length - 1] || 0
+    lastRedirectUrl = request.url
+    lastRedirectTimesForSameUrl.push(Date.now())
+    if (lastRedirectTimesForSameUrl.length > 5 && (Date.now() < lastRedirectTime + 100)) {
+      throw new Error(
+        `Nitro: A redirect loop has been detected for route '${routeName}'. This ismost likely due to a redirect loop caused by your middleware.`
+      )
+    }
+  } else {
+    lastRedirectUrl = request.url
+    lastRedirectTimesForSameUrl = []
+  }
 }
 
 // ---- Overridable defaults ------------

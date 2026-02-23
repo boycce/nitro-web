@@ -28,10 +28,3 @@ ResetPasswordPage.route = {
   '/reset/:token': true,
   'meta': { 'title': 'Reset password', layout: 2 },
 }
-
-// Client Middleware Example page
-export const BatCavePage = () => <div>Welcome to the Bat Cave!</div>
-BatCavePage.route = {
-  '/bat-cave': ['isBatman'], // middleware name
-  'meta': { 'title': 'Bat Cave', layout: 2 },
-}

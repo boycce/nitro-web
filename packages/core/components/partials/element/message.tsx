@@ -115,7 +115,7 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
       if (Array.isArray(query[key])) continue
       const rawQueryValue = query[key] as string
       
-      if (rawQueryValue.match(/=$/) && !isFirstRender) {
+      if (rawQueryValue.match(/~$/) && !isFirstRender) {
         // Only show if first render, otherwise skip internal tracking of the message
         continue
       }

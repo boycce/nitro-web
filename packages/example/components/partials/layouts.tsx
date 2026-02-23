@@ -38,7 +38,7 @@ export function Layout2() {
           <ul class="flex-1 flex gap-4 list-style-none">
             <li><Link class="underline1" to="/">Home</Link></li>
             <li><Link class="underline1" to="/about">About</Link></li>
-            <li><Link class="underline1" to="/bat-cave">Middleware Example</Link></li>
+            <li><Link class="underline1" to="/research-floor">Middleware Example</Link></li>
           </ul>
           <div>
             2025 © {injectedConfig?.name || 'Nitro'}
