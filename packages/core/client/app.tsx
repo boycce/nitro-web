@@ -219,14 +219,10 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
             }
             for (const key of route.middleware) {
               const error = settings.middleware[key](route, exposedStoreData || {})
+              // Note: the redirect uses the new pathname for query string values, e.g. '?example=value'. We also can't use the 
+              // current pathname, as this doesn't exist on page refresh.
               if (error && error.redirect) {
-                // Redirect() will use the new pathname instead of the current one for values without a pathname causing guard 
-                // redirect loops! We assume these query string redirects are intended to be relative to the current path.
-                if (error.redirect.startsWith('?')) {
-                  return redirect(window.location.pathname + error.redirect)
-                } else {
-                  return redirect(error.redirect)
-                }
+                return redirect(error.redirect)
               }
             }
             return null
@@ -286,7 +282,7 @@ function catchRedirectLoop(request: Request, routeName: string) {
     lastRedirectTimesForSameUrl.push(Date.now())
     if (lastRedirectTimesForSameUrl.length > 5 && (Date.now() < lastRedirectTime + 100)) {
       throw new Error(
-        `Nitro: A redirect loop has been detected for route '${routeName}'. This ismost likely due to a redirect loop caused by your middleware.`
+        `Nitro: A redirect loop has been detected for route '${routeName}'. This is most likely due to a redirect loop caused by your middleware. Consider triggered by redirect values without a pathname, e.g. '?example=value'.`
       )
     }
   } else {
