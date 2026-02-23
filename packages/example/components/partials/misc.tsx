@@ -30,7 +30,7 @@ StyleguidePage.route = {
 export const NotFoundPage = () => <NotFound />
 NotFoundPage.route = {
   '*': true,
-  'meta': { 'title': 'Nothing found', layout: 1 },
+  'meta': { 'title': 'Page Not Found', layout: 2 },
 }
 
 // Client Middleware Example page
