@@ -374,42 +374,58 @@ export const middleware = {
 
 
   isAdmin: (req, res, next) => {
-    // Still need to remove cookie matching in favour of uid..
-    // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
-    const user = req.user
-    let cookieMatch = user && (!req.headers.authid || user._id?.toString() == req.headers.authid)
-    if (cookieMatch && user && (user.type?.match(/admin/) || user.isAdmin)) next()
-    else if (user && (user.type?.match(/admin/) || user.isAdmin)) res.unauthorized('Invalid cookie, please refresh your browser')
-    else if (user) res.unauthorized('You are not authorised to make this request.')
-    else res.unauthorized('Please sign in first.')
+    if (!isValidUserOrRespond(req, res)) return
+    else if (!isAdminUser(req)) res.unauthorized('You are not authorised to make this request.')
+    else next()
   },
-  // isCompanyOwner: (req, res, next) => {
-  //   let user = req.user || { companies: [] }
-  //   let cid = req.params.cid
-  //   let company = user.companies.find((o) => o._id.toString() == cid)
-  //   let companyUser = company?.users?.find((o) => o._id.toString() == user._id?.toString())
-  //   if (!user._id) return res.unauthorized('Please sign in first.')
-  //   else if (!company || !companyUser) res.unauthorized('You are not authorised to make this request.')
-  //   else if (companyUser.type != 'owner') res.unauthorized('Only owners can make this request.')
-  //   else next()
-  // },
-  // isCompanyUser: (req, res, next) => {
-  //   let user = req.user || { companies: [] }
-  //   let cid = req.params.cid
-  //   let company = user.companies.find((o) => o._id.toString() == cid)
-  //   if (!user._id) return res.unauthorized('Please sign in first.')
-  //   else if (!company) res.unauthorized('You are not authorised to make this request.')
-  //   else next()
-  // },
   isUser: (req, res, next) => {
-    // todo: need to double check that uid is always defined
-    let uid = req.params.uid
-    if (req.user && (typeof uid == 'undefined' || req.user._id?.toString() == uid)) next()
-    else if (req.user) res.unauthorized('You are not authorised to make this request.')
-    else res.unauthorized('Please sign in first.')
+    if (!isValidUserOrRespond(req, res)) return
+    else next()
+  },
+  isParamUser: (req, res, next) => {
+    const isParamUser = req.user?._id?.toString() == req.params.uid
+    if (!isValidUserOrRespond(req, res)) return
+    else if (!isParamUser && !isAdminUser(req)) res.unauthorized('You are not authorised to make this request.')
+    else next() 
   },
   isDevelopment: (req, res, next) => {
     if (configLocal.env !== 'development') res.error('This API endpoint is only available in development')
     else next()
   },
+  isCompanyUser: (req, res, next) => {
+    if (!isValidParamCompanyUserOrRespond(req)) return
+    else next()
+  },
+  isCompanyOwner: (req, res, next) => {
+    if (!isValidParamCompanyUserOrRespond(req, true)) return
+    else next()
+  },
+}
+
+export function isAdminUser(req) {
+  return (req.user?.type?.match(/admin/) || req.user?.isAdmin) ? true : false
+}
+
+export function isValidUserOrRespond(req, res) {
+  // Check if the user is logged in, and that the requesting user is the same as the user, the requesting user might be outdated.
+  // E.g. new tab > signout > signin to a different user, now old tab needs to refresh.
+  if (!req.user) {
+    res.unauthorized('Please sign in first.')
+    return false
+  } else if (req.headers.requestingUserId && req.user._id?.toString() != req.headers.requestingUserId) {
+    res.unauthorized('Invalid session, please refresh your browser.')
+    return false
+  } else {
+    return true
+  }
+}
+
+function isValidParamCompanyUserOrRespond(req, res, checkIsOwner = false) {
+  const _company = req.user?.company?._id?.toString() == req.params.cid ? req.user.company : false
+  const company = _company || req.user?.companies?.find((o) => o._id.toString() == req.params.cid)
+  const isCompanyOwner = company?.users?.find((o) => o._id.toString() == req.user?._id?.toString() && o.type === 'owner')
+  if (!isValidUserOrRespond(req, res)) return
+  else if (!isAdminUser(req) && !company) res.unauthorized('You are not authorised to make this request.')
+  else if (!isAdminUser(req) && checkIsOwner && !isCompanyOwner) res.unauthorized('Only owners can make this request.')
+  else return true
 }

@@ -18,7 +18,7 @@ async function setupDefaultModels(db) {
 export { userModel, companyModel, setupDefaultModels }
 
 // Export router
-export { setupRouter, middleware } from './router.js'
+export { setupRouter, middleware, isValidUserOrRespond, isAdminUser } from './router.js'
 
 // Export email utility
 export { sendEmail } from './email/index.js'

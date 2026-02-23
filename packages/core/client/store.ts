@@ -39,9 +39,9 @@ function beforeUpdate<T extends Store>(newStore: T) {
     delete newStore.jwt
   }
 
-  // E.g. Cookie matching handy for rare issues, e.g. signout > signin (to a different user on another tab)
+  // Send the requesting user id in the headers for the server to check (see, ./server/router.js:isValidUser() for more details)
   if (newStore?.user?._id) {
-    axios().defaults.headers.authid = newStore?.user?._id
+    axios().defaults.headers.requestingUserId = newStore?.user?._id
   }
   return newStore
 }

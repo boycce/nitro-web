@@ -53,12 +53,17 @@ const config = {
   middleware: {
     ...middleware,
     // You add/extend middleware here, or even override what default middleware is used, e.g:
-    // order: [...middleware.order, 'cors'],
+    // order: [...middleware.order, 'cors', 'hasExecutiveAccess'],
     // cors: cors({
     //   origin: '*',
     //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     //   credentials: true,
     // }),
+    // hasExecutiveAccess: (req, res, next) => {
+    //   if (!isValidUserOrRespond(req, res)) return
+    //   else if (req.user?.type !== 'admin') res.unauthorized('Only executive account holders of Wayne Enterprises can access this page.')
+    //   else next()
+    // },
   },
 }
 
