@@ -1,4 +1,6 @@
 export function setupRouter(config: any): Promise<http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>>;
+export function isAdminUser(req: any): boolean;
+export function isValidUserOrRespond(req: any, res: any): boolean;
 /** @type {MiddlewareConfig} */
 export const middleware: MiddlewareConfig;
 export type Request = express.Request & {

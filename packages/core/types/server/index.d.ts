@@ -13,5 +13,5 @@ import userModel from './models/user.js';
 import companyModel from './models/company.js';
 export function setupDefaultModels(db: any): Promise<void>;
 export { userModel, companyModel };
-export { setupRouter, middleware } from "./router.js";
+export { setupRouter, middleware, isValidUserOrRespond, isAdminUser } from "./router.js";
 //# sourceMappingURL=index.d.ts.map
