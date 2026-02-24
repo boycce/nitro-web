@@ -46,9 +46,9 @@ export const routes = {
 function setup(middleware, _config) {
   // routes.setup is called automatically when express starts
   // Set config values
-  const configKeys = ['clientUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
+  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
   authConfig = pick(_config, configKeys)
-  for (const key of ['clientUrl', 'emailFrom', 'env', 'name']) {
+  for (const key of ['baseUrl', 'emailFrom', 'env', 'name']) {
     if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
   }
 

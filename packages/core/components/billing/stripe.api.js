@@ -21,7 +21,7 @@ function setup(middleware, _config) {
   // Set config values
   config = {
     env: _config.env,
-    clientUrl: _config.clientUrl,
+    baseUrl: _config.baseUrl,
     stripeSecretKey: _config.stripeSecretKey,
     stripeWebhookSecret: _config.stripeWebhookSecret,
   }
@@ -81,7 +81,7 @@ async function billingPortalSessionCreate(req, res) {
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: req.user.stripeCustomer.id,
-      return_url: config.clientUrl + '/subscriptions',
+      return_url: config.baseUrl + '/subscriptions',
     })
     res.json(session.url)
   } catch (err) {

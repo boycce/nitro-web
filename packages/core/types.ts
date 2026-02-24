@@ -2,7 +2,7 @@
 
 type InjectedConfig = {
   awsUrl?: string
-  clientUrl: string
+  baseUrl: string
   env: string
   googleMapsApiKey?: string
   isDemo: boolean // implicitly defined by webpack

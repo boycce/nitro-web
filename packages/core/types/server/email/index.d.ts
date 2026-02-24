@@ -1,6 +1,6 @@
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
- * @typedef {{ clientUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
  *
  * @param {object} opts
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
@@ -33,7 +33,7 @@ export function sendEmail({ template, to, config, bcc, data, from, replyTo, reci
  * Sends an email using a predefined template, with optional data/or recipientVariables
  */
 export type Config = {
-    clientUrl?: string;
+    baseUrl?: string;
     emailFrom?: string;
     mailgunDomain?: string;
     mailgunKey?: string;

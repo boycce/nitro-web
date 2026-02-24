@@ -15,7 +15,7 @@ const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
- * @typedef {{ clientUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
  *
  * @param {object} opts
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
@@ -46,8 +46,8 @@ export async function sendEmail({
 }) {
   if (!config) {
     throw new Error('sendEmail: `config` missing')
-  } else if (!config.clientUrl) {
-    throw new Error('sendEmail: `config.clientUrl` is missing')
+  } else if (!config.baseUrl) {
+    throw new Error('sendEmail: `config.baseUrl` is missing')
   } else if (!config.emailFrom) {
     throw new Error('sendEmail: `config.emailFrom` is missing')
   } else if (!test && (!config.mailgunKey || !config.mailgunDomain)) {
@@ -81,7 +81,7 @@ export async function sendEmail({
     recipientVariables[toEmail] = {
       ...(data || {}),
       configName: ucFirst(config.name),
-      domain: config.clientUrl,
+      domain: config.baseUrl,
       replyToEmail: getNameEmail(replyTo)[1],
       replyToName: getNameEmail(replyTo)[0],
       email: toEmail,
@@ -95,7 +95,7 @@ export async function sendEmail({
     bcc: bcc,
     emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
-    isDev: config.clientUrl.match(/:/), // possibly use config.env here
+    isDev: config.baseUrl.match(/:/), // possibly use config.env here
     recipientVariables: recipientVariables,
     replyTo: replyTo,
     skipCssInline: skipCssInline,
@@ -103,7 +103,7 @@ export async function sendEmail({
     template: template,
     test: config.emailTestMode || test,
     to: to,
-    url: config.clientUrl,
+    url: config.baseUrl,
   }
 
   // Grab html and send

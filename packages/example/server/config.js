@@ -41,7 +41,7 @@ const config = {
   client: {
     // injected into the client via webpack
     awsUrl: process.env.awsUrl,
-    clientUrl: process.env.originUrl || 'http://localhost:3000',
+    baseUrl: process.env.baseUrl || 'http://localhost:3000',
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
     name: process.env.name,

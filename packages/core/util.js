@@ -103,9 +103,9 @@ export function axios ({ createConfig } = {}) {
   if (typeof window !== 'undefined') {
     if (!axiosNonce) {
       // Remove mobile specific protocol and subdomain
-      const clientOrigin = window.document.location.origin.replace(/^(capacitor|https):\/\/(mobile\.)?/, 'https://')
+      const baseUrl = window.document.location.origin.replace(/^(capacitor|https):\/\/(mobile\.)?/, 'https://')
       axiosNonce = true
-      _axios.defaults.baseURL = clientOrigin
+      _axios.defaults.baseURL = baseUrl
       _axios.defaults.headers.desktop = true
       _axios.defaults.withCredentials = true
       _axios.defaults.timeout = 60000
