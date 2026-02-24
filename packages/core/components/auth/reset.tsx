@@ -69,7 +69,7 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
     try {
       const data = await request('post /api/reset-password', state, event, isLoading, setState)
       setStore((s) => ({ ...s, ...data }))
-      navigate(redirectTo || '/')
+      setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
       return setState({ ...state, errors: e as Errors })
     }

@@ -28,7 +28,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
     try {
       const data = await request('post /api/signup', state, e, isLoading, setState)
       setStore((prev) => ({ ...prev, ...data }))
-      setTimeout(() => navigate(redirectTo || '/'), 0) // wait for setStore
+      setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
       setState((prev) => ({ ...prev, errors: e as Errors }))
     }

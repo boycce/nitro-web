@@ -51,7 +51,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
         else navigate(redirectTo || '/')
-      }, 100) 
+      }, 10) 
     } catch (e) {
       return setState({ ...state, errors: e as Errors})
     }

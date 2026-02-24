@@ -19,10 +19,16 @@ export const routes = {
   'post    /api/signin': [signin],
   'post    /api/signup': [signup],
   'post    /api/reset-instructions': [resetInstructions],
-  'post    /api/reset-password': [resetPassword],
+  'post    /api/reset-password': [resetConfirm],
   'post    /api/invite-instructions': [inviteInstructions],
-  'post    /api/invite-accept': [resetPassword],
+  'post    /api/invite-accept': [inviteConfirm],
   'delete  /api/account/:uid': [remove],
+
+  // todo: 
+  //   We dont need all of these overridable, just signinAndGetStore, findUserFromProvider, 
+  //   and getStore. So we will allow just these two to be passed around.
+  //   userCreate not needed, they can just create their own signup function.
+  ///  Maybe we can pass these into setup?
 
   // Overridable helpers
   setup: setup,
@@ -33,6 +39,8 @@ export const routes = {
   tokenParse: tokenParse,
   userCreate: userCreate,
   validatePassword: validatePassword,
+  sendToken: sendToken,
+  inviteOrResetConfirm: inviteOrResetConfirm,
 }
 
 function setup(middleware, _config) {
@@ -138,95 +146,6 @@ function signin(req, res) {
 
 function signout(req, res) {
   res.json('{}')
-}
-
-async function resetInstructions(req, res) {
-  try {
-    let email = (req.body.email || '').trim().toLowerCase()
-    if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-
-    let user = await db.user.findOne({ query: { email }, _privateData: true })
-    if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-
-    let resetToken = await tokenCreate(user._id)
-    await db.user.update({ query: { email }, $set: { resetToken }})
-
-    res.json({})
-    sendEmail({
-      config: authConfig,
-      template: 'reset-password',
-      to: `${ucFirst(user.firstName)}<${email}>`,
-      data: {
-        token: resetToken + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
-      },
-    }).catch(err => console.error('sendEmail(..) mailgun error', err))
-  } catch (err) {
-    res.error(err)
-  }
-}
-
-async function resetPassword(req, res) {
-  try {
-    const { token, password, password2 } = req.body
-    const name = req.path.includes('invite') ? 'inviteToken' : 'resetToken'
-    const desktop = req.query.desktop
-    const id = tokenParse(token)
-    await validatePassword(password, password2)
-
-    let user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
-    if (!user || user[name] !== token) throw new Error('Sorry your token is invalid or has already been used.')
-
-    await db.user.update({
-      query: user._id,
-      data: {
-        password: await bcrypt.hash(password, 10),
-        resetToken: '',
-      },
-      blacklist: ['-' + name, '-password'],
-    })
-    res.send(await this.signinAndGetStore({ ...user, [name]: undefined }, desktop, this.getStore))
-  } catch (err) {
-    res.error(err)
-  }
-}
-
-async function inviteInstructions(req, res) {
-  try {
-    // Check if user is admin here rather than in middleware (which may not exist yet)
-    if (req.user.type != 'admin' && !req.user.isAdmin) {
-      throw new Error('You are not authorized to invite users.')
-    }
-    const inviteToken = await tokenCreate()
-    const userData = await db.user.validate({
-      ...pick(req.body, ['email', 'firstName', 'lastName']),
-      status: 'invited',
-      inviteToken: inviteToken,
-    })
-
-    // Check if user already exists
-    if (await db.user.findOne({ query: { email: userData.email } })) {
-      throw { title: 'email', detail: 'User already exists.' }
-    }
-
-    // Create user
-    const user = await db.user.insert({
-      data: userData,
-    })
-
-    // Send email
-    res.send(user)
-    sendEmail({
-      config: authConfig,
-      template: 'invite-user',
-      to: `${ucFirst(userData.firstName)}<${userData.email}>`,
-      data: {
-        token: inviteToken + (req.query.hasOwnProperty('desktop') ? '?desktop' : ''),
-      },
-    }).catch(err => console.error('sendEmail(..) mailgun error', err))
-
-  } catch (err) {
-    return res.error(err)
-  }
 }
 
 async function remove(req, res) {
@@ -409,4 +328,120 @@ export async function validatePassword(password='', password2) {
   } else if (typeof password2 != 'undefined' && password !== password2) {
     throw [{ title: 'password2', detail: 'Your passwords need to match.' }]
   }
+}
+
+
+
+
+/* ---- Controllers -------------------------- */
+
+export async function resetInstructions(req, res) {
+  try {
+    // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
+    let email = (req.body.email || '').trim().toLowerCase()
+    if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+
+    let user = await db.user.findOne({ query: { email }, _privateData: true })
+    if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+
+    // Send reset password email
+    await sendToken({ type: 'reset', user: user })
+    res.json({})
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function inviteInstructions(req, res) {
+  try {
+    // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
+    let user = await db.user.findOne({ query: { _id: req.params._id }, _privateData: true })
+    if (!user) throw new Error('Invalid user id')
+    // Send invite instructions email
+    await sendToken({ type: 'invite', user: user })
+    res.json({})
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function inviteConfirm(req, res) {
+  try {
+    res.send(await this.inviteOrResetConfirm('invite', req))
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function resetConfirm(req, res) {
+  try {
+    res.send(await this.inviteOrResetConfirm('reset', req))
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+/* ---- Helpers ------------------------------ */
+
+export async function inviteOrResetConfirm(type, req) {
+  const { token, password, password2 } = req.body
+  const name = type === 'invite' ? 'inviteToken' : 'resetToken'
+  const desktop = req.query.desktop
+  const id = tokenParse(token)
+  await validatePassword(password, password2)
+
+  let user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
+  if (!user || user[name] !== token) throw new Error('Sorry your token is invalid or has already been used.')
+
+  await db.user.update({
+    query: user._id,
+    data: {
+      password: await bcrypt.hash(password, 10),
+      [name]: '', // remove token
+    },
+    blacklist: ['-' + name, '-password'],
+  })
+  const store = await this.signinAndGetStore({ ...user, [name]: undefined }, desktop, this.getStore)
+  return store
+}
+
+/**
+ * Checks if the user exists, updates the user with the invite token and sends the invite email
+ * @param {object} options
+ * @param {'reset' | 'invite'} options.type -  The type of token to send (default: 'reset')
+ * @param {{_id: string, email: string, firstName: string}} options.user -  The user to send the invite email to
+ * @param {function} [options.beforeUpdate] - callback hook to run before updating the user
+ * @param {function} [options.beforeSendEmail] -  callback hook to run before sending the email
+ * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
+ */
+export async function sendToken({ type = 'reset', user, beforeUpdate, beforeSendEmail }) {
+  if (!user?._id) throw new Error('user is required')
+  if (!user?.email) throw new Error('user.email is required')
+  if (!user?.firstName) throw new Error('user.firstName is required')
+  const token = await tokenCreate(user._id)
+
+  // Update the user with the token
+  const result = await db.user.update({
+    query: { _id: user._id },
+    data: beforeUpdate ? beforeUpdate({ [type + 'Token']: token }) : { [type + 'Token']: token },
+    blacklist: ['-' + type + 'Token'],
+  })
+
+  if (!result._output.matchedCount) {
+    throw new Error('Invalid user id to send the token to')
+  }
+
+  // Send email
+  const options = {
+    config: authConfig,
+    template: type === 'reset' ? 'reset-password' : 'invite-user',
+    to: `${ucFirst(user.firstName)}<${user.email}>`,
+    data: { token: token }, // + (req.query.hasOwnProperty('desktop') ? '?desktop' : '')
+  }
+  const mailgunPromise = sendEmail(beforeSendEmail ? beforeSendEmail(options, token) : options).catch(err => {
+    console.error('sendEmail(..) mailgun error', err)
+  })
+
+  // Return the token and mailgun promise
+  return { token, mailgunPromise }
 }
