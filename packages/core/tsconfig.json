@@ -1,4 +1,6 @@
 {
+  "_note": "Development-only ts configuration.",
+  "_note_about_compilerOptions_paths": "Since the types for the package exports are not available in the package itself during development, we need to help the compiler find the types for these aliased paths.",
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true,
@@ -11,15 +13,16 @@
     "lib": ["es6", "dom", "dom.iterable", "esnext"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "noEmit": false,
+    "noEmit": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
     "noImplicitReturns": false,
     "noImplicitThis": true,
     "noStrictGenericChecks": false,
-    "outDir": "./dist",
     "paths": {
-      "types": ["./types.ts"]
+      "nitro-web/server": ["./server/index.ts"],
+      "nitro-web/util": ["./util.ts"],
+      "types": ["./types.ts"],
     },
     "resolveJsonModule": true,
     "rootDir": "./",
@@ -29,9 +32,8 @@
     "target": "es2022"
   },
   "include": [
-    "client", // includes ./globals.ts
+    "client",
     "components",
-    "server",
-    "types/core-only-globals.d.ts"
+    "server"
   ]
 }

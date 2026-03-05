@@ -1,24 +1,19 @@
-/**
- * @typedef {import('types').Role} Role
- */
+import type { Role } from 'types'
 
-/**
- * @typedef {Object} Country
- * @property {string} currency
- * @property {string} name
- * @property {{ currency: string, percentage: string }} numberFormats
- * @property {{ full: string, long: string, medium: string, short: string }} dateFormats
- */
+// dateformats: https://date-fns.org/v4.1.0/docs/format
+type Country = {
+  currency: string
+  name: string
+  numberFormats: { currency: string, percentage: string }
+  dateFormats: { full: string, long: string, medium: string, short: string }
+}
 
-/** @type {{ value: Role, label: string }[]} */
-export const roleOptions = [
+export const roleOptions: { value: Role, label: string }[] = [
   { value: 'admin', label: 'Admin' },
   { value: 'user', label: 'User' },
 ]
 
-/** @type {{ [key: string]: Country }} */
-// dateformats: https://date-fns.org/v4.1.0/docs/format#
-export const countries = {
+export const countries: { [key: string]: Country } = {
   nz: {
     currency: 'nzd',
     name: 'New Zealand',
@@ -49,8 +44,7 @@ export const countries = {
   },
 }
 
-/** @type {{ [key: string]: { name: string, symbol: string, digits: number } }} */
-export const currencies = {
+export const currencies: { [key: string]: { name: string, symbol: string, digits: number } } = {
   nzd: { name: 'New Zealand Dollar', symbol: '$', digits: 2 },
   aud: { name: 'Australian Dollar', symbol: '$', digits: 2 },
   usd: { name: 'United States Dollar', symbol: '$', digits: 2 },

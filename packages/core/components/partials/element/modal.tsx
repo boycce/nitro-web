@@ -1,5 +1,6 @@
 import { IsFirstRender, twMerge } from 'nitro-web'
 import SvgX1 from 'nitro-web/client/imgs/icons/x1.svg'
+import { useState, useRef, useEffect } from 'react'
 
 type ModalProps = {
   show: boolean

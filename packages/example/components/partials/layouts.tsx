@@ -1,5 +1,5 @@
 import { Outlet } from 'react-router-dom'
-import { injectedConfig, Message, MessageIcons, Sidebar } from 'nitro-web'
+import { injectedConfigInternalUse, Message, MessageIcons, Sidebar } from 'nitro-web'
 import Logo from '../../client/imgs/logo/logo.svg'
 
 // Dashboard, app screens (only the <Outlet/> receives `params` and `location`)
@@ -41,7 +41,7 @@ export function Layout2() {
             <li><Link class="underline1" to="/research-floor">Middleware Example</Link></li>
           </ul>
           <div>
-            2025 © {injectedConfig?.name || 'Nitro'}
+            2025 © {injectedConfigInternalUse?.name || 'Nitro'}
           </div>
         </div>
 

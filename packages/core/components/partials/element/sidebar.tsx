@@ -1,7 +1,7 @@
 // Component: https://tailwindui.com/components/application-ui/application-shells/sidebar#component-a69d85b6237ea2ad506c00ef1cd39a38
 import { css } from 'twin.macro'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
-import { injectedConfig } from 'nitro-web'
+import { injectedConfigInternalUse } from 'nitro-web'
 import {
   Bars3Icon,
   HomeIcon,
@@ -10,6 +10,8 @@ import {
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
 import { XIcon } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 
 const sidebarWidth = 'w-80'
 
@@ -90,7 +92,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
 
   const _menu = menu || [
     { name: 'Dashboard', to: '/', Icon: HomeIcon },
-    { name: injectedConfig.isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: PaintBrushIcon }, 
+    { name: injectedConfigInternalUse.isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: PaintBrushIcon }, 
     { name: 'Pricing', to: '/pricing', Icon: UsersIcon },
     { name: 'Signout', to: '/signout', Icon: ArrowLeftCircleIcon },
   ]
@@ -107,7 +109,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
           <Link to="/">
             <Logo width="70" height={undefined} />
           </Link>
-          <span className="text-[9px] text-gray-900 font-semibold mt-4">{injectedConfig.version}</span>
+          <span className="text-[9px] text-gray-900 font-semibold mt-4">{injectedConfigInternalUse.version}</span>
         </div>
       )}
       <nav className="flex flex-1 flex-col">

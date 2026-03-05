@@ -1,3 +1,4 @@
+// Optional globals for host projects to use, not included in Nitro
 import { useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 

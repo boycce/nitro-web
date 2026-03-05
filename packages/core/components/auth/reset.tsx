@@ -1,6 +1,7 @@
-import { Topbar, Field, FormError, Button, request, onChange } from 'nitro-web'
+import { Topbar, Field, FormError, Button, request, onChange, showErrorNotification } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 
 type resetInstructionsProps = {
   className?: string,
@@ -24,7 +25,7 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
       setStore((s) => ({ ...s, message: 'Done! Please check your email.' }))
       navigate(redirectTo || '/signin')
     } catch (e) {
-      return setState({ ...state, errors: e as Errors })
+      showErrorNotification(setStore, e)
     }
   }
 

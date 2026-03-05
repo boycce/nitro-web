@@ -1,4 +1,5 @@
-import { Errors } from 'nitro-web/types'
+import { ClientError, Errors } from 'nitro-web/types'
+import React from 'react'
 
 type FormError = {
   state: { errors?: Errors },
@@ -9,19 +10,19 @@ type FormError = {
 
 export function FormError({ state, fields, className }: FormError) {
   // A catch all error element that should be placed next to the submit button
-  let error: { title: string, detail: string } | undefined
+  let error: ClientError | undefined
   for (const item of state.errors || []) {
     if (!item.title || item.title.match(/^(error|invalid)$/i) || (fields && !fields.includes(item.title))) {
       error = item
     }
   }
   return (
-    <>
+    <React.Fragment>
       {error ? (
         <div class={`text-danger-foreground mt-1 text-sm nitro-error ${className||''}`}>
           {error.detail}
         </div>
       ) : null}
-    </>
+    </React.Fragment>
   )
 }

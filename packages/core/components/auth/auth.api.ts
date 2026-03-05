@@ -1,15 +1,25 @@
-// @ts-nocheck
 import crypto from 'crypto'
 import bcrypt from 'bcrypt'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
-import db from 'monastery'
+import _db from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
 import { isArray, pick, ucFirst, fullNameSplit } from 'nitro-web/util'
+import { Request, Response, ControllerSetup, UserMinimal, Store } from 'types'
 
-let authConfig = null
+const db = _db as any // eslint-disable-line @typescript-eslint/no-explicit-any
+const configCache: {
+  baseUrl?: string,
+  emailFrom?: string,
+  env?: string,
+  name?: string,
+  mailgunDomain?: string,
+  mailgunKey?: string,
+  masterPassword?: string, 
+  isNotMultiTenant?: boolean,
+} = {}
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 
 export const routes = {
@@ -31,7 +41,6 @@ export const routes = {
   ///  Maybe we can pass these into setup?
 
   // Overridable helpers
-  setup: setup,
   findUserFromProvider: findUserFromProvider,
   getStore: getStore,
   signinAndGetStore: signinAndGetStore,
@@ -43,13 +52,12 @@ export const routes = {
   inviteOrResetConfirm: inviteOrResetConfirm,
 }
 
-function setup(middleware, _config) {
+export const setup: ControllerSetup = (middleware, config) => {
   // routes.setup is called automatically when express starts
   // Set config values
-  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
-  authConfig = pick(_config, configKeys)
-  for (const key of ['baseUrl', 'emailFrom', 'env', 'name']) {
-    if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
+  for (const key of ['baseUrl', 'emailFrom', 'name', 'env', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']) {
+    if (!['baseUrl', 'emailFrom', 'env', 'name'].includes(key)) throw new Error(`Missing config value for: config.${key}`)
+    configCache[key as keyof typeof configCache] = config[key as keyof typeof config]
   }
 
   passport.use(
@@ -60,7 +68,7 @@ function setup(middleware, _config) {
           const user = await this.findUserFromProvider({ email }, password)
           next(null, user)
         } catch (err) {
-          next(err.message)
+          next((err as Error).message)
         }
       }
     )
@@ -84,7 +92,8 @@ function setup(middleware, _config) {
     )
   )
 
-  middleware.order.splice(3, 0, 'passport', 'passportError', 'jwtAuth', 'blocked')
+  // added after index 1 (after parseJson)
+  middleware.order.splice(2, 0, 'passport', 'passportError', 'jwtAuth', 'blocked')
 
   Object.assign(middleware, {
     blocked: function (req, res, next) {
@@ -108,16 +117,16 @@ function setup(middleware, _config) {
   })
 }
 
-async function store(req, res) {
+async function store(req: Request, res: Response) {
   res.json(await this.getStore(req.user))
 }
 
-async function signup(req, res) {
+async function signup(req: Request, res: Response) {
   try {
     const desktop = req.query.desktop
-    let user = await this.userCreate(req.body)
+    const user = await this.userCreate(req.body)
     sendEmail({
-      config: authConfig,
+      config: configCache,
       template: 'welcome',
       to: `${ucFirst(user.firstName)}<${user.email}>`,
     }).catch(console.error)
@@ -182,7 +191,7 @@ export async function findUserFromProvider(query, passwordToCheck) {
    * @param {object} query - e.g. { email: 'test@test.com' }
    * @param {string} <passwordToCheck> - password to test
    */
-  const isMultiTenant = !authConfig.isNotMultiTenant
+  const isMultiTenant = !configCache.isNotMultiTenant
   const checkPassword = arguments.length > 1
   const user = await db.user.findOne({
     query: query,
@@ -209,7 +218,7 @@ export async function findUserFromProvider(query, passwordToCheck) {
         throw new Error('There is no password associated with this account, please try signing in with another method.')
       }
       const match = user.password ? await bcrypt.compare(passwordToCheck, user.password) : false
-      if (!match && !(authConfig.masterPassword && passwordToCheck == authConfig.masterPassword)) {
+      if (!match && !(configCache.masterPassword && passwordToCheck == configCache.masterPassword)) {
         throw new Error('Email or password is incorrect.')
       }
     }
@@ -219,20 +228,20 @@ export async function findUserFromProvider(query, passwordToCheck) {
   }
 }
 
-export async function getStore(user) {
+export async function getStore(user?: UserMinimal): Promise<Store> {
   // Initial store
   return {
     user: user || undefined,
   }
 }
 
-export async function signinAndGetStore(user, isDesktop, getStore) {
+export async function signinAndGetStore(user: UserMinimal, isDesktop: boolean, getStoreFn: typeof getStore)  {
   if (user.loginActive === false) throw 'This user is not available.'
-  if (!getStore) throw new Error('Please provide a getStore function')
+  if (!getStoreFn) throw new Error('Please provide a getStore function')
   user.desktop = isDesktop
 
   const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-  const store = await getStore(user)
+  const store = await getStoreFn(user)
   return { ...store, jwt }
 }
 
@@ -243,7 +252,7 @@ export async function userCreate({ business, password, ...userDataProp }) {
     }
 
     const options = { blacklist: ['-_id'] }
-    const isMultiTenant = !authConfig.isNotMultiTenant
+    const isMultiTenant = !configCache.isNotMultiTenant
     const userId = db.id()
     const companyData = isMultiTenant && {
       _id: db.id(), 
@@ -288,20 +297,20 @@ export async function userCreate({ business, password, ...userDataProp }) {
   }
 }
 
-export function tokenCreate(id) {
+export function tokenCreate(id?: string) {
   return new Promise((resolve) => {
     crypto.randomBytes(16, (err, buff) => {
-      let hash = buff.toString('hex') // 32 chars
+      const hash = buff.toString('hex') // 32 chars
       resolve(`${hash}${id || ''}:${Date.now()}`)
     })
   })
 }
 
-export function tokenParse(token) {
-  let split = (token  ||  '').split(':')
-  let hash = split[0].slice(0, 32)
-  let userId = split[0].slice(32)
-  let time = split[1]
+export function tokenParse(token?: string) {
+  const split = (token ||  '').split(':')
+  const hash = split[0].slice(0, 32)
+  const userId = split[0].slice(32)
+  const time = split[1]
   if (!hash || !userId || !time) {
     throw { title: 'error', detail: 'Sorry your code is invalid.' }
   } else if (parseFloat(time) + 1000 * 60 * 60 * 24 < Date.now()) {
@@ -311,14 +320,14 @@ export function tokenParse(token) {
   }
 }
 
-export async function validatePassword(password='', password2) {
+export async function validatePassword(password='', password2?: string) {
   // let hasLowerChar = password.match(/[a-z]/)
   // let hasUpperChar = password.match(/[A-Z]/)
   // let hasNumber = password.match(/\d/)
   // let hasSymbol = password.match(/\W/)
   if (!password) {
     throw [{ title: 'password', detail: 'This field is required.' }]
-  } else if (authConfig.env !== 'development' && password.length < 8) {
+  } else if (configCache.env !== 'development' && password.length < 8) {
     throw [{ title: 'password', detail: 'Your password needs to be atleast 8 characters long' }]
     // } else if (!hasLowerChar || !hasUpperChar || !hasNumber || !hasSymbol) {
     //   throw {
@@ -338,10 +347,10 @@ export async function validatePassword(password='', password2) {
 export async function resetInstructions(req, res) {
   try {
     // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
-    let email = (req.body.email || '').trim().toLowerCase()
+    const email = (req.body.email || '').trim().toLowerCase()
     if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
 
-    let user = await db.user.findOne({ query: { email }, _privateData: true })
+    const user = await db.user.findOne({ query: { email }, _privateData: true })
     if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
 
     // Send reset password email
@@ -355,7 +364,7 @@ export async function resetInstructions(req, res) {
 export async function inviteInstructions(req, res) {
   try {
     // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
-    let user = await db.user.findOne({ query: { _id: req.params._id }, _privateData: true })
+    const user = await db.user.findOne({ query: { _id: req.params._id }, _privateData: true })
     if (!user) throw new Error('Invalid user id')
     // Send invite instructions email
     await sendToken({ type: 'invite', user: user })
@@ -390,7 +399,7 @@ export async function inviteOrResetConfirm(type, req) {
   const id = tokenParse(token)
   await validatePassword(password, password2)
 
-  let user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
+  const user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
   if (!user || user[name] !== token) throw new Error('Sorry your token is invalid or has already been used.')
 
   await db.user.update({
@@ -437,7 +446,7 @@ export async function sendToken({ type = 'reset', user, beforeUpdate, beforeSend
 
   // Send email
   const options = {
-    config: authConfig,
+    config: configCache,
     template: type === 'reset' ? 'reset-password' : 'invite-user',
     to: `${ucFirst(user.firstName)}<${user.email}>`,
     data: { token: token }, // + (req.query.hasOwnProperty('desktop') ? '?desktop' : '')

@@ -1,6 +1,9 @@
-import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
+import { 
+  Topbar, Field, Button, FormError, request, queryObject, injectedConfigInternalUse, updateJwt, onChange, showErrorNotification,
+} from 'nitro-web'
 import { Errors } from 'nitro-web/types'
-import { Fragment } from 'react'
+import { Fragment, useState, useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 type signinProps = {
   className?: string,
@@ -15,8 +18,8 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
   const isLoading = useState(isSignout)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
-    email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
-    password: injectedConfig.env == 'development' ? '1234' : '',
+    email: injectedConfigInternalUse.env === 'development' ? (injectedConfigInternalUse.placeholderEmail || '') : '',
+    password: injectedConfigInternalUse.env === 'development' ? '1234' : '',
     errors: [] as Errors,
   })
   
@@ -44,7 +47,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await request('post /api/signin', state, e, isLoading, setState)
+      const data = await request('post /api/signin', state, e, isLoading, setState) as { [key: string]: unknown }
       // Keep it loading until we navigate
       isLoading[1](true)
       setStore((s) => ({ ...s, ...data }))
@@ -53,7 +56,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
         else navigate(redirectTo || '/')
       }, 10) 
     } catch (e) {
-      return setState({ ...state, errors: e as Errors})
+      showErrorNotification(setStore, e)
     }
   }
 

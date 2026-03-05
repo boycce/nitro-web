@@ -1,8 +1,10 @@
-import { 
-  Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
-  Filters, FilterType, Table, TableColumn, usePushChangesToPath,
+import {
+  Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfigInternalUse, 
+  TimePicker, Filters, FilterType, Table, TableColumn, usePushChangesToPath, // FiltersHandleType
 } from 'nitro-web'
 import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
+import { useState, useMemo, useCallback } from 'react'
+
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
 import React from 'react'
 
@@ -236,11 +238,11 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
   return (
     <div class={`text-left max-w-[1100px] flex flex-col gap-4 pb-2 ${className}`}>
       <div>
-        <h1 class="h1">{injectedConfig.isDemo ? 'Design System' : 'Style Guide'}</h1>
+        <h1 class="h1">{injectedConfigInternalUse.isDemo ? 'Design System' : 'Style Guide'}</h1>
         <p class="mb-3">
           Components are styled using&nbsp;
           <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
-          {injectedConfig.isDemo && 
+          {injectedConfigInternalUse.isDemo && 
             <React.Fragment>
               <a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state
             </React.Fragment>
@@ -598,7 +600,8 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           <div class="grid grid-cols-3 gap-x-6">
             <div>
               <label for="avatar">Avatar</label>
-              <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(e, setState)} awsUrl={injectedConfig.awsUrl} />
+              <Drop class="is-small" name="avatar" state={state} onChange={(e) => onChange(e, setState)} 
+                awsUrl={injectedConfigInternalUse.awsUrl} />
             </div>
             <div>
               <label for="calendar">

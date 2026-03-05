@@ -8,25 +8,25 @@
   "main": "./client/index.ts",
   "exports": {
     ".": "./client/index.ts",
+    "./.eslintrc.json": "./.eslintrc.json",
+    "./tsconfig.json": "./tsconfig.json",
     "./client/imgs/*": "./client/imgs/*",
     "./client/globals": "./client/globals.ts",
     "./server": {
-      "import": "./server/index.js",
-      "types": "./types/server/index.d.ts"
+      "import": "./js/server/index.js",
+      "types": "./js/server/index.d.ts"
     },
-    "./types": "./types.ts",
-    "./.eslintrc.json": "./.eslintrc.json",
-    "./tsconfig.json": "./tsconfig.json",
     "./util": {
-      "import": "./util.js",
-      "types": "./types/util.d.ts"
-    }
+      "import": "./js/util.js",
+      "types": "./js/util.d.ts"
+    },
+    "./types": "./types.ts"
   },
   "scripts": {
     "major": "npm run types && standard-version -a --release-as major && npm publish && cd ../webpack && npm publish",
     "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
-    "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
+    "types": "tsc --project tsconfig.build.json"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",
@@ -48,12 +48,13 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
-    "sort-route-addresses-nodeps": "0.0.4",
+    "sort-route-addresses-nodeps": "0.0.5",
     "standard-version": "github:boycce/standard-version",
     "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.18.1"
+    "@typescript-eslint/eslint-plugin": "^8.18.1",
+    "tsc-alias": "^1.8.16"
   },
   "peerDependencies": {
     "@stripe/stripe-js": "^1.34.0",

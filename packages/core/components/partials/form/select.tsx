@@ -8,7 +8,7 @@ import ReactSelect, {
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
 import { ChevronsUpDownIcon, XIcon } from 'lucide-react'
 import { isFieldCached } from 'nitro-web'
-import { getErrorFromState, deepFind, twMerge } from 'nitro-web/util'
+import { getMatchingError, deepFind, twMerge } from 'nitro-web/util'
 import { Errors } from 'nitro-web/types'
 
 const filterFn = createFilter()
@@ -62,7 +62,7 @@ function SelectBase({
   id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, ...props 
 }: SelectProps) {
   let value: unknown|unknown[]
-  const error = getErrorFromState(state, errorTitle || name)
+  const error = getMatchingError(state?.errors, errorTitle || name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
 
   // Get value from value or state

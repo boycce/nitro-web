@@ -1,23 +1,23 @@
 import 'dotenv/config'
 import db from 'monastery'
-import config from './config.js'
+import { configServer } from './config'
 import { setupRouter, setupDefaultModels } from 'nitro-web/server'
 
 // Setup monastery models
-db.manager(config.mongoUrl, config.monasteryOptions)
-await db.models(config.pwd + 'server/models')
+db.manager(configServer.mongoUrl, configServer.monasteryOptions)
+await db.models(configServer.pwd + 'server/models')
 await setupDefaultModels(db)
 
 // Catch mongod not running
-if (config.env === 'development') {
+if (configServer.env === 'development') {
   db.onError(/** @param {Error} err */(err) => console.log(err))
 }
 
-// Setup router
-const server = await setupRouter(config)
+// Setup express instance
+const router = await setupRouter(configServer)
 
 // Start express
-server.listen({ port: process.env.PORT || 3001, host: '0.0.0.0' }, async () => {
+router.listen({ port: process.env.PORT || 3001, host: '0.0.0.0' }, async () => {
   // ...success
 })
 

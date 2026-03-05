@@ -288,7 +288,7 @@ export const getConfig = (config) => {
       }),
       new webpack.DefinePlugin({
         INJECTED_CONFIG: JSON.stringify({
-          ...(client||{}),
+          ...(client || {}),
           isDemo: !!process.env.isDemo,
           isStatic: !!process.env.isStatic,
           jwtName: 'nitro-jwt' + (isBuild ? '' : '-' + formatSlug(name)),

@@ -1,5 +1,6 @@
 import { css } from 'twin.macro'
 import { IsFirstRender } from 'nitro-web'
+import { useState, useRef, useEffect } from 'react'
 
 type AccordionProps = {
   ariaControls?: string // pass to add aria-controls attribute to the accordion

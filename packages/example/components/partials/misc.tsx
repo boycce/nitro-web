@@ -3,7 +3,7 @@
  * be automatically imported and setup by the client router, you can have multiple page compoennts in the same file, like this one.
  */
 //todo: rename to misc-pages?
-import { injectedConfig } from 'nitro-web'
+import { injectedConfigInternalUse } from 'nitro-web'
 import { Styleguide, NotFound } from 'nitro-web'
 import { Button } from './element'
 import { currencies } from '../../server/constants'
@@ -23,7 +23,7 @@ export const StyleguidePage = () => {
 }
 StyleguidePage.route = {
   '/styleguide': true,
-  'meta': { title: `${injectedConfig.isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
+  'meta': { title: `${injectedConfigInternalUse.isDemo ? 'Design System' : 'Style Guide'}`, layout: 1 },
 }
 
 // Not found page

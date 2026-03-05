@@ -1,5 +1,15 @@
-import type { Config, Errors, MessageObject, MonasteryImage, Store as NitroStore } from 'nitro-web/types'
-export type { Config, Errors, MessageObject }
+import type { 
+  Errors, MonasteryImage, Store as NitroStore,
+} from 'nitro-web/types'
+
+/* ---- Re-exports from nitro-web ------------ */
+
+export type { ClientError, Errors, MessageObject } from 'nitro-web/types'
+
+/* ---- Configs ------------------------------ */
+
+export type { ConfigServer } from './server/config'
+export type { ConfigClient } from './client/config'
 
 /* ---- Enums -------------------------------- */
 
@@ -13,8 +23,8 @@ export type StateError = Error;
 export interface StateErrors { errors: Errors; }
 export type BaseEntity = {
   _id?: Id;
-  createdAt: number;
-  updatedAt: number;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 /* ---- Store & User ------------------------- */

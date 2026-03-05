@@ -1,5 +1,5 @@
 // const pi = parseFloat(3.142)
-import '../types/globals.d.ts'
+import './globals.internal.d.ts'
 
 // Utility functions (since this file is an export, use export path for js declarations to work in host projects)
 export * from 'nitro-web/util'
@@ -52,5 +52,5 @@ export { Select, getSelectStyle, type SelectProps, type SelectOption } from '../
 // Component Other Components
 export { IsFirstRender } from '../components/partials/is-first-render'
 
-// Expose the injected config
-export const injectedConfig = { ...INJECTED_CONFIG } as import('types').Config
+// Expose the injected config for internal use only, this may change for your project, use your own ConfigClient instead ./client/config.ts
+export const injectedConfigInternalUse = { ...INJECTED_CONFIG }

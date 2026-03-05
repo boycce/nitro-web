@@ -1,0 +1,20 @@
+{
+  "_note": "We generate js and ts declarations for files referenced in Node.js (without bundling), made available via package exports.",
+  "_note_about_imports": "If you need to import relative files in these files, you will need to append '.js' to the path. This is because tsc does not change the js, and nodejs needs .js to find the file. However, in development, the complier is smart enough to use the .ts files.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "./js",
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "./js"
+  },
+  "include": [
+    "server",
+    "util.ts"
+  ],
+  "exclude": [
+    "client",
+    "components"
+  ]
+}

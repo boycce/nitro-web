@@ -1,6 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { twMerge, deepFind, getErrorFromState } from 'nitro-web/util'
-import { Errors, type Error } from 'nitro-web/types'
+import { twMerge, deepFind, getMatchingError } from 'nitro-web/util'
+import { Errors } from 'nitro-web/types'
+import React from 'react'
 
 type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {  
   /** field name or path on state (used to match errors), e.g. 'date', 'company.email' */
@@ -8,7 +8,7 @@ type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   /** name is applied if id is not provided. Used for radios */
   id?: string 
   /** state object to get the value, and check errors against */
-  state?: { errors?: Errors, [key: string]: any }
+  state?: { errors?: Errors, [key: string]: any } // eslint-disable-line @typescript-eslint/no-explicit-any
   size?: number
   subtext?: string|React.ReactNode
   text?: string|React.ReactNode
@@ -39,7 +39,7 @@ export function Checkbox({
 }: CheckboxProps) {
   // Checkbox/radio/toggle component
   let value!: boolean
-  const error = getErrorFromState(state, errorTitle || props.name)
+  const error = getMatchingError(state?.errors, errorTitle || props.name)
   const id = props.id || props.name
 
   if (!props.name) throw new Error('Checkbox requires a `name` prop')
@@ -66,7 +66,7 @@ export function Checkbox({
             {hitboxPadding && <div className='block absolute cursor-default' style={{inset: `-${hitboxPadding}px`}} />}
             {
               type !== 'toggle'
-                ? <>
+                ? <React.Fragment>
                     <input
                       {...props}
                       id={id}
@@ -100,7 +100,7 @@ export function Checkbox({
                               r={2.5}
                               className="fill-white opacity-0 group-has-[:checked]:opacity-100"
                             />
-                          : <>
+                          : <React.Fragment>
                               <path
                                 d="M4 8L6 10L10 4.5"
                                 strokeWidth={2}
@@ -115,11 +115,11 @@ export function Checkbox({
                                 strokeLinejoin="round"
                                 className="opacity-0 group-has-[:indeterminate]:opacity-100"
                               />
-                            </>
+                            </React.Fragment>
                       }
                     </svg>
-                  </>
-                : <>
+                  </React.Fragment>
+                : <React.Fragment>
                     <input 
                       {...props}
                       id={id}
@@ -145,7 +145,7 @@ export function Checkbox({
                         }
                       />
                     </div>
-                  </>
+                  </React.Fragment>
             }
           </div>
         </div>

@@ -1,6 +1,7 @@
-import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
+import { Button, Field, FormError, Topbar, request, injectedConfigInternalUse, onChange, showErrorNotification } from 'nitro-web'
 import { Errors } from 'nitro-web/types'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 type signupProps = {
   className?: string,
@@ -13,10 +14,10 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
   const isLoading = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
-    email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
-    name: injectedConfig.env === 'development' ? 'Bruce Wayne' : '',
-    business: { name: injectedConfig.env === 'development' ? 'Wayne Enterprises' : '' },
-    password: injectedConfig.env === 'development' ? '' : '',
+    email: injectedConfigInternalUse.env === 'development' ? (injectedConfigInternalUse.placeholderEmail || '') : '',
+    name: injectedConfigInternalUse.env === 'development' ? 'Bruce Wayne' : '',
+    business: { name: injectedConfigInternalUse.env === 'development' ? 'Wayne Enterprises' : '' },
+    password: injectedConfigInternalUse.env === 'development' ? '' : '',
     errors: [] as Errors,
   })
 
@@ -30,7 +31,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
       setStore((prev) => ({ ...prev, ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
-      setState((prev) => ({ ...prev, errors: e as Errors }))
+      showErrorNotification(setStore, e)
     }
   }
   

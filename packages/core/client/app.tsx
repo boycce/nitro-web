@@ -1,39 +1,36 @@
-import { createBrowserRouter, createHashRouter, redirect, RouterProvider } from 'react-router-dom' 
-import { Fragment, ReactNode } from 'react'
+import { createBrowserRouter, createHashRouter, redirect, RouterProvider, useLocation } from 'react-router-dom' 
+import { Fragment, ReactNode, useMemo, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
-import { injectedConfig, preloadedStoreData, exposedStoreData } from './index'
-import { Config, Store } from 'nitro-web/types'
+import { injectedConfigInternalUse, preloadedStoreData, exposedStoreData } from './index'
+import { NitroConfigClient, Store, NitroRouteClient } from 'nitro-web/types'
+
+type ConfigClient = NitroConfigClient<Store>
+type RouteClient = NitroRouteClient<Store>
+
+// type NitroMiddleware<TStore> = {
+//   [key: string]: (route: RouteClient, store: TStore) => undefined | { redirect: string }
+// }
 
 type StoreContainer = { 
   Provider: React.FC<{ children: ReactNode }> 
 }
 
 type LayoutProps = {
-  config: Config;
+  config: ConfigClient;
 }
 
 type Settings = {
   afterApp?: () => void
-  beforeApp: (config: Config) => Promise<object>
-  // beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
+  beforeApp: (config: ConfigClient) => Promise<object>
   isStatic?: boolean
   layouts: React.FC<LayoutProps>[]
-  allMiddleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
+  allMiddleware: Record<string, (route: RouteClient, store: Store) => undefined | { redirect: string }>
   name: string
   titleSeparator?: string
 }
 
-type Route = {
-  component: React.FC<{ route?: Route; config?: Config }>
-  middleware: string[]
-  name: string
-  path: string
-  redirect?: string
-  meta?: { title?: string; layout?: number }
-}
-
-type RouteWithPolicies = Route & {
+type RouteWithPolicies = RouteClient & {
   // Route policies, e.g. { 'get /signin' : ['isUser'] }
   [key: string]: true | string | (string | true)[]
 }
@@ -41,7 +38,12 @@ type RouteWithPolicies = Route & {
 let lastRedirectUrl = ''
 let lastRedirectTimesForSameUrl: number[] = []
 
-export async function setupApp(config: Config, storeContainer: StoreContainer, layouts: React.FC<LayoutProps>[]) {
+export async function setupApp<TStore>(
+  config: NitroConfigClient<TStore>, 
+  storeContainer: StoreContainer, 
+  layouts: React.FC<LayoutProps>[]
+) {
+  const { beforeApp: configBeforeApp, isStatic, name, titleSeparator, middleware: configMiddleware } = config
   if (!layouts) throw new Error('layouts are required')
   if (!(window as unknown as { useTracked: unknown }).useTracked) {
     throw new Error('useTracked is not defined globally before setupApp()')
@@ -49,16 +51,16 @@ export async function setupApp(config: Config, storeContainer: StoreContainer, l
 
   // Fetch state and init app
   const settings: Settings = {
-    beforeApp: config.beforeApp || beforeApp,
-    isStatic: config.isStatic,
+    beforeApp: configBeforeApp || beforeApp,
+    isStatic: isStatic,
     layouts: layouts,
-    allMiddleware: Object.assign(middleware, config.middleware || {}),
-    name: config.name,
-    titleSeparator: config.titleSeparator,
+    allMiddleware: Object.assign(middleware, configMiddleware || {}),
+    name: name,
+    titleSeparator: titleSeparator,
   }
 
   // Setup the jwt token
-  updateJwt(localStorage.getItem(injectedConfig.jwtName))
+  if (injectedConfigInternalUse.jwtName) updateJwt(localStorage.getItem(injectedConfigInternalUse.jwtName))
 
   // Fetch the store data, and make it available to the store
   const data = await settings.beforeApp(config)
@@ -70,13 +72,17 @@ export async function setupApp(config: Config, storeContainer: StoreContainer, l
 
 export function updateJwt(token?: string | null) {
   // Update the jwt token in local storage and axios headers
-  const key = injectedConfig.jwtName
-  localStorage.setItem(key, token || '')
+  const key = injectedConfigInternalUse.jwtName
+  if (!key) throw new Error('jwtName is not defined in the config')
   if (token) axios().defaults.headers.Authorization = `Bearer ${token}`
   else delete axios().defaults.headers.Authorization
 }
 
-function App({ settings, config, storeContainer }: { settings: Settings, config: Config, storeContainer: StoreContainer }): ReactNode {
+function App({ settings, config, storeContainer }: { 
+  settings: Settings, 
+  config: ConfigClient, 
+  storeContainer: StoreContainer 
+}): ReactNode {
   const router = useMemo(() => getRouter({ settings, config }), [])
 
   useEffect(() => {
@@ -115,7 +121,7 @@ function AfterApp({ settings }: { settings: Settings }) {
   return (null)
 }
 
-function getRouter({ settings, config }: { settings: Settings, config: Config }) {
+function getRouter({ settings, config }: { settings: Settings, config: ConfigClient }) {
   /**
    * Get all routes from components folder
    * @return {array} routes for for creatingBrowserRouter
@@ -128,7 +134,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
     // @ts-expect-error
     requireContext = import.meta.webpackContext('componentsDir', {
       recursive: true,
-      regExp: /(?<!\.api)\.(j|t)sx$/,
+      regExp: /(?<!\.api)\.(jsx|tsx)$/,
     })
   } catch (e) {
     const text = 'Please add resolve.alias: { components: path.join(dirname, "components") } to your webpack configuration:'
@@ -137,7 +143,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
   }
   // Loop files
   // const components = {}
-  const layouts: Route[][] = []
+  const layouts = []
 
   for (const filename of requireContext.keys()) {
     const file = requireContext(filename) // require
@@ -147,7 +153,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
       const isReactFnComponentOrFnRef = typeof file[key] === 'function' || !!file[key]?.render
       if (!file.hasOwnProperty(key) || key.match(/route/i) || !isReactFnComponentOrFnRef) continue
       const componentRoutes = toArray(file[key].route || file.route || file.Route) as RouteWithPolicies[]
-      const componentName = key || camelCase(key.replace(/^.*[\\\/]|\.jsx$/g, '')) as string // eslint-disable-line
+      const componentName = key || camelCase(key.replace(/^.*[\\\/]|\.(jsx|tsx)$/g, '')) as string // eslint-disable-line
       // console.log(file)
       // Todo: need to retrieve the original function name for default exports during minification.
       // console.log(1, file[key].name, key, componentName, file[key])
@@ -261,7 +267,7 @@ function RestoreScroll() {
   return (null)
 }
 
-function RouteComponent({ route, config }: { route: Route, config: Config }) {
+function RouteComponent({ route, config }: { route: RouteClient, config: ConfigClient }) {
   const Component = route.component
   document.title = route.meta?.title || ''
   return (
@@ -293,11 +299,13 @@ function catchRedirectLoop(request: Request, routeName: string) {
 
 // ---- Overridable defaults ------------
 
-async function beforeApp(config: Config) {
-  /**
-   * Gets called once before React is initialised
-   * @return {promise} - newStoreData which is used for sharedStore, later merged with the config.store() defaults
-   */
+/**
+ * Gets called once before React is initialised
+ * @param config - The configuration object
+ * @returns newStoreData which is used for sharedStore, later merged with the config.store() defaults
+ */
+async function beforeApp(config: ConfigClient) {
+  const { isStatic } = config
   let apiAvailable = false
   let storeData = {}
   try {
@@ -306,7 +314,7 @@ async function beforeApp(config: Config) {
     //   sharedStoreCache = window.prehot.sharedStoreCache
     //   delete window.prehot
     // }
-    if (!config.isStatic) {
+    if (!isStatic) {
       storeData = (await axios().get('/api/store', { 'axios-retry': { retries: 3 }, timeout: 4000 })).data
       apiAvailable = true
     }
@@ -319,16 +327,16 @@ async function beforeApp(config: Config) {
 
 export const middleware = {
   // Default middleware that can referenced from component routes
-  isAdmin: (route: unknown, store: { user?: { type?: string, isAdmin?: boolean } }) => {
+  isAdmin: (route: RouteClient, store: Store) => {
     if (store.user?.type?.match(/admin/) || store.user?.isAdmin) return
     else if (store.user) return { redirect: '/signin?unauth' }
     else return { redirect: '/signin?signin' }
   },
-  isSubscribed: (route: unknown, store: { user?: { company?: { currentSubscription?: string } } }) => {
-    if (store.user?.company?.currentSubscription) return
+  isSubscribed: (route: RouteClient, store: Store) => {
+    if ((store.user as any)?.company?.currentSubscription) return // eslint-disable-line @typescript-eslint/no-explicit-any
     else return { redirect: '/plans/subscribe' }
   },
-  isUser: (route: unknown, store: { user?: { type?: string } }) => {
+  isUser: (route: RouteClient, store: Store) => {
     if (store.user) return
     else return { redirect: '/signin?signin' }
   },

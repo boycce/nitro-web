@@ -1,3 +1,5 @@
+import { useRef, useState, useEffect } from 'react'
+
 type DropHandlerProps = {
   onDrop: (files: FileList) => void
   children: React.ReactNode

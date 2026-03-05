@@ -1,57 +1,61 @@
-// @ts-nocheck
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Stripe from 'stripe'
-import db from 'monastery'
+import _db from 'monastery'
 import * as util from 'nitro-web/util'
+import type { Routes, Request, Response, ControllerSetup } from 'types'
 
-let stripe = undefined
-let stripeProducts = []
-let config = {}
+type StripePrice = Pick<Stripe.Price, 'id' | 'product' | 'nickname' | 'recurring' | 'unit_amount' | 'tiers' | 'tiers_mode'> & {
+  interval?: Stripe.Price.Recurring['interval']
+}
+type StripeProduct = Pick<Stripe.Product, 'id' | 'created' | 'default_price' | 'description' | 'name' | 'metadata'> & {
+  type: 'project' | 'subscription'
+  prices: StripePrice[]
+}
 
-export const routes = {
+let stripe: Stripe
+let stripeProducts: StripeProduct[] = []
+const configCache: { stripeSecretKey?: string, stripeWebhookSecret?: string, baseUrl?: string } = {}
+const db = _db as any
+
+export const routes: Routes = {
   // Routes
   'post   /api/stripe/webhook': [stripeWebhook],
   'post   /api/stripe/create-billing-portal-session': [billingPortalSessionCreate],
   'get    /api/stripe/upcoming-invoices': [upcomingInvoicesFind],
-
-  // Overridable helpers
-  setup: setup,
 }
 
-function setup(middleware, _config) {
+export const setup: ControllerSetup = (_middleware, config) => {
   // Set config values
-  config = {
-    env: _config.env,
-    baseUrl: _config.baseUrl,
-    stripeSecretKey: _config.stripeSecretKey,
-    stripeWebhookSecret: _config.stripeWebhookSecret,
+  configCache.stripeSecretKey = config.stripeSecretKey
+  configCache.stripeWebhookSecret = config.stripeWebhookSecret
+  configCache.baseUrl = config.baseUrl
+  if (!configCache.stripeSecretKey || !configCache.stripeWebhookSecret || !configCache.baseUrl) {
+    throw new Error('Missing config value for stripe.api.js')
   }
-  for (let key in config) {
-    if (!config[key]) {
-      throw new Error(`Missing config value for stripe.api.js: ${key}`)
-    }
-  }
-  stripe = new Stripe(config.stripeSecretKey)
+  stripe = new Stripe(configCache.stripeSecretKey, { apiVersion: '2020-08-27' })
 }
 
-async function stripeWebhook(req, res) {
+async function stripeWebhook(req: Request, res: Response) {
   try {
-    var event = config.env == 'development' ? req.body : stripe.webhooks.constructEvent(
+    var event = req.env === 'development' ? req.body : stripe.webhooks.constructEvent(
       req.rawBody,
-      req.rawHeaders['stripe-signature'],
-      config.stripeWebhookSecret
+      req.rawHeaders['stripe-signature'] as string,
+      configCache.stripeWebhookSecret || ''
     )
   } catch (err) {
-    if (err && err.message) console.log(err.message)
+    if (err && typeof err === 'object' && 'message' in err) console.log(err.message)
     else console.log(err)
-    return res.error(err)
+    res.error(err)
+    return
   }
 
   if (!event.data || !event.data.object) {
-    return res.status(400).send(`Missing webhook data: ${event}.`)
+    res.status(400).send(`Missing webhook data: ${event}.`)
+    return
   }
 
   // useful for cleaning failed webhooks
-  if (req.query.success) return true
+  if (req.query.success) return
   // console.log('event.type: ', event.type)
 
   // Stripe cannot guarantee event order
@@ -74,14 +78,14 @@ async function stripeWebhook(req, res) {
   }
 }
 
-async function billingPortalSessionCreate(req, res) {
+async function billingPortalSessionCreate(req: Request, res: Response) {
   try {
-    if (!req.user.stripeCustomer?.id) {
+    if (!req.user?.stripeCustomer?.id) {
       throw new Error('No stripe customer found for the user')
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: req.user.stripeCustomer.id,
-      return_url: config.baseUrl + '/subscriptions',
+      return_url: configCache.baseUrl + '/subscriptions',
     })
     res.json(session.url)
   } catch (err) {
@@ -89,67 +93,84 @@ async function billingPortalSessionCreate(req, res) {
   }
 }
 
-async function upcomingInvoicesFind(req, res) {
+async function upcomingInvoicesFind(req: Request, res: Response) {
   try {
-    if (!req.user.stripeCustomer?.id) return res.json({})
+    if (!req.user?.stripeCustomer?.id) {
+      res.json({})
+      return
+    }
     const nextInvoice = await stripe.invoices.retrieveUpcoming({
       customer: req.user.stripeCustomer.id,
     })
     res.json(nextInvoice)
   } catch (err) {
-    if (err.code == 'invoice_upcoming_none') return res.json({})
+    if ((err as { code: string })?.code == 'invoice_upcoming_none') {
+      res.json({})
+      return
+    }
     error(req, res, err)
   }
 }
 
 /* ---- Overridable helpers ------------------ */
 
-async function error(req, res, err) {
+async function error(req: Request, res: Response, err: any) {
   if (err && err.response && err.response.body) console.log(err.response.body)
   if (util.isString(err) && err.match(/Cannot find company with id/)) {
     res.json({ user: 'no company found' })
-  } else res.error(err)
+  } else {
+    res.error(err)
+  }
 }
 
+/**
+ * Returns all products and caches it on the app
+ */
 export async function getProducts() {
-  /**
-   * Returns all products and caches it on the app
-   * @returns {Array} products
-   */
   try {
     if (stripeProducts) return stripeProducts
-    if (!config.stripeSecretKey) {
+    if (!configCache.stripeSecretKey) {
       stripeProducts = []
       throw new Error('Missing process.env.stripeSecretKey for retrieving products')
     }
 
-    let products = (await stripe.products.list({ limit: 100, active: true })).data
-    let prices = (await stripe.prices.list({ limit: 100, active: true, expand: ['data.tiers'] })).data
+    const products = (await stripe.products.list({ limit: 100, active: true })).data
+    const prices = (await stripe.prices.list({ limit: 100, active: true, expand: ['data.tiers'] })).data
 
-    return (stripeProducts = products.map((product) => ({
-      // remove default_price when new pricing is ready
-      ...util.pick(product, ['id', 'created', 'default_price', 'description', 'name', 'metadata']),
+    return (stripeProducts = products.map((product): StripeProduct => ({
+      id: product.id,
+      created: product.created,
+      default_price: product.default_price, // remove default_price when new pricing is ready
+      description: product.description,
+      name: product.name,
+      metadata: product.metadata,
       type: product.name.match(/housing/i) ? 'project' : 'subscription', // overwriting, was 'service'
       prices: prices
         .filter((price) => price.product == product.id)
-        .map((price) => ({
-          ...util.pick(price, ['id', 'product', 'nickname', 'recurring', 'unit_amount', 'tiers', 'tiers_mode']),
-          interval: price.recurring?.interval, // 'year', 'month', undefined
+        .map((price): StripePrice => ({
+          id: price.id,
+          product: price.product,
+          nickname: price.nickname,
+          recurring: price.recurring,
+          unit_amount: price.unit_amount,
+          tiers: price.tiers,
+          tiers_mode: price.tiers_mode,
+          interval: price.recurring?.interval,
         })),
     })))
   } catch (err) {
-    console.error(new Error(err)) // when stripe throws errors, the callstack is missing.
+    console.error(new Error(err as string)) // when stripe throws errors, the callstack is missing.
     return []
   }
 }
 
-async function getUserFromEvent(event) {
+async function getUserFromEvent(event: Stripe.Event) {
   // User retreived from the event's customer. 
   // The customer is created before the paymentIntent and subscriptionIntent is set up
-  let object = event.data.object
-  let customerId = object.object == 'customer'? object.id : object.customer
+  const object = event.data.object as Stripe.Customer | Stripe.PaymentIntent | Stripe.Subscription
+  const customerId = object.object == 'customer' ? object.id : object.customer
   if (customerId) {
-    var user = await db.user.findOne({
+    var user = await  db.user.findOne({
       query: { 'stripeCustomer.id': customerId },
       populate: db.user.populate({}),
       blacklist: false, // ['-company.users.inviteToken'],
@@ -165,7 +186,7 @@ async function getUserFromEvent(event) {
   }
   // populate company owner with user data (handy for _addSubscriptionBillingChange)
   if (user.company?.users) {
-    user.company.users = user.company.users.map(o => {
+    user.company.users = user.company.users.map((o: any) => {
       if (o.role == 'owner' && o._id.toString() == user._id.toString()) {
         o.firstName = user.firstName
         o.name = user.name
@@ -177,9 +198,9 @@ async function getUserFromEvent(event) {
   return user
 }
 
-async function webhookCustomerCreatedUpdated(req, res, event) {
+async function webhookCustomerCreatedUpdated(req: Request, res: Response, event: Stripe.Event) {
   try {
-    const customer = event.data.object
+    const customer = event.data.object as Stripe.Customer
     const user = await getUserFromEvent(event)
     const customerExpanded = await stripe.customers.retrieve(
       customer.id,
@@ -197,12 +218,12 @@ async function webhookCustomerCreatedUpdated(req, res, event) {
   }
 }
 
-async function webhookSubUpdated(req, res, event) {
+async function webhookSubUpdated(req: Request, res: Response, event: Stripe.Event) {
   // Update the subscription on the company
   try {
-    const subData = event.data.object
+    const subData = event.data.object as Stripe.Subscription
     // webhook from deleting a company?
-    if (subData.cancellation_details.comment == 'company deleted') {
+    if ((subData as any).cancellation_details.comment == 'company deleted') {
       return res.json({})
     }
 

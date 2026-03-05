@@ -1,63 +1,58 @@
-import _axios from 'axios'
+import _axios, { CreateAxiosDefaults } from 'axios'
 import axiosRetry from 'axios-retry'
 import { format } from 'date-fns'
 import { TZDate } from '@date-fns/tz'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
+import type { Dispatch, SetStateAction } from 'react'
+import { getClientErrors } from './util.errors.js'
 
 // Re-export TZDate
 export { TZDate } from '@date-fns/tz'
 
-/** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
+// Re-export util.errors
+export * from './util.errors.js'
 
-/**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
- * @typedef {import('axios').AxiosInstance} AxiosInstance
- * @typedef {import('axios').AxiosRequestConfig} AxiosRequestConfig
- * @typedef {import('axios').AxiosResponse} AxiosResponse
- * @typedef {import('axios-retry').IAxiosRetryConfigExtended} IAxiosRetryConfigExtended
- * 
- * Extend the config to be used below
- * @typedef {AxiosRequestConfig & { 'axios-retry'?: IAxiosRetryConfigExtended }} AxiosRequestConfigWithRetry
- * 
- * We only need to fix the `get` method, the rest of the methods inherit the new extended config...
- * @typedef {Omit<AxiosInstance, 'get'> & {
- *   get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>
-* }} AxiosInstanceWithRetry
-*/
+// Create an axios instance type that contains the `axios-retry` global declarations.
+// We only need to fix the `get` method, the rest of the methods inherit the new extended config...
+type AxiosInstanceWithRetry = Omit<AxiosInstance, 'get'> & {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  get<T = unknown, R = AxiosResponse, D = unknown>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>
+}
+type AxiosInstance = import('axios').AxiosInstance
+type AxiosRequestConfig = import('axios').AxiosRequestConfig
+type AxiosResponse = import('axios').AxiosResponse
+type IAxiosRetryConfigExtended = import('axios-retry').IAxiosRetryConfigExtended
+type AxiosRequestConfigWithRetry = AxiosRequestConfig & { 'axios-retry'?: IAxiosRetryConfigExtended }
 
-/** @typedef {object} ObjectId */
-/** @typedef {(value: string) => ObjectId} parseId */
-/** @typedef {(string|number|boolean)[]} EnumArray - an array of strings, numbers or booleans */
-/** @typedef {{ [key: string]: any }} SearchOperators - https://mongodb.com/docs/atlas/atlas-search/operators-and-collectors/ */
-/** @typedef {{ title: string, detail: string }} NitroError */
-/** @typedef {{ toJSON: () => { message: string } }} MongoError */
-/** @typedef {{ response: { data: { errors?: NitroError[], error?: string, error_description?: string } } }} AxiosWithErrors */
+type Box = {bottomLeft: Point, topRight: Point}
+type EnumArray = (string|number|boolean)[]
+type EventOrPathValue = {target: {name: string, value: unknown}} | [string, unknown]
+type Image = {path: string, bucket: string, base64?: string, date?: number}
+type ObjectId = { toString: () => string, toHexString: () => string, toJSON: () => { value: string }}
+type ParseId = (value: string) => ObjectId
+type Point = [number, number] // lng/lat
+type QueryObjectCache = { [key: string]: string|true|(string|true)[] }
+type SearchOperators = { [key: string]: unknown } // https://mongodb.com/docs/atlas/atlas-search/operators-and-collectors/
 
-/** @type {{[key: string]: {[key: string]: string|true|(string|true)[]}}} */
-let queryObjectCache = {}
-
-/** @type {Promise<import('@stripe/stripe-js').Stripe|null>|undefined} */
-let stripeClientCache
-
-/** @type {number|undefined} */
-let scrollbarCache
-
-/** @type {boolean|undefined} */
-let axiosNonce
-
-/** @type {AxiosInstance|undefined} */
-let axiosInstance
+const queryObjectsCache: { [key: string]: QueryObjectCache } = {}
+let stripeClientCache: Promise<import('@stripe/stripe-js').Stripe|null> | undefined
+let scrollbarCache: number | undefined
+let axiosNonce: boolean | undefined
+let axiosInstance: AxiosInstance | undefined
 
 /**
  * Returns a monastery schema which matches the Google autocomplete output
  */
 export function addressSchema () {
   // Google autocomplete should return the following object
-  /** @param {any} array @param {object} schema @returns {[]} */
-  function arrayWithSchema (array, schema) {
-    array.schema = schema
-    return array
+  function arrayWithSchema <T extends unknown[], S extends {[key: string]: unknown}>(
+    array: T, 
+    schema: S
+  ) {
+    const result = array as T & { schema: S }
+    result.schema = schema
+    return result
   }
   return {
     city: { type: 'string' },
@@ -87,19 +82,17 @@ export function addressSchema () {
 
 /**
  * Returns an axios instance for the client
- * @param {object} [options] - Options for the axios instance
- * @param {import('axios').CreateAxiosDefaults} [options.createConfig] - Options for the axios instance creation on the server, 
+ * @param options.createConfig - [server only] Pass to create a shared instance on the server, 
  *   e.g. { httpsAgent: new https.Agent({ keepAlive: true }) }
- * @returns {AxiosInstanceWithRetry}
  * 
- * To set the defaults (e.g. baseURL) other than ones below, simply set them yourself:
- * ```js
- *   import { axios } from 'nitro-web/util'
- *   axios().defaults.baseURL = 'https://example.com'
- * ```
- */
-export function axios ({ createConfig } = {}) {
-  // On the client, add retries and set the baseURL
+ * @example
+ *   - You can set the defaults (e.g. defaults.baseURL), via the follwing:
+ *   ```js
+ *     import { axios } from 'nitro-web/util'
+ *     axios().defaults.baseURL = 'https://example.com'
+ *   ```
+ *  */
+export function axios ({ createConfig }: { createConfig?: CreateAxiosDefaults } = {}): AxiosInstanceWithRetry {
   if (typeof window !== 'undefined') {
     if (!axiosNonce) {
       // Remove mobile specific protocol and subdomain
@@ -111,36 +104,32 @@ export function axios ({ createConfig } = {}) {
       _axios.defaults.timeout = 60000
       axiosRetry(_axios, { retries: 0, retryDelay: (/*i*/) => 300 })
     }
-    return _axios
+    return _axios as AxiosInstanceWithRetry
 
   // On the server, we can create an axios instance if we want to maintain keep-alive (for Azure SNAT Port Exhaustion / speed up requests)
   // E.g. axios({ createConfig: { httpsAgent: new https.Agent({ keepAlive: true }) } })
   } else {
     if (!axiosInstance && createConfig) axiosInstance = _axios.create(createConfig)
-    return axiosInstance || _axios
+    return axiosInstance || _axios as AxiosInstance
   }
 }
 
 /**
  * Builds the url with params
- * @param {string} url
- * @param {{[key: string]: string}} parameters - Key value parameters
- * @returns {string}, e.g. 'https://example.com?param1=value1&param2=value2'
+ * @example 'https://example.com?param1=value1&param2=value2'
  */
-export function buildUrl (url, parameters) {
+export function buildUrl (url: string, parameters: {[key: string]: string}) {
   const params = Object.keys(parameters).map((p) => `${encodeURIComponent(p)}=${encodeURIComponent(parameters[p])}`)
   return [url, params.join('&')].join('?')
-}   
+}
 
 /**
  * Converts a string to camel case
- * @param {string} str
- * @param {boolean} [capitaliseFirst] - Capitalise the first letter
- * @param {boolean} [allowNumber] - Allow numbers
- * @returns {string}
+ * @param capitaliseFirst - Capitalise the first letter
+ * @param allowNumber - Allow numbers
  */
-export function camelCase (str, capitaliseFirst, allowNumber) {
-  let regex = (capitaliseFirst ? '(?:^[a-z0-9]|' : '(?:') + '[-]+[a-z0-9])'
+export function camelCase (str: string, capitaliseFirst?: boolean, allowNumber?: boolean) {
+  const regex = (capitaliseFirst ? '(?:^[a-z0-9]|' : '(?:') + '[-]+[a-z0-9])'
   return str
     .toString()
     .toLowerCase()
@@ -156,11 +145,9 @@ export function camelCase (str, capitaliseFirst, allowNumber) {
 
 /**
  * Converts camel case to title case
- * @param {string} str
- * @param {boolean} [captialiseFirstOnly] - Capitalise the first letter only
- * @returns {string}
+ * @param captialiseFirstOnly - Capitalise the first letter only
  */
-export function camelCaseToTitle (str, captialiseFirstOnly) {
+export function camelCaseToTitle (str: string, captialiseFirstOnly?: boolean) {
   str = str.replace(/([A-Z]+)/g, ' $1').trim()
   if (captialiseFirstOnly) str = str.toLowerCase()
   return ucFirst(str)
@@ -168,41 +155,35 @@ export function camelCaseToTitle (str, captialiseFirstOnly) {
 
 /**
  * Converts camel case to hypen case
- * @param {string} str
- * @returns {string}
  */
-export function camelCaseToHypen (str) {
+export function camelCaseToHypen (str: string) {
   return str.replace(/[A-Z]|[0-9]+/g, m => '-' + m.toLowerCase())
 }
 
 /**
  * Converts hypen case to title case
- * @param {string} str
- * @param {boolean} [justCapitaliseFirst] - Just capitalise the first letter
- * @returns {string}
+ * @param str - string to convert
+ * @param justCapitaliseFirst - Just capitalise the first letter
  */
-export function hypenCaseToTitle (str, justCapitaliseFirst) {
+export function hypenCaseToTitle (str: string, justCapitaliseFirst?: boolean) {
   if (justCapitaliseFirst) return ucFirst(str.replace(/-/g, ' '))
   else return str.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())
 }
 
 /**
  * Capitalises a string
- * @param {string} [str]
- * @returns {string}
+ * @param str - string to convert
  */
-export function capitalise (str) {
+export function capitalise (str: string) {
   return (str||'').replace(/(?:^|\s)\S/g, (a) => a.toUpperCase())
 }
 
 /**
  * Formats a currency string
- * @param {number} cents
- * @param {number} [decimals=2]
- * @param {number} [decimalsMinimum]
- * @returns {string}
+ * @param decimals - Number of decimal places (default: 2)
+ * @param decimalsMinimum - Minimum number of decimal places
  */
-export function currency (cents, decimals=2, decimalsMinimum) {
+export function currency (cents: number, decimals = 2, decimalsMinimum?: number) {
   // Returns a formated currency string
   const num = Number(cents / 100)
   if (!isNumber(num)) return '$0.00'
@@ -214,23 +195,21 @@ export function currency (cents, decimals=2, decimalsMinimum) {
 
 /**
  * Converts a currency string to cents
- * @param {string} currency string, e.g. '$1,234.00'
- * @returns {string}
+ * @example '$1,234.00' => '123400'
  */
-export function currencyToCents (currency) {
+export function currencyToCents (currency: string) {
   // Converts '$1,234.00' to '1234.00', then to '123400'
-  let currencyString = Number(currency.replace(/[^0-9.]/g, '')).toFixed(2)
+  const currencyString = Number(currency.replace(/[^0-9.]/g, '')).toFixed(2)
   return currencyString.replace(/\./g, '')
 }
 
 /**
  * Returns a formatted date string
- * @param {number|Date} [date] - timestamp or date
- * @param {string} [pattern] - e.g. "dd mmmm yy" (https://date-fns.org/v4.1.0/docs/format#)
- * @param {string} [timezone] - convert a UTC date to a particular timezone.
- * @returns {string}
+ * @param date - number can be in seconds or milliseconds (UTC)
+ * @param pattern - e.g. "dd mmmm yy" (https://date-fns.org/v4.1.0/docs/format#)
+ * @param timezone - convert a UTC date to a particular timezone.
  */
-export function date (date, pattern, timezone) {
+export function date (date: number | Date, pattern?: string, timezone?: string) {
   if (!date) return ''
   const timestamp = typeof date === 'number' ? date : isDate(date) ? date?.getTime() : 0
   const timestampInTz = timezone ? new Date(new Date(timestamp).toLocaleString('en-US', { timeZone: timezone })).getTime() : timestamp
@@ -239,13 +218,13 @@ export function date (date, pattern, timezone) {
 
 /**
  * Get the same time in a given timezone, and optionally, set the time relative to the timezone (e.g. via timesString = '13:00')
- * @param {number|Date} date - timestamp or date
- * @param {string} [timezone] - defaults to local timezone
- * @param {string} [timeString] - 24h time string to change the time to in the new timezone, e.g. '13:00' or '13:00:01'
+ * @param date - number can be in seconds or milliseconds (UTC)
+ * @param timezone - defaults to local timezone
+ * @param timeString - 24h time string to change the time to in the new timezone, e.g. '13:00' or '13:00:01'
  * 
  * @link https://github.com/date-fns/tz
  */
-export function dateInTimezone (date, timezone, timeString) {
+export function dateInTimezone (date: number | Date, timezone?: string, timeString?: string) {
   const _date = new Date(typeof date === 'number' ? date : date.getTime())
 
   // No effect if no timezone or timeString provided
@@ -259,7 +238,7 @@ export function dateInTimezone (date, timezone, timeString) {
     _date.getHours(),
     _date.getMinutes(),
     _date.getSeconds(),
-    /**@type {string}*/(timezone ?? 0) // will think its just milliseconds if undefined
+    (timezone ?? 0) as string // will think its just milliseconds if undefined
   )
   
   // If a time string is provided, change the time
@@ -286,38 +265,35 @@ export function dateInTimezone (date, timezone, timeString) {
 }
 
 /**
- * @template {(...args: any[]) => any} T
  * Creates a debounced function that delays invoking `func` until after `wait`
  * milliseconds have elapsed since the last time the debounced function was invoked.
  *
- * @param {T} func - The function to debounce.
- * @param {number} [wait=0] - Number of milliseconds to delay.
- * @param {{
- *   leading?: boolean,  // invoke on the leading edge of the timeout (default: false)
- *   maxWait?: number,   // maximum time `func` is allowed to be delayed before it's invoked 
- *   trailing?: boolean, // invoke on the trailing edge of the timeout (default: true)
- * }} [options] - Options to control behavior.
- * @returns {((...args: Parameters<T>) => ReturnType<T>) & {
- *     cancel: () => void;
- *     flush: () => ReturnType<T>
- * }}
- *
+ * @param wait - Number of milliseconds to delay (default: 0)
+ * @param options - Options to control behavior
+ * @param options.leading - invoke on the leading edge of the timeout (default: false)
+ * @param options.maxWait - maximum time `func` is allowed to be delayed before it's invoked 
+ * @param options.trailing - invoke on the trailing edge of the timeout (default: true)
  * @example const debounced = debounce(updatePosition, 100)
  * @see https://lodash.com/docs/4.17.15#debounce
  */
-export function debounce(func, wait = 0, options) {
-  /** @type {any[]|undefined} */
-  let lastArgs
-  /** @type {any} */
-  let lastThis
-  /** @type {number|undefined} */
-  let maxWait
-  /** @type {any} */
-  let result
-  /** @type {ReturnType<typeof setTimeout>|undefined} */
-  let timerId
-  /** @type {number|undefined} */
-  let lastCallTime
+export function debounce<T extends (...args: any[]) => any>( // eslint-disable-line @typescript-eslint/no-explicit-any
+  func: T, 
+  wait = 0, 
+  options?: {
+    leading?: boolean
+    maxWait?: number
+    trailing?: boolean
+  }
+): ((...args: Parameters<T>) => ReturnType<T>) & {
+  cancel: () => void
+  flush: () => ReturnType<T>
+} {
+  let lastArgs: Parameters<T> | undefined
+  let lastThis: unknown
+  let maxWait: number | undefined
+  let result: ReturnType<T>
+  let timerId: ReturnType<typeof setTimeout> | undefined
+  let lastCallTime: number | undefined
   let lastInvokeTime = 0
   let leading = false
   let maxing = false
@@ -330,24 +306,16 @@ export function debounce(func, wait = 0, options) {
     trailing = 'trailing' in options ? !!options.trailing : trailing
   }
 
-  /**
-   * @param {number} time
-   * @returns {any}
-   */
-  function invokeFunc(time) {
+  function invokeFunc(time: number): ReturnType<T> {
     const args = lastArgs
     const thisArg = lastThis
     lastArgs = lastThis = undefined
     lastInvokeTime = time
-    result = func.apply(thisArg, args ? args : [])
+    result = func.apply(thisArg, args ? args : []) as ReturnType<T>
     return result
   }
 
-  /**
-   * @param {number} time
-   * @returns {any}
-   */
-  function leadingEdge(time) {
+  function leadingEdge(time: number): ReturnType<T> {
     // Reset any `maxWait` timer.
     lastInvokeTime = time
     // Start the timer for the trailing edge.
@@ -356,11 +324,7 @@ export function debounce(func, wait = 0, options) {
     return leading ? invokeFunc(time) : result
   }
 
-  /**
-   * @param {number} time
-   * @returns {number}
-   */
-  function remainingWait(time) {
+  function remainingWait(time: number): number {
     const timeSinceLastCall = time - (lastCallTime ?? 0)
     const timeSinceLastInvoke = time - lastInvokeTime
     const timeWaiting = wait - timeSinceLastCall
@@ -369,11 +333,7 @@ export function debounce(func, wait = 0, options) {
       : timeWaiting
   }
 
-  /**
-   * @param {number} time
-   * @returns {boolean}
-   */
-  function shouldInvoke(time) {
+  function shouldInvoke(time: number): boolean {
     const timeSinceLastCall = time - (lastCallTime ?? 0)
     const timeSinceLastInvoke = time - lastInvokeTime
     // Either this is the first call, activity has stopped and we're at the
@@ -387,23 +347,17 @@ export function debounce(func, wait = 0, options) {
     )
   }
 
-  /**
-   * @returns {any}
-   */
-  function timerExpired() {
+  function timerExpired(): void {
     const time = Date.now()
     if (shouldInvoke(time)) {
-      return trailingEdge(time)
+      trailingEdge(time)
+      return
     }
     // Restart the timer.
     timerId = setTimeout(timerExpired, remainingWait(time))
   }
 
-  /**
-   * @param {number} time
-   * @returns {any}
-   */
-  function trailingEdge(time) {
+  function trailingEdge(time: number): ReturnType<T> {
     timerId = undefined
     // Only invoke if we have `lastArgs` which means `func` has been
     // debounced at least once.
@@ -414,11 +368,7 @@ export function debounce(func, wait = 0, options) {
     return result
   }
 
-  /**
-   * Cancel any pending debounced invocation.
-   * @returns {void}
-   */
-  function cancel() {
+  function cancel(): void {
     if (timerId !== undefined) {
       clearTimeout(timerId)
     }
@@ -426,21 +376,11 @@ export function debounce(func, wait = 0, options) {
     lastArgs = lastCallTime = lastThis = timerId = undefined
   }
 
-  /**
-   * Immediately invoke the debounced function if pending.
-   * @returns {any}
-   */
-  function flush() {
+  function flush(): ReturnType<T> {
     return timerId === undefined ? result : trailingEdge(Date.now())
   }
 
-  /**
-   * The debounced function.
-   * @this {any}
-   * @param {...any} args
-   * @returns {any}
-   */
-  function debounced(...args) {
+  function debounced(this: unknown, ...args: Parameters<T>): ReturnType<T> {
     const time = Date.now()
     const isInvoking = shouldInvoke(time)
 
@@ -472,17 +412,13 @@ export function debounce(func, wait = 0, options) {
 
 /**
  * Deep clones an object or array, preserving its type
- * @template T
- * @param {T} obj - Object or array to deep clone
- * @returns {T}
  */
-export function deepCopy(obj) {
+export function deepCopy<T>(obj: T): T {
   if (!obj) return obj
   if (typeof obj !== 'object') return obj
 
   // Create a new instance based on the input type
-  /** @type {any} */
-  const clone = Array.isArray(obj) ? [] : {}
+  const clone = (Array.isArray(obj) ? [] : {}) as T
 
   for (const key in obj) {
     const value = obj[key]
@@ -494,51 +430,45 @@ export function deepCopy(obj) {
 
 /**
  * Retrieves a nested value from an object or array from a dot-separated path.
- * @param {object|any[]} obj - The source object or array.
- * @param {string} path - Dot-separated path (e.g. "owner.houses.0.color").
- * @returns {unknown} 
+ * @param path - Dot-separated path (e.g. "owner.houses.0.color").
  */
-export function deepFind(obj, path) {
+export function deepFind<T = unknown>(obj: object | unknown[], path: string) {
   if (!obj) return undefined
   if (typeof obj !== 'object') return undefined
 
   const chunks = path.split('.')
-  /** @type {any} */
-  let target = obj
+  let target: unknown = obj
 
   for (const chunk of chunks) {
     if (target === null || target === undefined) return undefined
-    target = target[chunk]
+    target = (target as Record<string, unknown>)[chunk]
   }
 
-  return target
+  return target as T | undefined
 }
 
 /**
  * Saves a deeply nested value without mutating the original object.
- * @template T
- * @param {T} obj - The source object or array.
- * @param {string} path - Dot-separated path to the nested property.
- * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
- * @returns {T}
+ * @param path - Dot-separated path to the nested property.
+ * @param value - The value to set, or a function to compute it from the current value.
  */
-export function deepSet(obj, path, value) {
+export function deepSet<T>(obj: T, path: string, value: unknown | ((current: unknown) => unknown)) {
   if (obj === null || obj === undefined) return obj
   return deepSetWithInfo(obj, path, value).obj
 }
 
 /**
  * Sets a deeply nested value without mutating the original object.
- * @template T
- * @param {T} _obj - The target object or array.
- * @param {string} path - Dot-separated path to the nested property.
- * @param {unknown|function} value - The value to set, or a function to compute it from the current value.
- * @returns {{ obj: T, parent: T, fieldName: string }}
+ * @param path - Dot-separated path to the nested property.
+ * @param value - The value to set, or a function to compute it from the current value.
  */
-export function deepSetWithInfo(_obj, path, value) {
-  /** @type {any} */
-  let obj = Array.isArray(_obj) ? [..._obj] : { ..._obj }
-  let parent = obj
+export function deepSetWithInfo<T>(
+  _obj: T, 
+  path: string, 
+  value: unknown | ((current: unknown) => unknown)
+) {
+  const obj = (Array.isArray(_obj) ? [..._obj] : { ..._obj }) as T
+  let parent: T = obj
   const chunks = (path || '').split('.')
 
   for (let i = 0, l = chunks.length; i < l; i++) {
@@ -547,17 +477,17 @@ export function deepSetWithInfo(_obj, path, value) {
 
     if (isLast) {
       // was obj for onChange()
-      parent[key] = typeof value === 'function' ? value(parent[key]) : value 
+      (parent as {[key: string]: unknown})[key] = typeof value === 'function' ? value((parent as {[key: string]: unknown})[key]) : value 
     } else {
       const nextIsArray = /^\d+$/.test(chunks[i + 1])
-      const current = parent[key]
+      const current = (parent as {[key: string]: unknown})[key]
 
       // If the next level doesn't exist, create an empty array/object
       const parentCopy = nextIsArray
         ? Array.isArray(current) ? [...current] : []
-        : isObject(current) ? { ...current } : {}
+        : typeof current === 'object' && current !== null ? { ...current } : {}
 
-      parent = parent[key] = parentCopy
+      parent = (parent as {[key: string]: unknown})[key] = parentCopy as T
     }
   }
   return {
@@ -574,70 +504,59 @@ export function deepSetWithInfo(_obj, path, value) {
  * - Does not mutate the original input
  * - Only traverses plain objects and arrays
  * - Throws if a circular reference is detected
- *
- * @template T
- * @param {T} input
- * @param {any} matchingValue
- * @param {any} value
- * @returns {T}
+ * 
  * @throws {Error}
  */
-export function deepSetWithMatch(input, matchingValue, value) {
+export function deepSetWithMatch<T>(input: T, matchingValue: unknown, value: unknown): T {
   const seen = new WeakMap()
 
-  /**
-   * @param {*} input2
-   * @returns {*}
-   */
-  function walk(input2) {
+  function walk(input2: unknown): unknown {
     if (input2 === matchingValue) return value
-
     if (Array.isArray(input2)) {
       return input2.map(walk)
     }
-
     if (input2 && typeof input2 === 'object') {
       const proto = Object.getPrototypeOf(input2)
       if (proto !== Object.prototype && proto !== null) return input2
       if (seen.has(input2)) throw new Error('Circular reference detected')
 
-      /** @type {{ [key: string]: any }} */
-      const result = {}
+      const result = {} as Record<string, unknown>
       seen.set(input2, result)
 
       for (const key of Object.keys(input2)) {
-        result[key] = (walk(input2[key]))
+        result[key] = walk(input2[key as keyof typeof input2])
       }
       return result
     }
-
     return input2
   }
 
-  return /** @type {T} */ (walk(input))
+  return (walk(input)) as T
 }
 
 /**
  * Iterates over an object or array
- * @param {{[key: string]: any}|[]|null} obj
- * @param {function} iteratee
- * @param {object} [context]
- * @returns {object|[]|null}
+ * @param iteratee - Function to call for each item
+ * @param context - Context to bind to the iteratee function
  */
-export function each (obj, iteratee, context) {
+export function each (
+  obj: {[key: string]: unknown} | unknown[] | null,
+  iteratee: (value: unknown, index: number | string, obj: unknown) => void,
+  context?: unknown
+) {
   // Similar to the underscore.each method
-  const shallowLen = obj === null ? void 0 : obj['length']
+  const shallowLen = obj === null ? void 0 : (obj as {length?: number})['length']
   const isArrayLike = typeof shallowLen == 'number' && shallowLen >= 0
   if (obj === null) {
     return null
   } else if (isArrayLike) {
-    for (let i = 0, l = obj.length; i < l; i++) {
-      iteratee.call(context || null, /** @type {any[]} */(obj)[i], i, obj)
+    for (let i = 0, l = (obj as unknown[]).length; i < l; i++) {
+      iteratee.call(context || null, (obj as unknown[])[i], i, obj)
     }
   } else {
-    for (let key in obj) {
+    for (const key in obj) {
       if (!obj.hasOwnProperty(key)) continue
-      iteratee.call(context || null, /** @type {{[key: string]: any}} */(obj)[key], key, obj)
+      iteratee.call(context || null, (obj as {[key: string]: unknown})[key], key, obj)
     }
   }
   return obj
@@ -645,26 +564,29 @@ export function each (obj, iteratee, context) {
 
 /**
  * Downloads a file
- * @param {string|Blob|File|Uint8Array<ArrayBuffer>} data
- * @param {string} filename
- * @param {string} [mime]
- * @param {string} [bom]
- * @returns {void}
+ * @param filename - Name of the file to download
+ * @param mime - MIME type of the file
+ * @param bom - Byte order mark to prepend
  * 
  * @link https://github.com/kennethjiang/js-file-download
  */
-export function fileDownload (data, filename, mime, bom) {
+export function fileDownload (
+  data: string | Blob | File | Uint8Array,
+  filename: string,
+  mime?: string,
+  bom?: string
+) {
   if (typeof window === 'undefined') return
-  let blobData = (typeof bom !== 'undefined') ? [bom, data] : [data]
-  let blob = new Blob(blobData, {type: mime || 'application/octet-stream'})
+  const blobData = (typeof bom !== 'undefined') ? [bom, data as BlobPart] : [data as BlobPart] // todo: types are off here
+  const blob = new Blob(blobData, {type: mime || 'application/octet-stream'})
 
-  if (typeof /** @type {any} */(window.navigator).msSaveBlob !== 'undefined') {
-    /** @type {any} */(window.navigator).msSaveBlob(blob, filename)
+  if (typeof (window.navigator as {msSaveBlob?: (blob: Blob, filename: string) => void}).msSaveBlob !== 'undefined') {
+    (window.navigator as unknown as {msSaveBlob: (blob: Blob, filename: string) => void}).msSaveBlob(blob, filename)
   } else {
-    let blobURL = (window.URL && window.URL.createObjectURL)
+    const blobURL = (window.URL && window.URL.createObjectURL)
       ? window.URL.createObjectURL(blob)
       : window.webkitURL.createObjectURL(blob)
-    let tempLink = document.createElement('a')
+    const tempLink = document.createElement('a')
     tempLink.style.display = 'none'
     tempLink.href = blobURL
     tempLink.setAttribute('download', filename)
@@ -684,11 +606,9 @@ export function fileDownload (data, filename, mime, bom) {
 
 /**
  * Formats a string into a name
- * @param {string} string
- * @param {boolean} [ignoreHyphen]
- * @returns {string}
+ * @param ignoreHyphen - Whether to ignore hyphens when formatting
  */
-export function formatName (string, ignoreHyphen) {
+export function formatName (string: string, ignoreHyphen?: boolean) {
   return ignoreHyphen
     ? ucFirst(string.toString().trim())
     : ucFirst(string.toString().trim().replace('-', ' '))
@@ -696,10 +616,8 @@ export function formatName (string, ignoreHyphen) {
 
 /**
  * Formats a string into a slug
- * @param {string} string
- * @returns {string}
  */
-export function formatSlug (string) {
+export function formatSlug (string: string) {
   return string
     .toString()
     .toLowerCase()
@@ -712,23 +630,33 @@ export function formatSlug (string) {
 
 /**
  * Serializes objects to FormData instances
- * @param {object} obj
- * @param {{ allowEmptyArrays?: boolean, indices?: boolean, nullsAsUndefineds?: boolean, booleansAsIntegers?: boolean }} [cfg] - config
- * @param {FormData} [existingFormData]
- * @param {string} [keyPrefix]
- * @returns {FormData}
+ * @param cfg - config
+ * @param existingFormData - Existing FormData instance to append to
+ * @param keyPrefix - Prefix for keys
  * @link https://github.com/therealparmesh/object-to-formdata
  */
-export function formData (obj, cfg, existingFormData, keyPrefix) {
-  /**
-   * Serializes objects to FormData instances
-   * @param {{[key: string]: any}} obj
-   * @param {{ allowEmptyArrays?: boolean, indices?: boolean, nullsAsUndefineds?: boolean, booleansAsIntegers?: boolean }} [cfg] - config
-   * @param {FormData} [existingFormData]
-   * @param {string} [keyPrefix]
-   * @returns {FormData}
-   */
-  const serialize = (obj, cfg, existingFormData, keyPrefix='') => {
+export function formData (
+  obj: {[key: string]: unknown},
+  cfg?: {
+    allowEmptyArrays?: boolean
+    indices?: boolean
+    nullsAsUndefineds?: boolean
+    booleansAsIntegers?: boolean
+  },
+  existingFormData?: FormData,
+  keyPrefix?: string
+) {
+  const serialize = (
+    obj: unknown,
+    cfg: {
+      allowEmptyArrays?: boolean
+      indices?: boolean
+      nullsAsUndefineds?: boolean
+      booleansAsIntegers?: boolean
+    },
+    existingFormData?: FormData,
+    keyPrefix = ''
+  ) => {
     cfg = cfg || {}
     cfg.indices = cfg.indices === undefined ? false : cfg.indices
     cfg.nullsAsUndefineds = cfg.nullsAsUndefineds === undefined ? false : cfg.nullsAsUndefineds
@@ -737,6 +665,7 @@ export function formData (obj, cfg, existingFormData, keyPrefix) {
     existingFormData = existingFormData || new FormData()
 
     const isBlob = typeof obj === 'object' && 
+      obj !== null &&
       'size' in obj && typeof obj.size === 'number' && 
       'type' in obj && typeof obj.type === 'string' && 
       'slice' in obj && typeof obj.slice === 'function'
@@ -758,7 +687,7 @@ export function formData (obj, cfg, existingFormData, keyPrefix) {
       if (cfg.booleansAsIntegers) {
         existingFormData.append(keyPrefix, obj ? '1' : '0')
       } else {
-        existingFormData.append(keyPrefix, obj)
+        existingFormData.append(keyPrefix, obj ? 'true' : 'false') // ts: changed from obj to obj ? 'true' : 'false'
       }
     } else if (Array.isArray(obj)) {
       if (obj.length) {
@@ -773,7 +702,7 @@ export function formData (obj, cfg, existingFormData, keyPrefix) {
       existingFormData.append(keyPrefix, obj.toISOString())
     } else if (obj === Object(obj) && !isFile && !isBlob) {
       Object.keys(obj).forEach((prop) => {
-        const value = obj[prop]
+        const value = (obj as {[key: string]: unknown})[prop]
         if (Array.isArray(value)) {
           while (prop.length > 2 && prop.lastIndexOf('[]') === prop.length - 2) {
             prop = prop.substring(0, prop.length - 2)
@@ -783,28 +712,25 @@ export function formData (obj, cfg, existingFormData, keyPrefix) {
         serialize(value, cfg, existingFormData, key)
       })
     } else {
-      existingFormData.append(keyPrefix, /** @type {any} */(obj))
+      existingFormData.append(keyPrefix, obj as Blob | string)
     }
     return existingFormData
   }
-  return serialize(obj, cfg, existingFormData, keyPrefix)
+  return serialize(obj, cfg || {}, existingFormData, keyPrefix)
 }
 
 /**
  * Returns capitalized full name
- * @param {{firstName: string, lastName: string}} object
- * @returns {string}
  */
-export function fullName (object) {
+export function fullName (object: {firstName: string, lastName: string}) {
   return ucFirst(object.firstName) + ' ' + ucFirst(object.lastName)
 }
 
 /**
  * Splits a full name into first and last names
- * @param {string} string
- * @returns {string[]} e.g. ['John', 'Smith']
+ * @example ['John', 'Smith']
  */
-export function fullNameSplit (string) {
+export function fullNameSplit (string: string) {
   string = string.trim().replace(/\s+/, ' ')
   if (string.match(/\s/)) {
     return [string.substring(0, string.lastIndexOf(' ')), string.substring(string.lastIndexOf(' ') + 1)]
@@ -815,10 +741,8 @@ export function fullNameSplit (string) {
 
 /**
  * Returns a list of country options
- * @param {{ [key: string]: { name: string } }} countries
- * @returns {{ value: string, label: string, flag: string }[]}
  */
-export function getCountryOptions (countries) {
+export function getCountryOptions (countries: {[key: string]: { name: string }}) {
   const output = []
   for (const iso in countries) {
     const name = countries[iso].name
@@ -829,10 +753,8 @@ export function getCountryOptions (countries) {
 
 /**
  * Returns a list of currency options
- * @param {{ [iso: string]: { name: string } }} currencies
- * @returns {{ value: string, label: string }[]}
  */
-export function getCurrencyOptions (currencies) {
+export function getCurrencyOptions (currencies: {[key: string]: { name: string }}) {
   const output = []
   for (const iso in currencies) {
     const name = currencies[iso].name
@@ -842,26 +764,10 @@ export function getCurrencyOptions (currencies) {
 }
 
 /**
- * Returns an error from a state object matching the path
- * @param {{ errors?: { title: string, detail: string }[] }|undefined} state
- * @param {string|RegExp} path
- * @returns {{ title: string, detail: string }|undefined}
- */
-export function getErrorFromState (state, path) {
-  if (!state || !state.errors) return undefined
-  for (const item of state.errors) {
-    if (isRegex(path) && (item.title || '').match(path)) return item
-    else if (item.title == path) return item
-  }
-}
-
-/**
  * Get the width of a prefix
- * @param {string} prefix
- * @param {number} [paddingRight=0]
- * @returns {number}
+ * @param paddingRight - Additional padding to add to the width (default: 0)
  */
-export function getPrefixWidth (prefix, paddingRight=0) {
+export function getPrefixWidth (prefix: string, paddingRight = 0) {
   if (!prefix || typeof window === 'undefined') return 0
   const span = document.createElement('span')
   span.classList.add('input-prefix')
@@ -875,11 +781,13 @@ export function getPrefixWidth (prefix, paddingRight=0) {
 
 /**
  * Returns a list of project directories
- * @param {{ join: (...args: string[]) => string }} path - e.g. `import path from 'path'`
- * @param {string} [pwd]
- * @returns {object}
+ * @param path - e.g. `import path from 'path'`
+ * @param pwd - Current working directory
  */
-export function getDirectories (path, pwd) {
+export function getDirectories (
+  path: { join: (...args: string[]) => string },
+  pwd?: string
+) {
   const _pwd = pwd || process.env.PWD || ''
   return {
     clientDir: path.join(_pwd, process.env.clientDir || 'client', '/'),
@@ -893,79 +801,25 @@ export function getDirectories (path, pwd) {
 
 /**
  * Returns a Stripe client promise
- * @param {string} stripePublishableKey
- * @returns {Promise<import('@stripe/stripe-js').Stripe|null>}
+ * @param stripePublishableKey - Stripe publishable key
  */
-export function getStripeClientPromise (stripePublishableKey) {
+export function getStripeClientPromise (stripePublishableKey: string) {
   return stripeClientCache || (stripeClientCache = loadStripe(stripePublishableKey))
 }
 
 /**
- * Returns a list of response errors
- * @typedef {Error|NitroError[]|MongoError|AxiosWithErrors|string|any} NitroErrorRaw
- * 
- * @param {NitroErrorRaw} errs
- * @returns {NitroError[]}
+ * Checks if a value is in an array, and returns it (todo, update this to not use optional key)
+ * @param value - Value to search for
+ * @param key - optional, to match across on a collection of objects
  */
-export function getResponseErrors (errs) {
-  // Array of error objects
-  if (Array.isArray(errs)) {
-    return errs
-  
-  // Axios response errors
-  } else if (typeof errs === 'object' && errs?.response?.data?.errors) {
-    return errs.response.data.errors
-
-  // Axios response error
-  } else if (typeof errs === 'object' && errs?.response?.data?.error) {
-    return [{ title: errs.response.data.error, detail: errs.response.data.error_description || '' }]
-
-  // new Error
-  } else if (errs instanceof Error || errs === null) {
-    return [{ title: 'error', detail: 'Oops there was an error' }]
-
-  // Mongo errors (when called on the backend)
-  } else if (typeof errs === 'object' && 'toJSON' in errs) {
-    return [{ title: 'error', detail: errs.toJSON().message }]
-      
-  // String
-  } else if (typeof errs === 'string') {
-    return [{ title: 'error', detail: errs }]
-
-  // Default error message
-  } else {
-    console.info('getResponseErrors(): ', errs)
-    return [{ title: 'error', detail: 'Oops there was an error' }]
-  }
-}
-
-/**
- * Returns the system error from a list of errors
- * @param {NitroError[]|undefined} nitroErrors
- * @returns {string}
- */
-export function getSystemError(nitroErrors) {
-  const allErrors = getResponseErrors(nitroErrors || [])
-  const systemError = allErrors.find(error => error.title === 'error')
-  return systemError?.detail || ''
-}
-
-/**
- * Checks if a value is in an array (todo, update this to not use optional key)
- * @param {any[]} array
- * @param {unknown} [value]
- * @param {string} [key] - optional, to match across on a colleciton of objects
- * @returns {boolean}
- */
-export function inArray (array, value, key) {
+export function inArray2 (array: unknown[], value?: unknown, key?: string) {
   if (!array || typeof value == 'undefined') return false
   else if (typeof key == 'undefined') return array.includes(value)
   else 
     for (let i = array.length; i--; ) {
-      if (typeof array[i] === 'object') {
-        /** @type {{[key: string]: unknown}} */
-        const item = array[i]
-        if (key in item && array[i][key] == value) return array[i]
+      if (typeof array[i] === 'object' && array[i] !== null) { // ts: added null check
+        const item = array[i] as {[key: string]: unknown}
+        if (key in item && item[key] == value) return array[i]
       }
     }
   return false
@@ -973,37 +827,29 @@ export function inArray (array, value, key) {
 
 /**
  * Checks if a variable is an array
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isArray (variable) {
+export function isArray (variable: unknown) {
   return Array.isArray(variable)
 }
 
 /**
  * Checks if a variable is a date
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isDate (variable) {
+export function isDate (variable: unknown) {
   return !!(typeof variable === 'object' && variable && 'getMonth' in variable)
 }
 
 /**
  * Checks if a variable is defined
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isDefined (variable) {
+export function isDefined (variable: unknown) {
   return typeof variable !== 'undefined'
 }
 
 /**
  * Checks if a variable is an email
- * @param {string} email
- * @returns {boolean}
  */
-export function isEmail (email) {
+export function isEmail (email: string) {
   // eslint-disable-next-line
   const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   return re.test(String(email).toLowerCase())
@@ -1011,14 +857,12 @@ export function isEmail (email) {
 
 /**
  * Checks if an object is empty
- * @param {{[key: string]: unknown}|null} [obj]
- * @param {boolean} [truthyValuesOnly]
- * @returns {boolean}
+ * @param truthyValuesOnly - Only check for truthy values
  */
-export function isEmpty (obj, truthyValuesOnly) {
+export function isEmpty (obj?: {[key: string]: unknown} | null, truthyValuesOnly?: boolean) {
   // note req.files doesn't have a hasOwnProperty method
   if (obj === null || typeof obj === 'undefined') return true
-  for (let prop in obj) {
+  for (const prop in obj) {
     if (obj[prop] || (!truthyValuesOnly && obj.hasOwnProperty && obj.hasOwnProperty(prop))) return false
   }
   return true
@@ -1026,19 +870,15 @@ export function isEmpty (obj, truthyValuesOnly) {
 
 /**
  * Checks if a variable is a function
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isFunction (variable) {
+export function isFunction (variable: unknown) {
   return typeof variable === 'function' ? true : false
 }
 
 /**
  * Checks if a variable is a hex string
- * @param {unknown} value
- * @returns {boolean}
  */
-export function isHex24 (value) {
+export function isHex24 (value: unknown) {
   // Fast function to check if the length is exactly 24 and all characters are valid hexadecimal digits
   const str = (value||'').toString()
   if (str.length !== 24) return false
@@ -1059,58 +899,46 @@ export function isHex24 (value) {
 
 /**
  * Checks if a variable is a number
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isNumber (variable) {
-  return !isNaN(parseFloat(/** @type {string} */(variable))) && isFinite(/** @type {number} */(variable))
+export function isNumber (variable: unknown) {
+  return !isNaN(parseFloat(variable as string)) && isFinite(variable as number)
 }
 
 /**
  * Checks if a variable is an object
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isObject (variable) {
+export function isObject (variable: unknown) {
   // Excludes null and array's
   return variable !== null && typeof variable === 'object' && !(variable instanceof Array) ? true : false
 }
 
 /**
  * Checks if a variable is a regex
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isRegex (variable) {
+export function isRegex (variable: unknown) {
   return variable instanceof RegExp ? true : false
 }
 
 /**
  * Checks if a variable is a string
- * @param {unknown} variable
- * @returns {boolean}
  */
-export function isString (variable) {
+export function isString (variable: unknown) {
   return typeof variable === 'string' || variable instanceof String ? true : false
 }
 
 /**
  * Converts the first character of a string to lowercase
- * @param {string} string
- * @returns {string}
  */
-export function lcFirst (string) {
+export function lcFirst (string: string) {
   return string.charAt(0).toLowerCase() + string.slice(1)
 }
 
 /**
  * Trims a string to a maximum length, and removes any partial words at the end
- * @param {string} string
- * @param {number} [len=100]
- * @param {boolean} [showEllipsis=true]
- * @returns {string}
+ * @param len - Maximum length (default: 100)
+ * @param showEllipsis - Whether to show ellipsis (default: true)
  */
-export function maxLength (string, len, showEllipsis) {
+export function maxLength (string: string, len = 100, showEllipsis = true) {
   // Trims to a maximum length, and removes any partial words at the end
   len = len || 100
   if (!string) return ''
@@ -1125,13 +953,8 @@ export function maxLength (string, len, showEllipsis) {
 
 /**
  * Expands a mongodb lng/lat box in kms, and returns the expanded box
- * @typedef {[number, number]} Point - lng/lat
- * @typedef {{bottomLeft: Point, topRight: Point}} Box
- * 
- * @param {number} km
- * @param {Point|Box} bottomLeftOrBox
- * @param {Point} [topRight]
- * @returns {[Point, Point]|null} (e.g. [bottomLeft, topRight])
+ * @param bottomLeftOrBox - Either a Point or a Box object
+ * @param topRight - Top right point (required if bottomLeftOrBox is a Point)
  * 
  * Handy box tester
  * https://www.keene.edu/campus/maps/tool/
@@ -1152,39 +975,43 @@ export function maxLength (string, len, showEllipsis) {
  * [[174.4438160493033,-37.05901990116617] (btm left)
  * [174.9684260722261,-36.66060184426172]] (top right)
  */
-export function mongoAddKmsToBox (km, bottomLeftOrBox, topRight) {
+export function mongoAddKmsToBox (
+  km: number,
+  bottomLeftOrBox: Point | Box,
+  topRight?: Point
+) {
+  let bottomLeft: Point
   if (typeof bottomLeftOrBox === 'object' && 'bottomLeft' in bottomLeftOrBox) {
     topRight = bottomLeftOrBox.topRight
-    var bottomLeft = bottomLeftOrBox.bottomLeft
+    bottomLeft = bottomLeftOrBox.bottomLeft
   } else {
     bottomLeft = bottomLeftOrBox
   }
   if (!bottomLeft || !topRight) {
     return null
   }
-  /** @param {number} lat @param {number} kms @returns {number} */
-  let lat = (lat, kms) => lat + (kms / 6371) * (180 / Math.PI)
-  /** @param {number} lng @param {number} lat @param {number} kms @returns {number} */
-  let lng = (lng, lat, kms) => lng + (kms / 6371) * (180 / Math.PI) / Math.cos(lat * Math.PI/180)
+  const lat = (lat: number, kms: number) => lat + (kms / 6371) * (180 / Math.PI)
+  const lng = (lng: number, lat: number, kms: number) => lng + (kms / 6371) * (180 / Math.PI) / Math.cos(lat * Math.PI/180)
   return [
     [lng(bottomLeft[0], bottomLeft[1], -km), lat(bottomLeft[1], -km)],
     [lng(topRight[0], -topRight[1], km), lat(topRight[1], km)],
   ]
 }
-
 /**
  * Returns a mongo query to find documents within a passed address
- * @param {{
- *   area?: {bottomLeft: [number, number], topRight: [number, number]}
- *   location?: {coordinates: [number, number]}
- * }} address
- * @param {number} km
- * @param {string} prefix
- * @returns {Object}
+ * @param km - Kilometers to expand the search area
+ * @param prefix - Prefix for the location field in the query
  */
-export function mongoDocWithinPassedAddress (address, km, prefix) {
+export function mongoDocWithinPassedAddress (
+  address: {
+    area?: {bottomLeft: [number, number], topRight: [number, number]}
+    location?: {coordinates: [number, number]}
+  },
+  km: number,
+  prefix: string
+) {
   // let type = ''
-  let areaSize = 5
+  const areaSize = 5
   // if (type == 'geoNear') {
   //   // NOT USING
   //   // Must be the first stage in an aggregate pipeline
@@ -1204,7 +1031,7 @@ export function mongoDocWithinPassedAddress (address, km, prefix) {
   //     },
   //   }
   if ('area' in address && address.area) {
-    let box = mongoAddKmsToBox(km, address.area)
+    const box = mongoAddKmsToBox(km, address.area)
     return {
       [`${prefix}location`]: {
         $geoWithin: {
@@ -1230,34 +1057,32 @@ export function mongoDocWithinPassedAddress (address, km, prefix) {
 
 /**
  * Find the distance in km between to points
- * @param {number[]} point1 - [lng, lat] ([192.2132.., 212.23323..])
- * @param {number[]} point2 - [lng, lat] ([192.2132.., 212.23323..])
- * @return {number} kms
+ * @param point1 - [lng, lat] ([192.2132.., 212.23323..])
+ * @param point2 - [lng, lat] ([192.2132.., 212.23323..])
  */
-export function mongoPointDifference (point1, point2) {
-  let R = 6371 // km
-  /** @param {number} degrees @returns {number} */
-  let mongoDegreesToRadians = (degrees) => degrees * (Math.PI / 180)
-  let dLat = mongoDegreesToRadians(point2[1]-point1[1])
-  let dLon = mongoDegreesToRadians(point2[0]-point1[0])
-  let lat1 = mongoDegreesToRadians(point1[1])
-  let lat2 = mongoDegreesToRadians(point2[1])
+export function mongoPointDifference (point1: [number, number], point2: [number, number]) {
+  const R = 6371 // km
+  const mongoDegreesToRadians = (degrees: number) => degrees * (Math.PI / 180)
+  const dLat = mongoDegreesToRadians(point2[1]-point1[1])
+  const dLon = mongoDegreesToRadians(point2[0]-point1[0])
+  const lat1 = mongoDegreesToRadians(point1[1])
+  const lat2 = mongoDegreesToRadians(point2[1])
 
-  let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) *
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) *
     Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2)
-  let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-  let d = R * c
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+  const d = R * c
   return parseFloat(d.toFixed(1))
 }
 
 /**
  * Maps over an object
- * @param {{ [key: string]: any }} object
- * @param {(value: any, key: string) => any} fn
  */
-export function objectMap (object, fn) {
-  /** @type {{ [key: string]: any }} */
-  const result = {}
+export function objectMap (
+  object: {[key: string]: unknown},
+  fn: (value: unknown, key: string) => unknown
+) {
+  const result: {[key: string]: unknown} = {}
   return Object.keys(object).reduce(function(result, key) {
     result[key] = fn(object[key], key)
     return result
@@ -1266,11 +1091,8 @@ export function objectMap (object, fn) {
 
 /**
  * Omits fields from an object
- * @param {{ [key: string]: unknown }} obj
- * @param {string[]} fields
- * @returns {{ [key: string]: unknown }}
  */
-export function omit (obj, fields) {
+export function omit (obj: {[key: string]: unknown}, fields: string[]) {
   const shallowCopy = Object.assign({}, obj)
   for (let i=0; i<fields.length; i+=1) {
     const key = fields[i]
@@ -1280,33 +1102,28 @@ export function omit (obj, fields) {
 }
 
 /**
- * @typedef {({target: {name: string, value: unknown}} | [string, unknown])} EventOrPathValue
- */
-
-/**
  * Automatically updates a state object from a field event by using the input name/value (deep paths supported)
  * E.g. setState(s => ({ ...s, [e.target.name]: e.target.value }))
- * @template T
- * @param {EventOrPathValue} eventOrPathValue - The input/select change event or [path, value] to update the state with
- * @param {React.Dispatch<React.SetStateAction<T>>} setState
- * @param {(value: unknown) => unknown} [beforeSetValue] - optional function to change the value before setting the state
- * @param {Function} [beforeSetState] - optional function to run before setting the state
- * @returns {Promise<T>}
+ * @param eventOrPathValue - The input/select change event or [path, value] to update the state with
+ * @param beforeSetValue - optional function to change the value before setting the state
+ * @param beforeSetState - optional function to run before setting the state
  * 
  * @example usage:
  *   - <input onChange={(e) => onChange(e, setState)} />
  *   - <input onChange={() => onChange(['address.name', 'Joe'], setState)} />
  */
-export function onChange (eventOrPathValue, setState, beforeSetValue, beforeSetState) {
-  /** @type {unknown} */
-  let value
-  /** @type {string} */
+export function onChange<T> (
+  eventOrPathValue: EventOrPathValue,
+  setState: Dispatch<SetStateAction<T>>,
+  beforeSetValue?: (value: unknown) => unknown,
+  beforeSetState?: (args: { state: T, parent: unknown, key: string }) => T
+) {
+  let value: unknown
   let path = ''
-  /** @type {boolean | undefined} */
-  let hasFiles
+  let hasFiles: boolean | undefined
   
   if (typeof eventOrPathValue === 'object' && 'target' in eventOrPathValue) {
-    const element = /** @type {HTMLInputElement & {_value?: unknown}} */(eventOrPathValue.target)
+    const element = eventOrPathValue.target as HTMLInputElement & {_value?: unknown}
     path = element.name || element.id || ''
     hasFiles = !!element.files
     value = (
@@ -1324,12 +1141,11 @@ export function onChange (eventOrPathValue, setState, beforeSetValue, beforeSetS
   }
 
   // Update state
-  return new Promise((resolve) => {
+  return new Promise((resolve: (value: T) => void) => {
     setState((state) => {
       const newValue = beforeSetValue ? beforeSetValue(value) : value
       const baseState = { ...state, ...(hasFiles ? { hasFiles } : {}) }
 
-      /** @type {{[key: string]: any}} */
       const { obj, parent, fieldName } = deepSetWithInfo(baseState, path, newValue)
       
       const newState = beforeSetState ? beforeSetState({ state: obj, parent: parent, key: fieldName }) : obj
@@ -1342,12 +1158,10 @@ export function onChange (eventOrPathValue, setState, beforeSetValue, beforeSetS
 
 /**
  * Pads a number
- * @param {number} [num=0]
- * @param {number} [padLeft=0]
- * @param {number} [fixedRight]
- * @returns {string}
+ * @param padLeft - Number of characters to pad on the left (default: 0)
+ * @param fixedRight - Number of decimal places to fix on the right
  */
-export function pad (num=0, padLeft=0, fixedRight) {
+export function pad (num = 0, padLeft = 0, fixedRight?: number) {
   num = parseFloat(num + '')
   if (fixedRight || fixedRight === 0) {
     return num.toFixed(fixedRight).padStart(padLeft + fixedRight + 1, '0')
@@ -1359,74 +1173,76 @@ export function pad (num=0, padLeft=0, fixedRight) {
 
 /**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
- *   - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
- *   - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
- * @param {{ [key: string]: unknown }} query - req.query
- * @param {{ [key: string]: (
- *     'string'
- *     | 'number'
- *     | 'boolean'
- *     | 'dateRange'
- *     | EnumArray
- *     | { rule: 'ids', parseId: parseId }
- *     | 'text'
- *     | { rule: 'text', numberFields: string[] }
- *     | { rule: 'search' } & SearchOperators
- *   )}} config - object of allowed filter/rule pairs.
+ * - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
+ * - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
  * 
- * Examples:
- * 
- * @example query = {
- *   location: '10-RS',
- *   age: '33',
- *   isDeleted: 'false',
- *   createdAt: '1749038400000,1749729600000',
- *   status: 'incomplete',
- *   customer.0: '69214ce7ab121fb3726965a1', // splayed array items
- *   text: 'John Doe',
- *   text: '15',
- *   search: 'John Doe',
- * }
- * @example config = {
- *   location: 'string',
- *   age: 'number',
- *   isDeleted: 'boolean',
- *   createdAt: 'dateRange',
- *   status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
- *   customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
- *   text: 'text',
- *   text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
- *   search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
- * }
- * @example returned MongoDB query object = {
- *   location: '10-RS',
- *   age: 33,
- *   isDeleted: false,
- *   createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
- *   status: 'incomplete',
- *   customer: { $in: [new ObjectId('1234567890')] },
- *   $text: { $search: 'John Doe' },
- *   $or: [{ $text: { $search: '15' }}, { age: 15 }],
- *   $search: { text: { query: "John Doe", path: ['firstName'] }},
- * }
+ * @param query - req.query
+ *   E.g. {
+ *     location: '10-RS',
+ *     age: '33',
+ *     isDeleted: 'false',
+ *     createdAt: '1749038400000,1749729600000',
+ *     status: 'incomplete',
+ *     customer.0: '69214ce7ab121fb3726965a1', // splayed array items
+ *     text: 'John Doe',
+ *     text: '15',
+ *     search: 'John Doe',
+ *   }
+ * @param config - allowed filters and their rules
+ *   E.g. {
+ *     location: 'string',
+ *     age: 'number',
+ *     isDeleted: 'boolean',
+ *     createdAt: 'dateRange',
+ *     status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
+ *     customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
+ *     text: 'text',
+ *     text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
+ *     search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
+ *   }
+ * @example returned object (using the examples above):
+ *   E.g. {
+ *     location: '10-RS',
+ *     age: 33,
+ *     isDeleted: false,
+ *     createdAt: { $gte: 1749038400000, $lte: 1749729600000 },
+ *     status: 'incomplete',
+ *     customer: { $in: [new ObjectId('1234567890')] },
+ *     $text: { $search: 'John Doe' },
+ *     $or: [{ $text: { $search: '15' }}, { age: 15 }],
+ *     $search: { text: { query: "John Doe", path: ['firstName'] }},
+ *   }
  */
-export function parseFilters(query, config) {
-  /**
-   * Should match the example returned object above
-   * @type {{ 
-   *   [key: string]: (
-   *     string
-   *     | number
-   *     | boolean
-   *     | { $gte?: number; $gt?: number; $lte?: number; $lt?: number; }
-   *     | (string|number|boolean)
-   *     | { $in: ObjectId[] } 
-   *     | { $search: string }                                              // key=$text
-   *     | ({ $text: { $search: string } } | { [key: string]: number })[]   // key=$or
-   *     | SearchOperators                                                  // key=$search
-   *   )
-   * }} */
-  const returnedMongoQuery = {}
+export function parseFilters(
+  query: {[key: string]: unknown},
+  config: {
+    [key: string]: (
+      'string' 
+      | 'number' 
+      | 'boolean' 
+      | 'dateRange' 
+      | EnumArray 
+      | { rule: 'ids', parseId: ParseId } 
+      | 'text' 
+      | { rule: 'text', numberFields: string[] } 
+      | ({ rule: 'search' } & SearchOperators)
+    )
+  }
+) {
+  // Should match the example returned object above
+  const returnedMongoQuery: {
+    [key: string]: (
+      string
+      | number
+      | boolean
+      | { $gte?: number; $gt?: number; $lte?: number; $lt?: number }
+      | (string|number|boolean)
+      | { $in: ObjectId[] }
+      | { $search: string }                                              // key=$text
+      | ({ $text: { $search: string } } | { [key: string]: number })[]   // key=$or
+      | SearchOperators                                                  // key=$search
+    )
+  } = {}
 
   // Convert splayed array items into a unified array objects,
   // E.g. 'customer.0' = '1' and 'customer.1' = '2' -> 'customer' = '1,2'
@@ -1435,13 +1251,13 @@ export function parseFilters(query, config) {
       const baseKey = key.replace(/\.\d+$/, '')
       const index = key.match(/\.(\d+)$/)?.[1] || 0
       if (index == 0) query[baseKey] = query[key]
-      else query[baseKey] += ',' + query[key]
+      else query[baseKey] = (query[baseKey] as string) + ',' + (query[key] as string)
     }
   }
 
   for (const key in query) {
     if (typeof query[key] !== 'string') continue
-    const val = query[key].trim()
+    const val = query[key] as string
     const rule = config[key]
 
     if (!rule) {
@@ -1468,7 +1284,7 @@ export function parseFilters(query, config) {
       else if (isNaN(end)) returnedMongoQuery[key] = { $gte: start }
       else returnedMongoQuery[key] = { $gte: start, $lte: end }
 
-    } else if (Array.isArray(rule)) { // Enum
+    } else if (Array.isArray(rule)) { // EnumArray
       // Detetect the entire array's type from the first item
       const type = typeof rule[0]
       if (!['string', 'number', 'boolean'].includes(type)) {
@@ -1476,7 +1292,7 @@ export function parseFilters(query, config) {
       }
       // Parse the value to the correct type and compare it to the rule item
       for (const ruleItem of rule) {
-        let valParsed = /** @type {string|number|boolean|undefined} */(val)
+        let valParsed: string | number | boolean | undefined = val
         if (type === 'number') valParsed = parseFloat(val)
         else if (type === 'boolean') valParsed = val === 'true' ? true : val === 'false' ? false : undefined
         if (valParsed === ruleItem) returnedMongoQuery[key] = valParsed
@@ -1515,7 +1331,7 @@ export function parseFilters(query, config) {
 
     } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'search') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
-      const output = /** @type {SearchOperators} */(deepSetWithMatch(rule, '{VALUE}', val)) // replace {VALUE} with the value
+      const output = deepSetWithMatch(rule, '{VALUE}', val) as SearchOperators // replace {VALUE} with the value
       delete output.rule // need to remove rule from the object
       returnedMongoQuery['$search'] = output
     } else {
@@ -1528,15 +1344,15 @@ export function parseFilters(query, config) {
 
 /**
  * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
- * @param {{ page?: string, sort?: '1'|'-1', sortBy?: string }} query - req.query
+ * @param query - req.query
  *   E.g. { 
  *     page: '1', 
  *     sort: '1', 
  *     sortBy: 'createdAt' 
  *   }
- * @param {{ fieldsFlattened: object, name: string }} model - The Monastery model
- * @param {number} [limit=10] - pass 0 to exclude limit/skip, regardless of pagination
- * @param {boolean} [hasMore] - hasMore parameter on parseSortOptions has been deprecated.
+ * @param model - The Monastery model
+ * @param limit - pass 0 to exclude limit/skip, regardless of pagination (default: 10)
+ * @param hasMore - hasMore parameter on parseSortOptions has been deprecated.
  * @example returned object (using the examples above):
  *   E.g. {
  *     limit: 10,
@@ -1544,7 +1360,12 @@ export function parseFilters(query, config) {
  *     sort: { createdAt: 1 },
  *   }
  */
-export function parseSortOptions(query, model, limit = 10, hasMore) {
+export function parseSortOptions(
+  query: { page?: string, sort?: '1' | '-1', sortBy?: string },
+  model: { fieldsFlattened: {[key: string]: unknown}, name: string },
+  limit = 10,
+  hasMore?: boolean
+) {
   if (hasMore) throw new Error('hasMore parameter on parseSortOptions has been deprecated.')
   const page = parseInt(query.page || '') || 1
 
@@ -1572,19 +1393,16 @@ export function parseSortOptions(query, model, limit = 10, hasMore) {
 
 /**
  * Picks fields from an object
- * @param {{ [key: string]: any }} obj
- * @param {string|RegExp|string[]|RegExp[]} keys
  */
-export function pick (obj, keys) {
+export function pick (obj: {[key: string]: unknown}, keys: string | RegExp | string[] | RegExp[]) {
   // Similiar to underscore.pick
   if (!isObject(obj) && !isFunction(obj)) return {}
   const keysArr = toArray(keys)
-  /** @type {{ [key: string]: unknown }} */
-  let output = {}
-  for (let key of keysArr) {
+  const output: {[key: string]: unknown} = {}
+  for (const key of keysArr) {
     if (typeof key === 'string' && obj.hasOwnProperty(key)) output[key] = obj[key]
     else if (key instanceof RegExp ) {
-      for (let key2 in obj) {
+      for (const key2 in obj) {
         if (obj.hasOwnProperty(key2) && key2.match(key)) output[key2] = obj[key2]
       }
     }
@@ -1593,32 +1411,34 @@ export function pick (obj, keys) {
 }
 
 /**
- * 
  * Parses a query string into an object, or returns the last known matching cache
- * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
- * @param {Object} [options] - options
- * @param {boolean} [options.emptyStringAsTrue] - assign true to empty values
- * @param {boolean} [options.splitCommaSeparated=true] - split comma-separated values into arrays
- * @param {boolean} [options.groupArrayIndexes=true] - group splayed array indexes into real arrays, 
+ * @param searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
+ * @param options - options
+ * @param options.emptyStringAsTrue - assign true to empty values
+ * @param options.splitCommaSeparated - split comma-separated values into arrays (default: true)
+ * @param options.groupArrayIndexes - group splayed array indexes into real arrays (default: true)
  *   E.g. 'date.0'='1234567890' -> 'date' = ['1234567890']
- * @returns {{[key: string]: string|true|(string|true)[]}} - e.g. { page: '1', book: 'my book', date: [1234567890] }
  * 
  * todo: maybe add toDeepObject param? be kinda cool to have
  */
-export function queryObject (searchString, options={}) {
+export function queryObject (
+  searchString: string,
+  options: {
+    emptyStringAsTrue?: boolean
+    splitCommaSeparated?: boolean
+    groupArrayIndexes?: boolean
+  } = {}
+) {
   if (searchString.startsWith('?')) searchString = searchString.slice(1)
   const { emptyStringAsTrue = false, splitCommaSeparated = true, groupArrayIndexes = true } = options
   const uniqueKey = searchString + (emptyStringAsTrue ? '-true' : '')
 
   if (searchString === '') return {}
-  if (!queryObjectCache) queryObjectCache = {}
-  if (queryObjectCache[uniqueKey]) return queryObjectCache[uniqueKey]
+  if (queryObjectsCache[uniqueKey]) return queryObjectsCache[uniqueKey]
 
   const params = new URLSearchParams(searchString)
-  /** @type {{[key: string]: string|true}} */
-  const flattened = Object.fromEntries(params.entries())
-  /** @type {{[key: string]: string|true|(string|true)[]}} */
-  const result = {}
+  const flattened: {[key: string]: string | true} = Object.fromEntries(params.entries())
+  const result: QueryObjectCache = {}
   // Loop through flattened query object.
   for (const key in flattened) {
     result[key] = flattened[key]
@@ -1640,16 +1460,15 @@ export function queryObject (searchString, options={}) {
     }
   }
 
-  queryObjectCache[uniqueKey] = result
+  queryObjectsCache[uniqueKey] = result
   return result
 }
 
 /**
  * Parses a query string into an array of objects
- * @param {string} searchString - location.search, e.g. '?page=1'
- * @returns {object[]} - e.g. [{ page: '1' }]
+ * @param searchString - location.search, e.g. '?page=1'
  */
-export function queryArray (searchString) {
+export function queryArray (searchString: string) {
   const query = queryObject(searchString)
   return Object.keys(query).map((key) => {
     return { [key]: query[key] }
@@ -1658,41 +1477,48 @@ export function queryArray (searchString) {
 
 /**
  * Parses an object and returns a query string (deep value keys are flatterned, e.g. 'job.location=1')
- * @param {{[key: string]: unknown}} obj - query object
- * @param {string} [_path] - path to the object
- * @param {{[key: string]: string}} [_output] - output object
- * @param {Object} [options] - options
- * @param {boolean} [options.concatenateArrays=true] - will concatenate arrays into a comma-separated string, rather than separate keys, 
+ * @param _path - path to the object
+ * @param _output - output object
+ * @param options - options
+ * @param options.concatenateArrays - will concatenate arrays into a comma-separated string, rather than separate keys (default: true)
  *   E.g. { date: [1,2] } -> 'date=1,2'
- * @returns {string}
  */
-export function queryString (obj, _path='', _output, options={}) {
-  /** @type {{[key: string]: string}} */
-  const output = _output || {}
+export function queryString (
+  obj: {[key: string]: unknown},
+  _path = '',
+  _output?: {[key: string]: string},
+  options: { concatenateArrays?: boolean } = {}
+) {
+  const output: {[key: string]: string} = _output || {}
   const { concatenateArrays = true } = options
 
-  for (let key in obj) {
+  for (const key in obj) {
     if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] == 'undefined' || obj[key] === '') continue
-      else if (concatenateArrays && Array.isArray(obj[key])) output[_path + key] = obj[key].join(',')
-      else if (typeof obj[key] == 'object') queryString(/** @type {{[key: string]: unknown}} */(obj[key]), _path+key+'.', output, options)
-      else output[_path + key] = obj[key] + ''
+      if (typeof obj[key] == 'undefined' || obj[key] === '') {
+        continue
+      } else if (concatenateArrays && Array.isArray(obj[key])) {
+        output[_path + key] = (obj[key] as unknown[]).join(',')
+      } else if (typeof obj[key] == 'object' && obj[key] !== null) { // ts: added null check
+        queryString(obj[key] as {[key: string]: unknown}, _path+key+'.', output, options)
+      } else {
+        output[_path + key] = obj[key] + ''
+      }
     }
   }
-  if (_path) return /** @type {string} */(/** @type {unknown} */ (output))
+  if (_path) return output as unknown as string
   const qs = new URLSearchParams(output).toString()
   return qs ? `?${qs}` : ''
 }
 
 /**
  * Axios request to the route
- * @param {string} route - e.g. 'post /api/user'
- * @param {{ [key: string]: any }} [data] - payload
- * @param {{preventDefault?: function}} [event] - event to prevent default
- * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
- * @param {SetState} [setState] - if passed, state.errors will be reset before the request
- * @param {Object} [options] - options
- * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
+ * @param route - e.g. 'post /api/user'
+ * @param data - payload
+ * @param event - event to prevent default
+ * @param isLoading - [isLoading, setIsLoading]
+ * @param setState - if passed, state.errors will be reset before the request
+ * @param options - options
+ * @param options.axiosConfig - withCredentials=true by default, see https://axios-http.com/docs/req_config
  * @returns {Promise<any>}
  * 
  * @example
@@ -1705,15 +1531,19 @@ export function queryString (obj, _path='', _output, options={}) {
  *   - loading states
  *   - using the correct axios instance via util.axios()
  */
-export async function request (route, data, event, isLoading, setState, options={}) {
+export async function request<T> (
+  route: string,
+  data?: {[key: string]: unknown},
+  event?: {preventDefault?: () => void},
+  isLoading?: [boolean, (value: boolean) => void],
+  setState?: Dispatch<SetStateAction<T>>,
+  options?: { axiosConfig?: AxiosRequestConfig }
+) {
   try {
     if (event?.preventDefault) event.preventDefault()
     const uri = route.replace(/^(post|put|delete|get) /, '')
-    const axiosConfig = { withCredentials: true, ...(options.axiosConfig || {}) }
-    const method =
-      /** @type {'post'|'put'|'delete'|'get'} */ (
-        (route.match(/^(post|put|delete|get) /)?.[1] || 'post').trim()
-      )
+    const axiosConfig = { withCredentials: true, ...(options?.axiosConfig || {}) }
+    const method = (route.match(/^(post|put|delete|get) /)?.[1] || 'post').trim() as 'post' | 'put' | 'delete' | 'get'
 
     // show loading
     if (isLoading) {
@@ -1723,20 +1553,18 @@ export async function request (route, data, event, isLoading, setState, options=
 
     // warning, not persisting through re-renders, but should be fine until loading is finished
     data = data || {}
-    if (setState) setState((/** @type {{[key: string]: any}} */prev) => ({ ...prev, errors: [] }))
+    if (setState) setState((prev) => ({ ...prev, errors: [] }))
 
     // Find out if the data has files?
     let hasFiles = false
-    /** @param {unknown} o */
-    let recurse = (o) => {
+    const recurse = (o: unknown) => {
       if (o instanceof File || hasFiles) hasFiles = true
-      else if (o && typeof o === 'object') each(o, recurse)
+      else if (o && typeof o === 'object') each(o as Array<unknown>, recurse)
     }
     recurse(data)
 
     // If yes, convert to form data
-    /** @type {FormData|undefined} */
-    const formData2 = hasFiles ? formData({ ...data }, { allowEmptyArrays: true, indices: true }) : undefined
+    const formData2: FormData | undefined = hasFiles ? formData({ ...data }, { allowEmptyArrays: true, indices: true }) : undefined
 
     // send the request
     const axiosFn = axios()[method]
@@ -1754,18 +1582,16 @@ export async function request (route, data, event, isLoading, setState, options=
     if (res.status == 'rejected') throw res.reason
     return res.value.data
 
-  } catch (errs) {
+  } catch (err) {
     if (isLoading) isLoading[1](false)
-    throw getResponseErrors(errs)
+    throw getClientErrors(err)
   }
 }
 
 /**
  * Removes undefined from an array or object
- * @param {[]|{[key: string]: any}} variable
- * @returns {[]|{[key: string]: any}}
  */
-export function removeUndefined (variable) {
+export function removeUndefined (variable: unknown[] | {[key: string]: unknown}) {
   // Removes undefined from an array or object
   if (Array.isArray(variable)) {
     for (let i = variable.length; i--; ) {
@@ -1781,33 +1607,34 @@ export function removeUndefined (variable) {
 
 /**
  * Build image URL from image array or object
- * @typedef {{path: string, bucket: string, base64?: string, date?: number}} Image
- * @param {string} awsUrl - e.g. 'https://s3.amazonaws.com/...'
- * @param {Image[]|Image} imageOrArray - file object/array
- * @param {string} [size] - overrides to 'full' when the image sizes are still processing
- * @param {number} [i] - array index
- * @returns {string}
+ * @param awsUrl - e.g. 'https://s3.amazonaws.com/...'
+ * @param imageOrArray - file object/array
+ * @param size - overrides to 'full' when the image sizes are still processing (default: 'full')
+ * @param i - array index
  */
-export function s3Image (awsUrl, imageOrArray, size='full', i) {
-  let lambdaDelay = 7000
-  let usingMilliseconds = true
+export function s3Image (
+  awsUrl: string,
+  imageOrArray: Image[] | Image,
+  size = 'full',
+  i?: number
+) {
+  const lambdaDelay = 7000
+  const usingMilliseconds = true
 
-  const image = /**@type {Image}*/(Array.isArray(imageOrArray) ? imageOrArray[i||0] : imageOrArray)
+  const image = (Array.isArray(imageOrArray) ? imageOrArray[i||0] : imageOrArray) as Image | undefined
   if (!image) return ''
   // Alway use preview if available
   if (image.base64) return image.base64
   // Wait a moment before the different sizes are generated by lambda
   if (((usingMilliseconds ? (image.date || 0) : (image.date || 0) * 1000) + lambdaDelay) > new Date().getTime()) size = 'full'
-  let key = size == 'full' ? image.path : `${size}/${image.path.replace(/^full\/|\.[a-z0-9]{3,4}$/ig, '')}.jpg`
+  const key = size == 'full' ? image.path : `${size}/${image.path.replace(/^full\/|\.[a-z0-9]{3,4}$/ig, '')}.jpg`
   return awsUrl + image.bucket + '/' + key
 }
 
 /**
  * Sanitize and encode all HTML in a user-submitted string
- * @param {string} string
- * @returns {string}
  */
-export function sanitizeHTML (string) {
+export function sanitizeHTML (string: string) {
   var temp = document.createElement('div')
   temp.textContent = string
   return temp.innerHTML
@@ -1815,14 +1642,17 @@ export function sanitizeHTML (string) {
 
 /**
  * Process scrollbar width once.
- * @param {string} [paddingClass] - class name to give padding to
- * @param {string} [marginClass] - class name to give margin to
- * @param {number} [maxWidth] - enclose css in a max-width media query
- * @param {string} [marginClassNegative] - class name to give negative margin to
- * @returns {number}
- * 
+ * @param paddingClass - class name to give padding to
+ * @param marginClass - class name to give margin to
+ * @param marginClassNegative - class name to give negative margin to
+ * @param maxWidth - enclose css in a max-width media query
  */
-export function scrollbar (paddingClass, marginClass, marginClassNegative, maxWidth) {
+export function scrollbar (
+  paddingClass?: string,
+  marginClass?: string,
+  marginClassNegative?: string,
+  maxWidth?: number
+) {
   if (typeof window === 'undefined') return 0
   if (scrollbarCache || scrollbarCache === 0) {
     return scrollbarCache
@@ -1869,18 +1699,16 @@ export function scrollbar (paddingClass, marginClass, marginClassNegative, maxWi
 
 /**
  * Convert seconds to time
- * @param {number} seconds
- * @param {boolean} [padMinute]
- * @returns {string}
+ * @param padMinute - Whether to pad minutes with leading zero
  */
-export function secondsToTime (seconds, padMinute) {
+export function secondsToTime (seconds: number, padMinute?: boolean) {
   seconds = Math.round(seconds)
-  let hours = Math.floor(seconds / (60 * 60))
-  let divisor_for_minutes = seconds % (60 * 60)
-  let minutes = Math.floor(divisor_for_minutes / 60)
-  let divisor_for_seconds = divisor_for_minutes % 60
-  let secs = Math.ceil(divisor_for_seconds)
-  let data = {
+  const hours = Math.floor(seconds / (60 * 60))
+  const divisor_for_minutes = seconds % (60 * 60)
+  const minutes = Math.floor(divisor_for_minutes / 60)
+  const divisor_for_seconds = divisor_for_minutes % 60
+  const secs = Math.ceil(divisor_for_seconds)
+  const data = {
     h: (hours + ''),
     m: (minutes + '').padStart(padMinute ? 2 : 1, '0'),
     s: (secs + ''),
@@ -1890,58 +1718,46 @@ export function secondsToTime (seconds, padMinute) {
 
 /**
  * Promise wrapper for setTimeout
- * @param {function} func
- * @param {number} milliseconds
- * @returns {Promise<void>}
  */
-export function setTimeoutPromise (func, milliseconds) {
+export function setTimeoutPromise (func: () => void, milliseconds: number): Promise<void> {
   return new Promise(function(resolve) {
     setTimeout(() => resolve(func()), milliseconds)
   })
 }
 
 /**
- * Shows a global error
- * @param {function} setStore
- * @param {NitroErrorRaw} errs
- */
-export function showError (setStore, errs) {
-  let detail = getResponseErrors(errs)[0].detail
-  setStore((/** @type {{[key: string]: any}} */o) => ({ ...o, message: { type: 'error', text: detail } }))
-}
-
-/**
  * Sort an array of objects by a key
- * @param {{[key: string]: any}[]} collection
- * @param {string} key
- * @returns {object[]}
  */
-export function sortByKey (collection, key) {
+export function sortByKey (collection: {[key: string]: unknown}[], key: string) {
   return collection.sort(function (a, b) {
-    var textA = (key in a ? a[key] : '').toUpperCase()
-    var textB = (key in b ? b[key] : '').toUpperCase()
+    var textA = (key in a ? (a[key] as string).toUpperCase() : '').toString().toUpperCase()
+    var textB = (key in b ? (b[key] as string).toUpperCase() : '').toString().toUpperCase()
     return textA < textB ? -1 : textA > textB ? 1 : 0
   })
 }
 
 /**
- * @template {(...args: any[]) => any} T
  * Creates a throttled function that only invokes `func` at most once per every `wait` milliseconds
  * 
- * @param {T} func - The function to throttle.
- * @param {number} [wait=0] - the number of milliseconds to throttle invocations to
- * @param {{
- *    leading?: boolean, // invoke on the leading edge of the timeout (default: true)
- *    trailing?: boolean, // invoke on the trailing edge of the timeout (default: true)
- * }} [options] - options object
- * @returns {((...args: Parameters<T>) => ReturnType<T>) & { 
- *     cancel: () => void;
- *     flush: () => ReturnType<T>
- * }}
+ * @param func - The function to throttle.
+ * @param wait - the number of milliseconds to throttle invocations to (default: 0)
+ * @param options - options object
+ * @param options.leading - invoke on the leading edge of the timeout (default: true)
+ * @param options.trailing - invoke on the trailing edge of the timeout (default: true)
  * @example const throttled = throttle(updatePosition, 100)
  * @see lodash
  */
-export function throttle (func, wait, options) {
+export function throttle<T extends (...args: any[]) => any>( // eslint-disable-line @typescript-eslint/no-explicit-any
+  func: T,
+  wait = 0,
+  options?: {
+    leading?: boolean
+    trailing?: boolean
+  }
+): ((...args: Parameters<T>) => ReturnType<T>) & {
+  cancel: () => void
+  flush: () => ReturnType<T>
+} {
   let leading = true
   let trailing = true
   if (typeof func != 'function') {
@@ -1960,54 +1776,40 @@ export function throttle (func, wait, options) {
 
 /**
  * Convert a variable to an array, if not already an array.
- * @template T
- * @param {T | undefined} variable
- * @returns {(T extends any[] ? T : T[])}
  */
-export function toArray (variable) {
+export function toArray<T>(variable: T | undefined): T extends unknown[] ? T : T[] {
   if (variable === undefined) {
-    // TypeScript can’t infer conditional return types from runtime empty array
-    // So we force-cast it to the generic fallback type
-    return /** @type {T extends any[] ? T : T[]} */([])
+    return [] as T extends unknown[] ? T : T[]
   }
-  return /** @type {T extends any[] ? T : T[]} */(Array.isArray(variable) ? variable : [variable])
+  return (Array.isArray(variable) ? variable : [variable]) as T extends unknown[] ? T : T[]
 }
 
 /**
- * Trim a string and replace multiple newlines with double newlines
- * @param {string} string
- * @returns {string}
+ * Custom tailwind merge instance
  */
-export function trim (string) {
-  if (!string || !isString(string)) return ''
-  return string.trim().replace(/\n\s+\n/g, '\n\n')
-}
-
-// Create a custom twMerge instance
 const customTailwindMerge = createTailwindMerge(() => {
   const config = getDefaultConfig()
 
   /**
-   * @param {string[]} baseNames - base names for x-axis (e.g. 'input-x')
-   * @returns {object} extended classGroups with new spacing classes
+   * @param baseNames - base names for x-axis (e.g. 'input-x')
    */
-  function newSpacingSizes(baseNames) {
+  function newSpacingSizes(baseNames: string[]) {
     const obj = {
-      pl: [...(/** @type {any} */(config.classGroups.pl) ?? [])],
-      pr: [...(/** @type {any} */(config.classGroups.pr) ?? [])],
-      pt: [...(/** @type {any} */(config.classGroups.pt) ?? [])],
-      pb: [...(/** @type {any} */(config.classGroups.pb) ?? [])],
-      px: [...(/** @type {any} */(config.classGroups.px) ?? [])],
-      py: [...(/** @type {any} */(config.classGroups.py) ?? [])],
-      p: [...(/** @type {any} */(config.classGroups.p) ?? [])],
-      ml: [...(/** @type {any} */(config.classGroups.ml) ?? [])],
-      mr: [...(/** @type {any} */(config.classGroups.mr) ?? [])],
-      mt: [...(/** @type {any} */(config.classGroups.mt) ?? [])],
-      mb: [...(/** @type {any} */(config.classGroups.mb) ?? [])],
-      mx: [...(/** @type {any} */(config.classGroups.mx) ?? [])],
-      my: [...(/** @type {any} */(config.classGroups.my) ?? [])],
-      m: [...(/** @type {any} */(config.classGroups.m) ?? [])],
-      gap: [...(/** @type {any} */(config.classGroups.gap) ?? [])],
+      pl: [...(config.classGroups.pl as unknown as string[] ?? [])],
+      pr: [...(config.classGroups.pr as unknown as string[] ?? [])],
+      pt: [...(config.classGroups.pt as unknown as string[] ?? [])],
+      pb: [...(config.classGroups.pb as unknown as string[] ?? [])],
+      px: [...(config.classGroups.px as unknown as string[] ?? [])],
+      py: [...(config.classGroups.py as unknown as string[] ?? [])],
+      p: [...(config.classGroups.p as unknown as string[] ?? [])],
+      ml: [...(config.classGroups.ml as unknown as string[] ?? [])],
+      mr: [...(config.classGroups.mr as unknown as string[] ?? [])],
+      mt: [...(config.classGroups.mt as unknown as string[] ?? [])],
+      mb: [...(config.classGroups.mb as unknown as string[] ?? [])],
+      mx: [...(config.classGroups.mx as unknown as string[] ?? [])],
+      my: [...(config.classGroups.my as unknown as string[] ?? [])],
+      m: [...(config.classGroups.m as unknown as string[] ?? [])],
+      gap: [...(config.classGroups.gap as unknown as string[] ?? [])],
     }
   
     // Add both axes classes
@@ -2043,16 +1845,14 @@ const customTailwindMerge = createTailwindMerge(() => {
 
 /**
  * Merge class conflicts together, but protect groups of classes from being merged together in the same argument. E.g. `(mb-1 mb-2) mx-1`
- * @param {(string|null|undefined|false|0|0n)[]} args  - false, 0, 0n are considered undefined
- * @returns {string}
+ * @param args - false, 0, 0n are considered undefined
  */
-export function twMerge(...args) {
+export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[]): string {
   const raw = twJoin(args)
   if (!raw.includes('(')) return customTailwindMerge(raw)
 
   // 1) Tokenize: either "(...)" group chunks or normal non-space tokens.
-  /** @type {{ cls: string, groupId: number }[]} */
-  const tokens = []
+  const tokens: { cls: string, groupId: number }[] = []
   let groupId = 0
 
   const re = /\(([^()]*)\)|(\S+)/g
@@ -2071,10 +1871,8 @@ export function twMerge(...args) {
   }
 
   // 3) Merge, except don't merge-away conflicts inside the same "( ... )" group.
-  /** @type {(string|null)[]} */
-  const out = []
-  /** @type {number[]} */
-  const groupIds = []
+  const out: (string | null)[] = []
+  const groupIds: number[] = []
 
   for (const t of tokens) {
     for (let i = out.length - 1; i >= 0; i--) {
@@ -2119,10 +1917,8 @@ export function twMerge(...args) {
 
 /**
  * Capitalize the first letter of a string
- * @param {string} string
- * @returns {string}
  */
-export function ucFirst (string) {
+export function ucFirst (string: string) {
   if (!string) return ''
   return string.charAt(0).toUpperCase() + string.slice(1)
 }

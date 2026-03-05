@@ -1,5 +1,6 @@
 import { NumericFormat } from 'react-number-format'
 import { getPrefixWidth } from 'nitro-web/util'
+import { useState, useRef, useEffect } from 'react'
 
 // Declaring the type here because typescript fails to infer type when referencing NumericFormatProps from react-number-format
 type NumericFormatProps = React.InputHTMLAttributes<HTMLInputElement> & {

@@ -1,9 +1,9 @@
-// @ts-nocheck
-import { deepFind, s3Image, getErrorFromState } from 'nitro-web/util'
+// todo: double check the types, they were a hack job
+import { deepFind, s3Image, getMatchingError, twMerge } from 'nitro-web/util'
+import { Errors, ClientError, MonasteryImage } from 'nitro-web/types'
 import { DropHandler } from 'nitro-web'
 import noImage from 'nitro-web/client/imgs/no-image.svg'
-import { Errors, MonasteryImage } from 'nitro-web/types'
-import { twMerge } from 'nitro-web/util'
+import React from 'react'
 
 type DropProps = {
   awsUrl?: string
@@ -32,9 +32,9 @@ type Image = File | FileList | MonasteryImage | null
 export function Drop({ awsUrl, className, id, name, onChange, multiple, state, errorTitle, ...props }: DropProps) {
   if (!name) throw new Error('Drop component requires a `name` prop')
   let value: Image = null
-  const error = getErrorFromState(state, errorTitle || name)
+  const error = getMatchingError(state?.errors, errorTitle || name)
   const inputId = id || name
-  const [urls, setUrls] = useState([])
+  const [urls, setUrls] = useState<string[]>([])
   const stateRef = useRef(state)
   stateRef.current = state
 
@@ -44,7 +44,8 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
   if (typeof value == 'undefined') value = null
 
   useEffect(() => {
-    (async () => setUrls(await getUrls(value as File | FileList | MonasteryImage | null)))()
+    // todo, doouble check type
+    (async () => setUrls((await getUrls(value as File | FileList | MonasteryImage | null)) as string[]))()
   }, [value])
 
   function tryAgain (e: { preventDefault: Function }) {
@@ -53,13 +54,14 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
     const input = document.getElementById(name) as HTMLInputElement
     if (input) input.value = ''
     if (onChange) {
-      const errors = (stateRef?.current?.errors || []).filter((e: Errors[]) => e?.title != name)
+      const errors = (stateRef?.current?.errors || []).filter((e: ClientError) => e.title != name)
       onChange({
         // remove file from state
-        target: { name: name, value: null },
+        target: { name: name, value: null as unknown as File | FileList },
         // reset (server) errors
         errors: errors.length ? errors : undefined,
-      })
+      } as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      // todo: fix the type above
     }
   }
 
@@ -84,7 +86,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
           reader.onerror = reject
           reader.readAsDataURL(item)
         } else {
-          resolve(s3Image(awsUrl, item))
+          resolve(s3Image(awsUrl || '', item))
         }
       })
     }))
@@ -110,21 +112,21 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
       >
         {
           !value &&
-          <>
+          <React.Fragment>
             {/* {todo upload svg here} */}
             <div>
               Drag and drop your file here&nbsp;
               <label class="weight-500 inline-block text-sm text-primary" for={inputId}>or select a file</label>
             </div>
-          </>
+          </React.Fragment>
         }
         {
           !!value &&
-          <>
+          <React.Fragment>
             {
               urls.map((url, i) => (
                 <div key={i} class="flex align-items-center gap-1">
-                  <img src={url || noImage} width="100%" />
+                  <img src={url || noImage as unknown as string} width="100%" />
                 </div>
               ))
             }
@@ -132,7 +134,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
               Your file has been added successfully.&nbsp; 
               <Link to="#" class="text-primary" onClick={tryAgain}>Use another file?</Link>
             </div>
-          </>
+          </React.Fragment>
         }
       </DropHandler>
       {error && <div class="form-error mt-0-5">{error.detail}</div>}

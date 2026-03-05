@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dispatch, SetStateAction, useRef, useEffect, useLayoutEffect } from 'react'
+import { Dispatch, SetStateAction, useRef, useEffect, useMemo, useState, useLayoutEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Button, Dropdown, Field, Select, type FieldProps, type SelectProps } from 'nitro-web'
 import { camelCaseToTitle, debounce, omit, queryString, queryObject, twMerge } from 'nitro-web/util'
 import { ListFilterIcon } from 'lucide-react'
@@ -15,7 +15,7 @@ export type FilterType = (
 )
 
 type FilterState = {
-  [key: string]: any
+  [key: string]: any // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 type FiltersProps = {

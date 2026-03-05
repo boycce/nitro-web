@@ -1,3 +1,5 @@
+import { useRef, useEffect } from 'react'
+
 export function IsFirstRender(delay?: number) {
   /*
    * Checks if the current render of a react component is the first

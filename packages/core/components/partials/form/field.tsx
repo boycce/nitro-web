@@ -4,10 +4,10 @@ import { css } from 'twin.macro'
 import { type FieldColorProps, FieldColor } from './field-color'
 import { type FieldCurrencyProps, FieldCurrency } from './field-currency'
 import { type FieldDateProps, FieldDate } from './field-date'
-import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
-import { Errors, type Error } from 'nitro-web/types'
+import { twMerge, deepFind, getMatchingError } from 'nitro-web/util'
+import { ClientError, Errors } from 'nitro-web/types'
 import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon } from 'lucide-react'
-import { memo } from 'react'
+import { memo, useState } from 'react'
 
 type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
@@ -58,7 +58,7 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
   // `type` must be kept as props.type for TS to be happy and follow the conditions below
   let value!: any
   let Icon!: React.ReactNode
-  const error = getErrorFromState(state, errorTitle || props.name)
+  const error = getMatchingError(state?.errors, errorTitle || props.name)
   const type = props.type
   const iconPos = ip == 'left' || (type == 'color' && !ip) ? 'left' : 'right'
   const id = props.id || props.name
@@ -141,7 +141,7 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
   }
 }
 
-function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: Error }) {
+function FieldContainer({ children, className, error }: { children: React.ReactNode, className?: string, error?: ClientError }) {
   return (
     <div
       css={style}
@@ -154,7 +154,7 @@ function FieldContainer({ children, className, error }: { children: React.ReactN
   )
 }
 
-function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?: React.ReactNode, iconPos: string, type?: string }) {
+function getInputClasses({ error, Icon, iconPos, type }: { error?: ClientError, Icon?: React.ReactNode, iconPos: string, type?: string }) {
   // not twMerge
   const px = 'px-[12px]'
   const py = 'py-[9px] py-input-y'
@@ -216,7 +216,7 @@ export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps
   if (deepFind(prevState, path) !== deepFind(nextState, path)) return false
   
   // If the state error has changed, re-render!
-  if (getErrorFromState(prevState, errorTitle) !== getErrorFromState(nextState, errorTitle)) return false
+  if (getMatchingError(prevState?.errors, errorTitle) !== getMatchingError(nextState?.errors, errorTitle)) return false
 
   // All good, use cached version
   return true
