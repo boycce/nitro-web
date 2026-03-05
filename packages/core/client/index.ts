@@ -9,7 +9,7 @@ export * as util from 'nitro-web/util'
 export * from '../types'
 
 // Main app functions
-export { setupApp, updateJwt } from './app'
+export { setupApp, updateJwt, middleware } from './app'
 export { createStore, exposedStoreData, preloadedStoreData, setStoreWrapper } from './store'
 
 // Component Pages

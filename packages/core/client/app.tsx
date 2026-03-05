@@ -19,7 +19,7 @@ type Settings = {
   // beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
   isStatic?: boolean
   layouts: React.FC<LayoutProps>[]
-  middleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
+  allMiddleware: Record<string, (route: unknown, store: Store) => undefined | { redirect: string }>
   name: string
   titleSeparator?: string
 }
@@ -52,7 +52,7 @@ export async function setupApp(config: Config, storeContainer: StoreContainer, l
     beforeApp: config.beforeApp || beforeApp,
     isStatic: config.isStatic,
     layouts: layouts,
-    middleware: Object.assign(defaultMiddleware, config.middleware || {}),
+    allMiddleware: Object.assign(middleware, config.middleware || {}),
     name: config.name,
     titleSeparator: config.titleSeparator,
   }
@@ -165,9 +165,9 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
           const layoutNum = (parseInt(String(route.meta?.layout || '1')) || 1) - 1
 
           // get the routes middleware
-          const middleware = toArray(route[routePath]).filter((policyNameOrTrue) => {
+          const routeMiddleware = toArray(route[routePath]).filter((policyNameOrTrue) => {
             if (policyNameOrTrue === true) return // ignore true
-            else if (policyNameOrTrue in settings.middleware) return true
+            else if (policyNameOrTrue in settings.allMiddleware) return true
             else console.error(`No middleware named '${policyNameOrTrue}' defined under config.middleware, skipping..`)
           })
 
@@ -180,7 +180,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
               layout: layoutNum,
               title: `${route.meta?.title ? `${route.meta.title}${settings.titleSeparator || ' - '}` : ''}${settings.name}`,
             },
-            middleware: middleware as string[],
+            middleware: routeMiddleware as string[],
             name: componentName,
             path: routePath,
             redirect: route.redirect,
@@ -218,7 +218,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
               await setTimeoutPromise(() => {}, 0)
             }
             for (const key of route.middleware) {
-              const error = settings.middleware[key](route, exposedStoreData || {})
+              const error = settings.allMiddleware[key](route, exposedStoreData || {})
               // Note: the redirect uses the new pathname for query string values, e.g. '?example=value'. We also can't use the 
               // current pathname, as this doesn't exist on page refresh.
               if (error && error.redirect) {
@@ -317,7 +317,7 @@ async function beforeApp(config: Config) {
   return { ...storeData, apiAvailable }
 }
 
-const defaultMiddleware = {
+export const middleware = {
   // Global middleware that can referenced from component routes
   isAdmin: (route: unknown, store: { user?: { type?: string, isAdmin?: boolean } }) => {
     const user = store.user || { type: 'visitor' }

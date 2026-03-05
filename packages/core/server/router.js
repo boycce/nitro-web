@@ -1,4 +1,5 @@
 // @ts-nocheck
+// renamed to app, similar to client/app.tsx
 import fs from 'fs'
 import path, { dirname } from 'path'
 import http from 'http'
