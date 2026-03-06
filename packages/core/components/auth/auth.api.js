@@ -420,10 +420,14 @@ export async function sendToken({ type = 'reset', user, beforeUpdate, beforeSend
   if (!user?.firstName) throw new Error('user.firstName is required')
   const token = await tokenCreate(user._id)
 
+  // get the data
+  const data = beforeUpdate ? beforeUpdate({ [type + 'Token']: token }) : { [type + 'Token']: token }
+  if (type === 'invite') data.isInvited = true
+
   // Update the user with the token
   const result = await db.user.update({
     query: { _id: user._id },
-    data: beforeUpdate ? beforeUpdate({ [type + 'Token']: token }) : { [type + 'Token']: token },
+    data: data,
     blacklist: ['-' + type + 'Token'],
   })
 

@@ -29,6 +29,7 @@ export type User = {
   name?: string
   avatar?: MonasteryImage
   isAdmin?: boolean
+  isInvited?: boolean
   type?: string
 }
 

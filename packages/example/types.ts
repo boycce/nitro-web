@@ -24,9 +24,10 @@ export type Store = NitroStore & {
 }
 
 export type User = BaseEntity & {
+  isInvited?: boolean
   firstName?: string
   lastName?: string
   name?: string
   avatar?: MonasteryImage
-  type: 'user' | 'admin'
+  type: 'user' | 'admin',
 }
