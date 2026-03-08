@@ -15,7 +15,7 @@ export function LoadingWithDots({ message='Loading', className, classNameDots }:
 export function LoadingOverlay({ message='Loading', className }: { message?: string, className?: string }) {
   return (
     <div 
-      className={twMerge('absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 text-md [&>span]:bg-white', className)}
+      className={twMerge('absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 text-sm [&>span]:bg-white', className)}
     >
       <span className="inline-block flex items-center justify-center gap-3 p-2">
         <Spinner />{message}
