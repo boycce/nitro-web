@@ -1,6 +1,6 @@
 import { JSX, useState, useCallback, Fragment, useMemo, useEffect } from 'react'
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
-import { Checkbox, queryObject, queryString, twMerge } from 'nitro-web'
+import { Checkbox, queryObject, queryString, Spinner, twMerge, LoadingWithDots, LoadingOverlay } from 'nitro-web'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 export type TableRowType = 'row' | 'loading' | 'empty' | 'thead'
@@ -45,7 +45,11 @@ export type TableProps<T> = {
   columnHeaderClassName?: string
   checkboxClassName?: string
   checkboxSize?: number
+  loadingOverlayClassName?: string
   isLoading?:boolean
+  loadingMessage?: string
+  showLoadingInline?: boolean|JSX.Element
+  showLoadingOverlay?: boolean|JSX.Element
 }
 
 export function Table<T extends TableRow>({ 
@@ -71,7 +75,12 @@ export function Table<T extends TableRow>({
   columnHeaderClassName,
   checkboxClassName,
   checkboxSize=16,
+  loadingOverlayClassName,
+  // Loading
   isLoading=false,
+  loadingMessage,
+  showLoadingInline=false,
+  showLoadingOverlay=true,
 }: TableProps<T>) {
   const location = useLocation()
   const [selectedRowIds, setSelectedRowIds] = useState<string[]>([])
@@ -80,9 +89,9 @@ export function Table<T extends TableRow>({
   const [rand] = useState(() => new Date().getTime() + Math.random())
 
   const rowsToRender = useMemo(() => {
-    // 1) Only show the first row when loading (content hidden), 2) an empty row when there are no records, or all rows
-    return rows.length > 0 ? (isLoading ? rows.slice(0, 1) : rows) : [{ _id: '' }] as unknown as T[]
-  }, [rows, isLoading])
+    // 1) Only show the first row when loading inline(content hidden), 2) an empty row when there are no records, or all rows
+    return rows.length > 0 ? ((isLoading && showLoadingInline) ? rows.slice(0, 1) : rows) : [{ _id: '' }] as unknown as T[]
+  }, [rows, isLoading, showLoadingInline])
 
   const columns = useMemo(() => {
     const checkboxCol: TableColumn = { value: 'checkbox', label: '', disableSort: true }
@@ -145,7 +154,7 @@ export function Table<T extends TableRow>({
     >
       <div 
         style={{ borderSpacing: `0 ${rowGap}px` }}
-        className={twMerge('table w-full border-separate', tableClassName)}
+        className={twMerge('table w-full border-separate', showLoadingOverlay ? 'relative' : '', tableClassName)}
       >
         {/* Thead row */}
         <div className="table-row relative">
@@ -181,7 +190,7 @@ export function Table<T extends TableRow>({
                   > 
                     {
                       col.value == 'checkbox'
-                        ? <>
+                        ? <Fragment>
                             <Checkbox 
                               size={checkboxSize}
                               name={`checkbox-all-${rand}`}
@@ -195,7 +204,7 @@ export function Table<T extends TableRow>({
                             >
                               {generateCheckboxActions && generateCheckboxActions(selectedRowIds)}
                             </div>
-                          </>
+                          </Fragment>
                         : <span className={twMerge(
                             'flex items-center gap-x-2 transition-opacity',
                             selectedRowIds.length ? 'opacity-0' : '',
@@ -267,9 +276,9 @@ export function Table<T extends TableRow>({
                             />
                           }
                           {
-                            // Rows (content hidden when loading)
+                            // Rows (content hidden when loading inline)
                             row._id &&
-                            <div className={isLoading ? 'opacity-0 pointer-events-none' : ''}>
+                            <div className={isLoading && showLoadingInline ? 'opacity-0 pointer-events-none' : ''}>
                               {
                                 col.value == 'checkbox'
                                   ? <Checkbox 
@@ -287,10 +296,21 @@ export function Table<T extends TableRow>({
                             </div>
                           }
                           {
-                            // Show "loading" or "no records" text in the first column
-                            j == 0 && (isLoading || !row._id) &&
-                            <div className={'absolute top-0 h-full flex items-center justify-center text-sm text-gray-500'}>
-                              { isLoading ? <>Loading<span className="relative ml-[2px] loading-dots" /></> : 'No records found.' }
+                            // Show "no records" or "loading" text in the first column
+                            j == 0 && (!row._id || isLoading) &&
+                            <div className={'absolute top-0 h-full flex items-center justify-center gap-3 text-sm text-gray-500'}>
+                              {
+                                (!row._id && !isLoading) ? (
+                                  'No records found.' 
+                                ) : (!row._id && isLoading && showLoadingInline === true) ? (
+                                  <Fragment>
+                                    <Spinner className="border-gray-500" />
+                                    <LoadingWithDots message={loadingMessage} />
+                                  </Fragment>
+                                ) : (!row._id && isLoading && showLoadingInline) ? (
+                                  showLoadingInline
+                                ) : null
+                              }
                             </div>
                           }
                         </div>
@@ -301,6 +321,11 @@ export function Table<T extends TableRow>({
               </div>
             )
           })
+        }
+        { 
+          (isLoading && showLoadingOverlay === true) 
+            ? <LoadingOverlay className={twMerge('m-[1px]', loadingOverlayClassName)} message={loadingMessage} /> 
+            : (isLoading && showLoadingOverlay) ? showLoadingOverlay : null
         }
       </div>
     </div>

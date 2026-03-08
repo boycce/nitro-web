@@ -1,6 +1,6 @@
 import { 
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
-  Filters, FilterType, Table, TableColumn, usePushChangesToPath,
+  Filters, FilterType, Table, TableColumn, usePushChangesToPath, Spinner, LoadingWithDots,
 } from 'nitro-web'
 import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
@@ -44,6 +44,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
     'Filters',
     'Button Colors & Sizes',
     'Button Icons',
+    'Loading Elements',
     'Varients',
     'Selects',
     'Inputs',
@@ -367,6 +368,18 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
+      {groups.includes('Loading Elements') && (
+        <div>
+          <h2 class="h3">Loading Elements</h2>
+          <div class="flex flex-wrap gap-x-6 gap-y-4 items-center mb-6">
+            <div><Spinner /></div>
+            <div><Spinner className="border-secondary" /></div>
+            <div><Spinner className="border-primary border-[3px]" /></div>
+            <div><LoadingWithDots message="Loading" /></div>
+          </div>
+        </div>
+      )}
+
       {groups.includes('Varients') && (
         <div>
           <h2 class="h3">Varients</h2>
@@ -658,6 +671,17 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             generateTd={generateTd}
             className="mb-6"
             isLoading={true}
+          />
+          <Table
+            rows={[]}
+            columns={thead}
+            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+            generateCheckboxActions={generateCheckboxActions}
+            generateTd={generateTd}
+            className="mb-6"
+            isLoading={true}
+            showLoadingOverlay={false}
+            showLoadingInline={true}
           />
           <Table
             rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}

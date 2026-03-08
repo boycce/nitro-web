@@ -23,7 +23,7 @@ export { Styleguide } from '../components/partials/styleguide'
 // Component Elements
 export { Accordion } from '../components/partials/element/accordion'
 export { Avatar } from '../components/partials/element/avatar'
-export { Button } from '../components/partials/element/button'
+export { Button, Spinner } from '../components/partials/element/button'
 export { Calendar, type CalendarProps } from '../components/partials/element/calendar'
 export { Dropdown, type DropdownProps, type DropdownOption } from '../components/partials/element/dropdown'
 export { Filters, type FilterType, usePushChangesToPath } from '../components/partials/element/filters'
@@ -36,6 +36,7 @@ export { TimePicker, type TimePickerProps } from '../components/partials/element
 export { Tooltip } from '../components/partials/element/tooltip'
 export { Topbar } from '../components/partials/element/topbar'
 export { Table, type TableColumn, type TableProps, type TableRow, type TableRowType } from '../components/partials/element/table'
+export { LoadingWithDots, LoadingOverlay } from '../components/partials/element/loading'
 
 // Component Form Elements
 export { Checkbox } from '../components/partials/form/checkbox'

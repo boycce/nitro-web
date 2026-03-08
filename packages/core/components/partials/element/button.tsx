@@ -41,16 +41,16 @@ export function Button({
 
   // Button colors, you can use custom colors by using className instead
   const colors = {
-    'primary': 'bg-primary hover:bg-primary-hover ring-transparent text-white [&>.loader]:border-white',
-    'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.loader]:border-white',
-    'black': 'bg-black hover:bg-gray-800 ring-transparent text-white [&>.loader]:border-white',
-    'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.loader]:border-white',
-    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.loader]:border-black', // maybe change to text-foreground
-    'clear': 'hover:bg-gray-50 ring-gray-300 hover:text-foreground [&>.loader]:border-foreground !shadow-none',
-    'danger': 'bg-danger hover:bg-danger-hover ring-transparent text-white [&>.loader]:border-white',
-    'warning': 'bg-warning hover:bg-warning-hover ring-transparent text-white [&>.loader]:border-white',
-    'info': 'bg-info hover:bg-info-hover ring-transparent text-white [&>.loader]:border-white',
-    'success': 'bg-success hover:bg-success-hover ring-transparent text-white [&>.loader]:border-white',
+    'primary': 'bg-primary hover:bg-primary-hover ring-transparent text-white [&>.spinner]:border-white',
+    'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.spinner]:border-white',
+    'black': 'bg-black hover:bg-gray-800 ring-transparent text-white [&>.spinner]:border-white',
+    'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.spinner]:border-white',
+    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.spinner]:border-black', // maybe change to text-foreground
+    'clear': 'hover:bg-gray-50 ring-gray-300 hover:text-foreground [&>.spinner]:border-foreground !shadow-none',
+    'danger': 'bg-danger hover:bg-danger-hover ring-transparent text-white [&>.spinner]:border-white',
+    'warning': 'bg-warning hover:bg-warning-hover ring-transparent text-white [&>.spinner]:border-white',
+    'info': 'bg-info hover:bg-info-hover ring-transparent text-white [&>.spinner]:border-white',
+    'success': 'bg-success hover:bg-success-hover ring-transparent text-white [&>.spinner]:border-white',
   }
   
   // Button sizes (px is better for height consistency)
@@ -91,12 +91,17 @@ export function Button({
       </span>
       {(IconRight || IconRightEnd) && getIcon(IconRight || IconRightEnd)}
       {
-        isLoading &&
-        <span className={
-          'loader !opacity-100 absolute top-[50%] left-[50%] w-[1rem] h-[1rem] ml-[-0.5rem] mt-[-0.5rem] ' +
-          'rounded-full animate-spin border-2 !border-t-transparent'
-        } />
+        isLoading && <Spinner className={'!opacity-100 size-[1rem]'} absoluteCenter={true} />
       }
     </button>
+  )
+}
+
+export function Spinner({ className, absoluteCenter }: { className?: string, absoluteCenter?: boolean }) {
+  const absoluteCenterClass = absoluteCenter ? 'absolute top-[50%] left-[50%] ml-[-0.5rem] mt-[-0.5rem]' : ''
+  return (
+    <span
+      className={twMerge(`spinner border-black border-2 inline-block size-[1em] rounded-full animate-spin ${absoluteCenterClass} ${className||''} !border-t-transparent `)}
+    />
   )
 }
