@@ -1009,6 +1009,9 @@ label, .label {
 .-z-10 {
   z-index: -10;
 }
+.z-10 {
+  z-index: 10;
+}
 .z-40 {
   z-index: 40;
 }
@@ -1047,6 +1050,9 @@ label, .label {
 }
 .m-1 {
   margin: 0.25rem;
+}
+.m-\[1px\] {
+  margin: 1px;
 }
 .\!my-0 {
   margin-top: 0px !important;
@@ -1140,9 +1146,6 @@ label, .label {
 .ml-\[12px\] {
   margin-left: 12px;
 }
-.ml-\[2px\] {
-  margin-left: 2px;
-}
 .mr-2 {
   margin-right: 0.5rem;
 }
@@ -1232,6 +1235,9 @@ label, .label {
 .inline-block {
   display: inline-block;
 }
+.inline {
+  display: inline;
+}
 .\!flex {
   display: -webkit-box !important;
   display: -ms-flexbox !important;
@@ -1311,6 +1317,10 @@ label, .label {
   width: 1em;
   height: 1em;
 }
+.size-\[1rem\] {
+  width: 1rem;
+  height: 1rem;
+}
 .size-\[22px\] {
   width: 22px;
   height: 22px;
@@ -1337,9 +1347,6 @@ label, .label {
 }
 .h-\[1em\] {
   height: 1em;
-}
-.h-\[1rem\] {
-  height: 1rem;
 }
 .h-\[25px\] {
   height: 25px;
@@ -1421,9 +1428,6 @@ label, .label {
 }
 .w-\[1em\] {
   width: 1em;
-}
-.w-\[1rem\] {
-  width: 1rem;
 }
 .w-\[30px\] {
   width: 30px;
@@ -1685,6 +1689,9 @@ label, .label {
 .gap-6 {
   gap: 1.5rem;
 }
+.gap-\[0\.2em\] {
+  gap: 0.2em;
+}
 .gap-\[16px\] {
   gap: 16px;
 }
@@ -1819,6 +1826,9 @@ label, .label {
 .border-2 {
   border-width: 2px;
 }
+.border-\[3px\] {
+  border-width: 3px;
+}
 .border-y {
   border-top-width: 1px;
   border-bottom-width: 1px;
@@ -1840,6 +1850,10 @@ label, .label {
 }
 .border-none {
   border-style: none;
+}
+.border-black {
+  --tw-border-opacity: 1;
+  border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
 }
 .border-black\/10 {
   border-color: rgb(0 0 0 / 0.1);
@@ -1864,6 +1878,10 @@ label, .label {
   --tw-border-opacity: 1;
   border-color: rgb(209 213 219 / var(--tw-border-opacity, 1));
 }
+.border-gray-500 {
+  --tw-border-opacity: 1;
+  border-color: rgb(107 114 128 / var(--tw-border-opacity, 1));
+}
 .border-indigo-300 {
   --tw-border-opacity: 1;
   border-color: rgb(165 180 252 / var(--tw-border-opacity, 1));
@@ -1879,6 +1897,10 @@ label, .label {
 .border-primary {
   --tw-border-opacity: 1;
   border-color: rgb(76 80 249 / var(--tw-border-opacity, 1));
+}
+.border-secondary {
+  --tw-border-opacity: 1;
+  border-color: rgb(34 197 94 / var(--tw-border-opacity, 1));
 }
 .\!border-t-transparent {
   border-top-color: transparent !important;
@@ -1991,6 +2013,9 @@ label, .label {
 .bg-yellow-400 {
   --tw-bg-opacity: 1;
   background-color: rgb(250 204 21 / var(--tw-bg-opacity, 1));
+}
+.bg-opacity-75 {
+  --tw-bg-opacity: 0.75;
 }
 .bg-gradient-to-tr {
   background-image: linear-gradient(to top right, var(--tw-gradient-stops));
@@ -3293,15 +3318,15 @@ label, .label {
 .\[\&\>\*\]\:opacity-0>* {
   opacity: 0;
 }
-.\[\&\>\.loader\]\:border-black>.loader {
+.\[\&\>\.spinner\]\:border-black>.spinner {
   --tw-border-opacity: 1;
   border-color: rgb(0 0 0 / var(--tw-border-opacity, 1));
 }
-.\[\&\>\.loader\]\:border-foreground>.loader {
+.\[\&\>\.spinner\]\:border-foreground>.spinner {
   --tw-border-opacity: 1;
   border-color: rgb(17 24 39 / var(--tw-border-opacity, 1));
 }
-.\[\&\>\.loader\]\:border-white>.loader {
+.\[\&\>\.spinner\]\:border-white>.spinner {
   --tw-border-opacity: 1;
   border-color: rgb(255 255 255 / var(--tw-border-opacity, 1));
 }
@@ -3331,6 +3356,10 @@ label, .label {
 }
 .\[\&\>input\]\:font-normal>input {
   font-weight: 400;
+}
+.\[\&\>span\]\:bg-white>span {
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 255 255 / var(--tw-bg-opacity, 1));
 }
 .\[\&\>svg\]\:size-full>svg {
   width: 100%;
