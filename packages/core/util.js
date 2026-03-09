@@ -946,7 +946,7 @@ export function getResponseErrors (errs) {
  */
 export function getSystemError(nitroErrors) {
   const allErrors = getResponseErrors(nitroErrors || [])
-  const systemError = allErrors.find(error => error.title === 'error')
+  const systemError = allErrors.find(error => error.title === 'error' || !error.title)
   return systemError?.detail || ''
 }
 
