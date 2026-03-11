@@ -727,7 +727,7 @@ export function queryString(obj: {
  * @param {string} route - e.g. 'post /api/user'
  * @param {{ [key: string]: any }} [data] - payload
  * @param {{preventDefault?: function}} [event] - event to prevent default
- * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
+ * @param {(value: boolean) => void} [setIsLoading] - setIsLoading setter
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
  * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
@@ -747,7 +747,7 @@ export function request(route: string, data?: {
     [key: string]: any;
 }, event?: {
     preventDefault?: Function;
-}, isLoading?: [boolean, (value: boolean) => void], setState?: SetState, options?: {
+}, setIsLoading?: (value: boolean) => void, setState?: SetState, options?: {
     axiosConfig?: AxiosRequestConfig;
 }): Promise<any>;
 /**

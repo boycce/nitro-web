@@ -908,11 +908,11 @@ export function getStripeClientPromise (stripePublishableKey) {
  * @returns {NitroError[]}
  */
 export function getResponseErrors (errs) {
-  // Array of error objects
+  // Array of error objects ////warning these may not have title from the server? e.g. if  throw new Error('You do not have access to export employees.') is thrown from the server into res.error(err)
   if (Array.isArray(errs)) {
     return errs
   
-  // Axios response errors
+  // Axios response errors ////wsame here too!!!
   } else if (typeof errs === 'object' && errs?.response?.data?.errors) {
     return errs.response.data.errors
 
@@ -1689,7 +1689,7 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {string} route - e.g. 'post /api/user'
  * @param {{ [key: string]: any }} [data] - payload
  * @param {{preventDefault?: function}} [event] - event to prevent default
- * @param {[boolean, (value: boolean) => void]} [isLoading] - [isLoading, setIsLoading]
+ * @param {(value: boolean) => void} [setIsLoading] - setIsLoading setter
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
  * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
@@ -1705,7 +1705,7 @@ export function queryString (obj, _path='', _output, options={}) {
  *   - loading states
  *   - using the correct axios instance via util.axios()
  */
-export async function request (route, data, event, isLoading, setState, options={}) {
+export async function request (route, data, event, setIsLoading, setState, options={}) {
   try {
     if (event?.preventDefault) event.preventDefault()
     const uri = route.replace(/^(post|put|delete|get) /, '')
@@ -1716,10 +1716,7 @@ export async function request (route, data, event, isLoading, setState, options=
       )
 
     // show loading
-    if (isLoading) {
-      if (isLoading[0]) return
-      else isLoading[1](true)
-    }
+    if (setIsLoading) setIsLoading(true)
 
     // warning, not persisting through re-renders, but should be fine until loading is finished
     data = data || {}
@@ -1750,12 +1747,12 @@ export async function request (route, data, event, isLoading, setState, options=
     ])
 
     // success
-    if (isLoading) isLoading[1](false)
+    if (setIsLoading) setIsLoading(false)
     if (res.status == 'rejected') throw res.reason
     return res.value.data
 
   } catch (errs) {
-    if (isLoading) isLoading[1](false)
+    if (setIsLoading) setIsLoading(false)
     throw getResponseErrors(errs)
   }
 }
