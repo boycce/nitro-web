@@ -43,7 +43,7 @@ export type TableProps<T> = {
   rowClassName?: string
   rowClassNameFn?: (row: T, i: number) => string
   columnClassName?: string
-  columnClassNameFn?: (row: T, i: number) => string
+  columnClassNameFn?: (col: TableColumn, row: T|undefined, i: number) => string
   columnSelectedClassName?: string
   columnHeaderClassName?: string
   checkboxClassName?: string
@@ -181,6 +181,7 @@ export function Table<T extends TableRow>({
                     getAlignClass(col.align),
                     columnClassName,
                     columnHeaderClassName,
+                    columnClassNameFn ? columnClassNameFn(col, undefined, j) : '',
                     col.className
                   )}
                 >
@@ -260,7 +261,7 @@ export function Table<T extends TableRow>({
                           _columnClassName,
                           getAlignClass(col.align),
                           columnClassName,
-                          columnClassNameFn ? columnClassNameFn(row, i) : '',
+                          columnClassNameFn ? columnClassNameFn(col, row, i) : '',
                           col.className,
                           isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
                         )}
