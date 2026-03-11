@@ -24,6 +24,7 @@ export type TableRow = {
   _id?: string
 }
 export type TableProps<T> = {
+  // todo: put the classnames into a single object
   columns: TableColumn[]
   rows: T[]
   generateTd: (col: TableColumn, row: T, i: number, isLast: boolean) => JSX.Element | null
@@ -40,7 +41,9 @@ export type TableProps<T> = {
   className?: string
   tableClassName?: string
   rowClassName?: string
+  rowClassNameFn?: (row: T, i: number) => string
   columnClassName?: string
+  columnClassNameFn?: (row: T, i: number) => string
   columnSelectedClassName?: string
   columnHeaderClassName?: string
   checkboxClassName?: string
@@ -70,7 +73,9 @@ export function Table<T extends TableRow>({
   className,
   tableClassName,
   rowClassName,
+  rowClassNameFn,
   columnClassName,
+  columnClassNameFn,
   columnSelectedClassName,
   columnHeaderClassName,
   checkboxClassName,
@@ -237,7 +242,9 @@ export function Table<T extends TableRow>({
                 id={`row-${row._id}-${i}`}
                 onClick={rowOnClick ? () => rowOnClick(row) : undefined}
                 className={twMerge(
-                  `table-row relative ${rowOnClick ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`, rowClassName
+                  `table-row relative ${rowOnClick ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`,
+                  rowClassName,
+                  rowClassNameFn ? rowClassNameFn(row, i) : ''
                 )}
               >
                 {
@@ -253,6 +260,7 @@ export function Table<T extends TableRow>({
                           _columnClassName,
                           getAlignClass(col.align),
                           columnClassName,
+                          columnClassNameFn ? columnClassNameFn(row, i) : '',
                           col.className,
                           isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
                         )}
