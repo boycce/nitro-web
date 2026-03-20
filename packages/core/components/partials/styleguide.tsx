@@ -711,10 +711,17 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
             <h2 class="h3">Modals & Notifications</h2>
             <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
               <Button color="primary" onClick={() => setShowModal1(true)}>Modal (default)</Button>
-              <Button color="danger" onClick={() => setStore({ message: { text: 'Error.', type: 'error' }}) }>Notification error</Button>
-              <Button color="warning" onClick={() => setStore({ message: { text: 'Warning.', type: 'warning' }}) }>Notification warning</Button>{/*eslint-disable-line*/}
-              <Button color="info" onClick={() => setStore({ message: { text: 'Info.', type: 'info' }}) }>Notification info</Button>
-              <Button color="success" onClick={() => setStore({ message: 'Success.' })}>Notification success</Button>
+              <Button color="danger" onClick={() => setStore((s) => ({ ...s, message: { text: 'Error.', type: 'error' }}))}>
+                Notification error
+              </Button>
+              <Button color="warning" onClick={() => setStore((s) => ({ ...s,  message: { text: 'Warning.', type: 'warning' }})) }>
+                Notification warning
+              </Button>{/*eslint-disable-line*/}
+              <Button color="info" onClick={() => setStore((s) => ({ ...s,  message: { text: 'Info.', type: 'info' }})) }>
+                Notification info</Button>
+              <Button color="success" onClick={() => setStore((s) => ({ ...s,  message: 'Success.' }))}>
+                Notification success
+              </Button>
             </div>
           </div>
 
