@@ -10,7 +10,7 @@ type signupProps = {
 
 export function Signup({ className, elements, redirectTo }: signupProps) {
   const navigate = useNavigate()
-  const isLoading = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
     email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
@@ -26,7 +26,8 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await request('post /api/signup', state, e, isLoading, setState)
+      if (isLoading) return
+      const data = await request('post /api/signup', state, e, setIsLoading, setState)
       setStore((prev) => ({ ...prev, ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
@@ -66,7 +67,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Create Account</Elements.Button>
+        <Elements.Button class="w-full" isLoading={isLoading} type="submit">Create Account</Elements.Button>
       </form>
     </div>
   )

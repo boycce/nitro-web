@@ -12,7 +12,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
-  const isLoading = useState(isSignout)
+  const [isLoading, setIsLoading] = useState(isSignout)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
     email: injectedConfig.env == 'development' ? (injectedConfig.placeholderEmail || '') : '',
@@ -35,18 +35,19 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
       setStore((s) => ({ ...s, user: undefined }))
       // util.axios().get('/api/signout')
       Promise.resolve()
-        .then(() => isLoading[1](false))
+        .then(() => setIsLoading(false))
         .then(() => updateJwt())
         .then(() => navigate({ pathname: '/signin', search: location.search }, { replace: true }))
-        .catch(err => (console.error(err), isLoading[1](false)))
+        .catch(err => (console.error(err), setIsLoading(false)))
     }
   }, [isSignout])
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await request('post /api/signin', state, e, isLoading, setState)
+      if (isLoading) return
+      const data = await request('post /api/signin', state, e, setIsLoading, setState)
       // Keep it loading until we navigate
-      isLoading[1](true)
+      setIsLoading(true)
       setStore((s) => ({ ...s, ...data }))
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
@@ -80,7 +81,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Sign In</Elements.Button>
+        <Elements.Button class="w-full" isLoading={isLoading} type="submit">Sign In</Elements.Button>
       </form>
     </div>
   )

@@ -10,7 +10,7 @@ type resetInstructionsProps = {
 
 export function ResetInstructions({ className, elements, redirectTo }: resetInstructionsProps) {
   const navigate = useNavigate()
-  const isLoading = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState({ email: '', errors: [] as Errors })
 
@@ -20,7 +20,8 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      await request('post /api/reset-instructions', state, event, isLoading, setState)
+      if (isLoading) return
+      await request('post /api/reset-instructions', state, event, setIsLoading, setState)
       setStore((s) => ({ ...s, message: 'Done! Please check your email.' }))
       navigate(redirectTo || '/signin')
     } catch (e) {
@@ -43,7 +44,7 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Elements.Button className="w-full" isLoading={isLoading[0]} type="submit">Email me a reset password link</Elements.Button>
+        <Elements.Button className="w-full" isLoading={isLoading} type="submit">Email me a reset password link</Elements.Button>
       </form>
     </div>
   )
@@ -52,7 +53,7 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
 export function ResetPassword({ className, elements, redirectTo }: resetInstructionsProps) {
   const navigate = useNavigate()
   const params = useParams()
-  const isLoading = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState(() => ({
     password: '',
@@ -67,7 +68,8 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
-      const data = await request('post /api/reset-password', state, event, isLoading, setState)
+      if (isLoading) return
+      const data = await request('post /api/reset-password', state, event, setIsLoading, setState)
       setStore((s) => ({ ...s, ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
@@ -94,7 +96,7 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
           <FormError state={state} className="pt-2" />
         </div>
 
-        <Elements.Button class="w-full" isLoading={isLoading[0]} type="submit">Reset Password</Elements.Button>
+        <Elements.Button class="w-full" isLoading={isLoading} type="submit">Reset Password</Elements.Button>
       </form>
     </div>
   )
