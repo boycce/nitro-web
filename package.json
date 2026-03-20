@@ -13,7 +13,7 @@
     "major": "npm run major -w packages/core",
     "minor": "npm run minor -w packages/core",
     "patch": "npm run patch -w packages/core",
-    "publish": "npm run publish -w packages/core",
+    "republish": "npm run republish -w packages/core",
     "start": "npm run start -w packages/example",
     "types": "npm run types -w packages/core"
   },
