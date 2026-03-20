@@ -1,4 +1,5 @@
 {
+  "name": "nitro-web-monorepo",
   "private": true,
   "workspaces": [
     "packages/*"
