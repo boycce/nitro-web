@@ -5,6 +5,7 @@ import { middleware } from 'nitro-web/server'
 const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'
+const port = process.env.port || 3000
 
 const config = {
   emailFrom: process.env.emailFrom,
@@ -16,10 +17,12 @@ const config = {
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
   publicPath: process.env.publicPath,
+  port: port,
   pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
   // isNotMultiTenant: true,
+  // portServer: 3001,
 
   monasteryOptions: {
     noDefaults: true,
@@ -41,7 +44,7 @@ const config = {
   client: {
     // injected into the client via webpack
     awsUrl: process.env.awsUrl,
-    baseUrl: process.env.baseUrl || 'http://localhost:3000',
+    baseUrl: process.env.baseUrl || 'http://localhost:' + port,
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
     name: process.env.name,

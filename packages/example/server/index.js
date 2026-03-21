@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import db from 'monastery'
 import config from './config.js'
-import { setupRouter, setupDefaultModels } from 'nitro-web/server'
+import { setupRouter, setupDefaultModels, getPortServer } from 'nitro-web/server'
 
 // Setup monastery models
 db.manager(config.mongoUrl, config.monasteryOptions)
@@ -17,7 +17,7 @@ if (config.env === 'development') {
 const server = await setupRouter(config)
 
 // Start express
-server.listen({ port: process.env.PORT || 3001, host: '0.0.0.0' }, async () => {
+server.listen({ port: getPortServer(config), host: '0.0.0.0' }, async () => {
   // ...success
 })
 

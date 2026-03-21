@@ -17,7 +17,7 @@ export function getConfig(config: any): (env: any, argv: any) => {
         historyApiFallback: boolean;
         host: string;
         hot: boolean;
-        port: number;
+        port: any;
         proxy: {
             '/api': {
                 logLevel: string;

@@ -16,7 +16,7 @@ import postcssImport from 'postcss-import'
 import postcssNested from 'postcss-nested'
 import postcssFor from 'postcss-for'
 import { createRequire } from 'module'
-import { getDirectories } from 'nitro-web/util'
+import { getDirectories, getPortServer } from 'nitro-web/util'
 
 const _require = createRequire(import.meta.url)
 const isBuild = process.env.NODE_ENV == 'production'
@@ -40,7 +40,7 @@ console.warn = (arg1, arg2, arg3, ...args) => {
 
 // process.traceDeprecation = true
 export const getConfig = (config) => {
-  const { client, name='', pwd, env='development', homepage, publicPath, version } = config
+  const { client, name='', pwd, env='development', homepage, publicPath, version, port=3000, portServer=undefined } = config
   const { clientDir, componentsDir, distDir, imgsDir } = getDirectories(path, pwd)
   const publicPathResolved = getPublicPath(env, homepage, publicPath)
 
@@ -69,11 +69,11 @@ export const getConfig = (config) => {
       historyApiFallback: true,
       host: '0.0.0.0',
       hot: true,
-      port: 3000,
+      port: port,
       proxy: {
         '/api': {
           logLevel: 'silent',
-          target: 'http://0.0.0.0:3001',
+          target: `http://0.0.0.0:${getPortServer({ port, portServer })}`,
           // bypass: async function (req, res, proxyOptions) {
           //   // // wait for pong, indicating express has restarted
           //   // // all non-asset routes are triggered (even the main page)
@@ -84,7 +84,7 @@ export const getConfig = (config) => {
         },
         '/email': {
           logLevel: 'silent',
-          target: 'http://0.0.0.0:3001',
+          target: `http://0.0.0.0:${getPortServer({ port, portServer })}`,
         },
       },
     },

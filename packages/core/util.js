@@ -908,7 +908,8 @@ export function getStripeClientPromise (stripePublishableKey) {
  * @returns {NitroError[]}
  */
 export function getResponseErrors (errs) {
-  // Array of error objects ////warning these may not have title from the server? e.g. if  throw new Error('You do not have access to export employees.') is thrown from the server into res.error(err)
+  // Array of error objects /////todo warning these may not have title from the server? e.g. if  
+  // throw new Error('You do not have access to export employees.') is thrown from the server into res.error(err)
   if (Array.isArray(errs)) {
     return errs
   
@@ -1590,6 +1591,15 @@ export function pick (obj, keys) {
     }
   }
   return output
+}
+
+/**
+ * Gets the port for the server
+ * @param {any} config - config
+ * @returns {number}
+ */
+export function getPortServer(config) {
+  return Number(config?.portServer || (config?.port ? Number(config.port) + 1 : 3001))
 }
 
 /**
