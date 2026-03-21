@@ -10,7 +10,7 @@ export let exposedStoreData: Store = preloadedStoreData
 export function createStore<T extends Store>(store: T) {
   const container = createContainer(() => {
     // const [state, setState] = useState<T>(() => (initData || store || {}) as T)
-    const [state, setState] = useState<T>(() => beforeUpdate((preloadedStoreData || store || {}) as T))
+    const [state, setState] = useState<T>(() => beforeUpdate({ ...store, ...preloadedStoreData } as T))
     exposedStoreData = state
     return [state, setStoreWrapper(setState)]
   })
