@@ -1,26 +1,45 @@
-/**
- * @typedef {import('types').Role} Role
- */
+import { currencies, countries } from 'nitro-web/server'
+
+// --- Enums ------------------------------------
 
 /**
- * @typedef {Object} Country
- * @property {string} currency
+ * Enums
+ * @typedef {'active'|'deleted'} UserStatus
+ * @typedef {'owner'|'manager'} UserRole
+ * @typedef {'active'|'unpaid'|'deleted'} CompanyStatus
+ * @typedef {'nz'} LocaleCountry
+ * @typedef {import('nitro-web/server').Country} Country
+ * @typedef {import('nitro-web/server').Currency} Currency
+ */
+
+/** @type {{ value: UserRole, label: string }[]} */
+export const userRoleOptions = [
+  { value: 'manager', label: 'Manager' },
+  { value: 'owner', label: 'Owner' },
+]
+/** @type {{ value: UserStatus, label: string }[]} */
+export const userStatusOptions = [
+  { value: 'active', label: 'Active' },
+  { value: 'deleted', label: 'Deleted' },
+]
+
+// --- Locales & Currencies ---------------------
+
+/**
+ * @typedef {Object} LocaleObject
+ * @property {Currency} currency
+ * @property {Country} country
  * @property {string} name
  * @property {{ currency: string, percentage: string }} numberFormats
  * @property {{ full: string, long: string, medium: string, short: string }} dateFormats
  */
 
-/** @type {{ value: Role, label: string }[]} */
-export const roleOptions = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'user', label: 'User' },
-]
-
-/** @type {{ [key: string]: Country }} */
 // dateformats: https://date-fns.org/v4.1.0/docs/format#
-export const countries = {
+/** @type {{ [key: string]: LocaleObject }} */
+export const locales = {
   nz: {
     currency: 'nzd',
+    country: 'nz',
     name: 'New Zealand',
     numberFormats: {
       currency: '¤#,##0.00',
@@ -33,74 +52,13 @@ export const countries = {
       short: 'dd/MM/yy', // '01/12/26'
     },
   },
-  au: {
-    currency: 'aud',
-    name: 'Australia',
-    numberFormats: {
-      currency: '¤#,##0.00',
-      percentage: '¤#,##0.00%',
-    },
-    dateFormats: {
-      full: 'eeee, d MMMM yyyy',
-      long: 'd MMMM yyyy',
-      medium: 'dd/MM/yyyy',
-      short: 'dd/MM/yy',
-    },
-  },
 }
 
-/** @type {{ [key: string]: { name: string, symbol: string, digits: number } }} */
-export const currencies = {
-  nzd: { name: 'New Zealand Dollar', symbol: '$', digits: 2 },
-  aud: { name: 'Australian Dollar', symbol: '$', digits: 2 },
-  usd: { name: 'United States Dollar', symbol: '$', digits: 2 },
-  btc: { name: 'Bitcoin', symbol: '₿', digits: 8 },
-  aed: { name: 'UAE Dirham', symbol: 'د.إ', digits: 2 },
-  ars: { name: 'Argentine Peso', symbol: '$', digits: 2 },
-  bdt: { name: 'Bangladeshi Taka', symbol: '৳', digits: 2 },
-  bhd: { name: 'Bahraini Dinar', symbol: '.د.ب', digits: 3 },
-  brl: { name: 'Brazilian Real', symbol: 'R$', digits: 2 },
-  cad: { name: 'Canadian Dollar', symbol: '$', digits: 2 },
-  chf: { name: 'Swiss Franc', symbol: 'Fr', digits: 2 },
-  clp: { name: 'Chilean Peso', symbol: '$', digits: 0 },
-  cny: { name: 'Chinese Yuan', symbol: '¥', digits: 2 },
-  cop: { name: 'Colombian Peso', symbol: '$', digits: 2 },
-  czk: { name: 'Czech Koruna', symbol: 'Kč', digits: 2 },
-  dkk: { name: 'Danish Krone', symbol: 'kr', digits: 2 },
-  egp: { name: 'Egyptian Pound', symbol: '£', digits: 2 },
-  eur: { name: 'Euro', symbol: '€', digits: 2 },
-  gbp: { name: 'Great Britain Pound', symbol: '£', digits: 2 },
-  hkd: { name: 'Hong Kong Dollar', symbol: '$', digits: 2 },
-  huf: { name: 'Hungarian Forint', symbol: 'Ft', digits: 0 },
-  idr: { name: 'Indonesian Rupiah', symbol: 'Rp', digits: 0 },
-  ils: { name: 'Israeli Shekel', symbol: '₪', digits: 2 },
-  inr: { name: 'Indian Rupee', symbol: '₹', digits: 2 },
-  jod: { name: 'Jordanian Dinar', symbol: 'د.ا', digits: 3 },
-  jpy: { name: 'Japanese Yen', symbol: '¥', digits: 0 },
-  kes: { name: 'Kenyan Shilling', symbol: 'Sh', digits: 2 },
-  krw: { name: 'South Korean Won', symbol: '₩', digits: 0 },
-  kwd: { name: 'Kuwaiti Dinar', symbol: 'د.ك', digits: 3 },
-  lkr: { name: 'Sri Lankan Rupee', symbol: 'Rs', digits: 2 },
-  mad: { name: 'Moroccan Dirham', symbol: 'د.م.', digits: 2 },
-  mxn: { name: 'Mexican Peso', symbol: '$', digits: 2 },
-  myr: { name: 'Malaysian Ringgit', symbol: 'RM', digits: 2 },
-  ngn: { name: 'Nigerian Naira', symbol: '₦', digits: 2 },
-  nok: { name: 'Norwegian Krone', symbol: 'kr', digits: 2 },
-  omr: { name: 'Omani Rial', symbol: '﷼', digits: 3 },
-  pen: { name: 'Peruvian Sol', symbol: 'S/', digits: 2 },
-  php: { name: 'Philippine Peso', symbol: '₱', digits: 2 },
-  pkt: { name: 'Pakistani Rupee', symbol: '₨', digits: 2 },
-  pln: { name: 'Polish Zloty', symbol: 'zł', digits: 2 },
-  qar: { name: 'Qatari Riyal', symbol: '﷼', digits: 2 },
-  ron: { name: 'Romanian Leu', symbol: 'lei', digits: 2 },
-  rub: { name: 'Russian Ruble', symbol: '₽', digits: 2 },
-  sar: { name: 'Saudi Riyal', symbol: '﷼', digits: 2 },
-  sek: { name: 'Swedish Krona', symbol: 'kr', digits: 2 },
-  sgd: { name: 'Singapore Dollar', symbol: '$', digits: 2 },
-  thb: { name: 'Thai Baht', symbol: '฿', digits: 2 },
-  try: { name: 'Turkish Lira', symbol: '₺', digits: 2 },
-  twd: { name: 'New Taiwan Dollar', symbol: 'NT$', digits: 2 },
-  uah: { name: 'Ukrainian Hryvnia', symbol: '₴', digits: 2 },
-  vnd: { name: 'Vietnamese Dong', symbol: '₫', digits: 0 },
-  zar: { name: 'South African Rand', symbol: 'R', digits: 2 },
-}
+/** @type {{ value: Country, label: string }[]} */
+export const localeOptions = /** @type {Country[]} */(Object.keys(locales)).map((c) => ({ value: c, label: locales[c].name }))
+
+/** @type {{ value: Country, label: string }[]} */
+export const countryOptions = /** @type {Country[]} */(Object.keys(countries)).map((c) => ({ value: c, label: countries[c].name }))
+
+/** @type {{ value: Currency, label: string }[]} */
+export const currencyOptions = /** @type {Currency[]} */(Object.keys(currencies)).map((c) => ({ value: c, label: currencies[c].name }))

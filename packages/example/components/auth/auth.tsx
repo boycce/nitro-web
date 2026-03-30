@@ -1,4 +1,4 @@
-import { Signin, Signup, ResetInstructions, ResetPassword } from 'nitro-web'
+import { Signin, Signup, ResetInstructions, ResetPassword, InviteConfirm } from 'nitro-web'
 
 // Signin page
 export const SigninPage = () => <Signin />
@@ -27,4 +27,11 @@ export const ResetPasswordPage = () => <ResetPassword />
 ResetPasswordPage.route = {
   '/reset/:token': true,
   'meta': { 'title': 'Reset password', layout: 2 },
+}
+
+// Invite confirm page
+export const InviteConfirmPage = () => <InviteConfirm />
+InviteConfirmPage.route = {
+  '/invite/:token': true,
+  'meta': { 'title': 'Accept invite', layout: 2 },
 }

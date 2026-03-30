@@ -15,7 +15,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
   const [state, setState] = useState({
     email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
     name: injectedConfig.env === 'development' ? 'Bruce Wayne' : '',
-    business: { name: injectedConfig.env === 'development' ? 'Wayne Enterprises' : '' },
+    company: { business: { name: injectedConfig.env === 'development' ? 'Wayne Enterprises' : '' } },
     password: injectedConfig.env === 'development' ? '' : '',
     errors: [] as Errors,
   })
@@ -49,8 +49,11 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
             />
           </div>
           <div>
-            <label for="business.name">Company Name</label>
-            <Field name="business.name" placeholder="E.g. Wayne Enterprises" state={state} onChange={(e) => onChange(e, setState)} />
+            <label for="company.business.name">Company Name</label>
+            <Field name="company.business.name" placeholder="E.g. Wayne Enterprises" state={state} 
+              onChange={(e) => onChange(e, setState)}
+              errorTitle={/business\.name/}
+            />
           </div>
         </div>
         <div>

@@ -1,10 +1,13 @@
 // @ts-nocheck
 export * from '../util.js'
 export * as util from '../util.js'
+export { currencies, countries } from './constants.js'
 
 /**
- * Re-export the MiddlewareConfig type from nitro-web/server
+ * Re-export types from nitro-web/server
  * @typedef {import('./router.js').MiddlewareConfig} MiddlewareConfig
+ * @typedef {import('./constants.js').Country} Country
+ * @typedef {import('./constants.js').Currency} Currency
  */
 
 // Export models

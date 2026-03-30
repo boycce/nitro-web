@@ -319,8 +319,8 @@ async function beforeApp(config: Config) {
 
 export const middleware = {
   // Default middleware that can referenced from component routes
-  isAdmin: (route: unknown, store: { user?: { type?: string, isAdmin?: boolean } }) => {
-    if (store.user?.type?.match(/admin/) || store.user?.isAdmin) return
+  isAdmin: (route: unknown, store: { user?: { isAdmin?: boolean } }) => {
+    if (store.user?.isAdmin) return
     else if (store.user) return { redirect: '/signin?unauth' }
     else return { redirect: '/signin?signin' }
   },
@@ -328,7 +328,7 @@ export const middleware = {
     if (store.user?.company?.currentSubscription) return
     else return { redirect: '/plans/subscribe' }
   },
-  isUser: (route: unknown, store: { user?: { type?: string } }) => {
+  isUser: (route: unknown, store: { user?: { isAdmin?: boolean } }) => {
     if (store.user) return
     else return { redirect: '/signin?signin' }
   },

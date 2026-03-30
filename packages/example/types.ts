@@ -1,9 +1,6 @@
-import type { Config, Errors, MessageObject, MonasteryImage, Store as NitroStore } from 'nitro-web/types'
+import type { Address, Config, Errors, MessageObject, MonasteryImage, Store as NitroStore } from 'nitro-web/types'
+import { UserRole, UserStatus, CompanyStatus, Currency } from './server/constants'
 export type { Config, Errors, MessageObject }
-
-/* ---- Enums -------------------------------- */
-
-export type Role = 'admin' | 'user'
 
 /* ---- Common ------------------------------- */
 
@@ -23,11 +20,38 @@ export type Store = NitroStore & {
   user?: User
 }
 
+export type Company = BaseEntity & {
+  business: {
+    address?: Address
+    currency: Currency
+    name: string
+    number?: string
+    phone?: string
+    website?: string
+  }
+  isDeleted?: boolean
+  isMock?: boolean
+  status: CompanyStatus
+  users: {
+    _id: Id
+    role: UserRole
+    status: UserStatus
+  }[]
+  invites: {
+    email: string
+    role: UserRole
+    inviteToken: string
+  }[]
+}
+
 export type User = BaseEntity & {
-  isInvited?: boolean
+  company: Company
+  email?: string
+  isAdmin?: boolean
   firstName?: string
   lastName?: string
   name?: string
   avatar?: MonasteryImage
-  type: 'user' | 'admin',
+  // If single tenancy application
+  // isInvited?: boolean
 }

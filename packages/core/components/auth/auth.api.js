@@ -4,50 +4,46 @@ import bcrypt from 'bcrypt'
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
-import db from 'monastery'
+import db, { isId } from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
 import { sendEmail } from 'nitro-web/server'
 import { isArray, pick, ucFirst, fullNameSplit } from 'nitro-web/util'
+// Todo: detect if the user is already invited to the company, instead of token error
 
-let authConfig = null
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
+let authConfig = null
+let auth = {
+  userFindFromProvider, userSigninGetStore, getStore,
+  userCreate, passwordValidate, tokenCreate, tokenParse, tokenSend,
+  tokenConfirmForReset, tokenConfirmForSingleTenant, tokenConfirmForMultiTenant,
+}
 
 export const routes = {
   // Routes
   'get     /api/store': [store],
   'get     /api/signout': [signout],
-  'post    /api/signin': [signin],
-  'post    /api/signup': [signup],
+  'post    /api/signin': [signin], // [todo: route gaurd basic limiter]
+  'post    /api/signup': [signup], // [todo: route gaurd Altcha]
   'post    /api/reset-instructions': [resetInstructions],
-  'post    /api/reset-password': [resetConfirm],
+  'post    /api/reset-confirm': [resetConfirm], // was reset-password
   'post    /api/invite-instructions': [inviteInstructions],
-  'post    /api/invite-accept': [inviteConfirm],
+  'post    /api/invite-confirm': [inviteConfirm], // was invite-accept
   'delete  /api/account/:uid': [remove],
-
-  // todo: 
-  //   We dont need all of these overridable, just signinAndGetStore, findUserFromProvider, 
-  //   and getStore. So we will allow just these two to be passed around.
-  //   userCreate not needed, they can just create their own signup function.
-  ///  Maybe we can pass these into setup?
-
-  // Overridable helpers
+  // Setup (called automatically when express starts)
   setup: setup,
-  findUserFromProvider: findUserFromProvider,
-  getStore: getStore,
-  signinAndGetStore: signinAndGetStore,
-  tokenCreate: tokenCreate,
-  tokenParse: tokenParse,
-  userCreate: userCreate,
-  validatePassword: validatePassword,
-  sendToken: sendToken,
-  inviteOrResetConfirm: inviteOrResetConfirm,
 }
 
-function setup(middleware, _config) {
-  // routes.setup is called automatically when express starts
-  // Set config values
-  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant']
+function setup(middleware, _config, helpers = {}) {
+  // Tip: you can pass in your own helpers to override the default helpers, `this` context contains all helpers.
+  // E.g. setup: (middleware, config, helpers) => authRoutes.setup(middleware, config, { getStore, ... })
+  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant', 
+    'confirmInvites']
   authConfig = pick(_config, configKeys)
+  auth = { ...auth, ...helpers }
+  // Bind all the functions to the auth object (so the can be individually overridden and reference other helpers)
+  for (const key of Object.keys(auth)) {
+    if (typeof auth[key] === 'function') auth[key] = auth[key].bind(auth)
+  }
   for (const key of ['baseUrl', 'emailFrom', 'env', 'name']) {
     if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
   }
@@ -57,7 +53,7 @@ function setup(middleware, _config) {
       { usernameField: 'email' },
       async (email, password, next) => {
         try {
-          const user = await this.findUserFromProvider({ email }, password)
+          const user = await auth.userFindFromProvider({ email }, password)
           next(null, user)
         } catch (err) {
           next(err.message)
@@ -74,7 +70,7 @@ function setup(middleware, _config) {
       },
       async (payload, done) => {
         try {
-          const user = await this.findUserFromProvider({ _id: payload._id })
+          const user = await auth.userFindFromProvider({ _id: payload._id })
           if (!user) return done(null, false)
           return done(null, user)
         } catch (err) {
@@ -109,19 +105,14 @@ function setup(middleware, _config) {
 }
 
 async function store(req, res) {
-  res.json(await this.getStore(req.user))
+  res.json(await auth.getStore(req.user))
 }
 
 async function signup(req, res) {
   try {
     const desktop = req.query.desktop
-    let user = await this.userCreate(req.body)
-    sendEmail({
-      config: authConfig,
-      template: 'welcome',
-      to: `${ucFirst(user.firstName)}<${user.email}>`,
-    }).catch(console.error)
-    res.send(await this.signinAndGetStore(user, desktop, this.getStore))
+    const user = await auth.userCreate(req.body)
+    res.send(await auth.userSigninGetStore(user, desktop))
   } catch (err) {
     res.error(err)
   }
@@ -136,7 +127,7 @@ function signin(req, res) {
     if (err) return res.error(err)
     if (!user && info) return res.error('email', info.message)
     try {
-      const response = await this.signinAndGetStore(user, desktop, this.getStore)
+      const response = await auth.userSigninGetStore(user, desktop)
       res.send(response)
     } catch (err) {
       res.error(err)
@@ -167,8 +158,91 @@ async function remove(req, res) {
     // }
     await db.user.remove({ query: { _id: uid }})
     // Logout now so that an error doesn't throw when naviating to /signout
-    req.logout()
+    await new Promise((resolve, reject) => req.logout(err => err ? reject(err) : resolve()))
     res.send(`User: '${uid}' removed successfully`)
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function resetInstructions(req, res) {
+  try {
+    // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
+    let email = (req.body.email || '').trim().toLowerCase()
+    if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+
+    let user = await db.user.findOne({ query: { email }, _privateData: true })
+    if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
+
+    // Send reset password email
+    await auth.tokenSend({ _id: user._id, email: user.email, firstName: user.firstName })
+    res.json({})
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function inviteInstructions(req, res) {
+  // Single-tenant: 
+  //.  - no user found: error (not supported, must be pre-created)
+  //   - user pre-created: update user with token, and send them the token
+  // Multi-tenant:
+  //   - user exists and confirmInvites=false: auto-add user to company.users
+  //   - user exists and confirmInvites=true: add user to company.invites, and send them the token
+  //.  - no user found: add user to company.invites and send them the token
+  try {
+    if (authConfig.isNotMultiTenant) {
+      const user = await db.user.findOne({ query: { _id: req.body._id }, _privateData: true })
+      if (!user) throw new Error('Please pre-create the user first, no user id found.')
+      await auth.tokenSend({ type: 'invite', _id: user._id, email: user.email, firstName: user.firstName })
+      res.json({})
+
+    } else {
+      const companyId = req.body.companyId
+      if (!req.user.isAdmin && (!companyId || req.user?.company?._id?.toString() !== companyId.toString())) {
+        throw new Error('You do not have permission to invite users to this company.')
+      }
+      const existingUser = await db.user.findOne({ query: { email: req.body.email } })
+      if (existingUser && !authConfig.confirmInvites) {
+        await db.company.update({
+          query: db.id(companyId),
+          $push: { users: { _id: existingUser._id, role: req.body.role, status: 'active' } },
+        })
+      } else {
+        await auth.tokenSend({
+          type: 'companyInvite', _id: companyId,
+          email: req.body.email,
+          firstName: existingUser?.firstName || req.body.firstName,
+        })
+      }
+      res.json({})
+    }
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function resetConfirm(req, res) {
+  try {
+    res.send(await auth.tokenConfirmForReset(req))
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function inviteConfirm(req, res) {
+  // single tenant:
+  //   - user pre-created: update user with new password (and any other inviteConfirm.tsx form fields)
+  //.  - no user found: error (not supported, must be pre-created)
+  // multi tenant:
+  //   - user exists and confirmInvites=false: no-op (i.e no token, user already added)
+  //   - user exists and confirmInvites=true: update company (invite.tsx should display 'Invite Accepted' and redirect to home)
+  //   - no user found: create new user with new password (and any other inviteConfirm.tsx form fields)
+  try {
+    const result = authConfig.isNotMultiTenant
+      ? await auth.tokenConfirmForSingleTenant(req)
+      : await auth.tokenConfirmForMultiTenant(req)
+    res.send(result)
   } catch (err) {
     res.error(err)
   }
@@ -176,9 +250,10 @@ async function remove(req, res) {
 
 /* ---- Overridable helpers ------------------ */
 
-export async function findUserFromProvider(query, passwordToCheck) {
+export async function userFindFromProvider(query, passwordToCheck) {
   /**
-   * Find user for state (and verify password if signing in with email)
+   * Find user for state (and verify password if signing in with email).
+   * NOTE: the application needs to set user.company to the active company (if multi tenant)
    * @param {object} query - e.g. { email: 'test@test.com' }
    * @param {string} <passwordToCheck> - password to test
    */
@@ -199,9 +274,13 @@ export async function findUserFromProvider(query, passwordToCheck) {
   }
   if (!user) {
     throw new Error(checkPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
+  } else if (user.status && user.status !== 'active') {
+    throw new Error('This user account is not active.')
   } else if (isMultiTenant && !user.company) {
     throw new Error('The current company is no longer associated with this user')
   } else if (isMultiTenant && user.company.status != 'active') {
+    throw new Error('This user is not associated with an active company')
+  } else if (isMultiTenant && !user.company.users?.find(u => u._id.toString() === user._id.toString())?.status === 'active') {
     throw new Error('This user is not associated with an active company')
   } else {
     if (checkPassword) {
@@ -219,6 +298,15 @@ export async function findUserFromProvider(query, passwordToCheck) {
   }
 }
 
+export async function userSigninGetStore(user, isDesktop) {
+  if (user.loginActive === false) throw { title: 'error', detail: 'This user is not available.' }
+  user.desktop = isDesktop
+
+  const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
+  const store = await this.getStore(user)
+  return { ...store, jwt }
+}
+
 export async function getStore(user) {
   // Initial store
   return {
@@ -226,45 +314,43 @@ export async function getStore(user) {
   }
 }
 
-export async function signinAndGetStore(user, isDesktop, getStore) {
-  if (user.loginActive === false) throw 'This user is not available.'
-  if (!getStore) throw new Error('Please provide a getStore function')
-  user.desktop = isDesktop
+/* ---- Helpers (not easily overridable) ----- */
 
-  const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-  const store = await getStore(user)
-  return { ...store, jwt }
-}
-
-export async function userCreate({ business, password, ...userDataProp }) {
+/**
+ * Creates a new user and company (if multi tenant and `user.company` is not an id)
+ * @param {object} userData - user data
+ * @param {string} [userData.password] - optional
+ * @param {string} [userData.password2] - optional, to confirm the password
+ * @param {string} [userData.company] - if multi tenant and `user.company` is not an id, create a new company
+ * @param {boolean} [skipSendEmail=false] - whether to skip sending the welcome email
+ * @returns {Promise<object>} - the created user
+ */
+export async function userCreate({ password, password2, company, ...userDataProp }, skipSendEmail) {
   try {
-    if (!this.findUserFromProvider) {
-      throw new Error('this.findUserFromProvider doesn\'t exist, make sure the context is available when calling this function')
+    const userId = db.id()
+    const options = { blacklist: ['-_id'] }
+    const companyIsId = !authConfig.isNotMultiTenant && isId(company)
+
+    // Define new company data if applicable
+    const companyData = !authConfig.isNotMultiTenant && !companyIsId && {
+      _id: db.id(),
+      users: [{ _id: userId, role: 'owner', status: 'active' }],
+      ...(company ? company : {}), // removed
     }
 
-    const options = { blacklist: ['-_id'] }
-    const isMultiTenant = !authConfig.isNotMultiTenant
-    const userId = db.id()
-    const companyData = isMultiTenant && {
-      _id: db.id(), 
-      ...(business ? { business } : {}),
-      users: [{ _id: userId, role: 'owner', status: 'active' }],
-    }
+    // Define user data
     const userData = {
       ...userDataProp,
       _id: userId,
-      ...(userDataProp.name ? { 
-        firstName: fullNameSplit(userDataProp.name)[0],
-        lastName: fullNameSplit(userDataProp.name)[1],
-      } : {}),
       password: password ? await bcrypt.hash(password, 10) : undefined,
-      ...(isMultiTenant ? { company: companyData._id } : {}),
+      ...(companyIsId ? { company: company } : (companyData ? { company: companyData._id } : {})), // AKA "active company"
+      ...(userDataProp.name ? { firstName: fullNameSplit(userDataProp.name)[0], lastName: fullNameSplit(userDataProp.name)[1] } : {}),
     }
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
-      ...(isMultiTenant ? [db.company.validate(companyData, options)] : []),
-      typeof password === 'undefined' ? Promise.resolve() : validatePassword(password),
+      typeof password === 'undefined' ? Promise.resolve() : this.passwordValidate(password, password2),
+      ...(companyData ? [db.company.validate(companyData, options)] : []),
     ])
 
     // Throw all the errors from at once
@@ -277,10 +363,19 @@ export async function userCreate({ business, password, ...userDataProp }) {
 
     // Insert company & user
     await db.user.insert({ data: userData, ...options })
-    if (isMultiTenant) await db.company.insert({ data: companyData, ...options })
+    if (companyData) await db.company.insert({ data: companyData, ...options })
+
+    // Send welcome email
+    if (!skipSendEmail) {
+      sendEmail({
+        config: authConfig,
+        template: 'welcome',
+        to: `${ucFirst(userData.firstName)}<${userData.email}>`,
+      }).catch(console.error)
+    }
 
     // Return the user
-    return await findUserFromProvider({ _id: userId })
+    return await this.userFindFromProvider({ _id: userId })
 
   } catch (err) {
     if (!isArray(err)) throw err
@@ -288,30 +383,7 @@ export async function userCreate({ business, password, ...userDataProp }) {
   }
 }
 
-export function tokenCreate(id) {
-  return new Promise((resolve) => {
-    crypto.randomBytes(16, (err, buff) => {
-      let hash = buff.toString('hex') // 32 chars
-      resolve(`${hash}${id || ''}:${Date.now()}`)
-    })
-  })
-}
-
-export function tokenParse(token) {
-  let split = (token  ||  '').split(':')
-  let hash = split[0].slice(0, 32)
-  let userId = split[0].slice(32)
-  let time = split[1]
-  if (!hash || !userId || !time) {
-    throw { title: 'error', detail: 'Sorry your code is invalid.' }
-  } else if (parseFloat(time) + 1000 * 60 * 60 * 24 < Date.now()) {
-    throw { title: 'error', detail: 'Sorry your code has timed out.' }
-  } else {
-    return userId
-  }
-}
-
-export async function validatePassword(password='', password2) {
+export async function passwordValidate(password='', password2) {
   // let hasLowerChar = password.match(/[a-z]/)
   // let hasUpperChar = password.match(/[A-Z]/)
   // let hasNumber = password.match(/\d/)
@@ -330,117 +402,125 @@ export async function validatePassword(password='', password2) {
   }
 }
 
+export function tokenCreate(modelName, id) {
+  return new Promise((resolve) => {
+    crypto.randomBytes(16, (err, buff) => {
+      let hash = buff.toString('hex') // 32 chars
+      resolve(`${hash}:${modelName}:${id || ''}:${Date.now()}`)
+    })
+  })
+}
 
-
-
-/* ---- Controllers -------------------------- */
-
-export async function resetInstructions(req, res) {
-  try {
-    // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
-    let email = (req.body.email || '').trim().toLowerCase()
-    if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-
-    let user = await db.user.findOne({ query: { email }, _privateData: true })
-    if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-
-    // Send reset password email
-    await sendToken({ type: 'reset', user: user })
-    res.json({})
-  } catch (err) {
-    res.error(err)
+export function tokenParse(token, modelName, maxAgeMs = 1000 * 60 * 60 * 24) {
+  let [hash, modelNameParsed, id, time] = (token || '').split(':')
+  if (!hash || !id || !time) {
+    throw { title: 'error', detail: 'Sorry your code is invalid.' }
+  } else if (modelNameParsed !== modelName) {
+    throw { title: 'error', detail: 'Sorry we are detecting a token mismatch.' }
+  } else if (parseFloat(time) + maxAgeMs < Date.now()) {
+    throw { title: 'error', detail: 'Sorry your code has timed out.' }
+  } else {
+    return id
   }
 }
 
-export async function inviteInstructions(req, res) {
-  try {
-    // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
-    let user = await db.user.findOne({ query: { _id: req.params._id }, _privateData: true })
-    if (!user) throw new Error('Invalid user id')
-    // Send invite instructions email
-    await sendToken({ type: 'invite', user: user })
-    res.json({})
-  } catch (err) {
-    res.error(err)
-  }
+export async function tokenConfirmForReset(req) {
+  return await this.tokenConfirmForSingleTenant(req, true)
 }
 
-export async function inviteConfirm(req, res) {
-  try {
-    res.send(await this.inviteOrResetConfirm('invite', req))
-  } catch (err) {
-    res.error(err)
-  }
-}
-
-export async function resetConfirm(req, res) {
-  try {
-    res.send(await this.inviteOrResetConfirm('reset', req))
-  } catch (err) {
-    res.error(err)
-  }
-}
-
-/* ---- Helpers ------------------------------ */
-
-export async function inviteOrResetConfirm(type, req) {
-  const { token, password, password2 } = req.body
-  const name = type === 'invite' ? 'inviteToken' : 'resetToken'
+export async function tokenConfirmForSingleTenant(req, isReset) {
+  const { token, password, password2, ...userData } = req.body
+  const tokenName = isReset ? 'resetToken' : 'inviteToken'
   const desktop = req.query.desktop
-  const id = tokenParse(token)
-  await validatePassword(password, password2)
+  const id = this.tokenParse(token, 'user')
+  await this.passwordValidate(password, password2)
 
-  let user = await db.user.findOne({ query: id, blacklist: ['-' + name], _privateData: true })
-  if (!user || user[name] !== token) throw new Error('Sorry your token is invalid or has already been used.')
+  const user = await db.user.findOne({ query: id, blacklist: ['-' + tokenName], _privateData: true })
+  if (!user || user[tokenName] !== token) throw new Error('Sorry your token is invalid or has already been used.')
 
   await db.user.update({
     query: user._id,
     data: {
       password: await bcrypt.hash(password, 10),
-      [name]: '', // remove token
+      [tokenName]: '', // remove token
+      ...userData,
     },
-    blacklist: ['-' + name, '-password'],
+    blacklist: ['-' + tokenName, '-password'],
   })
-  const store = await this.signinAndGetStore({ ...user, [name]: undefined }, desktop, this.getStore)
-  return store
+  return await this.userSigninGetStore({ ...user, [tokenName]: undefined }, desktop)
+}
+
+export async function tokenConfirmForMultiTenant(req) {
+  const { token, ...userData } = req.body
+  const desktop = req.query.desktop
+  const companyId = db.id(this.tokenParse(token, 'company'))
+
+  // Find the invite from the token (company.invites[] entry)
+  const company = await db.company.findOne({ query: { _id: companyId, 'invites.inviteToken': token }, _privateData: true })
+  if (!company) throw new Error('Sorry your token is invalid or has already been used.')
+  const invite = company.invites.find(inv => inv.inviteToken === token)
+
+  // Has the user already been added to the company (company.users[] entry)?
+  const existingUser = await db.user.findOne({ query: { email: userData.email }, _privateData: true })
+  if (existingUser && company.users.some(u => u._id.toString() === existingUser._id.toString())) {
+    throw new Error('This user has already been added to the company.')
+  }
+
+  // Find or create new user
+  const user = existingUser || await this.userCreate({ ...userData, company: companyId }, true) // AKA "active company"
+  
+  // Add the user to the company
+  await db.company.update({
+    query: companyId,
+    $push: { users: { _id: user._id, role: invite.role, status: 'active' } }, // add user to company
+    $pull: { invites: { inviteToken: token } }, // remove invite
+  })
+
+  // Signin
+  return await this.userSigninGetStore(user, desktop)
 }
 
 /**
- * Checks if the user exists, updates the user with the invite token and sends the invite email
+ * Creates and sends a reset or invite token to a user or company
  * @param {object} options
- * @param {'reset' | 'invite'} options.type -  The type of token to send (default: 'reset')
- * @param {{_id: string, email: string, firstName: string}} options.user -  The user to send the invite email to
- * @param {function} [options.beforeUpdate] - callback hook to run before updating the user
- * @param {function} [options.beforeSendEmail] -  callback hook to run before sending the email
+ * @param {'reset' | 'invite' | 'companyInvite'} options.type - token type (default: 'reset')
+ * @param {string} options._id - user or company id
+ * @param {string} options.email - recipient email
+ * @param {string} options.firstName - recipient first name
+ * @param {function} [options.beforeUpdate] - runs before updating the model with the token, return null to skip update
+ * @param {function} [options.beforeSendEmail] - runs before sending the email, receives (options, token)
  * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
  */
-export async function sendToken({ type = 'reset', user, beforeUpdate, beforeSendEmail }) {
-  if (!user?._id) throw new Error('user is required')
-  if (!user?.email) throw new Error('user.email is required')
-  if (!user?.firstName) throw new Error('user.firstName is required')
-  const token = await tokenCreate(user._id)
+export async function tokenSend({ type = 'reset', _id, email, firstName, beforeUpdate, beforeSendEmail }) {
+  if (!_id) throw new Error(`${type === 'companyInvite' ? 'company' : 'user'} id is required`)
+  if (!email) throw new Error('email is required')
+  if (!firstName) throw new Error('firstName is required')
 
-  // get the data
-  const data = beforeUpdate ? beforeUpdate({ [type + 'Token']: token }) : { [type + 'Token']: token }
-  if (type === 'invite') data.isInvited = true
+  const tokenName = type === 'companyInvite' ? 'inviteToken' : type + 'Token'
+  const modelName = type === 'companyInvite' ? 'company' : 'user'
+  const token = await this.tokenCreate(modelName, _id)
+  const _beforeUpdate = beforeUpdate || (o => o)
 
-  // Update the user with the token
-  const result = await db.user.update({
-    query: { _id: user._id },
-    data: data,
-    blacklist: ['-' + type + 'Token'],
-  })
-
-  if (!result._output.matchedCount) {
-    throw new Error('Invalid user id to send the token to')
+  if (modelName === 'company') {
+    // For companies, add the token to company.invites[].inviteToken
+    await db.company.update({ query: db.id(_id), $pull: { invites: { email } } })
+    const result = await db.company.update({ query: db.id(_id), $push: { invites: _beforeUpdate({ email: email, inviteToken: token }) }})
+    if (!result._output.matchedCount) throw new Error('Invalid company id to update the token for')
+  } else {
+    // For users, add the token to user.inviteToken|resetToken
+    const result = await db[modelName].update({
+      query: db.id(_id),
+      $set: _beforeUpdate({ [tokenName]: token, isInvited: type === 'invite' ? true : undefined }),
+    })
+    if (!result._output.matchedCount) throw new Error('Invalid ' + modelName + ' id to update the token for')
   }
 
   // Send email
   const options = {
     config: authConfig,
-    template: type === 'reset' ? 'reset-password' : 'invite-user',
-    to: `${ucFirst(user.firstName)}<${user.email}>`,
-    data: { token: token }, // + (req.query.hasOwnProperty('desktop') ? '?desktop' : '')
+    template: type === 'reset' ? 'reset-instructions' : 'invite-instructions',
+    to: `${ucFirst(firstName)}<${email}>`,
+    data: { token: token },
   }
   const mailgunPromise = sendEmail(beforeSendEmail ? beforeSendEmail(options, token) : options).catch(err => {
     console.error('sendEmail(..) mailgun error', err)

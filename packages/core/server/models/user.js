@@ -5,25 +5,26 @@ export default {
 
   fields: {
     avatar: { type: 'image' },
-    company: { model: 'company', required: true },
+    company: { model: 'company', required: true }, // AKA "active company"
     email: { type: 'email', required: true, index: 'unique' },
-    isInvited: { type: 'boolean' },
+    isAdmin: { type: 'boolean', default: false },
     firstName: { type: 'string', required: true },
     lastName: { type: 'string', required: true },
-    status: { type: 'string', default: 'active', enum: ['active', 'deleted', 'inactive'] },
     stripeCustomer: { type: 'any' },
     stripeSubscription: { type: 'any' },
     stripeIntents: { type: 'any' },
-    type: { type: 'string', default: 'user', enum: ['user', 'admin'] },
     usedFreeTrial: { type: 'boolean', default: false },
     // hidden fields
     password: { type: 'string', minLength: 6 },
-    inviteToken: { type: 'string' },
     resetToken: { type: 'string' },
+    // If single tenancy application
+    // status: { type: 'string', default: 'active', enum: ['active', 'deleted'] },
+    // isInvited: { type: 'boolean' }
+    // inviteToken: { type: 'string' },
   },
 
   findBL: ['password', 'inviteToken', 'resetToken'],
-  updateBL: ['password', 'inviteToken', 'resetToken', 'company', 'status', 'stripeSubscription', 'type', 'usedFreeTrial'],
+  updateBL: ['password', 'inviteToken', 'resetToken', 'company', 'status', 'stripeSubscription', 'isAdmin', 'usedFreeTrial'],
 
   messages: {
     lastName: {

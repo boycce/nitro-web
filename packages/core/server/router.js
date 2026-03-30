@@ -404,7 +404,7 @@ export const middleware = {
 }
 
 export function isAdminUser(req) {
-  return (req.user?.type?.match(/admin/) || req.user?.isAdmin) ? true : false
+  return req.user?.isAdmin ? true : false
 }
 
 export function isValidUserOrRespond(req, res) {
@@ -424,7 +424,7 @@ export function isValidUserOrRespond(req, res) {
 function isValidParamCompanyUserOrRespond(req, res, checkIsOwner = false) {
   const _company = req.user?.company?._id?.toString() == req.params.cid ? req.user.company : false
   const company = _company || req.user?.companies?.find((o) => o._id.toString() == req.params.cid)
-  const isCompanyOwner = company?.users?.find((o) => o._id.toString() == req.user?._id?.toString() && o.type === 'owner')
+  const isCompanyOwner = company?.users?.find((o) => o._id.toString() == req.user?._id?.toString() && o.role === 'owner')
   if (!isValidUserOrRespond(req, res)) return
   else if (!isAdminUser(req) && !company) res.unauthorized('You are not authorised to make this request.')
   else if (!isAdminUser(req) && checkIsOwner && !isCompanyOwner) res.unauthorized('Only owners can make this request.')

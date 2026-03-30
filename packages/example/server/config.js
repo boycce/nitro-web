@@ -5,7 +5,7 @@ import { middleware } from 'nitro-web/server'
 const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'
-const port = process.env.port || 3000
+const port = process.env.port || 3000 // TODO: Maybe think how we can extract default from baseUrl if defined? Maybe. 
 
 const config = {
   emailFrom: process.env.emailFrom,
@@ -64,7 +64,7 @@ const config = {
     // }),
     // hasExecutiveAccess: (req, res, next) => {
     //   if (!isValidUserOrRespond(req, res)) return
-    //   else if (req.user?.type !== 'admin') res.unauthorized('Only executive account holders of Wayne Enterprises can access this page.')
+    //   else if (req.user?.isAdmin) res.unauthorized('Only executive account holders of Wayne Enterprises can access this page.')
     //   else next()
     // },
   },

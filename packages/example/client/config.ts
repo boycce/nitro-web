@@ -8,7 +8,7 @@ export default {
     ...middleware,
     // extend or override default middleware here...
     hasExecutiveAccess: (_route: unknown, store: Store) => {
-      if (store.user?.type === 'admin') return
+      if (store.user?.isAdmin) return
       else return { redirect: '/signin?error=Only executive account holders of Wayne Enterprises can access this page.' }
     },
   },

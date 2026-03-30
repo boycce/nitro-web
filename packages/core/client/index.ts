@@ -16,6 +16,7 @@ export { createStore, exposedStoreData, preloadedStoreData, setStoreWrapper } fr
 export { Signin } from '../components/auth/signin'
 export { Signup } from '../components/auth/signup'
 export { ResetInstructions, ResetPassword } from '../components/auth/reset'
+export { InviteConfirm } from '../components/auth/inviteConfirm'
 export { Dashboard } from '../components/dashboard/dashboard'
 export { NotFound } from '../components/partials/not-found'
 export { Styleguide } from '../components/partials/styleguide'

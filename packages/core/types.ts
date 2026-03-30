@@ -24,13 +24,12 @@ export type Config = InjectedConfig & {
 
 export type User = {
   _id?: string
+  email?: string
   firstName?: string
   lastName?: string
   name?: string
   avatar?: MonasteryImage
   isAdmin?: boolean
-  isInvited?: boolean
-  type?: string
 }
 
 export type Error = { title: string, detail: string }

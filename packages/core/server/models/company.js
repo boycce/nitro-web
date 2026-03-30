@@ -13,17 +13,20 @@ export default {
       phone: { type: 'string' },
       website: { type: 'string', isURL: true },
     },
-    status: { type: 'string', default: 'active', enum: ['active', 'unpaid', 'deleted'] },
+    status: { type: 'string', default: 'active', enum: ['active', 'unpaid', 'deleted'], required: true },
     users: [{
-      _id: { model: 'user' },
-      role: { type: 'string', enum: ['owner', 'manager', 'accountant'] },
-      status: { type: 'string', required: true, enum: ['invited', 'active', 'deleted'] },
-      inviteEmail: { type: 'string' },
-      inviteToken: { type: 'string' },
+      _id: { model: 'user', required: true },
+      role: { type: 'string', enum: ['owner', 'manager'], required: true },
+      status: { type: 'string', default: 'active', enum: ['active', 'deleted'], required: true },
+    }],
+    invites: [{
+      email: { type: 'email', required: true },
+      role: { type: 'string', enum: ['owner', 'manager'], required: true },
+      inviteToken: { type: 'string', required: true },
     }],
   },
 
-  findBL: ['users.inviteToken'],
+  findBL: ['invites.token'],
   updateBL: ['status', 'users'],
 
   afterFind: [
@@ -34,8 +37,6 @@ export default {
         for (let i=data.users.length; i--;) {
           const user = data.users[i]
           const userExpanded = data.usersExpanded.find(o => String(o._id) == String(user._id))
-          // console.log(userExpanded)
-          if (user.inviteEmail) user.email = user.inviteEmail
           if (userExpanded) Object.assign(user, { ...userExpanded, name: fullName(userExpanded) })
         }
         delete data.usersExpanded
