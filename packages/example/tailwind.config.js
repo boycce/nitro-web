@@ -20,7 +20,7 @@ export default {
   },
   theme: {
     // Note: No class order is guaranteed when using mulitple extension classes below on an element.
-    // Full list: https://github.com/tailwindlabs/tailwindcss/blob/main/stubs/config.full.js#L889
+    // Full list: https://github.com/tailwindlabs/tailwindcss/blob/v3.4.19/stubs/config.full.js#L889
     extend: {
       boxShadow: {
         'dropdown-ul': '0 2px 8px 0 rgba(0, 0, 0, 0.05)',
