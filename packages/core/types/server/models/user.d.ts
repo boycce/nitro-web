@@ -1,82 +1,63 @@
 declare namespace _default {
     namespace fields {
-        export namespace avatar {
+        namespace avatar {
             let type: string;
         }
-        export namespace company {
+        namespace company {
             let model: string;
             let required: boolean;
         }
-        export namespace email {
+        namespace email {
             let type_1: string;
             export { type_1 as type };
             let required_1: boolean;
             export { required_1 as required };
             export let index: string;
         }
-        export namespace isInvited {
+        namespace isAdmin {
             let type_2: string;
             export { type_2 as type };
+            let _default: boolean;
+            export { _default as default };
         }
-        export namespace firstName {
+        namespace firstName {
             let type_3: string;
             export { type_3 as type };
             let required_2: boolean;
             export { required_2 as required };
         }
-        export namespace lastName {
+        namespace lastName {
             let type_4: string;
             export { type_4 as type };
             let required_3: boolean;
             export { required_3 as required };
         }
-        export namespace status {
+        namespace stripeCustomer {
             let type_5: string;
             export { type_5 as type };
-            let _default: string;
-            export { _default as default };
-            let _enum: string[];
-            export { _enum as enum };
         }
-        export namespace stripeCustomer {
+        namespace stripeSubscription {
             let type_6: string;
             export { type_6 as type };
         }
-        export namespace stripeSubscription {
+        namespace stripeIntents {
             let type_7: string;
             export { type_7 as type };
         }
-        export namespace stripeIntents {
+        namespace usedFreeTrial {
             let type_8: string;
             export { type_8 as type };
-        }
-        export namespace type_9 {
-            let type_10: string;
-            export { type_10 as type };
-            let _default_1: string;
+            let _default_1: boolean;
             export { _default_1 as default };
-            let _enum_1: string[];
-            export { _enum_1 as enum };
         }
-        export { type_9 as type };
-        export namespace usedFreeTrial {
-            let type_11: string;
-            export { type_11 as type };
-            let _default_2: boolean;
-            export { _default_2 as default };
-        }
-        export namespace password {
-            let type_12: string;
-            export { type_12 as type };
+        namespace password {
+            let type_9: string;
+            export { type_9 as type };
             export let minLength: number;
         }
-        export namespace inviteToken {
-            let type_13: string;
-            export { type_13 as type };
-        }
-        export namespace resetToken {
-            let type_14: string;
-            export { type_14 as type };
+        namespace resetToken {
+            let type_10: string;
+            export { type_10 as type };
         }
     }
     let findBL: string[];

@@ -90,25 +90,39 @@ declare namespace _default {
             export { _default_2 as default };
             let _enum: string[];
             export { _enum as enum };
+            let required_3: boolean;
+            export { required_3 as required };
         }
         let users: {
             _id: {
                 model: string;
+                required: boolean;
             };
             role: {
                 type: string;
                 enum: string[];
+                required: boolean;
             };
             status: {
                 type: string;
-                required: boolean;
+                default: string;
                 enum: string[];
+                required: boolean;
             };
-            inviteEmail: {
+        }[];
+        let invites: {
+            email: {
                 type: string;
+                required: boolean;
+            };
+            role: {
+                type: string;
+                enum: string[];
+                required: boolean;
             };
             inviteToken: {
                 type: string;
+                required: boolean;
             };
         }[];
     }
