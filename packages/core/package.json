@@ -20,6 +20,10 @@
     "./util": {
       "import": "./util.js",
       "types": "./types/util.d.ts"
+    },
+    "./constants": {
+      "import": "./server/constants.js",
+      "types": "./types/server/constants.d.ts"
     }
   },
   "scripts": {

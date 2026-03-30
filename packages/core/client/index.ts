@@ -4,6 +4,7 @@ import '../types/globals.d.ts'
 // Utility functions (since this file is an export, use export path for js declarations to work in host projects)
 export * from 'nitro-web/util'
 export * as util from 'nitro-web/util'
+export { currencies, countries } from 'nitro-web/constants'
 
 // Main types (since this file is an export, this needs to be a relative path, we cant use tsconfig path aliases)
 export * from '../types'

@@ -1,4 +1,5 @@
-import { currencies, countries } from 'nitro-web/server'
+// Place shared constants here that are used in both client and server files, use JsDoc for type definitions
+import { currencies, countries } from 'nitro-web/constants'
 
 // --- Enums ------------------------------------
 
@@ -8,8 +9,8 @@ import { currencies, countries } from 'nitro-web/server'
  * @typedef {'owner'|'manager'} UserRole
  * @typedef {'active'|'unpaid'|'deleted'} CompanyStatus
  * @typedef {'nz'} LocaleCountry
- * @typedef {import('nitro-web/server').Country} Country
- * @typedef {import('nitro-web/server').Currency} Currency
+ * @typedef {import('nitro-web/constants').Country} Country
+ * @typedef {import('nitro-web/constants').Currency} Currency
  */
 
 /** @type {{ value: UserRole, label: string }[]} */
