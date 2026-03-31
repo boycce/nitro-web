@@ -12,7 +12,7 @@ import { isArray, pick, ucFirst, fullNameSplit } from 'nitro-web/util'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 let authConfig = null
-let auth = {
+export const auth = {
   userFindFromProvider, userSigninGetStore, getStore,
   userCreate, passwordValidate, tokenCreate, tokenParse, tokenSend,
   tokenConfirmForReset, tokenConfirmForSingleTenant, tokenConfirmForMultiTenant,
@@ -34,15 +34,14 @@ export const routes = {
 }
 
 function setup(middleware, _config, helpers = {}) {
-  // Tip: you can pass in your own helpers to override the default helpers, `this` context contains all helpers.
+  // Tip: you can pass in your own helpers to override the default helpers, internally all functions are called
+  // with `auth` as the context, so `this` context contains all helpers.
   // E.g. setup: (middleware, config, helpers) => authRoutes.setup(middleware, config, { getStore, ... })
   const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant', 
     'confirmInvites']
   authConfig = pick(_config, configKeys)
-  auth = { ...auth, ...helpers }
-  // Bind all the functions to the auth object (so the can be individually overridden and reference other helpers)
-  for (const key of Object.keys(auth)) {
-    if (typeof auth[key] === 'function') auth[key] = auth[key].bind(auth)
+  for (const key of Object.keys(helpers)) {
+    auth[key] = helpers[key]
   }
   for (const key of ['baseUrl', 'emailFrom', 'env', 'name']) {
     if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
@@ -274,8 +273,12 @@ export async function userFindFromProvider(query, passwordToCheck) {
   }
   if (!user) {
     throw new Error(checkPassword ? 'Email or password is incorrect.' : 'Session-user is invalid.')
-  } else if (user.status && user.status !== 'active') {
-    throw new Error('This user account is not active.')
+  } else if (user.status?.match(/removed|deleted|unavailable/)) {
+    throw new Error('This user account is not available.')
+  } else if (user.status === 'terminated') {
+    throw new Error('This user account has been terminated.')
+  } else if (user.status === 'invited') {
+    throw new Error('This user account is not yet active.')
   } else if (isMultiTenant && !user.company) {
     throw new Error('The current company is no longer associated with this user')
   } else if (isMultiTenant && user.company.status != 'active') {
@@ -303,7 +306,7 @@ export async function userSigninGetStore(user, isDesktop) {
   user.desktop = isDesktop
 
   const jwt = jsonwebtoken.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '30d' })
-  const store = await this.getStore(user)
+  const store = await auth.getStore(user)
   return { ...store, jwt }
 }
 
@@ -349,7 +352,7 @@ export async function userCreate({ password, password2, company, ...userDataProp
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
-      typeof password === 'undefined' ? Promise.resolve() : this.passwordValidate(password, password2),
+      typeof password === 'undefined' ? Promise.resolve() : auth.passwordValidate(password, password2),
       ...(companyData ? [db.company.validate(companyData, options)] : []),
     ])
 
@@ -375,7 +378,7 @@ export async function userCreate({ password, password2, company, ...userDataProp
     }
 
     // Return the user
-    return await this.userFindFromProvider({ _id: userId })
+    return await auth.userFindFromProvider({ _id: userId })
 
   } catch (err) {
     if (!isArray(err)) throw err
@@ -425,21 +428,22 @@ export function tokenParse(token, modelName, maxAgeMs = 1000 * 60 * 60 * 24) {
 }
 
 export async function tokenConfirmForReset(req) {
-  return await this.tokenConfirmForSingleTenant(req, true)
+  return await auth.tokenConfirmForSingleTenant(req, true)
 }
 
 export async function tokenConfirmForSingleTenant(req, isReset) {
   const { token, password, password2, ...userData } = req.body
   const tokenName = isReset ? 'resetToken' : 'inviteToken'
   const desktop = req.query.desktop
-  const id = this.tokenParse(token, 'user')
-  await this.passwordValidate(password, password2)
+  const _id = db.id(auth.tokenParse(token, 'user'))
+  await auth.passwordValidate(password, password2)
 
-  const user = await db.user.findOne({ query: id, blacklist: ['-' + tokenName], _privateData: true })
-  if (!user || user[tokenName] !== token) throw new Error('Sorry your token is invalid or has already been used.')
+  // Find the inviteToken, but bypass hooks because inviteToken may = true in a potential afterFind hook.
+  const user1 = await db.user._findOne({ _id: _id}, { projection: { [tokenName]: 1 } })
+  if (!user1 || user1[tokenName] !== token) throw new Error('Sorry your token is invalid or has already been used.')
 
   await db.user.update({
-    query: user._id,
+    query: _id,
     data: {
       password: await bcrypt.hash(password, 10),
       [tokenName]: '', // remove token
@@ -447,16 +451,22 @@ export async function tokenConfirmForSingleTenant(req, isReset) {
     },
     blacklist: ['-' + tokenName, '-password'],
   })
-  return await this.userSigninGetStore({ ...user, [tokenName]: undefined }, desktop)
+
+  const user2 = await db.user.findOne({ query: _id })
+  return await auth.userSigninGetStore({ ...user2, [tokenName]: undefined }, desktop)
 }
 
 export async function tokenConfirmForMultiTenant(req) {
   const { token, ...userData } = req.body
   const desktop = req.query.desktop
-  const companyId = db.id(this.tokenParse(token, 'company'))
+  const companyId = db.id(auth.tokenParse(token, 'company'))
 
-  // Find the invite from the token (company.invites[] entry)
-  const company = await db.company.findOne({ query: { _id: companyId, 'invites.inviteToken': token }, _privateData: true })
+  // Find the invite from the token (company.invites[] entry), but bypass hooks because inviteToken may = true in 
+  // a potential afterFind hook.
+  const company = await db.company._findOne(
+    { _id: companyId, 'invites.inviteToken': token }, 
+    { projection: { 'invites.inviteToken': 1 } }
+  )
   if (!company) throw new Error('Sorry your token is invalid or has already been used.')
   const invite = company.invites.find(inv => inv.inviteToken === token)
 
@@ -467,7 +477,7 @@ export async function tokenConfirmForMultiTenant(req) {
   }
 
   // Find or create new user
-  const user = existingUser || await this.userCreate({ ...userData, company: companyId }, true) // AKA "active company"
+  const user = existingUser || await auth.userCreate({ ...userData, company: companyId }, true) // AKA "active company"
   
   // Add the user to the company
   await db.company.update({
@@ -477,7 +487,7 @@ export async function tokenConfirmForMultiTenant(req) {
   })
 
   // Signin
-  return await this.userSigninGetStore(user, desktop)
+  return await auth.userSigninGetStore(user, desktop)
 }
 
 /**
@@ -498,7 +508,7 @@ export async function tokenSend({ type = 'reset', _id, email, firstName, beforeU
 
   const tokenName = type === 'companyInvite' ? 'inviteToken' : type + 'Token'
   const modelName = type === 'companyInvite' ? 'company' : 'user'
-  const token = await this.tokenCreate(modelName, _id)
+  const token = await auth.tokenCreate(modelName, _id)
   const _beforeUpdate = beforeUpdate || (o => o)
 
   if (modelName === 'company') {
