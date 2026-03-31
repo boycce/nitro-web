@@ -3,7 +3,10 @@ export function inviteInstructions(req: any, res: any): Promise<void>;
 export function resetConfirm(req: any, res: any): Promise<void>;
 export function inviteConfirm(req: any, res: any): Promise<void>;
 export function userFindFromProvider(query: any, passwordToCheck: any, ...args: any[]): Promise<any>;
-export function userSigninGetStore(user: any, isDesktop: any): Promise<any>;
+export function userSigninGetStore(user: any, isDesktop: any): Promise<{
+    jwt: string;
+    user: any;
+}>;
 export function getStore(user: any): Promise<{
     user: any;
 }>;
@@ -24,9 +27,18 @@ export function userCreate({ password, password2, company, ...userDataProp }: {
 export function passwordValidate(password: string, password2: any): Promise<void>;
 export function tokenCreate(modelName: any, id: any): Promise<any>;
 export function tokenParse(token: any, modelName: any, maxAgeMs?: number): any;
-export function tokenConfirmForReset(req: any): Promise<any>;
-export function tokenConfirmForSingleTenant(req: any, isReset: any): Promise<any>;
-export function tokenConfirmForMultiTenant(req: any): Promise<any>;
+export function tokenConfirmForReset(req: any): Promise<{
+    jwt: string;
+    user: any;
+}>;
+export function tokenConfirmForSingleTenant(req: any, isReset: any): Promise<{
+    jwt: string;
+    user: any;
+}>;
+export function tokenConfirmForMultiTenant(req: any): Promise<{
+    jwt: string;
+    user: any;
+}>;
 /**
  * Creates and sends a reset or invite token to a user or company
  * @param {object} options
@@ -49,6 +61,19 @@ export function tokenSend({ type, _id, email, firstName, beforeUpdate, beforeSen
     token: string;
     mailgunPromise: Promise<unknown>;
 }>;
+export namespace auth {
+    export { userFindFromProvider };
+    export { userSigninGetStore };
+    export { getStore };
+    export { userCreate };
+    export { passwordValidate };
+    export { tokenCreate };
+    export { tokenParse };
+    export { tokenSend };
+    export { tokenConfirmForReset };
+    export { tokenConfirmForSingleTenant };
+    export { tokenConfirmForMultiTenant };
+}
 export const routes: {
     'get     /api/store': (typeof store)[];
     'get     /api/signout': (typeof signout)[];
