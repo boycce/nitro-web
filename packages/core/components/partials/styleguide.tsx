@@ -494,6 +494,17 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 onChange={(e) => onChange(e, setState)}
               />
             </div>
+            <div>
+              <label for="action">Disabled</label>
+              <Select 
+                name="action"
+                isDisabled={true}
+                options={useMemo(() => [
+                  { value: 'edit', label: 'Edit' },
+                  { value: 'delete', label: 'Delete' },
+                ], [])} 
+              />
+            </div>
           </div>
         </div>
       )}
@@ -547,8 +558,13 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 name="amount" type="currency" state={state} currency={state.currency || 'nzd'} 
                 // Example of using a custom format and currencies, e.g. 
                 format={'¤#,##0.00'} 
-                currencies={currencies} 
+                currencies={currencies}
+                onChange={(e) => onChange(e, setState)}
               />
+            </div>
+            <div>
+              <label for="firstName">First Name (disabled)</label>
+              <Field name="firstName" state={state} onChange={(e) => onChange(e, setState)} disabled />
             </div>
           </div>
         </div>

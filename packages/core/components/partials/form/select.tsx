@@ -17,6 +17,7 @@ type GetSelectStyle = {
   name: string
   isFocused?: boolean
   isSelected?: boolean
+  isDisabled?: boolean
   hasError?: boolean
   usePrefixes?: boolean
 }
@@ -122,7 +123,7 @@ function SelectBase({
           multiValueLabel: () => '',
           multiValueRemove: () => getSelectStyle({ name: 'multiValueRemove' }),
           placeholder: () => getSelectStyle({ name: 'placeholder' }),
-          singleValue: () => getSelectStyle({ name: 'singleValue', hasError: !!error }),
+          singleValue: (p) => getSelectStyle({ name: 'singleValue', hasError: !!error, isDisabled: p.isDisabled }),
           // Indicators
           clearIndicator: () => getSelectStyle({ name: 'clearIndicator' }),
           dropdownIndicator: () => getSelectStyle({ name: 'dropdownIndicator' }),
@@ -267,6 +268,7 @@ const selectStyles = {
       + '!min-h-0 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
+    disabled: 'cursor-not-allowed bg-input-disabled-bg',
   },
   valueContainer: 'py-[9px] px-[12px] py-input-y px-input-x gap-1', // dont twMerge (input-x is optional)
   // Input container objects
@@ -281,6 +283,7 @@ const selectStyles = {
   singleValue: {
     base: 'text-input',
     error: 'text-danger-foreground',
+    disabled: 'text-input-disabled',
   },
   // Icon indicators
   clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground',
@@ -298,7 +301,7 @@ const selectStyles = {
   },
 }
 
-export function getSelectStyle({ name, isFocused, isSelected, hasError, usePrefixes }: GetSelectStyle) {
+export function getSelectStyle({ name, isFocused, isSelected, isDisabled, hasError, usePrefixes }: GetSelectStyle) {
   // Returns a class list that conditionally includes hover/focus modifier classes, or uses CSS modifiers, e.g. hover:, focus:
   // @ts-expect-error
   const obj = selectStyles[name]
@@ -314,7 +317,8 @@ export function getSelectStyle({ name, isFocused, isSelected, hasError, usePrefi
   }
   if (obj.error && hasError) output += ` ${obj.error}`
   if (obj.selected && isSelected) output += ` ${obj.selected}`
-  
+  if (obj.disabled && isDisabled) output += ` ${obj.disabled}`
+
   return twMerge(output)
 }
 

@@ -159,14 +159,14 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
   const px = 'px-[12px]'
   const py = 'py-[9px] py-input-y'
   return (
-    'block col-start-1 row-start-1 w-full rounded-md bg-white text-input-base outline outline-1 -outline-offset-1 ' +
+    'block col-start-1 row-start-1 w-full rounded-md bg-white disabled:bg-input-disabled-bg text-input-base outline outline-1 -outline-offset-1 ' +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' + `${py} ${px} ` +
     (iconPos == 'right' && Icon ? 'pr-[32px] pr-input-x-icon pl-input-x ' : '') +
     (iconPos == 'left' && Icon ? 'pl-[32px] pl-input-x-icon pr-input-x ' : 'px-input-x ') +
     (iconPos == 'left' && Icon && type == 'color' ? 'indent-[5px] ' : '') +
-    (error 
-      ? 'text-danger-foreground outline-danger focus:outline-danger ' 
-      : 'text-input outline-input-border focus:outline-input-border-focus ') + 
+    (error
+      ? 'text-danger-foreground outline-danger focus:outline-danger '
+      : 'text-input outline-input-border focus:outline-input-border-focus disabled:text-input-disabled ') +
     (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ') + 
     'nitro-input'
   )

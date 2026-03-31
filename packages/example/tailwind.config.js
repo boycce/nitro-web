@@ -49,6 +49,8 @@ export default {
         // Nitro element colors
         'input': colors.gray[900],
         'input-placeholder': colors.gray[400],
+        'input-disabled': colors.gray[400],
+        'input-disabled-bg': colors.gray[100],
         'input-border': colors.gray[300],
         'input-border-focus': '#4c50f9',
         'dropdown-selected-foreground': darken('#4c50f9', 0.05),
