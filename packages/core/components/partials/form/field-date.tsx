@@ -20,6 +20,8 @@ type PreFieldDateProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onCh
   mode: 'single' | 'multiple' | 'range' | 'time'
   /** show the time picker for single mode*/
   showTime?: boolean
+  /** pattern to use for the date picker */
+  pattern?: string
   /** prefix to add to the input */
   prefix?: string
   /** number of months to show in the dropdown */
@@ -61,6 +63,7 @@ export function FieldDate({
   Icon,
   numberOfMonths,
   onChange: onChangeProp,
+  pattern: patternProp,
   prefix = '',
   showTime,
   DayPickerProps,
@@ -73,8 +76,10 @@ export function FieldDate({
   const [preventInputValueUpdates, setPreventInputValueUpdates] = useState(false)
   const [prefixWidth, setPrefixWidth] = useState(0)
   const dropdownRef = useRef<DropdownRef>(null)
-  const pattern = props.mode == 'time' ? 'hh:mmaa' :  `d MMM yyyy${showTime && props.mode == 'single' ? ' hh:mmaa' : ''}`
   const id = props.id || props.name
+  const pattern = patternProp || (
+    props.mode == 'time' ? 'hh:mmaa' :  `d MMM yyyy${showTime && props.mode == 'single' ? ' hh:mmaa' : ''}`
+  )
 
   // Since value and onChange are optional, we need need to create an internal value state
   const [internalValue, setInternalValue] = useState<Timestamp[]>(() => preInternalValue(props))
