@@ -1,5 +1,5 @@
 // Place shared constants here that are used in both client and server files, use JsDoc for type definitions
-import { currencies, countries } from 'nitro-web/constants'
+export { currencies, countries, countryOptions, currencyOptions } from 'nitro-web/constants'
 
 // --- Enums ------------------------------------
 
@@ -55,11 +55,5 @@ export const locales = {
   },
 }
 
-/** @type {{ value: Country, label: string }[]} */
-export const localeOptions = /** @type {Country[]} */(Object.keys(locales)).map((c) => ({ value: c, label: locales[c].name }))
+export const localeOptions = Object.entries(locales).map(([k, l]) => ({ value: /**@type {Country}*/(k), label: l.name }))
 
-/** @type {{ value: Country, label: string }[]} */
-export const countryOptions = /** @type {Country[]} */(Object.keys(countries)).map((c) => ({ value: c, label: countries[c].name }))
-
-/** @type {{ value: Currency, label: string }[]} */
-export const currencyOptions = /** @type {Currency[]} */(Object.keys(currencies)).map((c) => ({ value: c, label: currencies[c].name }))

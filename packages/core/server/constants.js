@@ -266,3 +266,5 @@ export const countries = {
   zm: { name: 'Zambia', flag: '🇿🇲' },
   zw: { name: 'Zimbabwe', flag: '🇿🇼' },
 }
+export const countryOptions = Object.entries(countries).map(([k, c]) => ({ value: /**@type {Country}*/(k), label: c.name, flag: c.flag }))
+export const currencyOptions = Object.entries(currencies).map(([k, c]) => ({ value: /**@type {Currency}*/(k), label: c.name }))
