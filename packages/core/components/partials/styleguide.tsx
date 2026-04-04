@@ -2,6 +2,7 @@ import {
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
   Filters, FilterType, Table, TableColumn, usePushChangesToPath, Spinner, LoadingWithDots,
 } from 'nitro-web'
+import { countryOptions } from 'nitro-web/constants'
 import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
 import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
 import React from 'react'
@@ -242,8 +243,8 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
           Components are styled using&nbsp;
           <a href="https://v3.tailwindcss.com/docs/configuration" class="underline" target="_blank" rel="noreferrer">TailwindCSS</a>. 
           {injectedConfig.isDemo && 
-            <React.Fragment>
-              <a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state
+            <React.Fragment> 
+              &nbsp;<a href="#" class="underline" onClick={indirectlyChangeTheState}>Click here</a> to indirectly change the state
             </React.Fragment>
           }
         </p>
@@ -448,10 +449,12 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
               <Select
                 // https://github.com/lipis/flag-icons
                 name="country" 
-                mode="country"
                 state={state} 
-                options={useMemo(() => [{ value: 'nz', label: 'New Zealand' }, { value: 'au', label: 'Australia' }], [])} 
+                options={countryOptions}
                 onChange={(e) => onChange(e, setState)}
+                // menuIsOpen={true}
+                // useMemo(() => [{ value: 'nz', label: 'New Zealand' }, { value: 'au', label: 'Australia' }], [])} 
+                // classNames={{ flag: () => 'mr-4' }}
               />
             </div>
             <div>
@@ -466,7 +469,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                 onInputChange={onCustomerSearch}
                 options={useMemo(() => [ 
                   { 
-                    className: 'bb', 
+                    className: 'border-bottom-with-space', 
                     fixed: true,
                     value: '0',
                     label: (
@@ -476,9 +479,9 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                       </React.Fragment>
                     ), 
                   },
-                  { value: '1', label: 'Iron Man Industries' },
-                  { value: '2', label: 'Captain America' },
-                  { value: '3', label: 'Thor Limited' },
+                  { value: '1', label: 'Wayne Enterprises' },
+                  { value: '2', label: 'Iceberg Lounge Limited' },
+                  { value: '3', label: 'Ace Chemicals Company' },
                 ], [customerSearch])}
               />
             </div>

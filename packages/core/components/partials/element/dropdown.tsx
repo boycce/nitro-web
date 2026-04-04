@@ -1,6 +1,6 @@
 import { css } from 'twin.macro'
 import { forwardRef, cloneElement } from 'react'
-import { getSelectStyle, twMerge } from 'nitro-web'
+import { getSelectClassName, twMerge } from 'nitro-web'
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 
 export type DropdownOption = { 
@@ -61,7 +61,7 @@ export const Dropdown = forwardRef(function Dropdown({
   isHoverable = isHoverable && !menuIsOpen
   const dropdownRef = useRef<HTMLDivElement|null>(null)
   const [isActive, setIsActive] = useState(!!menuIsOpen)
-  const menuStyle = getSelectStyle({ name: 'menu' })
+  const menuStyle = getSelectClassName({ name: 'menu' })
   const [direction, setDirection] = useState<null | 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right'>(null)
   const [ready, setReady] = useState(false)
 
@@ -187,7 +187,7 @@ export const Dropdown = forwardRef(function Dropdown({
         {menuContent}
         {
           options && options.map((option, i) => {
-            const optionStyle = getSelectStyle({ name: 'option', usePrefixes: true, isSelected: option.isSelected })
+            const optionStyle = getSelectClassName({ name: 'option', usePrefixes: true, isSelected: option.isSelected })
             return (
               <li 
                 key={i} 

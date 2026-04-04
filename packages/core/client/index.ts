@@ -50,7 +50,7 @@ export { type FieldColorProps } from '../components/partials/form/field-color'
 export { type FieldCurrencyProps } from '../components/partials/form/field-currency'
 export { type FieldDateProps } from '../components/partials/form/field-date'
 export { Location } from '../components/partials/form/location'
-export { Select, getSelectStyle, type SelectProps, type SelectOption } from '../components/partials/form/select'
+export { Select, getSelectClassName, type SelectProps, type SelectOption } from '../components/partials/form/select'
 
 // Component Other Components
 export { IsFirstRender } from '../components/partials/is-first-render'
