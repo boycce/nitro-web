@@ -1,6 +1,7 @@
 import { 
   Drop, Dropdown, Field, Select, Button as ButtonNitro, Checkbox, GithubLink, Modal, Calendar, injectedConfig, TimePicker,
   Filters, FilterType, Table, TableColumn, usePushChangesToPath, Spinner, LoadingWithDots,
+  Initials,
 } from 'nitro-web'
 import { countryOptions } from 'nitro-web/constants'
 import { date, getCurrencyOptions, onChange, ucFirst } from 'nitro-web/util'
@@ -63,8 +64,9 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
       amount: 100,
       brandColor: '#F3CA5F',
       colorsMulti: ['blue', 'green'],
-      country: 'nz',
+      country: 'cd',
       currency: 'nzd',
+      customer: '1',
       date: Date.now(),
       dateRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
       dateMultiple: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 2],
@@ -479,9 +481,21 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                       </React.Fragment>
                     ), 
                   },
-                  { value: '1', label: 'Wayne Enterprises' },
-                  { value: '2', label: 'Iceberg Lounge Limited' },
-                  { value: '3', label: 'Ace Chemicals Company' },
+                  {
+                    value: '1', 
+                    label: 'Wayne Enterprises',
+                    IconLeft: <Initials icon={{ initials: 'WE' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                  },
+                  {
+                    value: '2', 
+                    label: 'Iceberg Lounge Limited',
+                    IconLeft: <Initials icon={{ initials: 'IL' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                  },
+                  {
+                    value: '3', 
+                    label: 'Ace Chemicals Company',
+                    IconLeft: <Initials icon={{ initials: 'AC' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                  },
                 ], [customerSearch])}
               />
             </div>

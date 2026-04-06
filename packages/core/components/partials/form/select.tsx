@@ -4,6 +4,7 @@ import { memo, useMemo, Fragment } from 'react'
 import ReactSelect, { 
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
   DropdownIndicatorProps, MultiValueRemoveProps, ClassNamesConfig,
+  ValueContainerProps,
 } from 'react-select'
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
 import { ChevronsUpDownIcon, XIcon } from 'lucide-react'
@@ -26,6 +27,7 @@ export type SelectOption = {
   value: unknown, 
   label: string | React.ReactNode, 
   fixed?: boolean,
+  IconLeft?: React.ReactNode,
   flag?: string | React.ReactNode,
   data?: { [key: string]: unknown } 
 }
@@ -150,6 +152,7 @@ function SelectBase({
           DropdownIndicator, 
           ClearIndicator, 
           MultiValueRemove,
+          ValueContainer,
         }}
         styles={{
           menu: (base) => ({ 
@@ -193,35 +196,43 @@ function Control({ children, ...props }: ControlProps) {
   )
 }
 
-function SingleValue(props: SingleValueProps) {
-  const selectedOption = props.getValue()[0] as { labelControl?: string, flag?: string | React.ReactNode }
+
+function ValueContainer({ children, ...props}: ValueContainerProps) {
+  return (
+    // <div class="cat-tre">
+    <components.ValueContainer {...props}>{children}</components.ValueContainer>
+    // </div>
+  )
+}
+
+function SingleValue({ children, ...props }: SingleValueProps) {
+  const selectedOption = props.getValue()[0] as { labelControl?: string, flag?: string | React.ReactNode, IconLeft?: React.ReactNode }
   // @ts-expect-error 
   const flagClassName = props.getClassNames('flag')
 
-  return (
+  return (  
     <components.SingleValue {...props}>
-      <Fragment>
-        { 
-          selectedOption?.labelControl
-            ? <Fragment>{selectedOption.labelControl}</Fragment>
-            : <Fragment>
-                {selectedOption?.flag && <span className={flagClassName}>{selectedOption.flag}</span>}
-                {props.children}
-              </Fragment>
-        }
-      </Fragment>
+      { 
+        selectedOption?.labelControl
+          ? <Fragment>{selectedOption.labelControl}</Fragment>
+          : <Fragment>
+              {selectedOption?.flag && <span className={flagClassName}>{selectedOption.flag}</span>}
+              {selectedOption?.IconLeft}
+              <span class="overflow-hidden text-ellipsis whitespace-nowrap">{children}</span>
+            </Fragment>
+      }
     </components.SingleValue>
   )
 }
 
 function Option(props: OptionProps) {
-  const data = props.data as { className?: string, flag?: string | React.ReactNode }
+  const data = props.data as { className?: string, flag?: string | React.ReactNode, IconLeft?: React.ReactNode }
   // const _nitro = (props.selectProps as { _nitro?: { mode?: string } })?._nitro
   // @ts-expect-error
   const flagClassName = props.getClassNames('flag')
   return (
     <components.Option className={data.className} {...props}>
-      <span class="flex-auto">{data.flag && <span className={flagClassName}>{data.flag}</span>}{props.label}</span>
+      <span class="flex-auto">{data.flag && <span className={flagClassName}>{data.flag}</span>}{data.IconLeft}{props.label}</span>
       {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" />}
     </components.Option>
   )
@@ -261,7 +272,7 @@ const selectClassNames = {
     error: 'outline-danger',
     disabled: 'cursor-not-allowed bg-input-disabled-bg',
   },
-  valueContainer: 'py-[9px] px-[12px] py-input-y px-input-x gap-1', // dont twMerge (input-x is optional)
+  valueContainer: 'gap-1 py-[9px] px-[12px] py-input-y px-input-x', // dont twMerge (input-x is optional)
   // Input container objects
   input: {
     base: 'text-input',
@@ -272,14 +283,14 @@ const selectClassNames = {
   multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-foreground hover:bg-red-50',
   placeholder: 'text-input-placeholder',
   singleValue: {
-    base: 'text-input',
+    base: 'text-input !overflow-visible min-w-0 flex items-center',
     error: 'text-danger-foreground',
     disabled: 'text-input-disabled',
   },
   // Icon indicators
   clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground',
   dropdownIndicator: 'p-1 hover:bg-gray-100 text-gray-500 rounded-md hover:text-black',
-  indicatorsContainer: 'p-1 px-2 gap-1',
+  indicatorsContainer: 'p-1 pl-0 pr-2 gap-1',
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
   // Dropdown menu
   menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
@@ -290,7 +301,8 @@ const selectClassNames = {
     hover: 'bg-gray-50',
     selected: '!bg-gray-100 text-dropdown-selected-foreground',
   },
-  flag: 'align-middle text-[1.2em] leading-[1em] mr-1.5',
+  // Nitro specific
+  flag: 'align-middle text-[1.2em] leading-[1em] mr-1.5 flex-shrink-0',
 }
 
 export function getSelectClassName({ name, isFocused, isSelected, isDisabled, hasError, usePrefixes }: GetSelectClassName) {
