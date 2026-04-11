@@ -871,6 +871,9 @@ export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[])
  */
 export function ucFirst(string: string): string;
 export { TZDate } from "@date-fns/tz";
+export function getIdFromObject(object: {
+    _id?: string;
+} | string | undefined): string;
 /**
  * Returns a list of response errors
  */
