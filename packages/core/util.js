@@ -856,6 +856,15 @@ export function getErrorFromState (state, path) {
 }
 
 /**
+ * Get the id from an object
+ * @param {{_id?: string}|string|undefined} object - The object to get the id from
+ * @returns {string} The id from the object
+ */
+export const getIdFromObject = (object) => {
+  return typeof object === 'object' && object?._id ? object._id : ''
+}
+
+/**
  * Get the width of a prefix
  * @param {string} prefix
  * @param {number} [paddingRight=0]

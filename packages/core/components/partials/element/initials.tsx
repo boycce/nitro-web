@@ -29,7 +29,7 @@ export function Initials({ icon, isBig, isMedium, isSmall, isRound, className }:
   )
 }
 
-function getColorByLetter(letter: string) {
+export function getColorByLetter(letter: string) {
   const colors = ['#067306', '#AA33FF', '#FF54AF', '#F44336', '#c03c3c', '#5451e0', '#d88c1b']
   const charIndex = letter.toLowerCase().charCodeAt(0) - 97
   const charIndexLimited = (charIndex < 0 || charIndex > 25) ? 25 : charIndex

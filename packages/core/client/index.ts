@@ -30,7 +30,7 @@ export { Calendar, type CalendarProps } from '../components/partials/element/cal
 export { Dropdown, type DropdownProps, type DropdownOption } from '../components/partials/element/dropdown'
 export { Filters, type FilterType, usePushChangesToPath } from '../components/partials/element/filters'
 export { GithubLink } from '../components/partials/element/github-link'
-export { Initials } from '../components/partials/element/initials'
+export { Initials, getColorByLetter } from '../components/partials/element/initials'
 export { Message, type MessageIcons } from '../components/partials/element/message'
 export { Modal } from '../components/partials/element/modal'
 export { Sidebar, type SidebarProps } from '../components/partials/element/sidebar'

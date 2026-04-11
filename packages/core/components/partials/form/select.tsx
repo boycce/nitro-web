@@ -232,7 +232,7 @@ function Option(props: OptionProps) {
   const flagClassName = props.getClassNames('flag')
   return (
     <components.Option className={data.className} {...props}>
-      <span class="flex-auto">{data.flag && <span className={flagClassName}>{data.flag}</span>}{data.IconLeft}{props.label}</span>
+      <span class="flex-auto min-w-0">{data.flag && <span className={flagClassName}>{data.flag}</span>}{data.IconLeft}{props.label}</span>
       {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" />}
     </components.Option>
   )
