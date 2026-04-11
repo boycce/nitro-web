@@ -28,7 +28,7 @@ export type TableProps<T> = {
   columns: TableColumn[]
   rows: T[]
   generateTd: (col: TableColumn, row: T, i: number, isLast: boolean) => JSX.Element | null
-  generateCheckboxActions?: (selectedRowIds: string[]) => JSX.Element | null
+  generateCheckboxActions?: (selectedRowIds: string[], setSelectedRowIds: (selectedRowIds: string[]) => void) => JSX.Element | null
   headerHeightMin?: number
   rowHeightMin?: number
   rowContentHeightMax?: number
@@ -128,6 +128,12 @@ export function Table<T extends TableRow>({
   // Reset selected rows when the location changes, or the number of rows changed (e.g. when a row is removed)
   useEffect(() => setSelectedRowIds([]), [location.key, (rows ?? []).map(row => row._id || '').join(',')])
 
+  // Drive the header checkbox's indeterminate state when some (but not all) rows are selected
+  useEffect(() => {
+    const input = document.querySelector<HTMLInputElement>(`input[name="checkbox-all-${rand}"]`)
+    if (input) input.indeterminate = selectedRowIds.length > 0 && selectedRowIds.length < rows.length
+  }, [selectedRowIds, rows, rand])
+
   // --- Sorting ---
 
   const navigate = useNavigate()
@@ -201,6 +207,7 @@ export function Table<T extends TableRow>({
                               size={checkboxSize}
                               name={`checkbox-all-${rand}`}
                               hitboxPadding={5}
+                              checked={rows.length > 0 && selectedRowIds.length === rows.length}
                               className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
                               checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
                               onChange={(e) => onSelect('all', e.target.checked)}
@@ -208,7 +215,7 @@ export function Table<T extends TableRow>({
                             <div 
                               className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[35px] [&>*]:z-10 whitespace-nowrap`}
                             >
-                              {generateCheckboxActions && generateCheckboxActions(selectedRowIds)}
+                              {generateCheckboxActions && generateCheckboxActions(selectedRowIds, setSelectedRowIds)}
                             </div>
                           </Fragment>
                         : <span className={twMerge(
