@@ -26,6 +26,7 @@ type GetSelectClassName = {
 export type SelectOption = { 
   value: unknown, 
   label: string | React.ReactNode, 
+  labelSearch?: string,
   fixed?: boolean,
   IconLeft?: React.ReactNode,
   flag?: string | React.ReactNode,
@@ -131,7 +132,8 @@ function SelectBase({
         id={containerId}
         filterOption={(option, searchText) => {
           if ((option.data as {fixed?: boolean}).fixed) return true
-          return filterFn(option, searchText)
+          const labelSearch = (option.data as {labelSearch?: string}).labelSearch
+          return filterFn(labelSearch ? { ...option, label: labelSearch } : option, searchText)
         }}
         menuPlacement="auto"
         minMenuHeight={250}
