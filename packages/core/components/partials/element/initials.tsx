@@ -1,38 +1,68 @@
 import { twMerge } from 'nitro-web/util'
 
+type NamedSize = 'big' | 'medium' | 'normal' | 'small'
+type Size = NamedSize | number
+
 type InitialsProps = {
-  icon?: { initials: string, hex?: string }
-  isBig?: boolean
-  isMedium?: boolean
-  isSmall?: boolean
+  initials: string,
+  color?: string, // e.g. '#067306' or 'text-primary'
+  colorBg?: string, // e.g. '#06730618' or 'bg-primary' (if not passed, color will be used)
+  opacityBg?: number, // e.g. 0.18
+  colors?: string[], // e.g. ['#067306']
+  size?: Size, // named ('big', 'medium', 'small') or pixel number (e.g. 20)
   isRound?: boolean
   className?: string
 }
 
-export function Initials({ icon, isBig, isMedium, isSmall, isRound, className }: InitialsProps) {
-  const color = icon?.hex || icon?.initials && getColorByLetter(icon?.initials) || '#000000'
+// Returns tailwind classes for the nearest named size bucket
+function sizeClasses(size: Size): string {
+  const px = typeof size === 'number' ? size : { big: 30, medium: 26, normal: 24, small: 21 }[size]
+  if (px <= 21) return 'size-[21px] text-[10px]'
+  else if (px <= 24) return 'size-[24px] text-[11px]' // default
+  else if (px <= 26) return 'size-[26px] text-[12px]'
+  else return 'size-[30px] text-[13px]'
+}
+
+export function Initials({ initials, color, colorBg, colors, opacityBg, size, isRound, className }: InitialsProps) {
+  // Check if className colors were passed
+  const colorFgClass = color?.startsWith('text-') ? color : undefined
+  const colorBgClass = colorBg?.startsWith('bg-') ? colorBg : undefined
+  if ((colorFgClass || colorBgClass) && (!color || !colorBg)) {
+    throw new Error('When using className colors, `color` and `colorBg` params are required')
+  }
+  // Check if hex colors were passed, otherwise use the color by letter
+  const colorFgHex = colorFgClass ? undefined : (color || getColorByLetter(initials, colors))
+  const colorBgHex = colorBgClass ? undefined : (colorBg || colorFgHex)
+
+  const sizeStyle = typeof size === 'number' ? { width: `${size}px`, height: `${size}px` } : {}
+
   return (
-    <span 
+    <span
+      style={{ color: colorFgHex, ...sizeStyle }}
       className={twMerge(
-        'nitro-initials flex items-center justify-center rounded-[5px] font-bold text-[11px] size-[24px]',
-        isBig && 'size-[40px] text-sm',
-        isMedium && 'size-[30px] text-xs',
-        isSmall && 'size-[22px]',
+        (
+          'nitro-initials inline-flex items-center justify-center font-bold text-[11px] size-[24px] relative rounded-md ' +
+          `overflow-hidden ring-1 ring-inset ring-[#00000012] ${colorFgClass}`
+        ),
+        sizeClasses(size || 'normal'),
         isRound && 'rounded-full',
-        !icon && 'w-0',
+        !initials && 'w-0',
         className
       )}
-      style={icon ? {backgroundColor: color + '18', color: color} : {}}
     >
-      {icon?.initials}
+      <span 
+        style={colorBgHex ? { backgroundColor: colorBgHex } : {}} 
+        className={`absolute inset-0  ${opacityBg || 'opacity-[10%]'} ${colorBgClass}`}
+      />
+      {initials}
     </span>
   )
 }
 
-export function getColorByLetter(letter: string) {
-  const colors = ['#067306', '#AA33FF', '#FF54AF', '#F44336', '#c03c3c', '#5451e0', '#d88c1b']
+export function getColorByLetter(letter: string, colors?: string[]) {
+  const colors2 = colors || ['#067306', '#AA33FF', '#FF54AF', '#F44336', '#c03c3c', '#5451e0', '#d88c1b']
   const charIndex = letter.toLowerCase().charCodeAt(0) - 97
   const charIndexLimited = (charIndex < 0 || charIndex > 25) ? 25 : charIndex
-  const index = Math.round(charIndexLimited / 25 * (colors.length-1))
-  return colors[index]
+  const index = Math.round(charIndexLimited / 25 * (colors2.length-1))
+  return colors2[index]
 }

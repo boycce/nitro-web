@@ -9,6 +9,23 @@ import { Check, EllipsisVerticalIcon, FileEditIcon } from 'lucide-react'
 import React from 'react'
 
 const perPage = 10
+const allGroups = [
+  'Links', 
+  'Dropdowns', 
+  'Filters', 
+  'Button Colors & Sizes', 
+  'Button Icons', 
+  'Loading Elements', 
+  'Varients', 
+  'Selects', 
+  'Inputs', 
+  'Date Inputs', 
+  'File Inputs & Calendar & Time', 
+  'Tables', 
+  'Modals & Notifications', 
+  'Custom Components',
+] as const
+
 const statusColors = function(status: string) {
   return {
     pending: 'bg-yellow-400',
@@ -22,6 +39,7 @@ type StyleguideProps = {
   elements?: { Button?: typeof ButtonNitro }
   children?: React.ReactNode
   currencies?: { [key: string]: { name: string, symbol: string, digits: number } }
+  groups?: Array<typeof allGroups[number]>
 }
 
 type QuoteExample = {
@@ -33,29 +51,14 @@ type QuoteExample = {
   status: string
 }
 
-export function Styleguide({ className, elements, children, currencies }: StyleguideProps) {
+export function Styleguide({ className, elements, children, currencies, groups }: StyleguideProps) {
   const Button = elements?.Button || ButtonNitro
   const [, setStore] = useTracked()
   const [customerSearch, setCustomerSearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
 
   // Tip: handy when developing or updating components, you can hide/show the groups you want to see
-  const groups = [
-    'Links',
-    'Dropdowns',
-    'Filters',
-    'Button Colors & Sizes',
-    'Button Icons',
-    'Loading Elements',
-    'Varients',
-    'Selects',
-    'Inputs',
-    'Date Inputs',
-    'File Inputs & Calendar & Time',
-    'Tables',
-    'Modals & Notifications',
-    'Custom Components',
-  ]
+  const visibleGroups = groups || allGroups
   const [state, setState] = useState(() => getState())
 
   function getState(useOldValues?: boolean) {
@@ -252,7 +255,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </p>
       </div>
 
-      {groups.includes('Links') && (
+      {visibleGroups.includes('Links') && (
         <div>
           <h2 class="h3">Links</h2>
           <div class="mb-6">
@@ -263,7 +266,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
   
-      {groups.includes('Dropdowns') && (
+      {visibleGroups.includes('Dropdowns') && (
         <div>
           <h2 class="h3">Dropdowns</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
@@ -297,7 +300,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Filters') && (
+      {visibleGroups.includes('Filters') && (
         <div>
           <h2 class="h3">Filters</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
@@ -327,7 +330,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Button Colors & Sizes') && (
+      {visibleGroups.includes('Button Colors & Sizes') && (
         <div>
           <h2 class="h3">Button Colors & Sizes</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
@@ -351,7 +354,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Button Icons') && (
+      {visibleGroups.includes('Button Icons') && (
         <div>
           <h2 class="h3">Button Icons</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
@@ -371,7 +374,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Loading Elements') && (
+      {visibleGroups.includes('Loading Elements') && (
         <div>
           <h2 class="h3">Loading Elements</h2>
           <div class="flex flex-wrap gap-x-6 gap-y-4 items-center mb-6">
@@ -383,7 +386,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Varients') && (
+      {visibleGroups.includes('Varients') && (
         <div>
           <h2 class="h3">Varients</h2>
           <div class="grid grid-cols-3 gap-x-6">
@@ -409,7 +412,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Selects') && (
+      {visibleGroups.includes('Selects') && (
         <div>
           <h2 class="h3">Selects</h2>
           <div class="grid grid-cols-3 lg:grid-cols-3 gap-x-6">
@@ -484,17 +487,17 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
                   {
                     value: '1', 
                     label: 'Wayne Enterprises',
-                    IconLeft: <Initials icon={{ initials: 'WE' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="WE" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
                   },
                   {
                     value: '2', 
                     label: 'Iceberg Lounge Limited',
-                    IconLeft: <Initials icon={{ initials: 'IL' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="IL" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
                   },
                   {
                     value: '3', 
                     label: 'Ace Chemicals Company',
-                    IconLeft: <Initials icon={{ initials: 'AC' }} className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="AC" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
                   },
                 ], [customerSearch])}
               />
@@ -526,7 +529,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Inputs') && (
+      {visibleGroups.includes('Inputs') && (
         <div>
           <h2 class="h3">Inputs</h2>
           <div class="grid grid-cols-3 gap-x-6">
@@ -587,7 +590,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Date Inputs') && (
+      {visibleGroups.includes('Date Inputs') && (
         <div>
           <h2 class="h3">Date Inputs</h2>
           <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
@@ -638,7 +641,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('File Inputs & Calendar & Time') && (
+      {visibleGroups.includes('File Inputs & Calendar & Time') && (
         <div>
           <h2 class="h3">File Inputs & Calendar & Time</h2>
           <div class="grid grid-cols-3 gap-x-6">
@@ -675,7 +678,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Tables') && (
+      {visibleGroups.includes('Tables') && (
         <div>
           <div class="flex justify-between items-start">
             <h2 class="h3">Tables</h2>
@@ -738,7 +741,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </div>
       )}
 
-      {groups.includes('Modals & Notifications') && (
+      {visibleGroups.includes('Modals & Notifications') && (
         <React.Fragment>
           <div>
             <h2 class="h3">Modals & Notifications</h2>
@@ -782,7 +785,7 @@ export function Styleguide({ className, elements, children, currencies }: Styleg
         </React.Fragment>
       )}
 
-      {groups.includes('Custom Components') && (
+      {visibleGroups.includes('Custom Components') && (
         <React.Fragment>
           {children}
         </React.Fragment>
