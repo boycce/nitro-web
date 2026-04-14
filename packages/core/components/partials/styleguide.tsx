@@ -487,17 +487,17 @@ export function Styleguide({ className, elements, children, currencies, groups }
                   {
                     value: '1', 
                     label: 'Wayne Enterprises',
-                    IconLeft: <Initials initials="WE" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="WE" className="inline-flex my-[-2px] mr-2 flex-shrink-0" />,
                   },
                   {
                     value: '2', 
                     label: 'Iceberg Lounge Limited',
-                    IconLeft: <Initials initials="IL" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="IL" className="inline-flex my-[-2px] mr-2 flex-shrink-0" />,
                   },
                   {
                     value: '3', 
                     label: 'Ace Chemicals Company',
-                    IconLeft: <Initials initials="AC" className="inline-flex my-[-3px] mr-2 flex-shrink-0" />,
+                    IconLeft: <Initials initials="AC" className="inline-flex my-[-2px] mr-2 flex-shrink-0" />,
                   },
                 ], [customerSearch])}
               />
