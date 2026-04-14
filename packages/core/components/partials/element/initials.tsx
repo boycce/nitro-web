@@ -41,7 +41,7 @@ export function Initials({ initials, color, colorBg, colors, opacityBg, size, is
       style={{ color: colorFgHex, ...sizeStyle }}
       className={twMerge(
         (
-          'nitro-initials inline-flex items-center justify-center font-bold text-[11px] size-[24px] relative rounded-md ' +
+          'nitro-initials flex-shrink-0 inline-flex items-center justify-center font-bold text-[11px] size-[24px] relative rounded-md ' +
           `overflow-hidden ring-1 ring-inset ring-[#00000012] ${colorFgClass}`
         ),
         sizeClasses(size || 'normal'),

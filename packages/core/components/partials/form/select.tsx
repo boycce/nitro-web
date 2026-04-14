@@ -27,6 +27,7 @@ export type SelectOption = {
   value: unknown, 
   label: string | React.ReactNode, 
   labelSearch?: string,
+  noTruncate?: boolean,
   fixed?: boolean,
   IconLeft?: React.ReactNode,
   flag?: string | React.ReactNode,
@@ -208,7 +209,7 @@ function ValueContainer({ children, ...props}: ValueContainerProps) {
 }
 
 function SingleValue({ children, ...props }: SingleValueProps) {
-  const selectedOption = props.getValue()[0] as { labelControl?: string, flag?: string | React.ReactNode, IconLeft?: React.ReactNode }
+  const selectedOption = props.getValue()[0] as { labelControl?: string } & SelectOption
   // @ts-expect-error 
   const flagClassName = props.getClassNames('flag')
 
@@ -220,7 +221,10 @@ function SingleValue({ children, ...props }: SingleValueProps) {
           : <Fragment>
               {selectedOption?.flag && <span className={flagClassName}>{selectedOption.flag}</span>}
               {selectedOption?.IconLeft}
-              <span class="overflow-hidden text-ellipsis whitespace-nowrap">{children}</span>
+              {selectedOption?.noTruncate 
+                ? children
+                : <span class="overflow-hidden text-ellipsis whitespace-nowrap">{children}</span>
+              }
             </Fragment>
       }
     </components.SingleValue>
@@ -228,14 +232,14 @@ function SingleValue({ children, ...props }: SingleValueProps) {
 }
 
 function Option(props: OptionProps) {
-  const data = props.data as { className?: string, flag?: string | React.ReactNode, IconLeft?: React.ReactNode }
+  const data = props.data as { className?: string } & SelectOption
   // const _nitro = (props.selectProps as { _nitro?: { mode?: string } })?._nitro
   // @ts-expect-error
   const flagClassName = props.getClassNames('flag')
   return (
     <components.Option className={data.className} {...props}>
       <span class="flex-auto min-w-0">{data.flag && <span className={flagClassName}>{data.flag}</span>}{data.IconLeft}{props.label}</span>
-      {props.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" />}
+      {props.isSelected && <CheckCircleIcon className="flex-shrink-0 size-[22px] text-primary -my-1 -mx-0.5" />}
     </components.Option>
   )
 }
