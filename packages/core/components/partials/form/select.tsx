@@ -7,7 +7,7 @@ import ReactSelect, {
   ValueContainerProps,
 } from 'react-select'
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
-import { ChevronsUpDownIcon, XIcon } from 'lucide-react'
+import { ChevronsUpDownIcon, SearchIcon, XIcon } from 'lucide-react'
 import { isFieldCached } from 'nitro-web'
 import { getErrorFromState, deepFind, twMerge } from 'nitro-web/util'
 import { Errors } from 'nitro-web/types'
@@ -59,6 +59,8 @@ export type SelectProps = {
   errorTitle?: string|RegExp
   /** Extend or override individual react-select part class names — merged with defaults via twMerge **/
   classNames?: NitroClassNamesConfig
+  /** Show a search icon instead of the dropdown arrow **/
+  showSearchIcon?: boolean
   /** All other props are passed to react-select **/
   [key: string]: unknown
 }
@@ -67,8 +69,8 @@ export const Select = memo(SelectBase, (prev, next) => {
   return isFieldCached(prev, next)
 })
 
-function SelectBase({ 
-  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, classNames, ...props 
+function SelectBase({
+  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, classNames, showSearchIcon, ...props
 }: SelectProps) {
   let value: unknown|unknown[]
   const error = getErrorFromState(state, errorTitle || name)
@@ -126,7 +128,7 @@ function SelectBase({
          */
         {...props}
         // @ts-expect-error
-        _nitro={{ prefix, mode }}
+        _nitro={{ prefix, mode, showSearchIcon }}
         key={value as string}
         unstyled={true}
         inputId={id || name}
@@ -148,14 +150,15 @@ function SelectBase({
         options={options}
         value={value}
         classNames={mergedClassNames}
-        components={{ 
-          Control, 
-          SingleValue, 
+        components={{
+          Control,
+          SingleValue,
           Option,
-          DropdownIndicator, 
-          ClearIndicator, 
+          DropdownIndicator,
+          ClearIndicator,
           MultiValueRemove,
           ValueContainer,
+          ...props.components as object,
         }}
         styles={{
           menu: (base) => ({ 
@@ -245,9 +248,13 @@ function Option(props: OptionProps) {
 }
 
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
+  const _nitro = (props.selectProps as { _nitro?: { showSearchIcon?: boolean } })?._nitro
+  const isSearch = _nitro?.showSearchIcon
+  const Icon = isSearch ? SearchIcon : ChevronsUpDownIcon
   return (
     <components.DropdownIndicator {...props}>
-      <ChevronsUpDownIcon size={15} className="text-[#b6b8be] text-input-icon -my-0.5 -mx-[1px]" />
+      <Icon size={isSearch ? 13 : 15} strokeWidth={isSearch ? 2.4 : undefined} 
+        className="text-[#b6b8be] text-input-icon -my-0.5 -mx-[1px]" />
     </components.DropdownIndicator>
   )
 }
