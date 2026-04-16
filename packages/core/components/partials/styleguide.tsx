@@ -503,7 +503,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
               />
             </div>
             <div>
-              <label for="currency">Currencies</label>
+              <label for="currency">Currencies (and classNames prop)</label>
               <Select 
                 name="currency"
                 state={state} 
@@ -512,6 +512,11 @@ export function Styleguide({ className, elements, children, currencies, groups }
                   { value: 'aud', label: 'Australian Dollar' },
                 ]), [])} 
                 onChange={(e) => onChange(e, setState)}
+                classNames={{
+                  control: {
+                    focus: 'outline-secondary',
+                  },
+                }}
               />
             </div>
             <div>
@@ -522,7 +527,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 options={useMemo(() => [
                   { value: 'edit', label: 'Edit' },
                   { value: 'delete', label: 'Delete' },
-                ], [])} 
+                ], [])}
               />
             </div>
           </div>

@@ -29,6 +29,8 @@ type FieldExtraProps = {
   placeholder?: string
   /** title used to find related error messages */
   errorTitle?: string|RegExp
+  /** class names to override the default class names */
+  inputClassName?: string
 }
 type IconWrapperProps = {
   iconPos: 'left' | 'right'
@@ -54,7 +56,7 @@ export const Field = memo(FieldBase, (prev, next) => {
   return isFieldCached(prev, next)
 })
 
-function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProps) {
+function FieldBase({ state, icon, iconPos: ip, errorTitle, inputClassName, ...props }: FieldProps) {
   // `type` must be kept as props.type for TS to be happy and follow the conditions below
   let value!: any
   let Icon!: React.ReactNode
@@ -104,8 +106,9 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, ...props }: FieldProp
   }
 
   // Classname
-  const inputClassName = getInputClasses({ error, Icon, iconPos, type })
-  const commonProps = { id: id, value: value, className: inputClassName }
+  const inputClasses = getInputClasses({ error, Icon, iconPos, type })
+  const inputClassName2 = inputClassName ? twMerge(inputClasses, inputClassName) : inputClasses.replaceAll(/\(|\)/g, '')
+  const commonProps = { id: id, value: value, className: inputClassName2 }
 
   // Type has to be referenced as props.type for TS to be happy
   if (!type || type == 'text' || type == 'number' || type == 'password' || type == 'email' || type == 'filter' || type == 'search') {
@@ -160,9 +163,11 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
   const py = 'py-[9px] py-input-y'
   return (
     'block col-start-1 row-start-1 w-full rounded-md bg-white disabled:bg-input-disabled-bg text-input-base outline outline-1 -outline-offset-1 ' +
-    'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 ' + `${py} ${px} ` +
-    (iconPos == 'right' && Icon ? 'pr-[32px] pr-input-x-icon pl-input-x ' : '') +
-    (iconPos == 'left' && Icon ? 'pl-[32px] pl-input-x-icon pr-input-x ' : 'px-input-x ') +
+    'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 (' +
+      `${py} ${px} ` +
+      (iconPos == 'right' && Icon ? 'pr-[32px] pr-input-x-icon pl-input-x ' : '') +
+      (iconPos == 'left' && Icon ? 'pl-[32px] pl-input-x-icon pr-input-x ' : 'px-input-x ') +
+    ')' +
     (iconPos == 'left' && Icon && type == 'color' ? 'indent-[5px] ' : '') +
     (error
       ? 'text-danger-foreground outline-danger focus:outline-danger '

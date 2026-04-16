@@ -3,7 +3,7 @@ import { css } from 'twin.macro'
 import { memo, useMemo, Fragment } from 'react'
 import ReactSelect, { 
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
-  DropdownIndicatorProps, MultiValueRemoveProps, ClassNamesConfig,
+  DropdownIndicatorProps, MultiValueRemoveProps, // ClassNamesConfig,
   ValueContainerProps,
 } from 'react-select'
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
@@ -14,7 +14,6 @@ import { Errors } from 'nitro-web/types'
 
 const filterFn = createFilter()
 
-type NitroClassNamesConfig = ClassNamesConfig & { flag?: () => string }
 type GetSelectClassName = {
   name: string
   isFocused?: boolean
@@ -22,6 +21,7 @@ type GetSelectClassName = {
   isDisabled?: boolean
   hasError?: boolean
   usePrefixes?: boolean
+  classNames?: ClassNames
 }
 export type SelectOption = { 
   value: unknown, 
@@ -58,7 +58,7 @@ export type SelectProps = {
   /** title used to find related error messages */
   errorTitle?: string|RegExp
   /** Extend or override individual react-select part class names — merged with defaults via twMerge **/
-  classNames?: NitroClassNamesConfig
+  classNames?: ClassNames
   /** Show a search icon instead of the dropdown arrow **/
   showSearchIcon?: boolean
   /** All other props are passed to react-select **/
@@ -70,7 +70,9 @@ export const Select = memo(SelectBase, (prev, next) => {
 })
 
 function SelectBase({
-  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, classNames, showSearchIcon, ...props
+  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, classNames: classNamesProp, 
+  showSearchIcon, className,
+  ...props
 }: SelectProps) {
   let value: unknown|unknown[]
   const error = getErrorFromState(state, errorTitle || name)
@@ -87,33 +89,29 @@ function SelectBase({
   // Input is always controlled if state is passed in
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
 
-  const mergedClassNames = useMemo(() => mergeClassNames({
-    // Input container
-    control: (p) => getSelectClassName({ name: 'control', hasError: !!error, ...p }),
-    valueContainer: () => getSelectClassName({ name: 'valueContainer' }),
-    // Input container objects
-    input: () => getSelectClassName({ name: 'input', hasError: !!error }),
-    multiValue: () => getSelectClassName({ name: 'multiValue' }),
-    multiValueLabel: () => '',
-    multiValueRemove: () => getSelectClassName({ name: 'multiValueRemove' }),
-    placeholder: () => getSelectClassName({ name: 'placeholder' }),
-    singleValue: (p) => getSelectClassName({ name: 'singleValue', hasError: !!error, isDisabled: p.isDisabled }),
-    // Indicators
-    clearIndicator: () => getSelectClassName({ name: 'clearIndicator' }),
-    dropdownIndicator: () => getSelectClassName({ name: 'dropdownIndicator' }),
-    indicatorsContainer: () => getSelectClassName({ name: 'indicatorsContainer' }),
-    indicatorSeparator: () => getSelectClassName({ name: 'indicatorSeparator' }),
-    // Dropmenu
-    menu: () => getSelectClassName({ name: 'menu' }),
-    groupHeading: () => getSelectClassName({ name: 'groupHeading' }),
-    noOptionsMessage: () => getSelectClassName({ name: 'noOptionsMessage' }),
-    option: (p) => getSelectClassName({ name: 'option', ...p }),
-    // Nitro specific
-    flag: () => getSelectClassName({ name: 'flag' }),
-  }, classNames), [!!error, classNames])
+  // Merge class names (up to 1 level deep)
+  const classNames = useMemo(() => {
+    const merged = { ...selectClassNames }
+    for (const key in classNamesProp) {
+      const value = classNamesProp[key as keyof ClassNames]
+      if (typeof value == 'object') {
+        // @ts-expect-error
+        merged[key] = { ...merged[key] }
+        for (const key2 in value) {
+          const value2 = value[key2 as keyof typeof value]
+          // @ts-expect-error
+          merged[key][key2] = twMerge(merged[key][key2], value2)
+        }
+      } else {
+        // @ts-expect-error
+        merged[key] = twMerge(merged[key], value)
+      }
+    }
+    return merged
+  }, [classNamesProp])
 
   return (
-    <div css={style} class={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after nitro-select ${props.className || ''}`)}>
+    <div css={style} class={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}>
       <ReactSelect
         /**
          * react-select prop quick reference (https://react-select.com/props#api):
@@ -149,7 +147,31 @@ function SelectBase({
         }}
         options={options}
         value={value}
-        classNames={mergedClassNames}
+        classNames={useMemo(() => ({
+          // Input container
+          control: (p) => getSelectClassName({ name: 'control', hasError: !!error, ...p, classNames: classNames }),
+          valueContainer: () => getSelectClassName({ name: 'valueContainer', classNames: classNames }),
+          // Input container objects
+          input: () => getSelectClassName({ name: 'input', hasError: !!error, classNames: classNames }),
+          multiValue: () => getSelectClassName({ name: 'multiValue', classNames: classNames }),
+          multiValueLabel: () => '',
+          multiValueRemove: () => getSelectClassName({ name: 'multiValueRemove', classNames: classNames }),
+          placeholder: () => getSelectClassName({ name: 'placeholder', classNames: classNames }),
+          singleValue: (p) => getSelectClassName({ name: 'singleValue', hasError: !!error, isDisabled: p.isDisabled,
+            classNames: classNames }),
+          // Indicators
+          clearIndicator: () => getSelectClassName({ name: 'clearIndicator', classNames: classNames }),
+          dropdownIndicator: () => getSelectClassName({ name: 'dropdownIndicator', classNames: classNames }),
+          indicatorsContainer: () => getSelectClassName({ name: 'indicatorsContainer', classNames: classNames }),
+          indicatorSeparator: () => getSelectClassName({ name: 'indicatorSeparator', classNames: classNames }),
+          // Dropmenu
+          menu: () => getSelectClassName({ name: 'menu', classNames: classNames }),
+          groupHeading: () => getSelectClassName({ name: 'groupHeading', classNames: classNames }),
+          noOptionsMessage: () => getSelectClassName({ name: 'noOptionsMessage', classNames: classNames }),
+          option: (p) => getSelectClassName({ name: 'option', ...p, classNames: classNames }),
+          // Nitro specific
+          flag: () => getSelectClassName({ name: 'flag', classNames: classNames }),
+        }), [!!error, classNames])}
         components={{
           Control,
           SingleValue,
@@ -285,7 +307,7 @@ const selectClassNames = {
     error: 'outline-danger',
     disabled: 'cursor-not-allowed bg-input-disabled-bg',
   },
-  valueContainer: 'gap-1 py-[9px] px-[12px] py-input-y px-input-x', // dont twMerge (input-x is optional)
+  valueContainer: 'gap-1 (py-[9px] px-[12px] py-input-y px-input-x)', // dont twMerge (input-x is optional)
   // Input container objects
   input: {
     base: 'text-input',
@@ -316,14 +338,41 @@ const selectClassNames = {
   },
   // Nitro specific
   flag: 'align-middle text-[1.2em] leading-[1em] mr-1.5 flex-shrink-0',
+} as const
+
+type ClassNames = {
+  // Input container
+  control?: { base?: string, focus?: string, error?: string, disabled?: string }
+  valueContainer?: string
+  // Input container objects
+  input?: { base?: string, error?: string, disabled?: string }
+  multiValue?: string
+  multiValueLabel?: string
+  multiValueRemove?: string
+  placeholder?: string
+  singleValue?: { base?: string, error?: string, disabled?: string }
+  // Icon indicators
+  clearIndicator?: string
+  dropdownIndicator?: string
+  indicatorsContainer?: string
+  indicatorSeparator?: string
+  // Dropdown menu
+  menu?: string
+  groupHeading?: string
+  noOptionsMessage?: string
+  option?: { base?: string, hover?: string, selected?: string }
+  // Nitro specific
+  flag?: string
 }
 
-export function getSelectClassName({ name, isFocused, isSelected, isDisabled, hasError, usePrefixes }: GetSelectClassName) {
+export function getSelectClassName({ name, isFocused, isSelected, isDisabled, hasError, usePrefixes, classNames }: GetSelectClassName) {
   // Returns a class list that conditionally includes hover/focus modifier classes, or uses CSS modifiers, e.g. hover:, focus:
   // @ts-expect-error
-  const obj = selectClassNames[name]
+  const obj = classNames?.[name] || selectClassNames[name]
   let output = obj?.base
-  if (typeof obj == 'string') return obj // no modifiers
+  
+  if (typeof obj == 'string' && obj.includes('(')) return obj.replaceAll(/\(|\)/g, '') // no modifiers & still has group wrappers
+  else if (typeof obj == 'string') return obj // no modifiers
 
   if (usePrefixes) {
     if (obj.focus) output += ' ' + obj.focus.split(' ').map((part: string) => `focus:${part}`).join(' ')
@@ -337,11 +386,6 @@ export function getSelectClassName({ name, isFocused, isSelected, isDisabled, ha
   if (obj.disabled && isDisabled) output += ` ${obj.disabled}`
 
   return twMerge(output)
-}
-
-function mergeClassNames(defaults: NitroClassNamesConfig, custom?: NitroClassNamesConfig): NitroClassNamesConfig {
-  if (!custom) return defaults
-  return { ...defaults, ...custom }
 }
 
 const style = css`
