@@ -2613,6 +2613,9 @@ label, .label {
 .outline-input-border-focus {
   outline-color: #4c50f9;
 }
+.outline-secondary {
+  outline-color: #22c55e;
+}
 .ring-0 {
   --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
   --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(0px + var(--tw-ring-offset-width)) var(--tw-ring-color);
