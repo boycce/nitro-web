@@ -5,6 +5,7 @@ import ReactSelect, {
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
   DropdownIndicatorProps, MultiValueRemoveProps, // ClassNamesConfig,
   ValueContainerProps,
+  MenuProps,
 } from 'react-select'
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
 import { ChevronsUpDownIcon, SearchIcon, XIcon } from 'lucide-react'
@@ -180,8 +181,10 @@ function SelectBase({
           ClearIndicator,
           MultiValueRemove,
           ValueContainer,
+          Menu,
           ...props.components as object,
         }}
+        // menuIsOpen={!search ? false : undefined}
         styles={{
           menu: (base) => ({ 
             ...base, minWidth: minMenuWidth,
@@ -211,6 +214,10 @@ function SelectBase({
   )
 }
 
+function Menu(props: MenuProps) {
+  return props.options.length === 0 ? null : <components.Menu {...props} />
+}
+
 function Control({ children, ...props }: ControlProps) {
   // const selectedOption = props.getValue()[0]
   const _nitro = (props.selectProps as { _nitro?: { prefix?: string, mode?: string } })?._nitro
@@ -223,7 +230,6 @@ function Control({ children, ...props }: ControlProps) {
     </components.Control>
   )
 }
-
 
 function ValueContainer({ children, ...props}: ValueContainerProps) {
   return (
@@ -316,7 +322,7 @@ const selectClassNames = {
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: 'text-xs',
   multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-foreground hover:bg-red-50',
-  placeholder: 'text-input-placeholder',
+  placeholder: 'text-input-placeholder truncate',
   singleValue: {
     base: 'text-input !overflow-visible min-w-0 flex items-center',
     error: 'text-danger-foreground',

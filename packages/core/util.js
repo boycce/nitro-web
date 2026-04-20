@@ -200,16 +200,18 @@ export function capitalise (str) {
  * @param {number} cents
  * @param {number} [decimals=2]
  * @param {number} [decimalsMinimum]
+ * @param {string} [prefix='$']
+ * @param {string} [suffix='']
  * @returns {string}
  */
-export function currency (cents, decimals=2, decimalsMinimum) {
+export function currency (cents, decimals=2, decimalsMinimum, prefix='$', suffix='') {
   // Returns a formated currency string
   const num = Number(cents / 100)
   if (!isNumber(num)) return '$0.00'
-  return '$' + num.toLocaleString(undefined, {
+  return prefix + num.toLocaleString(undefined, {
     minimumFractionDigits: typeof decimalsMinimum == 'undefined' ? decimals : decimalsMinimum,
     maximumFractionDigits: decimals,
-  })
+  }) + suffix
 }
 
 /**
@@ -1300,7 +1302,7 @@ export function omit (obj, fields) {
  * @param {EventOrPathValue} eventOrPathValue - The input/select change event or [path, value] to update the state with
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
  * @param {(value: unknown) => unknown} [beforeSetValue] - optional function to change the value before setting the state
- * @param {Function} [beforeSetState] - optional function to run before setting the state
+ * @param {(info: { state: T, parent: string, key: string }) => T} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  * 
  * @example usage:
