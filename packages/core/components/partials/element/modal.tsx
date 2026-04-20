@@ -67,13 +67,13 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
       onClick={(e) => e.stopPropagation()} 
       class={`${twMerge(`fixed top-0 w-[100vw] h-[100vh] z-[200] ${stateObj.root} ${rootClassName||''}`)} nitro-modal`}
     >
-      <div class={`!absolute inset-0 box-content bg-gray-500/70 transition-opacity ${stateObj.bg}`}></div>
-      <div class={`relative h-[100vh] overflow-y-auto transition-[opacity,transform] ${stateObj.container}`}>
+      <div class={`${twMerge('!absolute inset-0 box-content bg-gray-500/70 transition-opacity')} ${stateObj.bg}`}></div>
+      <div class={`${twMerge('relative h-[100vh] overflow-y-auto transition-[opacity,transform]')} ${stateObj.container}`}>
         <div class="flex items-center justify-center min-h-full" onMouseDown={onClick}> 
           <div 
             ref={containerEl} 
             style={{ maxWidth: maxWidth || '550px', minHeight: minHeight }} 
-            class={`relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg p-9 ${className||''}`}
+            class={`${twMerge('relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg p-9', className)}`}
           >
             <div 
               class="absolute top-0 right-0 p-3 m-1 cursor-pointer" 
