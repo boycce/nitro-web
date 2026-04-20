@@ -112,9 +112,11 @@ export function capitalise(str?: string): string;
  * @param {number} cents
  * @param {number} [decimals=2]
  * @param {number} [decimalsMinimum]
+ * @param {string} [prefix='$']
+ * @param {string} [suffix='']
  * @returns {string}
  */
-export function currency(cents: number, decimals?: number, decimalsMinimum?: number): string;
+export function currency(cents: number, decimals?: number, decimalsMinimum?: number, prefix?: string, suffix?: string): string;
 /**
  * Converts a currency string to cents
  * @param {string} currency string, e.g. '$1,234.00'
@@ -538,14 +540,18 @@ export function omit(obj: {
  * @param {EventOrPathValue} eventOrPathValue - The input/select change event or [path, value] to update the state with
  * @param {React.Dispatch<React.SetStateAction<T>>} setState
  * @param {(value: unknown) => unknown} [beforeSetValue] - optional function to change the value before setting the state
- * @param {Function} [beforeSetState] - optional function to run before setting the state
+ * @param {(info: { state: T, parent: string, key: string }) => T} [beforeSetState] - optional function to run before setting the state
  * @returns {Promise<T>}
  *
  * @example usage:
  *   - <input onChange={(e) => onChange(e, setState)} />
  *   - <input onChange={() => onChange(['address.name', 'Joe'], setState)} />
  */
-export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.Dispatch<React.SetStateAction<T>>, beforeSetValue?: (value: unknown) => unknown, beforeSetState?: Function): Promise<T>;
+export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.Dispatch<React.SetStateAction<T>>, beforeSetValue?: (value: unknown) => unknown, beforeSetState?: (info: {
+    state: T;
+    parent: string;
+    key: string;
+}) => T): Promise<T>;
 /**
  * Pads a number
  * @param {number} [num=0]
