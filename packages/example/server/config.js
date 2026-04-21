@@ -5,7 +5,7 @@ import { middleware } from 'nitro-web/server'
 const _require = createRequire(import.meta.url)
 const env = process.env.env || (process.env.NODE_ENV !== 'production' ? 'development' : process.env.NODE_ENV)
 const pwd = process.env.PWD + '/'
-const port = process.env.port || 3000 // TODO: Maybe think how we can extract default from baseUrl if defined? Maybe. 
+const port = process.env.PORT // PORT required for Heroku
 
 const config = {
   emailFrom: process.env.emailFrom,
@@ -17,12 +17,12 @@ const config = {
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
   publicPath: process.env.publicPath,
-  port: port,
+  port: port || 3000,
+  portServer: process.env.portServer || port || 3001,
   pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
   // isNotMultiTenant: true,
-  // portServer: 3001,
 
   monasteryOptions: {
     noDefaults: true,
@@ -44,7 +44,7 @@ const config = {
   client: {
     // injected into the client via webpack
     awsUrl: process.env.awsUrl,
-    baseUrl: process.env.baseUrl || 'http://localhost:' + port,
+    baseUrl: process.env.baseUrl || 'http://localhost:' + (port || 3000),
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
     name: process.env.name,

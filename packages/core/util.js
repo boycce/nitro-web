@@ -1604,14 +1604,14 @@ export function pick (obj, keys) {
   return output
 }
 
-/**
- * Gets the port for the server
- * @param {any} config - config
- * @returns {number}
- */
-export function getPortServer(config) {
-  return Number(config?.portServer || (config?.port ? Number(config.port) + 1 : 3001))
-}
+// /**
+//  * Gets the port for the server
+//  * @param {any} config - config
+//  * @returns {number}
+//  */
+// export function getPortServer(config) {
+//   return Number(config?.portServer || (config?.port ? Number(config.port) + 1 : 3001))
+// }
 
 /**
  * 
