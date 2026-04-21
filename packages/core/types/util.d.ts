@@ -686,12 +686,6 @@ export function pick(obj: {
     [key: string]: unknown;
 };
 /**
- * Gets the port for the server
- * @param {any} config - config
- * @returns {number}
- */
-export function getPortServer(config: any): number;
-/**
  *
  * Parses a query string into an object, or returns the last known matching cache
  * @param {string} searchString - location.search e.g. '?page=1&book=my+%2B+book&date.0=1234567890'
