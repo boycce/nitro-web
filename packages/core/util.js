@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { TZDate } from '@date-fns/tz'
 import { loadStripe } from '@stripe/stripe-js/pure.js' // pure removes ping
 import { twMerge as _twMerge, twJoin, createTailwindMerge, getDefaultConfig } from 'tailwind-merge'
+import { currencies } from 'nitro-web/constants'
 
 // Re-export TZDate
 export { TZDate } from '@date-fns/tz'
@@ -198,20 +199,33 @@ export function capitalise (str) {
 /**
  * Formats a currency string
  * @param {number} cents
- * @param {number} [decimals=2]
- * @param {number} [decimalsMinimum]
- * @param {string} [prefix='$']
- * @param {string} [suffix='']
+ * @param {object} [options]
+ * @param {string} [options.currency='usd'] - prefix and decimals auto-retrieved from the default currencies
+ * @param {number} [options.decimals] - number of decimals to display
+ * @param {number} [options.decimalsMinimum] - minimum number of decimals to display
+ * @param {string} [options.prefix]
+ * @param {string} [options.suffix]
  * @returns {string}
  */
-export function currency (cents, decimals=2, decimalsMinimum, prefix='$', suffix='') {
-  // Returns a formated currency string
-  const num = Number(cents / 100)
-  if (!isNumber(num)) return '$0.00'
-  return prefix + num.toLocaleString(undefined, {
-    minimumFractionDigits: typeof decimalsMinimum == 'undefined' ? decimals : decimalsMinimum,
-    maximumFractionDigits: decimals,
-  }) + suffix
+export function currency (cents, options) {
+  const { currency, decimals, decimalsMinimum, prefix, suffix } = options || { currency: 'usd' }
+  const currencyObject = currencies[/**@type {keyof typeof currencies}*/(currency)]
+
+  if (currency && !currencyObject) {
+    throw new Error(`Currency ${currency} not found in default currencies, please pass custom format options`)
+  } else if (!currency && (!decimals || !prefix)) {
+    throw new Error('currency: Please pass a currency or both decimals and prefix')
+  }
+
+  const _prefix = prefix ?? currencyObject?.symbol
+  const _decimals = decimals ?? currencyObject?.digits
+  let displayNum = Number(cents / Math.pow(10, _decimals))
+  if (!isNumber(displayNum)) displayNum = 0
+
+  return _prefix + displayNum.toLocaleString(undefined, {
+    minimumFractionDigits: typeof decimalsMinimum == 'undefined' ? _decimals : decimalsMinimum,
+    maximumFractionDigits: _decimals,
+  }) + (suffix || '')
 }
 
 /**

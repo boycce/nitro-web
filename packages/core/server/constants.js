@@ -67,7 +67,7 @@ export const currencies = {
   twd: { name: 'New Taiwan Dollar', symbol: 'NT$', digits: 2, flag: '🇹🇼' },
   uah: { name: 'Ukrainian Hryvnia', symbol: '₴', digits: 2, flag: '🇺🇦' },
   vnd: { name: 'Vietnamese Dong', symbol: '₫', digits: 0, flag: '🇻🇳' },
-  zar: { name: 'South African Rand', symbol: 'R', digits: 2, flag: '🇿🇦' }
+  zar: { name: 'South African Rand', symbol: 'R', digits: 2, flag: '🇿🇦' },
 }
 
 /** @type {{ [key in Country]: { name: string, flag: string } }} */
