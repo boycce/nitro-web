@@ -110,13 +110,21 @@ export function capitalise(str?: string): string;
 /**
  * Formats a currency string
  * @param {number} cents
- * @param {number} [decimals=2]
- * @param {number} [decimalsMinimum]
- * @param {string} [prefix='$']
- * @param {string} [suffix='']
+ * @param {object} [options]
+ * @param {string} [options.currency='usd'] - prefix and decimals auto-retrieved from the default currencies
+ * @param {number} [options.decimals] - number of decimals to display
+ * @param {number} [options.decimalsMinimum] - minimum number of decimals to display
+ * @param {string} [options.prefix]
+ * @param {string} [options.suffix]
  * @returns {string}
  */
-export function currency(cents: number, decimals?: number, decimalsMinimum?: number, prefix?: string, suffix?: string): string;
+export function currency(cents: number, options?: {
+    currency?: string;
+    decimals?: number;
+    decimalsMinimum?: number;
+    prefix?: string;
+    suffix?: string;
+}): string;
 /**
  * Converts a currency string to cents
  * @param {string} currency string, e.g. '$1,234.00'
