@@ -117,20 +117,22 @@ export function Location({ clear, id, name, onInput, onSelect, placeholder, plac
     if (clear) setInputValue('')
     else setInputValue(place.formatted_address)
     const addressObject = formatAddressObject(place)
+    // removed: line1 (unit/number street)
+    // removed: line2 (suburb, postcode)
+    // removed: unit 
     onSelect({
       city: addressObject.city,
       country: addressObject.country,
-      line1: [[addressObject.unit, addressObject.number].filter(o=>o).join('/'), addressObject.street].join(' '),
-      line2: [addressObject.suburb, addressObject.postcode].filter(o=>o).join(', '),
       full: place.formatted_address,
-      number: addressObject.number,
+      number: [addressObject.unit,addressObject.number].filter(o=>o).join('/'),
       postcode: addressObject.postcode,
+      region: addressObject.region,
+      street: addressObject.street,
       suburb: addressObject.suburb,
       location: {
         coordinates: [place.geometry.location.lng(), place.geometry.location.lat()],
         type: 'Point',
       },
-      unit: addressObject.unit,
       area: !util.deepFind(place, 'geometry.viewport') ? undefined : {
         bottomLeft: [
           place.geometry.viewport.getSouthWest().lng(),

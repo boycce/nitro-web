@@ -55,21 +55,25 @@ let axiosInstance
  */
 export function addressSchema () {
   // Google autocomplete should return the following object
+  // 
   /** @param {any} array @param {object} schema @returns {[]} */
   function arrayWithSchema (array, schema) {
     array.schema = schema
     return array
   }
   return {
+    // removed: line1 (unit/number street)
+    // removed: line2 (suburb, postcode)
+    // removed: unit 
+    // added: region
     city: { type: 'string' },
     country: { type: 'string', default: 'New Zealand' },
     full: { type: 'string', index: 'text' },
-    line1: { type: 'string' },
-    line2: { type: 'string' },
     number: { type: 'string' },
     postcode: { type: 'string' },
+    region: { type: 'string' },
+    street: { type: 'string' },
     suburb: { type: 'string' },
-    unit: { type: 'string' },
     // Google places viewport
     area: {
       bottomLeft: [{ type: 'number' }], // lng, lat
