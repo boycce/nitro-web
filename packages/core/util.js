@@ -213,11 +213,11 @@ export function currency (cents, options) {
 
   if (currency && !currencyObject) {
     throw new Error(`Currency ${currency} not found in default currencies, please pass custom format options`)
-  } else if (!currency && (!decimals || !prefix)) {
-    throw new Error('currency: Please pass a currency or both decimals and prefix')
+  } else if (!currency && typeof decimals === 'undefined') {
+    throw new Error('currency: When passing custom options, you must include a `currency` or `decimals` option')
   }
 
-  const _prefix = prefix ?? currencyObject?.symbol
+  const _prefix = prefix ?? typeof suffix === 'undefined' ? currencyObject?.symbol : ''
   const _decimals = decimals ?? currencyObject?.digits
   let displayNum = Number(cents / Math.pow(10, _decimals))
   if (!isNumber(displayNum)) displayNum = 0
@@ -912,6 +912,7 @@ export function getDirectories (path, pwd) {
     distDir: path.join(_pwd, process.env.distDir || ((process.env.clientDir || 'client') + '/dist'), '/'),
     emailTemplateDir: path.join(_pwd, process.env.emailTemplateDir || 'server/email', '/'),
     imgsDir: path.join(_pwd, (process.env.clientDir || 'client'), 'imgs', '/'),
+    fontsDir: path.join(_pwd, (process.env.clientDir || 'client'), 'fonts', '/'),
     tmpDir: path.join(_pwd, process.env.tmpDir || 'tmp', '/'),
   }
 }

@@ -41,7 +41,7 @@ console.warn = (arg1, arg2, arg3, ...args) => {
 // process.traceDeprecation = true
 export const getConfig = (config) => {
   const { client, name='', pwd, env='development', homepage, publicPath, version, port=3000, portServer=3001 } = config
-  const { clientDir, componentsDir, distDir, imgsDir } = getDirectories(path, pwd)
+  const { clientDir, componentsDir, distDir, imgsDir, fontsDir } = getDirectories(path, pwd)
   const publicPathResolved = getPublicPath(env, homepage, publicPath)
   
   if (env === 'development' && port === portServer) {
@@ -288,6 +288,7 @@ export const getConfig = (config) => {
         patterns: [
           { from: imgsDir + 'favicon.png', to: './favicon.png' },
           { from: imgsDir, to: './assets/imgs' },
+          { from: fontsDir, to: './assets/fonts' },
         ],
       }),
       new webpack.DefinePlugin({
