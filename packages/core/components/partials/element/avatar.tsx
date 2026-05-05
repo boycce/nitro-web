@@ -34,7 +34,7 @@ export function Avatar({ awsUrl, isRound, user, showPlaceholderImage, className 
       ? <img class={classes} src={s3Image(awsUrl, user.avatar, 'small')} /> 
       : showPlaceholderImage 
         ? <img class={classes} src={avatarImg} width="30px" /> 
-        : <Initials className={classes} icon={{ initials: getInitials(user), hex: getHex(user) }} isRound={isRound} isMedium={true} />
+        : <Initials className={classes} initials={getInitials(user)} color={getHex(user)} isRound={isRound} />
   )
 }
 
