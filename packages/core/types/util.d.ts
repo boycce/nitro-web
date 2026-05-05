@@ -13,22 +13,19 @@ export function addressSchema(): {
         type: string;
         index: string;
     };
-    line1: {
-        type: string;
-    };
-    line2: {
-        type: string;
-    };
     number: {
         type: string;
     };
     postcode: {
         type: string;
     };
-    suburb: {
+    region: {
         type: string;
     };
-    unit: {
+    street: {
+        type: string;
+    };
+    suburb: {
         type: string;
     };
     area: {
