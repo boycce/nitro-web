@@ -32,10 +32,14 @@ export type SelectOption = {
   fixed?: boolean,
   IconLeft?: React.ReactNode,
   flag?: string | React.ReactNode,
+  className?: string,
   data?: { [key: string]: unknown } 
 }
+
+export type SelectedOption = SelectOption | null
+
 /** Select (all other props are passed to react-select) **/
-export type SelectProps = {
+export type SelectProps<IsMulti extends boolean = false> = {
   /** field name or path on state (used to match errors), e.g. 'date', 'company.email' **/
   name: string
   /** inputId, the name is used if not provided **/
@@ -46,8 +50,10 @@ export type SelectProps = {
   minMenuWidth?: number
   /** The prefix to add to the input **/
   prefix?: string
-  /** The onChange handler **/
-  onChange?: (event: { target: { name: string, value: unknown } }) => void
+  /** Whether multiple values can be selected **/
+  isMulti?: IsMulti
+  /** The onChange handler (option should really ref options using ts generics) **/
+  onChange?: (event: { target: { name: string, value: unknown } }, option: IsMulti extends true ? SelectOption[] : SelectedOption) => void
   /** The options to display in the dropdown, data is used to pass additional data to the option **/
   options: SelectOption[]
   /** The state object to get the value and check errors from **/
@@ -68,13 +74,13 @@ export type SelectProps = {
 
 export const Select = memo(SelectBase, (prev, next) => {
   return isFieldCached(prev, next)
-})
+}) as <IsMulti extends boolean = false>(props: SelectProps<IsMulti>) => React.ReactElement | null
 
-function SelectBase({
+function SelectBase<IsMulti extends boolean = false>({
   id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode='', errorTitle, classNames: classNamesProp, 
   showSearchIcon, className,
   ...props
-}: SelectProps) {
+}: SelectProps<IsMulti>) {
   let value: unknown|unknown[]
   const error = getErrorFromState(state, errorTitle || name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
@@ -89,6 +95,7 @@ function SelectBase({
 
   // Input is always controlled if state is passed in
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
+  else if (typeof value == 'undefined') value = null // new
 
   // Merge class names (up to 1 level deep)
   const classNames = useMemo(() => {
@@ -126,7 +133,6 @@ function SelectBase({
          *   menuIsOpen={false}
          */
         {...props}
-        // @ts-expect-error
         _nitro={{ prefix, mode, showSearchIcon }}
         key={value as string}
         unstyled={true}
@@ -140,14 +146,31 @@ function SelectBase({
         menuPlacement="auto"
         minMenuHeight={250}
         onChange={!onChange ? undefined : (o) => {
-          // Array returned for multi-select
-          const value = Array.isArray(o) 
-            ? o.map(v => typeof v == 'object' && v !== null && 'value' in v ? v.value : v) 
-            : (typeof o == 'object' && o !== null && 'value' in o ? o.value : o)
-          return onChange({ target: { name: name, value: value }})
+          // An array is returned for multi-select
+          type OptionType = IsMulti extends true ? SelectOption[] : SelectedOption
+          let value: unknown | unknown[] = []
+          let optionCopy = [] as unknown as OptionType
+
+          if (Array.isArray(o)) {
+            for (const v of o) {
+              const isObject = typeof v == 'object' && v !== null && 'value' in v;
+              (optionCopy as OptionType[]).push(isObject ? { ...v } : v);
+              (value as unknown[]).push(isObject ? v.value : v)
+            }
+          } else {
+            const isObject = typeof o == 'object' && o !== null && 'value' in o
+            value = isObject ? o.value : o
+            optionCopy = (isObject ? { ...o } : o) as OptionType
+          }
+
+          return onChange(
+            { target: { name: name, value: value }}, 
+            optionCopy
+          )
         }}
         options={options}
         value={value}
+        // @ts-expect-error
         classNames={useMemo(() => ({
           // Input container
           control: (p) => getSelectClassName({ name: 'control', hasError: !!error, ...p, classNames: classNames }),
@@ -263,7 +286,7 @@ function SingleValue({ children, ...props }: SingleValueProps) {
 }
 
 function Option(props: OptionProps) {
-  const data = props.data as { className?: string } & SelectOption
+  const data = props.data as SelectOption
   // const _nitro = (props.selectProps as { _nitro?: { mode?: string } })?._nitro
   // @ts-expect-error
   const flagClassName = props.getClassNames('flag')
