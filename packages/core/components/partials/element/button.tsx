@@ -36,7 +36,7 @@ export function Button({
   const iconPosition = 
     IconLeft ? 'left' : IconLeftEnd ? 'leftEnd' : IconRight ? 'right' : IconRightEnd ? 'rightEnd' : IconCenter ? 'center' : 'none'
   const base = 
-    'relative inline-flex items-center justify-center text-center font-medium shadow-sm focus-visible:outline ' +
+    'relative inline-flex items-center justify-center text-center font-medium shadow-button focus-visible:outline ' +
     'focus-visible:outline-2 focus-visible:outline-offset-2 ring-inset ring-1' + (children ? '' : ' aspect-square')
 
   // Button colors, you can use custom colors by using className instead
