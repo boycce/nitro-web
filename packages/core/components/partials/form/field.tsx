@@ -6,10 +6,10 @@ import { type FieldCurrencyProps, FieldCurrency } from './field-currency'
 import { type FieldDateProps, FieldDate } from './field-date'
 import { twMerge, getErrorFromState, deepFind } from 'nitro-web/util'
 import { Errors, type Error } from 'nitro-web/types'
-import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon } from 'lucide-react'
-import { memo } from 'react'
+import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon, PaperclipIcon } from 'lucide-react'
+import { memo, useState } from 'react'
 
-type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color'
+type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color' | 'file'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
@@ -44,6 +44,7 @@ export type FieldProps = (
   | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
   | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
+  | ({ type: 'file' } & InputProps & FieldExtraProps)
 )
 type IsFieldCachedProps = {
   name: string
@@ -74,11 +75,13 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, inputClassName, ...pr
     return type == 'password' ? 'password' : (type == 'textarea' ? 'textarea' : (type == 'number' ? 'number' : 'text'))
   })
   
-  // Value: Input is always controlled if state is passed in
-  if (typeof props.value !== 'undefined') value = props.value
-  else if (typeof state == 'object') {
-    const v = deepFind(state, props.name) ?? ''
-    value = v
+  // Value: Input is always controlled if state is passed in (file inputs stay uncontrolled)
+  if (type !== 'file') {
+    if (typeof props.value !== 'undefined') value = props.value
+    else if (typeof state == 'object') {
+      const v = deepFind(state, props.name) ?? ''
+      value = v
+    }
   }
   
   // Icon
@@ -101,6 +104,8 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, inputClassName, ...pr
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <ClockIcon />} className="size-[14px] size-input-icon" /> 
   } else if (type == 'date') {
     Icon = <IconWrapper iconPos={iconPos} icon={icon || <CalendarIcon />} className="size-[14px] size-input-icon" />
+  } else if (type == 'file') {
+    Icon = <IconWrapper iconPos={iconPos} icon={icon || <PaperclipIcon />} className="size-[14px] size-input-icon" />
   } else if (icon) {
     Icon = <IconWrapper iconPos={iconPos} icon={icon} className="size-[14px] size-input-icon" />
   }
@@ -141,6 +146,13 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, inputClassName, ...pr
         <FieldDate {...props} {...commonProps} Icon={Icon} />
       </FieldContainer>
     )
+  } else if (type == 'file') {
+    // const { className, ...rest } = props as Extract<FieldProps, { type: 'file' }>
+    return (
+      <FieldContainer error={error} className={props.className}>
+        {Icon}<input {...props} {...commonProps} type="file" />
+      </FieldContainer>
+    )
   }
 }
 
@@ -162,7 +174,7 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
   const px = 'px-[12px]'
   const py = 'py-[9px] py-input-y'
   return (
-    'block col-start-1 row-start-1 w-full rounded-md bg-white disabled:bg-input-disabled-bg text-input-base outline outline-1 -outline-offset-1 ' +
+    'block col-start-1 row-start-1 w-full rounded-md bg-white disabled:cursor-not-allowed disabled:bg-input-disabled-bg text-input-base outline outline-1 -outline-offset-1 ' +
     'placeholder:text-input-placeholder focus:outline focus:outline-2 focus:-outline-offset-2 (' +
       `${py} ${px} ` +
       (iconPos == 'right' && Icon ? 'pr-[32px] pr-input-x-icon pl-input-x ' : '') +
@@ -173,6 +185,12 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
       ? 'text-danger-foreground outline-danger focus:outline-danger '
       : 'text-input outline-input-border focus:outline-input-border-focus disabled:text-input-disabled ') +
     (iconPos == 'right' ? 'justify-self-start ' : 'justify-self-end ') + 
+    (type == 'file' 
+      ? 'file:inline-flex file:shrink-0 file:cursor-pointer file:items-center file:justify-center ' +
+        'file:rounded file:border-0 file:bg-transparent file:py-[0.1em] file:my-[-0.1em] file:px-[0.4em] file:ml-[-0.4em] file:mr-[0.7em] file:text-input-base file:font-medium file:text-input ' +
+        'file:outline-none file:bg-gray-100 hover:file:bg-gray-200 ' 
+      : ''
+    ) +
     'nitro-input'
   )
 }
@@ -228,7 +246,7 @@ export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps
 }
 
 const style = css`
-  input {
+  input:not([type='file']) {
     appearance: textfield;
     -moz-appearance: textfield;
   }

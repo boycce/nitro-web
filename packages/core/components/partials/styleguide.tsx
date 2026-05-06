@@ -591,6 +591,10 @@ export function Styleguide({ className, elements, children, currencies, groups }
               <label for="firstName">First Name (disabled)</label>
               <Field name="firstName" state={state} onChange={(e) => onChange(e, setState)} disabled />
             </div>
+            <div>
+              <label for="file">File Input</label>
+              <Field name="file" type="file" state={state} onChange={(e) => onChange(e, setState)} />
+            </div>
           </div>
         </div>
       )}
