@@ -417,7 +417,7 @@
   --tw-gradient-via-position:  ;
   --tw-gradient-to-position:  ;
 }
-.\!shadow-none, .shadow-2xl, .shadow-\[0_0_40px_0_rgb\(237_237_237\)\], .shadow-\[0_1px_2px_0px_\#0000001c\], .shadow-dropdown-ul, .shadow-lg, .shadow-none, .shadow-sm {
+.\!shadow-none, .shadow-2xl, .shadow-\[0_0_40px_0_rgb\(237_237_237\)\], .shadow-\[0_1px_2px_0px_\#0000001c\], .shadow-button, .shadow-dropdown-ul, .shadow-lg, .shadow-none, .shadow-sm {
   --tw-ring-offset-shadow: 0 0 #0000;
   --tw-ring-shadow: 0 0 #0000;
   --tw-shadow: 0 0 #0000;
@@ -2559,6 +2559,12 @@ label, .label {
 .shadow-\[0_1px_2px_0px_\#0000001c\] {
   --tw-shadow: 0 1px 2px 0px #0000001c;
   --tw-shadow-colored: 0 1px 2px 0px var(--tw-shadow-color);
+  -webkit-box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+          box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+.shadow-button {
+  --tw-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --tw-shadow-colored: 0 1px 2px 0 var(--tw-shadow-color);
   -webkit-box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
           box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
