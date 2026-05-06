@@ -7,11 +7,21 @@ const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
 const darken = (clr, val) => Color(clr).darken(val).rgb().string()
 const nitroDir = path.dirname(require.resolve('nitro-web'))
 
+const projectColors = {
+  // list project colors here
+  'status-indigo': '#4b59f2',
+  'status-blue': '#106efb',
+  //...
+}
+
 export default {
   content: {
     relative: true,
     files: [
       './components/**/*.{ts,tsx}',
+      './client/**/*.{ts,tsx}',
+      './server/constants.js',
+      './server/util.js',
       path.join(nitroDir, '../components/**/*.{ts,tsx}'),
     ],
   },
@@ -57,6 +67,8 @@ export default {
         'dropdown-ul-border': colors.gray[200],
         'variable-selected': '#4c50f9',
         // 'input-icon': '#c6c8ce', // optional
+        // project colors
+        ...projectColors,
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
@@ -87,6 +99,9 @@ export default {
       borderRadius: {
         // 'md': '5px', // button/input
         // 'DEFAULT': '4px', // button small
+      },
+      borderColor: {
+        // e.g. 'DEFAULT': ...
       },
     },
   },
