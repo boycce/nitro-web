@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { addressSchema, fullName } from 'nitro-web/util'
+import { addressSchema, fullName, _toArray } from 'nitro-web/util'
 
 export default {
 
@@ -28,6 +28,15 @@ export default {
 
   findBL: ['invites.token'],
   updateBL: ['status', 'users'],
+
+  // beforeValidate: [
+  //   async function (data) {
+  //     const rows = toArray(data)
+  //     for (const data of rows) {
+  //       // if (data.name) data.name = data.name.trim()
+  //     }
+  //   },
+  // ],
 
   afterFind: [
     async function (data) {

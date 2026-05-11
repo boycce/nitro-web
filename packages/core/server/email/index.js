@@ -188,6 +188,7 @@ async function sendWithMailgun(settings, html) {
   // Supports batch sending via recipientVariables, limit 1000 emails
   // https://documentation.mailgun.com/en/latest/user_manual.html?highlight=batch%20sending#batch-sending
   let processedhtml = await processTemplate(settings, html)
+  // console.log(settings)
   if (settings.test) return processedhtml
 
   return new Promise((resolve, reject) => {

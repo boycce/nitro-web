@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@stripe/stripe-js": "^1.34.0",
-    "monastery": "^3.5.9",
     "nitro-web": "0.0.204",
+    "monastery": "^3.5.13",
     "stripe": "^9.16.0"
   },
   "devDependencies": {

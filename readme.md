@@ -80,7 +80,7 @@ console.log(res) // if config.emailTestMode=true, the template will be returned
 ### Versions
 
 - Express `^4.17`
-- Monastery `~3.5.4`
+- Monastery `~3.5.13`
 - Node `^18`
 - React `^18.3`
 - Tailwind `^3.4`
