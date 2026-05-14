@@ -97,6 +97,7 @@ export async function setupRouter (config) {
       expressApp.use('/assets', compression()) // gzip
       expressApp.use('/assets', express.static(distDir + 'assets/', { maxage: '365d' }))
     } else if (!allMiddleware[name]) {
+      console.error(`SetupRouter: Server middleware '${name}' not found`)
       continue
     } else {
       expressApp.use(allMiddleware[name])
