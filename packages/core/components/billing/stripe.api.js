@@ -2,6 +2,7 @@
 import Stripe from 'stripe'
 import db from 'monastery'
 import * as util from 'nitro-web/util'
+import { resolveBaseUrl } from '../auth/auth.api.js'
 
 let stripe = undefined
 let stripeProducts = []
@@ -81,7 +82,7 @@ async function billingPortalSessionCreate(req, res) {
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: req.user.stripeCustomer.id,
-      return_url: config.baseUrl + '/subscriptions',
+      return_url: resolveBaseUrl(req.baseUrl, config.baseUrl) + '/subscriptions',
     })
     res.json(session.url)
   } catch (err) {

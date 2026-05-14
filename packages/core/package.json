@@ -31,6 +31,7 @@
     "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
     "republish": "npm publish && cd ../webpack && npm publish",
+    "test": "node --test components/**/*.test.js",
     "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
@@ -55,7 +56,8 @@
     "passport-local": "^1.0.0",
     "sort-route-addresses-nodeps": "0.0.4",
     "standard-version": "github:boycce/standard-version",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "tldts": "^7.0.30"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.18.1"

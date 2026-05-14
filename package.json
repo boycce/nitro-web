@@ -15,7 +15,8 @@
     "patch": "npm run patch -w packages/core",
     "republish": "npm run republish -w packages/core",
     "start": "npm run start -w packages/example",
-    "types": "npm run types -w packages/core"
+    "types": "npm run types -w packages/core",
+    "test": "npm run test -w packages/core"
   },
   "engines": {
     "node": ">=18 <21"

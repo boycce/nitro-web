@@ -6,12 +6,14 @@ import passportLocal from 'passport-local'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import db, { isId } from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
+import { getDomain } from 'tldts'
 import { sendEmail } from 'nitro-web/server'
 import { isArray, pick, ucFirst, fullNameSplit } from 'nitro-web/util'
 // Todo: detect if the user is already invited to the company, instead of token error
 
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 let authConfig = null
+
 export const auth = {
   userFindFromProvider, userSigninGetStore, getStore,
   userCreate, passwordValidate, tokenCreate, tokenParse, tokenSend,
@@ -37,7 +39,7 @@ function setup(middleware, _config, helpers = {}) {
   // Tip: you can pass in your own helpers to override the default helpers, internally all functions are called
   // with `auth` as the context, so `this` context contains all helpers.
   // E.g. setup: (middleware, config, helpers) => authRoutes.setup(middleware, config, { getStore, ... })
-  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant', 
+  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant',
     'confirmInvites']
   authConfig = pick(_config, configKeys)
   for (const key of Object.keys(helpers)) {
@@ -104,13 +106,13 @@ function setup(middleware, _config, helpers = {}) {
 }
 
 async function store(req, res) {
-  res.json(await auth.getStore(req.user))
+  res.json(await auth.getStore(req.user, req))
 }
 
 async function signup(req, res) {
   try {
     const desktop = req.query.desktop
-    const user = await auth.userCreate(req.body)
+    const user = await auth.userCreate(req.body, getBaseUrl(req))
     res.send(await auth.userSigninGetStore(user, desktop))
   } catch (err) {
     res.error(err)
@@ -125,6 +127,9 @@ function signin(req, res) {
   passport.authenticate('local', { session: false }, async (err, user, info) => {
     if (err) return res.error(err)
     if (!user && info) return res.error('email', info.message)
+    if (req.whitelabel && user.company?._id?.toString() !== req.whitelabel._id?.toString()) {
+      return res.error('email', `This sign in page is for ${req.whitelabel.name || req.whitelabel.subdomain} only.`)
+    }
     try {
       const response = await auth.userSigninGetStore(user, desktop)
       res.send(response)
@@ -169,12 +174,12 @@ export async function resetInstructions(req, res) {
     // const desktop = req.query.hasOwnProperty('desktop') ? '?desktop' : '' // see sendToken for future usage
     let email = (req.body.email || '').trim().toLowerCase()
     if (!email) throw { title: 'email', detail: 'The email you entered is incorrect.' }
-
+    
     let user = await db.user.findOne({ query: { email }, _privateData: true })
     if (!user) throw { title: 'email', detail: 'The email you entered is incorrect.' }
 
     // Send reset password email
-    await auth.tokenSend({ _id: user._id, email: user.email, firstName: user.firstName })
+    await auth.tokenSend({ _id: user._id, email: user.email, firstName: user.firstName, baseUrl: getBaseUrl(req) })
     res.json({})
   } catch (err) {
     res.error(err)
@@ -193,7 +198,7 @@ export async function inviteInstructions(req, res) {
     if (authConfig.isNotMultiTenant) {
       const user = await db.user.findOne({ query: { _id: req.body._id }, _privateData: true })
       if (!user) throw new Error('Please pre-create the user first, no user id found.')
-      await auth.tokenSend({ type: 'invite', _id: user._id, email: user.email, firstName: user.firstName })
+      await auth.tokenSend({ type: 'invite', _id: user._id, email: user.email, firstName: user.firstName, baseUrl: getBaseUrl(req) })
       res.json({})
 
     } else {
@@ -212,6 +217,7 @@ export async function inviteInstructions(req, res) {
           type: 'companyInvite', _id: companyId,
           email: req.body.email,
           firstName: existingUser?.firstName || req.body.firstName,
+          baseUrl: getBaseUrl(req),
         })
       }
       res.json({})
@@ -310,8 +316,8 @@ export async function userSigninGetStore(user, isDesktop) {
   return { ...store, jwt }
 }
 
-export async function getStore(user) {
-  // Initial store
+export async function getStore(user, _req) {
+  // Initial store (req only passed from the /store route, not after signin)
   return {
     user: user || undefined,
   }
@@ -325,10 +331,11 @@ export async function getStore(user) {
  * @param {string} [userData.password] - optional
  * @param {string} [userData.password2] - optional, to confirm the password
  * @param {string} [userData.company] - if multi tenant and `user.company` is not an id, create a new company
+ * @param {string} [baseUrl] - baseUrl to use for the email
  * @param {boolean} [skipSendEmail=false] - whether to skip sending the welcome email
  * @returns {Promise<object>} - the created user
  */
-export async function userCreate({ password, password2, company, ...userDataProp }, skipSendEmail) {
+export async function userCreate({ password, password2, company, ...userDataProp }, baseUrl, skipSendEmail) {
   try {
     const userId = db.id()
     const options = { blacklist: ['-_id'] }
@@ -371,7 +378,7 @@ export async function userCreate({ password, password2, company, ...userDataProp
     // Send welcome email
     if (!skipSendEmail) {
       sendEmail({
-        config: authConfig,
+        config: { ...authConfig, baseUrl: baseUrl || authConfig.baseUrl },
         template: 'welcome',
         to: `${ucFirst(userData.firstName)}<${userData.email}>`,
       }).catch(console.error)
@@ -499,9 +506,10 @@ export async function tokenConfirmForMultiTenant(req) {
  * @param {string} options.firstName - recipient first name
  * @param {function} [options.beforeUpdate] - runs before updating the model with the token, return null to skip update
  * @param {function} [options.beforeSendEmail] - runs before sending the email, receives (options, token)
+ * @param {string} [options.baseUrl] - baseUrl to use for the email
  * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
  */
-export async function tokenSend({ type = 'reset', _id, email, firstName, beforeUpdate, beforeSendEmail }) {
+export async function tokenSend({ type = 'reset', _id, email, firstName, beforeUpdate, beforeSendEmail, baseUrl }) {
   if (!_id) throw new Error(`${type === 'companyInvite' ? 'company' : 'user'} id is required`)
   if (!email) throw new Error('email is required')
   if (!firstName) throw new Error('firstName is required')
@@ -527,7 +535,7 @@ export async function tokenSend({ type = 'reset', _id, email, firstName, beforeU
 
   // Send email
   const options = {
-    config: authConfig,
+    config: { ...authConfig, baseUrl: baseUrl || authConfig.baseUrl },
     template: type === 'reset' ? 'reset-instructions' : 'invite-instructions',
     to: `${ucFirst(firstName)}<${email}>`,
     data: { token: token },
@@ -538,4 +546,29 @@ export async function tokenSend({ type = 'reset', _id, email, firstName, beforeU
 
   // Return the token and mailgun promise
   return { token, mailgunPromise }
+}
+
+function getBaseUrl(req) {
+  return resolveBaseUrl(req?.baseUrl, authConfig.baseUrl)
+}
+
+export function resolveBaseUrl(reqUrl, cfgUrl) {
+  // Use reqUrl if its apex domain matches cfgUrl's apex (e.g. wildcard.example.com matches cfg: app.example.com)
+  if (!reqUrl) return cfgUrl
+  try {
+    const reqHost = new URL(reqUrl).hostname
+    const cfgHost = new URL(cfgUrl).hostname
+    const reqApex = getDomain(reqHost)
+    const cfgApex = getDomain(cfgHost)
+
+    if (reqApex && cfgApex) {
+      return reqApex === cfgApex ? reqUrl : cfgUrl
+    } else if (reqHost === cfgHost || reqHost.endsWith('.' + cfgHost)) {
+      return reqUrl
+    } else {
+      return cfgUrl
+    }
+  } catch (_) {
+    return cfgUrl
+  }
 }

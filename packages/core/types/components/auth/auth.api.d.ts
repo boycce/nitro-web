@@ -7,7 +7,7 @@ export function userSigninGetStore(user: any, isDesktop: any): Promise<{
     jwt: string;
     user: any;
 }>;
-export function getStore(user: any): Promise<{
+export function getStore(user: any, _req: any): Promise<{
     user: any;
 }>;
 /**
@@ -16,6 +16,7 @@ export function getStore(user: any): Promise<{
  * @param {string} [userData.password] - optional
  * @param {string} [userData.password2] - optional, to confirm the password
  * @param {string} [userData.company] - if multi tenant and `user.company` is not an id, create a new company
+ * @param {string} [baseUrl] - baseUrl to use for the email
  * @param {boolean} [skipSendEmail=false] - whether to skip sending the welcome email
  * @returns {Promise<object>} - the created user
  */
@@ -23,7 +24,7 @@ export function userCreate({ password, password2, company, ...userDataProp }: {
     password?: string;
     password2?: string;
     company?: string;
-}, skipSendEmail?: boolean): Promise<object>;
+}, baseUrl?: string, skipSendEmail?: boolean): Promise<object>;
 export function passwordValidate(password: string, password2: any): Promise<void>;
 export function tokenCreate(modelName: any, id: any): Promise<any>;
 export function tokenParse(token: any, modelName: any, maxAgeMs?: number): any;
@@ -48,19 +49,22 @@ export function tokenConfirmForMultiTenant(req: any): Promise<{
  * @param {string} options.firstName - recipient first name
  * @param {function} [options.beforeUpdate] - runs before updating the model with the token, return null to skip update
  * @param {function} [options.beforeSendEmail] - runs before sending the email, receives (options, token)
+ * @param {string} [options.baseUrl] - baseUrl to use for the email
  * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
  */
-export function tokenSend({ type, _id, email, firstName, beforeUpdate, beforeSendEmail }: {
+export function tokenSend({ type, _id, email, firstName, beforeUpdate, beforeSendEmail, baseUrl }: {
     type: "reset" | "invite" | "companyInvite";
     _id: string;
     email: string;
     firstName: string;
     beforeUpdate?: Function;
     beforeSendEmail?: Function;
+    baseUrl?: string;
 }): Promise<{
     token: string;
     mailgunPromise: Promise<unknown>;
 }>;
+export function resolveBaseUrl(reqUrl: any, cfgUrl: any): any;
 export namespace auth {
     export { userFindFromProvider };
     export { userSigninGetStore };

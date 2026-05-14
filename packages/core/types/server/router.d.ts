@@ -1,4 +1,8 @@
-export function setupRouter(config: any): Promise<http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>>;
+/** @returns {Promise<{ server: import('http').Server, expressApp: import('express').Application }>} */
+export function setupRouter(config: any): Promise<{
+    server: import("http").Server;
+    expressApp: import("express").Application;
+}>;
 export function isAdminUser(req: any): boolean;
 export function isValidUserOrRespond(req: any, res: any): boolean;
 /** @type {MiddlewareConfig} */
@@ -18,6 +22,5 @@ export type MiddlewareConfig = {
     order: string[];
     [key: string]: ((req: Request, res: Response, next: Function) => void) | string[];
 };
-import http from 'http';
 import express from 'express';
 //# sourceMappingURL=router.d.ts.map

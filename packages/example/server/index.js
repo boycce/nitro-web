@@ -14,7 +14,7 @@ if (config.env === 'development') {
 }
 
 // Setup router (automatically picks up the *.api.js routes from /components)
-const server = await setupRouter(config)
+const { server } = await setupRouter(config)
 
 // Start express
 server.listen({ port: config.portServer, host: '0.0.0.0' }, async () => {

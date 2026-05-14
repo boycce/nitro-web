@@ -34,6 +34,7 @@ import * as util from 'nitro-web/util'
 let configLocal
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
+/** @returns {Promise<{ server: import('http').Server, expressApp: import('express').Application }>} */
 export async function setupRouter (config) {
   configLocal = config
   const { env, middleware: configMiddleware, version } = config
@@ -158,7 +159,7 @@ export async function setupRouter (config) {
     else { res.status(404); res.notFound() }
   })
 
-  return server
+  return { server, expressApp }
 }
 
 function setupErrorResponses (expressApp) {
@@ -335,8 +336,13 @@ export const middleware = {
 
   modifyRequest: (req, res, next) => {
     // Handy boolean denoting that the request wants JSON returned
-    // global.start = new Date().getTime()
     req.json = req.xhr || req.accepts(['html', 'json']) == 'json'
+    // Dynamic baseUrl from the request headers, may require app.set('trust proxy', 1) in the server setup
+    req.baseUrl = req.protocol + '://' + req.headers.host
+    // log the headers if the config.logHeaders is true
+    if (configLocal.logHeaders) {
+      console.info('Headers:', req.headers)
+    }
     next()
   },
 

@@ -22,7 +22,8 @@ const config = {
   pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
-  // isNotMultiTenant: true,
+  // isNotMultiTenant: true, // changes how the user is created, only one tenant per user
+  // logHeaders: process.env.logHeaders,
 
   monasteryOptions: {
     noDefaults: true,
@@ -44,7 +45,7 @@ const config = {
   client: {
     // injected into the client via webpack
     awsUrl: process.env.awsUrl,
-    baseUrl: process.env.baseUrl || 'http://localhost:' + (port || 3000),
+    baseUrl: process.env.baseUrl || ('http://localhost:' + (port || 3000)),
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
     name: process.env.name,
