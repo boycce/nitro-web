@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 
 type signupProps = {
   className?: string,
-  elements?: { Button?: typeof Button },
+  elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
 }
 
@@ -22,6 +22,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
 
   const Elements = {
     Button: elements?.Button || Button,
+    Header: elements?.Header || null,
   }
 
   async function onSubmit (e: React.FormEvent<HTMLFormElement>) {
@@ -37,6 +38,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
   
   return (
     <div className={className}>
+      {!!Elements.Header && Elements.Header}
       <Topbar title={<Fragment>Start your 21 day Free Trial</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">

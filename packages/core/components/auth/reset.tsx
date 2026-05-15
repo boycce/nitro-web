@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 
 type resetInstructionsProps = {
   className?: string,
-  elements?: { Button?: typeof Button },
+  elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
 }
 
@@ -16,6 +16,7 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
 
   const Elements = {
     Button: elements?.Button || Button,
+    Header: elements?.Header || null,
   }
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
@@ -31,6 +32,7 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
 
   return (
     <div className={className}>
+      {!!Elements.Header && Elements.Header}
       <Topbar title={<Fragment>Reset your Password</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">
@@ -64,6 +66,7 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
   
   const Elements = {
     Button: elements?.Button || Button,
+    Header: elements?.Header || null,
   }
 
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
@@ -79,6 +82,7 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
 
   return (
     <div className={className}>
+      {!!Elements.Header && Elements.Header}
       <Topbar title={<Fragment>Reset your Password</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">

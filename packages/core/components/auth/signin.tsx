@@ -4,7 +4,7 @@ import { Fragment } from 'react'
 
 type signinProps = {
   className?: string,
-  elements?: { Button?: typeof Button },
+  elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
 }
 
@@ -22,6 +22,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
   
   const Elements = {
     Button: elements?.Button || Button,
+    Header: elements?.Header || null,
   }
 
   useEffect(() => {
@@ -60,6 +61,7 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
 
   return (
     <div className={className}>
+      {!!Elements.Header && Elements.Header}
       <Topbar title={<Fragment>Sign in to your Account</Fragment>} />
 
       <form onSubmit={onSubmit} class="mb-0">

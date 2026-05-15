@@ -4,7 +4,7 @@ import { Fragment, useEffect } from 'react'
 
 type InviteConfirmProps = {
   className?: string,
-  elements?: { Button?: typeof Button },
+  elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
 }
 
@@ -25,6 +25,7 @@ export function InviteConfirm({ className, elements, redirectTo }: InviteConfirm
 
   const Elements = {
     Button: elements?.Button || Button,
+    Header: elements?.Header || null,
   }
 
   // Auto-confirm on mount for already signed-in users
@@ -72,6 +73,7 @@ export function InviteConfirm({ className, elements, redirectTo }: InviteConfirm
 
   return (
     <div className={className}>
+      {!!Elements.Header && Elements.Header}
       <Topbar title={<Fragment>Accept Your Invite</Fragment>} />
 
       <form onSubmit={(e) => submit(state, e)} class="mb-0">
