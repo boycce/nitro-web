@@ -22,8 +22,8 @@ const config = {
   pwd: pwd, // change to rootDir
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
+  logHeaders: process.env.logHeaders,
   // isNotMultiTenant: true, // changes how the user is created, only one tenant per user
-  // logHeaders: process.env.logHeaders,
 
   monasteryOptions: {
     noDefaults: true,

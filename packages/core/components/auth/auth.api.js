@@ -549,7 +549,7 @@ export async function tokenSend({ type = 'reset', _id, email, firstName, beforeU
 }
 
 function getBaseUrl(req) {
-  return resolveBaseUrl(req?.baseUrl, authConfig.baseUrl)
+  return resolveBaseUrl(req?.nitroBaseUrl, authConfig.baseUrl)
 }
 
 export function resolveBaseUrl(reqUrl, cfgUrl) {

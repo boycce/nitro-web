@@ -82,7 +82,7 @@ async function billingPortalSessionCreate(req, res) {
     }
     const session = await stripe.billingPortal.sessions.create({
       customer: req.user.stripeCustomer.id,
-      return_url: resolveBaseUrl(req.baseUrl, config.baseUrl) + '/subscriptions',
+      return_url: resolveBaseUrl(req.nitroBaseUrl, config.baseUrl) + '/subscriptions',
     })
     res.json(session.url)
   } catch (err) {
