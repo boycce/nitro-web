@@ -6,9 +6,10 @@ type signinProps = {
   className?: string,
   elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
+  hideSignup?: boolean,
 }
 
-export function Signin({ className, elements, redirectTo }: signinProps) {
+export function Signin({ className, elements, redirectTo, hideSignup }: signinProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
@@ -79,7 +80,9 @@ export function Signin({ className, elements, redirectTo }: signinProps) {
         </div>
         
         <div class="mb-14">
-          Don&apos;t have an account? You can <Link to="/signup" class="underline2 is-active">sign up here</Link>.
+          {!hideSignup && (
+            <Fragment>Don&apos;t have an account? You can <Link to="/signup" class="underline2 is-active">sign up here</Link>.</Fragment>
+          )}
           <FormError state={state} className="pt-2" />
         </div>
 
