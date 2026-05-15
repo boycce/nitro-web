@@ -17,7 +17,7 @@ type InjectedConfig = {
 
 export type Config = InjectedConfig & {
   // Non-injectable config on the client
-  beforeApp?: () => Promise<object>
+  beforeApp?: (config: Config) => Promise<unknown>
   beforeStoreUpdate?: (prevStore: Store | null, newData: Store) => Store
   middleware?: {[key: string]: (route: any, store: any) => undefined | { redirect: string }}
 }

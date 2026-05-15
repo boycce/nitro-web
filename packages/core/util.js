@@ -756,9 +756,9 @@ export function formData (obj, cfg, existingFormData, keyPrefix) {
     cfg.allowEmptyArrays = cfg.allowEmptyArrays === undefined ? false : cfg.allowEmptyArrays
     existingFormData = existingFormData || new FormData()
 
-    const isBlob = typeof obj === 'object' && 
-      'size' in obj && typeof obj.size === 'number' && 
-      'type' in obj && typeof obj.type === 'string' && 
+    const isBlob = obj != null && typeof obj === 'object' &&
+      'size' in obj && typeof obj.size === 'number' &&
+      'type' in obj && typeof obj.type === 'string' &&
       'slice' in obj && typeof obj.slice === 'function'
 
     const isFile = isBlob &&

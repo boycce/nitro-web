@@ -15,7 +15,7 @@ type LayoutProps = {
 
 type Settings = {
   afterApp?: () => void
-  beforeApp: (config: Config) => Promise<object>
+  beforeApp: (config: Config) => Promise<unknown>
   // beforeStoreUpdate: (prevStore: Store | null, newData: Store) => Store
   isStatic?: boolean
   layouts: React.FC<LayoutProps>[]
