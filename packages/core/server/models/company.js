@@ -57,8 +57,8 @@ export default {
     publicData: function(models) {
       return models
     },
-    loginPopulate: function() {
-      // return the company with expanded company.users
+    authPopulate: function() {
+      // Special method called by auth.api.js on authentication.
       return [
         {
           as: 'usersExpanded',

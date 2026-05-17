@@ -433,7 +433,7 @@ function isValidParamCompanyUserOrRespond(req, res, checkIsOwner = false) {
   const company = _company || req.user?.companies?.find((o) => o._id.toString() == req.params.cid)
   const isCompanyOwner = company?.users?.find((o) => o._id.toString() == req.user?._id?.toString() && o.role === 'owner')
   if (!isValidUserOrRespond(req, res)) return
-  else if (!isAdminUser(req) && !company) res.unauthorized('You are not authorised to make this request.')
-  else if (!isAdminUser(req) && checkIsOwner && !isCompanyOwner) res.unauthorized('Only owners can make this request.')
+  else if (!isAdminUser(req) && !company) res.unauthorized('Only company users can make this request.')
+  else if (!isAdminUser(req) && checkIsOwner && !isCompanyOwner) res.unauthorized('Only company owners can make this request.')
   else return true
 }

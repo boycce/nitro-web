@@ -48,7 +48,8 @@ export default {
   ],
 
   methods: {
-    loginPopulate: function() {
+    authPopulate: function() {
+      // Special method called by auth.api.js on authentication.
       return []
     },
   },

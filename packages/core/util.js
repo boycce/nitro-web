@@ -941,7 +941,8 @@ export function getResponseErrors (errs) {
   // Array of error objects /////todo warning these may not have title from the server? e.g. if  
   // throw new Error('You do not have access to export employees.') is thrown from the server into res.error(err)
   if (Array.isArray(errs)) {
-    return errs
+    if (errs.length === 0) return [{ title: 'error', detail: 'Oops there was an error, but no errors were returned' }]
+    else return errs
   
   // Axios response errors ////wsame here too!!!
   } else if (typeof errs === 'object' && errs?.response?.data?.errors) {

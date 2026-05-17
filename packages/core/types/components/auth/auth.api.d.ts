@@ -47,16 +47,18 @@ export function tokenConfirmForMultiTenant(req: any): Promise<{
  * @param {string} options._id - user or company id
  * @param {string} options.email - recipient email
  * @param {string} options.firstName - recipient first name
+ * @param {'owner'|'manager'} [options.role] - required when type is companyInvite
  * @param {function} [options.beforeUpdate] - runs before updating the model with the token, return null to skip update
  * @param {function} [options.beforeSendEmail] - runs before sending the email, receives (options, token)
  * @param {string} [options.baseUrl] - baseUrl to use for the email
  * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
  */
-export function tokenSend({ type, _id, email, firstName, beforeUpdate, beforeSendEmail, baseUrl }: {
+export function tokenSend({ type, _id, email, firstName, role, beforeUpdate, beforeSendEmail, baseUrl }: {
     type: "reset" | "invite" | "companyInvite";
     _id: string;
     email: string;
     firstName: string;
+    role?: "owner" | "manager";
     beforeUpdate?: Function;
     beforeSendEmail?: Function;
     baseUrl?: string;
