@@ -387,7 +387,7 @@ export const middleware = {
     else next()
   },
   isUser: (req, res, next) => {
-    if (!isValidUserOrRespond(req, res)) return
+    if (!isValidUserOrRespond(req, res)) return 
     else next()
   },
   isParamUser: (req, res, next) => {
@@ -401,11 +401,11 @@ export const middleware = {
     else next()
   },
   isCompanyUser: (req, res, next) => {
-    if (!isValidParamCompanyUserOrRespond(req)) return
+    if (!isValidParamCompanyUserOrRespond(req, res)) return
     else next()
   },
   isCompanyOwner: (req, res, next) => {
-    if (!isValidParamCompanyUserOrRespond(req, true)) return
+    if (!isValidParamCompanyUserOrRespond(req, res, true)) return
     else next()
   },
 }
@@ -433,6 +433,7 @@ function isValidParamCompanyUserOrRespond(req, res, checkIsOwner = false) {
   const company = _company || req.user?.companies?.find((o) => o._id.toString() == req.params.cid)
   const isCompanyOwner = company?.users?.find((o) => o._id.toString() == req.user?._id?.toString() && o.role === 'owner')
   if (!isValidUserOrRespond(req, res)) return
+  else if (!isAdminUser(req) && configLocal.isNotMultiTenant) res.unauthorized('Only admins can make this request.')
   else if (!isAdminUser(req) && !company) res.unauthorized('Only company users can make this request.')
   else if (!isAdminUser(req) && checkIsOwner && !isCompanyOwner) res.unauthorized('Only company owners can make this request.')
   else return true

@@ -13,6 +13,10 @@ let templates = {}
 let nodemailerMailgun = undefined
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
+export const requiredEmailConfigKeys = ['baseUrl', 'emailFrom', 'name', 'env']
+export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgunDomain', 'mailgunKey']
+
+
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
  * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
@@ -44,24 +48,19 @@ export async function sendEmail({
   skipCssInline,
   test,  
 }) {
-  if (!config) {
-    throw new Error('sendEmail: `config` missing')
-  } else if (!config.baseUrl) {
-    throw new Error('sendEmail: `config.baseUrl` is missing')
-  } else if (!config.emailFrom) {
-    throw new Error('sendEmail: `config.emailFrom` is missing')
-  } else if (!test && (!config.mailgunKey || !config.mailgunDomain)) {
-    throw new Error('sendEmail: `config.mailgunKey` or `config.mailgunDomain` is missing')
-  } else if (!config.name) {
-    throw new Error('sendEmail: `config.name` is missing')
-  } else if (!template) {
-    throw new Error('sendEmail: `template` missing')
-  } else if (!to) {
-    throw new Error('sendEmail: `to` missing')
+  const isTest = config.emailTestMode || test
+  if (!config) throw new Error('sendEmail: `config` missing')
+  for (const key of requiredEmailConfigKeys) {
+    if (!config[key]) throw new Error(`sendEmail: config.${key} is missing`)
   }
+  if (!isTest && (!config.mailgunKey || !config.mailgunDomain)) {
+    throw new Error('sendEmail: config.mailgunKey and config.mailgunDomain are required')
+  }
+  if (!template) throw new Error('sendEmail: `template` missing')
+  if (!to) throw new Error('sendEmail: `to` missing')
 
   // Setup nodemailer once
-  if (!nodemailerMailgun && !test) {
+  if (!nodemailerMailgun && !isTest) {
     nodemailerMailgun = nodemailer.createTransport(
       mailgun({ auth: { api_key: config.mailgunKey, domain: config.mailgunDomain }})
     )
@@ -95,13 +94,13 @@ export async function sendEmail({
     bcc: bcc,
     emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
-    isDev: config.baseUrl.match(/:/), // possibly use config.env here
+    isDev: config.env === 'development',
     recipientVariables: recipientVariables,
     replyTo: replyTo,
     skipCssInline: skipCssInline,
     subject: subject,
     template: template,
-    test: config.emailTestMode || test,
+    test: isTest,
     to: to,
     url: config.baseUrl,
   }
@@ -187,24 +186,27 @@ function processTemplate(settings, html) {
 async function sendWithMailgun(settings, html) {
   // Supports batch sending via recipientVariables, limit 1000 emails
   // https://documentation.mailgun.com/en/latest/user_manual.html?highlight=batch%20sending#batch-sending
-  let processedhtml = await processTemplate(settings, html)
-  // console.log(settings)
+  const processedhtml = await processTemplate(settings, html)
+  const mailgunOpts = {
+    ...(settings.bcc && !settings.isDev? { bcc: settings.bcc } : {}),
+    from: settings.from,
+    html: processedhtml,
+    'h:Reply-To': settings.replyTo,
+    subject: settings.subject,
+    to: settings.to,
+    ...(!settings.recipientVariables? {} : {
+      'recipient-variables': typeof settings.recipientVariables == 'string'
+        ? settings.recipientVariables
+        : JSON.stringify(settings.recipientVariables),
+    }),
+  }
+  if (settings.test && settings.isDev) {
+    console.info('Test mode: sendEmail mailgunOpts', { ...mailgunOpts, html: null, 'recipient-variables': settings.recipientVariables })
+  }
   if (settings.test) return processedhtml
 
   return new Promise((resolve, reject) => {
-    nodemailerMailgun.sendMail({
-      ...(settings.bcc && !settings.isDev? { bcc: settings.bcc } : {}),
-      from: settings.from,
-      html: processedhtml,
-      'h:Reply-To': settings.replyTo,
-      subject: settings.subject,
-      to: settings.to,
-      ...(!settings.recipientVariables? {} : {
-        'recipient-variables': typeof settings.recipientVariables == 'string'
-          ? settings.recipientVariables
-          : JSON.stringify(settings.recipientVariables),
-      }),
-    }, function(err, info) {
+    nodemailerMailgun.sendMail(mailgunOpts, function(err, info) {
       if (err) {
         console.error('SendEmail mailgun error')
         reject(err)

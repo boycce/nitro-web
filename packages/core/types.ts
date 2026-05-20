@@ -20,6 +20,7 @@ export type Config = InjectedConfig & {
   beforeApp?: (config: Config) => Promise<unknown>
   beforeStoreUpdate?: (prevStore: Store | null, newData: Store) => Store
   middleware?: {[key: string]: (route: any, store: any) => undefined | { redirect: string }}
+  getSignoutStore?: (prev: any, initialStore: any) => any
 }
 
 export type User = {
@@ -54,7 +55,7 @@ export type Store = {
   apiAvailable?: boolean
   jwt?: string
   message?: MessageObject | string
-  user?: User,
+  user: User,
 }
 
 // util.addressSchema

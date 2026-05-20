@@ -17,7 +17,7 @@ export type BaseEntity = {
 /* ---- Store & User ------------------------- */
 
 export type Store = NitroStore & {
-  user?: User
+  user: User
 }
 
 export type Company = BaseEntity & {
@@ -39,6 +39,7 @@ export type Company = BaseEntity & {
   }[]
   invites: {
     email: string
+    firstName: string
     role: UserRole
     inviteToken: string
   }[]

@@ -1,11 +1,15 @@
-import { Topbar, Field, FormError, Button, request, onChange } from 'nitro-web'
-import { Errors } from 'nitro-web/types'
+import { Topbar, Field, FormError, Button, request, onChange, getSignoutStore, getInitialStore } from 'nitro-web'
+import { Config, Errors } from 'nitro-web/types'
 import { Fragment } from 'react'
 
 type resetInstructionsProps = {
   className?: string,
   elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
+}
+
+type resetPasswordProps = resetInstructionsProps & {
+  config: Pick<Config, 'getSignoutStore'>
 }
 
 export function ResetInstructions({ className, elements, redirectTo }: resetInstructionsProps) {
@@ -52,9 +56,10 @@ export function ResetInstructions({ className, elements, redirectTo }: resetInst
   )
 }
 
-export function ResetPassword({ className, elements, redirectTo }: resetInstructionsProps) {
+export function ResetPassword({ className, elements, redirectTo, config }: resetPasswordProps) {
   const navigate = useNavigate()
   const params = useParams()
+  const getSignoutStoreFn = config.getSignoutStore || getSignoutStore
   const [isLoading, setIsLoading] = useState(false)
   const [, setStore] = useTracked()
   const [state, setState] = useState(() => ({
@@ -73,7 +78,7 @@ export function ResetPassword({ className, elements, redirectTo }: resetInstruct
     try {
       if (isLoading) return
       const data = await request('post /api/reset-password', state, event, setIsLoading, setState)
-      setStore((s) => ({ ...s, ...data }))
+      setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
       return setState({ ...state, errors: e as Errors })

@@ -137,7 +137,7 @@ function getRouter({ settings, config }: { settings: Settings, config: Config })
   }
   // Loop files
   // const components = {}
-  const layouts: Route[][] = []
+  const layouts: Route[][] = [] //rename to routes
 
   for (const filename of requireContext.keys()) {
     const file = requireContext(filename) // require
@@ -319,17 +319,17 @@ async function beforeApp(config: Config) {
 
 export const middleware = {
   // Default middleware that can referenced from component routes
-  isAdmin: (route: unknown, store: { user?: { isAdmin?: boolean } }) => {
+  isAdmin: (route: unknown, store: { user?: { isAdmin?: boolean, _id?: string } }) => {
     if (store.user?.isAdmin) return
-    else if (store.user) return { redirect: '/signin?unauth' }
+    else if (store.user?._id) return { redirect: '/signin?unauth' }
     else return { redirect: '/signin?signin' }
   },
   isSubscribed: (route: unknown, store: { user?: { company?: { currentSubscription?: string } } }) => {
     if (store.user?.company?.currentSubscription) return
     else return { redirect: '/plans/subscribe' }
   },
-  isUser: (route: unknown, store: { user?: { isAdmin?: boolean } }) => {
-    if (store.user) return
+  isUser: (route: unknown, store: { user?: { _id?: string } }) => {
+    if (store.user?._id) return
     else return { redirect: '/signin?signin' }
   },
 }

@@ -21,6 +21,7 @@ export default {
     }],
     invites: [{
       email: { type: 'email', required: true },
+      firstName: { type: 'string', required: true },
       role: { type: 'string', enum: ['owner', 'manager'], required: true },
       inviteToken: { type: 'string', required: true },
     }],

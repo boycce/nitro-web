@@ -11,7 +11,7 @@ export * from '../types'
 
 // Main app functions
 export { setupApp, updateJwt, middleware } from './app'
-export { createStore, exposedStoreData, preloadedStoreData, setStoreWrapper } from './store'
+export { createStore, exposedStoreData, preloadedStoreData, setStoreWrapper, getSignoutStore, getInitialStore } from './store'
 
 // Component Pages
 export { Signin } from '../components/auth/signin'

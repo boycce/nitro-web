@@ -1,25 +1,29 @@
-import { Topbar, Field, FormError, Button, request, onChange, getResponseErrors, showError } from 'nitro-web'
-import { Errors } from 'nitro-web/types'
+import { Topbar, Field, FormError, Button, request, onChange, getResponseErrors, getSignoutStore, getInitialStore } from 'nitro-web'
+import { Config, Errors } from 'nitro-web/types'
+import { twMerge } from 'nitro-web/util'
 import { Fragment, useEffect } from 'react'
 
 type InviteConfirmProps = {
   className?: string,
   elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
+  config: Pick<Config, 'getSignoutStore'>
 }
 
-export function InviteConfirm({ className, elements, redirectTo }: InviteConfirmProps) {
+export function InviteConfirm({ className, elements, redirectTo, config }: InviteConfirmProps) {
   const navigate = useNavigate()
   const params = useParams()
-  const [store, setStore] = useTracked()
+  const [, setStore] = useTracked()
+  const getSignoutStoreFn = config.getSignoutStore || getSignoutStore
   const [isLoading, setIsLoading] = useState(false)
-  const [accepted, setAccepted] = useState(false)
+  const [isExistingUser, setIsExistingUser] = useState<boolean | 'pending'>('pending')
+  const [isAccepted, setIsAccepted] = useState(false)
   const [state, setState] = useState(() => ({
     firstName: '',
     lastName: '',
     password: '',
     password2: '',
-    token: params.token,
+    email: '',
     errors: [] as Errors,
   }))
 
@@ -28,45 +32,56 @@ export function InviteConfirm({ className, elements, redirectTo }: InviteConfirm
     Header: elements?.Header || null,
   }
 
-  // Auto-confirm on mount for already signed-in users
+  // Get invite details on mount
   useEffect(() => {
-    if (store.user) submit({ token: params.token })
+    preSubmit()
   }, [])
 
-  async function submit(data: object, event?: React.FormEvent<HTMLFormElement>) {
+  async function preSubmit() {
     try {
-      if (isLoading) return
-      const result = await request('post /api/invite-confirm', data, event, setIsLoading, setState)
-      setStore((s) => ({ ...s, ...result }))
-      setAccepted(true)
-      setTimeout(() => navigate(redirectTo || '/'), 5000)
+      const result = await request(`get /api/invite-pre-confirm/${params.token}`)
+      setIsExistingUser(result.isExistingUser)
+      setState((s) => ({ ...s, email: result.email }))
+      if (result.isExistingUser) submit({ token: params.token })
     } catch (e) {
-      showError(setStore, e)
       setState((s) => ({ ...s, errors: getResponseErrors(e) }))
     }
   }
 
-  if (store.user) {
+  async function submit(data: object, event?: React.FormEvent<HTMLFormElement>) {
+    try {
+      if (isLoading) return
+      const result = await request(`post /api/invite-confirm/${params.token}`, data, event, setIsLoading, setState)
+      // Only update the store if the user was created AND refreshly signed in
+      if (result?.jwt) setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...result }))
+      setIsAccepted(true)
+      setTimeout(() => navigate(redirectTo || '/'), 5000)
+    } catch (e) {
+      setState((s) => ({ ...s, errors: getResponseErrors(e) }))
+    }
+  }
+
+  if (isExistingUser || isAccepted) {
     return (
-      <div className={className}>
-        <div class="py-12 text-center">
-          {accepted ? (
-            <Fragment>
-              <p class="text-lg font-semibold">Your invite has been accepted.</p>
-              <p class="text-sm text-gray-500 mt-1">You&apos;ll be redirected back to the <Link to="/">home page</Link> shortly...</p>
-            </Fragment>
-          ) : isLoading ? (
-            <Fragment>
-              <p class="text-lg font-semibold">Accepting your invite...</p>
-              <p class="text-sm text-gray-500 mt-1">Please wait while we confirm your invite.</p>
-            </Fragment>
-          ) : (
-            <Fragment>
-              <p class="text-lg font-semibold mb-2">Oops! Something went wrong.</p>
-              <span class="text-sm text-red-500 bg-red-50 p-1 rounded-md mt-1">{state.errors.map((error) => error.detail).join(', ')}</span>
-            </Fragment>
-          )}
-        </div>
+      <div className={twMerge('min-h-[250px]', className)}>
+        {isAccepted ? (
+          <Fragment>
+            <div class="text-2xl font-bold mb-4">Your invite has been accepted.</div>
+            <p class="">You&apos;ll be redirected back to the <Link to="/">home page</Link> shortly...</p>
+          </Fragment>
+        ) : isExistingUser === 'pending' && !state.errors.length ? (
+          <Fragment>
+            <div class="text-2xl font-bold mb-4">One moment please...</div>
+            <p class="">Verifying your token.</p>
+          </Fragment>
+        ) : (
+          <Fragment>
+            <div class="text-2xl font-bold mb-4">Something went wrong.</div>
+            {state.errors.map((error, i) => {
+              return (<span key={i} class="text-red-500 bg-red-50 p-1 rounded-md">{error.detail} <br /></span>)
+            })}
+          </Fragment>
+        )}
       </div>
     )
   }
@@ -74,18 +89,24 @@ export function InviteConfirm({ className, elements, redirectTo }: InviteConfirm
   return (
     <div className={className}>
       {!!Elements.Header && Elements.Header}
-      <Topbar title={<Fragment>Accept Your Invite</Fragment>} />
+      <Topbar title={<Fragment>Accept Invitation</Fragment>} />
 
       <form onSubmit={(e) => submit(state, e)} class="mb-0">
         <div class="grid grid-cols-2 gap-6">  
           <div>
             <label for="firstName">First Name</label>
-            <Field name="firstName" type="text" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your first name..." />
+            <Field name="firstName" type="text" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your first name..." 
+              autoComplete="given-name" />
           </div>
           <div>
             <label for="lastName">Last Name</label>
-            <Field name="lastName" type="text" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your last name..." />
+            <Field name="lastName" type="text" state={state} onChange={(e) => onChange(e, setState)} placeholder="Your last name..." 
+              autoComplete="off" />
           </div>
+        </div>
+        <div>
+          <label for="email">Email Address</label>
+          <Field name="email" type="email" state={state} placeholder="Your email address..." disabled={true} />
         </div>
         <div>
           <label for="password">Choose a Password</label>
@@ -97,8 +118,7 @@ export function InviteConfirm({ className, elements, redirectTo }: InviteConfirm
         </div>
 
         <div class="mb-14">
-          Already have an account? <Link to="/signin" class="underline2 is-active">Sign in here</Link> first then revisit this link.
-          <FormError state={state} className="pt-2" />
+          <FormError state={state} className="pt-2" fields={['firstName', 'lastName', 'password', 'password2']} />
         </div>
 
         <Elements.Button class="w-full" isLoading={isLoading} type="submit">Accept Invite & Create Account</Elements.Button>

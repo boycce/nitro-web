@@ -1,17 +1,19 @@
-import { Button, Field, FormError, Topbar, request, injectedConfig, onChange } from 'nitro-web'
-import { Errors } from 'nitro-web/types'
+import { Button, Field, FormError, Topbar, request, injectedConfig, onChange, getSignoutStore, getInitialStore } from 'nitro-web'
+import { Config, Errors } from 'nitro-web/types'
 import { Fragment } from 'react'
 
 type signupProps = {
   className?: string,
   elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
+  config: Pick<Config, 'getSignoutStore'>
 }
 
-export function Signup({ className, elements, redirectTo }: signupProps) {
+export function Signup({ className, elements, redirectTo, config }: signupProps) {
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
   const [, setStore] = useTracked()
+  const getSignoutStoreFn = config.getSignoutStore || getSignoutStore
   const [state, setState] = useState({
     email: injectedConfig.env === 'development' ? (injectedConfig.placeholderEmail || '') : '',
     name: injectedConfig.env === 'development' ? 'Bruce Wayne' : '',
@@ -29,7 +31,7 @@ export function Signup({ className, elements, redirectTo }: signupProps) {
     try {
       if (isLoading) return
       const data = await request('post /api/signup', state, e, setIsLoading, setState)
-      setStore((prev) => ({ ...prev, ...data }))
+      setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
       setState((prev) => ({ ...prev, errors: e as Errors }))

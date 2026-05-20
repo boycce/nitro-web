@@ -1,5 +1,8 @@
-import { Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange } from 'nitro-web'
-import { Errors } from 'nitro-web/types'
+import { 
+  Topbar, Field, Button, FormError, request, queryObject, injectedConfig, updateJwt, onChange, 
+  getSignoutStore, getInitialStore,
+} from 'nitro-web'
+import { Config, Errors } from 'nitro-web/types'
 import { Fragment } from 'react'
 
 type signinProps = {
@@ -7,12 +10,14 @@ type signinProps = {
   elements?: { Button?: typeof Button, Header?: React.ReactNode },
   redirectTo?: string,
   hideSignup?: boolean,
+  config: Pick<Config, 'getSignoutStore'>
 }
 
-export function Signin({ className, elements, redirectTo, hideSignup }: signinProps) {
+export function Signin({ className, elements, redirectTo, hideSignup, config }: signinProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const isSignout = location.pathname == '/signout'
+  const getSignoutStoreFn = config.getSignoutStore || getSignoutStore
   const [isLoading, setIsLoading] = useState(isSignout)
   const [, setStore] = useTracked()
   const [state, setState] = useState({
@@ -32,9 +37,11 @@ export function Signin({ className, elements, redirectTo, hideSignup }: signinPr
     if (query.email) setState({ ...state, email: query.email as string })
   }, [location.search])
 
+
   useEffect(() => {
     if (isSignout) {
-      setStore((s) => ({ ...s, user: undefined }))
+      // Reset the user to the initialStoreData user
+      setStore((s) => getSignoutStoreFn(s, getInitialStore()))
       // util.axios().get('/api/signout')
       Promise.resolve()
         .then(() => setIsLoading(false))
@@ -50,7 +57,7 @@ export function Signin({ className, elements, redirectTo, hideSignup }: signinPr
       const data = await request('post /api/signin', state, e, setIsLoading, setState)
       // Keep it loading until we navigate
       setIsLoading(true)
-      setStore((s) => ({ ...s, ...data }))
+      setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...data }))
       setTimeout(() => { // wait for setStore
         if (location.search.includes('redirect')) navigate(location.search.replace('?redirect=', ''))
         else navigate(redirectTo || '/')

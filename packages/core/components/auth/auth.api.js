@@ -7,18 +7,20 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import db, { isId } from 'monastery'
 import jsonwebtoken from 'jsonwebtoken'
 import { getDomain } from 'tldts'
-import { sendEmail } from 'nitro-web/server'
+import { sendEmail, requiredEmailConfigKeys, optionalEmailConfigKeys } from 'nitro-web/server'
 import { isArray, pick, ucFirst, fullNameSplit, isEmail } from 'nitro-web/util'
 // Todo: detect if the user is already invited to the company, instead of token error
 
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 let authConfig = null
+const requiredConfigKeys = [...requiredEmailConfigKeys]
+const optionalConfigKeys = [...optionalEmailConfigKeys, 'masterPassword', 'isNotMultiTenant', 'autoAddExistingUsers', 'limitOneTenantPerUser']
 
 export const auth = {
-  userFindFromProvider, userSigninGetStore, getStore,
+  userFindFromProvider, userSigninGetStore, getStore, addUserToCompany,
   userCreate, passwordValidate, tokenCreate, tokenParse, tokenSend,
   tokenConfirmForReset, tokenConfirmForSingleTenant, tokenConfirmForMultiTenant,
-  getBaseUrl,
+  getBaseUrl, invitePreConfirm, inviteConfirm, updateMemberRole, removeMember,
 }
 
 export const routes = {
@@ -30,9 +32,12 @@ export const routes = {
   'post    /api/reset-instructions': [resetInstructions],
   'post    /api/reset-confirm': [resetConfirm], // was reset-password
   'post    /api/invite-instructions': [inviteInstructions],
-  'post    /api/resend-invite-instructions': [resendInviteInstructions],
-  'post    /api/invite-confirm': [inviteConfirm], // was invite-accept
+  'post    /api/resend-instructions': [resendInstructions],
+  'get     /api/invite-pre-confirm/:token': [invitePreConfirm],
+  'post    /api/invite-confirm/:token': [inviteConfirm], // was invite-accept
   'delete  /api/account/:uid': [remove],
+  'put     /api/company/:cid/member-role/:uidOrEmail': ['isCompanyOwner', updateMemberRole],
+  'delete  /api/company/:cid/member/:uidOrEmail': ['isCompanyOwner', removeMember],
   // Setup (called automatically when express starts)
   setup: setup,
 }
@@ -44,14 +49,13 @@ function setup(middleware, _config, helpers = {}) {
   // Tip: you can pass in your own helpers to override the default helpers, internally all functions are called
   // with `auth` as the context, so `this` context contains all helpers.
   // E.g. setup: (middleware, config, helpers) => authRoutes.setup(middleware, config, { getStore, ... })
-  const configKeys = ['baseUrl', 'emailFrom', 'env', 'name', 'mailgunDomain', 'mailgunKey', 'masterPassword', 'isNotMultiTenant',
-    'autoAddExistingUsers']
-  authConfig = pick(_config, configKeys)
+
+  authConfig = pick(_config, [...requiredConfigKeys, ...optionalConfigKeys])
   for (const key of Object.keys(helpers)) {
     auth[key] = helpers[key]
   }
-  for (const key of ['baseUrl', 'emailFrom', 'env', 'name']) {
-    if (!authConfig[key]) throw new Error(`Missing config value for: config.${key}`)
+  for (const key of requiredConfigKeys) {
+    if (!authConfig[key]) throw new Error(`Auth setup(): Missing config.${key} value`)
   }
 
   passport.use(
@@ -186,11 +190,11 @@ export async function resetInstructions(req, res) {
   }
 }
 
-export async function inviteInstructions(req, res, next, isResend) {
+export async function inviteInstructions(req, res) {
   /**
-   * Single-tenant:  res.body: isResend ? { _id } : { _id }
-   *   - no user found: error (not supported, must be pre-created)
-   *   - user pre-created: update user with token, and send them the token
+   * Single-tenant (requires pre-created user):  res.body: isResend ? { _id } : { _id }
+   *   - no user found: error
+   *   - user exsits: send them the token to update their password
    * 
    * Multi-tenant:   res.body: isResend ? { companyId, email } : { companyId, email, firstName, role }
    *   - user exists and autoAddExistingUsers=true: auto-add user to company.users
@@ -206,38 +210,46 @@ export async function inviteInstructions(req, res, next, isResend) {
         id: user._id, 
         payload: pick(user, ['email', 'firstName']), 
         baseUrl: auth.getBaseUrl(req),
-        isResend: isResend,
+        isResend: req.isResend,
       })
       return res.json({})
 
     } else {
       const { companyId, email, firstName, role } = req.body
-      if (!companyId) {
-        throw new Error('CompanyId is missing from the request body.')
-      } else if (!req.user.isAdmin && req.user?.company?._id?.toString() !== companyId.toString()) {
+      if (!companyId) throw new Error('CompanyId is missing from the request body.')
+      const company = await db.company.findOne({ query: { _id: db.id(companyId) }, project: { users: 1 } })
+
+      if (!company) {
+        throw new Error('Company not found.')
+      } else if (!req.user.isAdmin && company.users?.find(u => u._id.toString() === req.user._id.toString())?.role !== 'owner') {
         throw new Error('Only company owners can invite users to this company.')
-      } else if (isResend && authConfig.autoAddExistingUsers) {
-        throw new Error('When autoAddExistingUsers is true, resending an invite is not supported.')
       }
+
       // Is there an exsiting user witht his email?
-      const existingUser = authConfig.autoAddExistingUsers ? await db.user.findOne({ query: { email }, project: { firstName: 1 } }) : null
+      const existingUserCheck = (authConfig.autoAddExistingUsers || authConfig.limitOneTenantPerUser) ? true : false
+      const existingUser = existingUserCheck ? await db.user.findOne({ query: { email }, project: { firstName: 1, company: 1 } }) : null
       const autoAdd = authConfig.autoAddExistingUsers && existingUser
+
+      // Check if the user is already a member of another company (the extra condition is to handle user's missing from company.users)
+      if (authConfig.limitOneTenantPerUser && existingUser?.company && existingUser.company.toString() !== companyId) {
+        throw new Error('This user is already a member of another company.')
+      }
 
       if (autoAdd) {
         // Make sure the user is not already a member of the company
-        const companyUserCount = await db.company.count({ query: { _id: companyId, 'users._id': existingUser._id } })
-        if (companyUserCount > 0) throw new Error('User is already a member of this company.')
-        // $push skips implicit validation, so we validate first
-        const userRow = { _id: existingUser._id, role: role, status: 'active' }
-        await db.user.validate({ users: [userRow] }, { update: true, blacklist: ['-users'] })
-        await db.company.update({ query: db.id(companyId), $push: { users: userRow } })
+        if (company?.users?.some(u => u._id.toString() === existingUser._id.toString())) {
+          throw new Error('User is already a member of this company.')
+        }
+        // Add the user to the company
+        await auth.addUserToCompany(companyId, existingUser._id, role)
+
       } else {
         await auth.tokenSend({
           type: 'companyInvite',
           id: companyId,
           payload: { email: email, firstName: firstName, role: role },
           baseUrl: auth.getBaseUrl(req),
-          isResend: isResend,
+          isResend: req.isResend,
         })
       }
 
@@ -252,8 +264,9 @@ export async function inviteInstructions(req, res, next, isResend) {
   }
 }
 
-export async function resendInviteInstructions(req, res) {
-  return inviteInstructions(req, res, null, true)
+export async function resendInstructions(req, res) {
+  req.isResend = true
+  return inviteInstructions(req, res)
 }
 
 export async function resetConfirm(req, res) {
@@ -277,6 +290,77 @@ export async function inviteConfirm(req, res) {
       ? await auth.tokenConfirmForSingleTenant(req)
       : await auth.tokenConfirmForMultiTenant(req)
     res.send(result)
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function invitePreConfirm(req, res) {
+  req.preConfirm = true
+  return await auth.inviteConfirm(req, res)
+}
+
+export async function updateMemberRole(req, res) {
+  // req.body: { role }
+  try {
+    const { role } = req.body
+    const { cid, uidOrEmail } = req.params
+    const companyId = db.id(cid)
+    const uid = uidOrEmail.includes('@') ? null : db.id(uidOrEmail)
+    const email = uidOrEmail.includes('@') ? uidOrEmail.trim().toLowerCase() : null
+
+    const company = await db.company.findOne({ query: { _id: companyId }, blacklist: false, project: { users: 1, invites: 1 } })
+    const item = uid ? company?.users?.find((u) => u._id.toString() === uid.toString()) : company?.invites?.find((i) => i.email === email)
+    if (!company) throw { title: 'error', detail: 'Company not found.' }
+    else if (uid && !item) throw { title: 'error', detail: 'User not found.' }
+    else if (email && !item) throw { title: 'error', detail: 'Invite not found.' }
+    else if (!role) throw { title: 'role', detail: 'Role is required.' }
+    else if (role !== 'owner' && uid) ensureNotLastOwner(company?.users, uid)
+
+    // Validate the role
+    await db.company.validate(
+      { [uid ? 'users' : 'invites']: [{ ...item, role }] },
+      { update: true, blacklist: ['-users', '-invites'] }
+    )
+    await db.company.update({
+      query: { _id: companyId, ...(uid ? { 'users._id': uid } : { 'invites.email': email }) },
+      $set: { ...(uid ? { 'users.$.role': role } : { 'invites.$.role': role }) },
+    })
+    res.json({})
+  } catch (err) {
+    res.error(err)
+  }
+}
+
+export async function removeMember(req, res) {
+  try {
+    const { cid, uidOrEmail } = req.params
+    const companyId = db.id(cid)
+    const uid = uidOrEmail.includes('@') ? null : db.id(uidOrEmail)
+    const email = uidOrEmail.includes('@') ? uidOrEmail.trim().toLowerCase() : null
+
+    const company = await db.company.findOne({ query: { _id: companyId }, blacklist: false, project: { users: 1, invites: 1 } })
+    if (!company) throw { title: 'error', detail: 'Company not found.' }
+    if (uid && uid.toString() === req.user._id.toString()) throw { title: 'error', detail: 'You cannot remove yourself.' }
+    if (uid && !company.users.find((u) => u._id.toString() === uid.toString())) throw { title: 'error', detail: 'User not found.' }
+    if (email && !company.invites.find((i) => i.email === email)) throw { title: 'error', detail: 'Invite not found.' }
+    if (uid) ensureNotLastOwner(company?.users, uid)
+    
+    // Remove the user from the company
+    await db.company.update({
+      query: { _id: companyId, ...(uid ? { 'users._id': uid } : { 'invites.email': email }) },
+      $pull: { ...(uid ? { users: { _id: uid } } : { invites: { email } }) },
+    })
+    // Not required since the company.users is checked on auth.
+    //
+    //   Remove the user's active company, if it's the same
+    //   if (uid) {
+    //     await db.user.update({
+    //       query: { _id: uid, company: cid },
+    //       $set: { company: null },
+    //     })
+    //   }
+    res.json({})
   } catch (err) {
     res.error(err)
   }
@@ -315,11 +399,11 @@ export async function userFindFromProvider(query, passwordToCheck) {
   } else if (user.status === 'invited') {
     throw new Error('This user account is not yet active.')
   } else if (isMultiTenant && !user.company) {
-    throw new Error('The current company is no longer associated with this user')
+    throw new Error('There is no primary company associated with this user')
   } else if (isMultiTenant && user.company.status != 'active') {
-    throw new Error('This user is not associated with an active company')
-  } else if (isMultiTenant && !user.company.users?.find(u => u._id.toString() === user._id.toString())?.status === 'active') {
-    throw new Error('This user is not associated with an active company')
+    throw new Error('The  company associated with this user is no longer active')
+  } else if (isMultiTenant && user.company.users?.find(u => u._id.toString() === user._id.toString())?.status !== 'active') {
+    throw new Error('This user is no longer a member of the company')
   } else {
     if (checkPassword) {
       if (!user.password) {
@@ -364,32 +448,38 @@ export async function getStore(user, _req) {
  * @param {boolean} [skipSendEmail=false] - whether to skip sending the welcome email
  * @returns {Promise<object>} - the created user
  */
-export async function userCreate({ password, password2, company, ...userDataProp }, baseUrl, skipSendEmail) {
+export async function userCreate({ password, password2, company, ...userDataProp }, baseUrl, invite, skipSendEmail) {
   try {
     const userId = db.id()
+    const isMultiTenant = !authConfig.isNotMultiTenant
     const options = { blacklist: ['-_id'] }
-    const companyIsId = !authConfig.isNotMultiTenant && isId(company)
+    const isUpdate = isMultiTenant && isId(company)
+    const isInsert = isMultiTenant && !isId(company)
+    const companyId = isInsert ? db.id() : isUpdate ? db.id(company) : null
 
-    // Define new company data if applicable
-    const companyData = !authConfig.isNotMultiTenant && !companyIsId && {
-      _id: db.id(),
+    // Create or update data if multi tenant
+    const insertCompanyData = isInsert ? {
+      ...(company || {}),
+      _id: companyId,
       users: [{ _id: userId, role: 'owner', status: 'active' }],
-      ...(company ? company : {}), // removed
-    }
+    } : null
 
     // Define user data
     const userData = {
       ...userDataProp,
       _id: userId,
       password: password ? await bcrypt.hash(password, 10) : undefined,
-      ...(companyIsId ? { company: company } : (companyData ? { company: companyData._id } : {})), // AKA "active company"
+      ...(isInsert || isUpdate ? { company: companyId } : {}), // AKA "active company"
       ...(userDataProp.name ? { firstName: fullNameSplit(userDataProp.name)[0], lastName: fullNameSplit(userDataProp.name)[1] } : {}),
     }
     // First validate the data so we don't have to create a transaction
     const results = await Promise.allSettled([
       db.user.validate(userData, options),
       typeof password === 'undefined' ? Promise.resolve() : auth.passwordValidate(password, password2),
-      ...(companyData ? [db.company.validate(companyData, options)] : []),
+      ...(isInsert 
+        ? [db.company.validate(insertCompanyData, options)] 
+        : isUpdate ? [addUserToCompany(companyId, userId, invite.role, invite.inviteToken, true)] : []
+      ),
     ])
 
     // Throw all the errors from at once
@@ -400,9 +490,13 @@ export async function userCreate({ password, password2, company, ...userDataProp
     }, [])
     if (errors.length) throw errors
 
-    // Insert company & user
+    // todo: start: add this in transaction, handy for tokenConfirmForMultiTenant -------
+    // Insert user
     await db.user.insert({ data: userData, ...options })
-    if (companyData) await db.company.insert({ data: companyData, ...options })
+
+    // Insert, or, update company with user
+    if (isInsert) await db.company.insert({ data: insertCompanyData, ...options })
+    else if (isUpdate) await auth.addUserToCompany(companyId, userId, invite.role, invite.inviteToken)
 
     // Send welcome email
     if (!skipSendEmail) {
@@ -415,6 +509,7 @@ export async function userCreate({ password, password2, company, ...userDataProp
 
     // Return the user
     return await auth.userFindFromProvider({ _id: userId })
+    // todo: end: add this in transaction, handy for tokenConfirmForMultiTenant -------
 
   } catch (err) {
     if (!isArray(err)) throw err
@@ -463,12 +558,33 @@ export function tokenParse(token, modelName, maxAgeMs = 1000 * 60 * 60 * 24) {
   }
 }
 
+export async function addUserToCompany(companyId, userId, role, token, justValidate) {
+  // Validate first, if it fails its an internal error really...
+  const userRow = { _id: userId, role: role, status: 'active' }
+  const userRow2 = (await db.company.validate({ users: [userRow] }, { update: true, blacklist: ['-users'] })).users[0]
+  if (justValidate) return userRow2
+  
+  // Add the user to the company ($push skips implicit validation)
+  await db.company.update({
+    query: companyId, 
+    $push: { users: userRow2 }, 
+    ...(token ? { $pull: { invites: { inviteToken: token } } } : {}), // token optional
+  })
+  // Update users with no active company yet
+  await db.user.update({
+    query: { _id: userId, company: null },
+    $set: { company: companyId },
+  })
+}
+
 export async function tokenConfirmForReset(req) {
   return await auth.tokenConfirmForSingleTenant(req, true)
 }
 
 export async function tokenConfirmForSingleTenant(req, isReset) {
-  const { token, password, password2, ...userData } = req.body
+  // single tenant: for both confirm and reset, this endpoint at least requires password/password2
+  const token = req.params.token
+  const { password, password2, ...userData } = req.body
   const tokenName = isReset ? 'resetToken' : 'inviteToken'
   const desktop = req.query.desktop
   const _id = db.id(auth.tokenParse(token, 'user'))
@@ -477,6 +593,7 @@ export async function tokenConfirmForSingleTenant(req, isReset) {
   // Find the inviteToken, but bypass hooks because inviteToken may = true in a potential afterFind hook.
   const user1 = await db.user._findOne({ _id: _id}, { projection: { [tokenName]: 1 } })
   if (!user1 || user1[tokenName] !== token) throw new Error('Sorry your token is invalid or has already been used.')
+  if (req.preConfirm) throw new Error('Internal error: Token pre-confirm is not supported in single tenant mode.')
 
   await db.user.update({
     query: _id,
@@ -493,42 +610,40 @@ export async function tokenConfirmForSingleTenant(req, isReset) {
 }
 
 export async function tokenConfirmForMultiTenant(req) {
-  const { token, ...userData } = req.body
+  const token = req.params.token
   const desktop = req.query.desktop
   const companyId = db.id(auth.tokenParse(token, 'company'))
 
   // Find the invite (we need to bypass hooks as inviteToken maybe true in an afterFind hook)
-  const company = await db.company._findOne(
-    { _id: companyId, 'invites.inviteToken': token }, 
-    { projection: { invites: 1, users: 1 } }
-  )
+  const company = await db.company._findOne({ _id: companyId, 'invites.inviteToken': token }, { projection: { invites: 1, users: 1 } })
+  const invite = company?.invites?.find(inv => inv.inviteToken === token)
   if (!company) throw new Error('Sorry your token is invalid or has already been used.')
-  const invite = company.invites.find(inv => inv.inviteToken === token)
+  if (!invite.email) throw new Error('Internal error: Email address missing from the invite.')
 
-  // Has the user already been added to the company (company.users[] entry)?
-  const existingUser = await db.user.findOne({ query: { email: userData.email }, _privateData: true })
-  if (existingUser && company.users?.some(u => u._id.toString() === existingUser._id.toString())) {
-    throw new Error('This user has already been added to the company.')
+  const existingUser = await db.user.findOne({ query: { email: invite.email }, _privateData: true })
+  if (authConfig.limitOneTenantPerUser && existingUser?.company && existingUser.company.toString() !== companyId.toString()) {
+    throw new Error(`You (${invite.email}) are already a member of another company.`)
   }
 
-  // Create new user if needed
-  const user = existingUser || await auth.userCreate({ ...userData, company: companyId }, true) // AKA "active company"
+  // Existing user already added to company?
+  if (existingUser && company.users?.some(u => u._id.toString() === existingUser._id.toString())) {
+    throw new Error('User is already a member of this company.')
+  }
 
-  // Validate data, by this point this will be an internal error as the invite/status should be correct
-  const companyUser = await db.user.validate(
-    { users: [{ ...invite, _id: user._id, status: 'active' }] }, 
-    { update: true, blacklist: ['-users'] }
-  ).users[0]
+  // Dont submit yet if the user is requesting preConfirm data (used to show the correct form fields first)
+  if (req.preConfirm) return { isExistingUser: !!existingUser, email: invite.email }
 
-  // Add the user to the company ($push skips implicit validation)
-  await db.company.update({
-    query: companyId,
-    $push: { users: companyUser }, // add user to company
-    $pull: { invites: { inviteToken: token } }, // remove invite
-  })
+  // Existing user: add the user to company
+  if (existingUser) {
+    await auth.addUserToCompany(companyId, existingUser._id, invite.role, invite.inviteToken)
+    return {} // no signin, security risk if they take hold of the token
 
-  // Signin
-  return await auth.userSigninGetStore(user, desktop)
+  // New user: create user (and add the user to the company), and signin
+  } else {
+    const baseUrl = auth.getBaseUrl(req)
+    const user = await auth.userCreate({ ...req.body, company: companyId }, baseUrl, invite, true)
+    return await auth.userSigninGetStore(user, desktop)
+  }
 }
 
 /**
@@ -557,24 +672,27 @@ export async function tokenSend({ type, id, payload, beforeUpdate, beforeSendEma
   const docId = db.id(id)
   const apply = beforeUpdate || (o => o)
   const tokenName = type + 'Token'
-  let token
+  const emailData = {}
+  const companyProjection = { invites: 1, name: 1, business: 1 }
 
   // Company invite resend: reuse the invite token (bypass hooks, inviteToken may be `true` in an afterFind hook)
   if (type === 'companyInvite' && isResend) {
-    const company = await db.company._findOne({ _id: docId, 'invites.email': payload.email }, { projection: { invites: 1 } })
+    const company = await db.company._findOne({ _id: docId, 'invites.email': payload.email }, { projection: companyProjection })
     const invite = company?.invites?.find(i => i.email === payload.email)
     if (!invite?.inviteToken) throw new Error('No pending invite found for this email.')
     if (!payload.firstName) payload.firstName = invite.firstName
-    token = invite.inviteToken
+    emailData.token = invite.inviteToken
+    emailData.companyName = company.name || company.business?.name
 
   // Company invite new: push new invite onto company.invites
   } else if (type === 'companyInvite') {
-    const company = await db.company.findOne({ query: docId, project: { invites: 1 } })
+    const company = await db.company._findOne({ _id: docId }, { projection: companyProjection })
     if (!company) throw new Error('Invalid company id to send an invite for.')
     if (company.invites?.find(i => i.email === payload.email)) throw new Error('This email has already been invited to join this company.')
-    token = await auth.tokenCreate('company', id)
+    emailData.token = await auth.tokenCreate('company', id)
+    emailData.companyName = company.name || company.business?.name
     const invite = (await db.company.validate(
-      { invites: [apply({ ...payload, inviteToken: token })] },
+      { invites: [apply({ ...payload, inviteToken: emailData.token })] },
       { update: true, blacklist: ['-invites'] }
     )).invites[0]
     await db.company.update({ query: docId, $push: { invites: invite } })
@@ -583,14 +701,14 @@ export async function tokenSend({ type, id, payload, beforeUpdate, beforeSendEma
   } else if (isResend) {
     const user = await db.user._findOne({ _id: docId }, { projection: { [tokenName]: 1 } }) // token maybe `true` in an afterFind hook
     if (!user?.[tokenName]) throw new Error('No pending invite for this user.')
-    token = user[tokenName]
+    emailData.token = user[tokenName]
 
   // User token fresh: create token, set on user.resetToken or user.inviteToken
   } else {
-    token = await auth.tokenCreate('user', id)
+    emailData.token = await auth.tokenCreate('user', id)
     const result = await db.user.update({
       query: docId,
-      $set: apply({ [tokenName]: token, isInvited: type === 'invite' ? true : undefined }),
+      $set: apply({ [tokenName]: emailData.token, isInvited: type === 'invite' ? true : undefined }),
     })
     if (!result._output.matchedCount) throw new Error('Invalid user id to update the token for')
   }
@@ -600,14 +718,14 @@ export async function tokenSend({ type, id, payload, beforeUpdate, beforeSendEma
     config: { ...authConfig, baseUrl: baseUrl || authConfig.baseUrl },
     template: type === 'reset' ? 'reset-instructions' : 'invite-instructions',
     to: `${ucFirst(payload.firstName)}<${payload.email}>`,
-    data: { token },
-    test: true,
+    data: emailData,
+    // test: true,
   }
-  const mailgunPromise = sendEmail(beforeSendEmail ? beforeSendEmail(emailOpts, token) : emailOpts).catch(err => {
+  const mailgunPromise = sendEmail(beforeSendEmail ? beforeSendEmail(emailOpts, emailData.token) : emailOpts).catch(err => {
     console.error('sendEmail(..) mailgun error', err)
   })
 
-  return { token, mailgunPromise }
+  return { token: emailData.token, mailgunPromise: mailgunPromise }
 }
 
 export function getBaseUrl(req) {
@@ -633,4 +751,11 @@ export function resolveBaseUrl(reqUrl, cfgUrl) {
   } catch (_) {
     return cfgUrl
   }
+}
+
+export function ensureNotLastOwner(companyUsers, idNowNonOwner) {
+  const remaining = (companyUsers || []).filter((u) =>
+    u.role === 'owner' && u.status !== 'deleted' && u._id.toString() !== idNowNonOwner.toString()
+  )
+  if (!remaining.length) throw { title: 'role', detail: 'There must be at least one active owner.' }
 }

@@ -1731,7 +1731,7 @@ export function queryString (obj, _path='', _output, options={}) {
  * @param {string} route - e.g. 'post /api/user'
  * @param {{ [key: string]: any }} [data] - payload
  * @param {{preventDefault?: function}} [event] - event to prevent default
- * @param {(value: boolean) => void} [setIsLoading] - setIsLoading setter
+ * @param {React.Dispatch<React.SetStateAction<any>>} [setIsLoading] - setIsLoading setter
  * @param {SetState} [setState] - if passed, state.errors will be reset before the request
  * @param {Object} [options] - options
  * @param {AxiosRequestConfig} [options.axiosConfig] - withCredentials=true by default, see https://axios-http.com/docs/req_config
@@ -1758,7 +1758,7 @@ export async function request (route, data, event, setIsLoading, setState, optio
       )
 
     // show loading
-    if (setIsLoading) setIsLoading(true)
+    if (setIsLoading) setIsLoading((/** @type {any} */o) => o ? o : true)
 
     // warning, not persisting through re-renders, but should be fine until loading is finished
     data = data || {}

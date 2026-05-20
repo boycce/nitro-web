@@ -24,7 +24,7 @@ export { userModel, companyModel, setupDefaultModels }
 export { setupRouter, middleware, isValidUserOrRespond, isAdminUser } from './router.js'
 
 // Export email utility
-export { sendEmail } from './email/index.js'
+export { sendEmail, requiredEmailConfigKeys, optionalEmailConfigKeys } from './email/index.js'
 
 // Export API controllers
 export * from '../components/auth/auth.api.js'

@@ -23,7 +23,9 @@ const config = {
   stripeSecretKey: process.env.stripeSecretKey,
   stripeWebhookSecret: process.env.stripeWebhookSecret,
   logHeaders: process.env.logHeaders,
-  // isNotMultiTenant: true, // changes how the user is created, only one tenant per user
+  // isNotMultiTenant: process.env.isNotMultiTenant, // changes how the user is created, only one comapny per user
+  // autoAddExistingUsers: process.env.autoAddExistingUsers, // automatically add existing users to the company
+  // limitOneTenantPerUser: process.env.limitOneTenantPerUser, // handy when the ui doesn't support multiple tenant switching yet
 
   monasteryOptions: {
     noDefaults: true,
