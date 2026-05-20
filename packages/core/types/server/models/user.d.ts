@@ -72,7 +72,7 @@ declare namespace _default {
     let beforeValidate: ((data: any) => Promise<void>)[];
     let afterFind: ((data: any) => Promise<any>)[];
     namespace methods {
-        function loginPopulate(): any[];
+        function authPopulate(): any[];
     }
 }
 export default _default;

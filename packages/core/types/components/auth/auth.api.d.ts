@@ -1,7 +1,11 @@
 export function resetInstructions(req: any, res: any): Promise<void>;
-export function inviteInstructions(req: any, res: any): Promise<void>;
+export function inviteInstructions(req: any, res: any): Promise<any>;
+export function resendInstructions(req: any, res: any): Promise<any>;
 export function resetConfirm(req: any, res: any): Promise<void>;
 export function inviteConfirm(req: any, res: any): Promise<void>;
+export function invitePreConfirm(req: any, res: any): Promise<void>;
+export function updateMemberRole(req: any, res: any): Promise<void>;
+export function removeMember(req: any, res: any): Promise<void>;
 export function userFindFromProvider(query: any, passwordToCheck: any, ...args: any[]): Promise<any>;
 export function userSigninGetStore(user: any, isDesktop: any): Promise<{
     jwt: string;
@@ -24,10 +28,11 @@ export function userCreate({ password, password2, company, ...userDataProp }: {
     password?: string;
     password2?: string;
     company?: string;
-}, baseUrl?: string, skipSendEmail?: boolean): Promise<object>;
+}, baseUrl?: string, invite: any, skipSendEmail?: boolean): Promise<object>;
 export function passwordValidate(password: string, password2: any): Promise<void>;
 export function tokenCreate(modelName: any, id: any): Promise<any>;
 export function tokenParse(token: any, modelName: any, maxAgeMs?: number): any;
+export function addUserToCompany(companyId: any, userId: any, role: any, token: any, justValidate: any): Promise<any>;
 export function tokenConfirmForReset(req: any): Promise<{
     jwt: string;
     user: any;
@@ -39,26 +44,36 @@ export function tokenConfirmForSingleTenant(req: any, isReset: any): Promise<{
 export function tokenConfirmForMultiTenant(req: any): Promise<{
     jwt: string;
     user: any;
+} | {
+    isExistingUser: boolean;
+    email: any;
+} | {
+    isExistingUser?: undefined;
+    email?: undefined;
 }>;
 /**
  * Creates and sends a reset or invite token to a user or company
  * @param {object} options
- * @param {'reset' | 'invite' | 'companyInvite'} options.type - token type (default: 'reset')
- * @param {string} options._id - user or company id
- * @param {string} options.email - recipient email
- * @param {string} options.firstName - recipient first name
- * @param {'owner'|'manager'} [options.role] - required when type is companyInvite
+ * @param {'reset' | 'invite' | 'companyInvite'} options.type - token type
+ * @param {string} options.id - user or company id
+ * @param {{
+ *   email: string,
+ *   firstName: string,
+ *   [key: string]: any, // other fields to include in the invite row
+ * }} options.payload
  * @param {function} [options.beforeUpdate] - runs before updating the model with the token, return null to skip update
  * @param {function} [options.beforeSendEmail] - runs before sending the email, receives (options, token)
  * @param {string} [options.baseUrl] - baseUrl to use for the email
  * @returns {Promise<{token: string, mailgunPromise: Promise<unknown>}>}
  */
-export function tokenSend({ type, _id, email, firstName, role, beforeUpdate, beforeSendEmail, baseUrl }: {
+export function tokenSend({ type, id, payload, beforeUpdate, beforeSendEmail, baseUrl, isResend }: {
     type: "reset" | "invite" | "companyInvite";
-    _id: string;
-    email: string;
-    firstName: string;
-    role?: "owner" | "manager";
+    id: string;
+    payload: {
+        email: string;
+        firstName: string;
+        [key: string]: any;
+    };
     beforeUpdate?: Function;
     beforeSendEmail?: Function;
     baseUrl?: string;
@@ -66,11 +81,14 @@ export function tokenSend({ type, _id, email, firstName, role, beforeUpdate, bef
     token: string;
     mailgunPromise: Promise<unknown>;
 }>;
+export function getBaseUrl(req: any): any;
 export function resolveBaseUrl(reqUrl: any, cfgUrl: any): any;
+export function ensureNotLastOwner(companyUsers: any, idNowNonOwner: any): void;
 export namespace auth {
     export { userFindFromProvider };
     export { userSigninGetStore };
     export { getStore };
+    export { addUserToCompany };
     export { userCreate };
     export { passwordValidate };
     export { tokenCreate };
@@ -79,6 +97,11 @@ export namespace auth {
     export { tokenConfirmForReset };
     export { tokenConfirmForSingleTenant };
     export { tokenConfirmForMultiTenant };
+    export { getBaseUrl };
+    export { invitePreConfirm };
+    export { inviteConfirm };
+    export { updateMemberRole };
+    export { removeMember };
 }
 export const routes: {
     'get     /api/store': (typeof store)[];
@@ -88,8 +111,12 @@ export const routes: {
     'post    /api/reset-instructions': (typeof resetInstructions)[];
     'post    /api/reset-confirm': (typeof resetConfirm)[];
     'post    /api/invite-instructions': (typeof inviteInstructions)[];
-    'post    /api/invite-confirm': (typeof inviteConfirm)[];
+    'post    /api/resend-instructions': (typeof resendInstructions)[];
+    'get     /api/invite-pre-confirm/:token': (typeof invitePreConfirm)[];
+    'post    /api/invite-confirm/:token': (typeof inviteConfirm)[];
     'delete  /api/account/:uid': (typeof remove)[];
+    'put     /api/company/:cid/member-role/:uidOrEmail': (string | typeof updateMemberRole)[];
+    'delete  /api/company/:cid/member/:uidOrEmail': (string | typeof removeMember)[];
     setup: typeof setup;
 };
 declare function store(req: any, res: any): Promise<void>;

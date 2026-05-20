@@ -112,6 +112,10 @@ declare namespace _default {
                 type: string;
                 required: boolean;
             };
+            firstName: {
+                type: string;
+                required: boolean;
+            };
             role: {
                 type: string;
                 enum: string[];
@@ -128,7 +132,7 @@ declare namespace _default {
     let afterFind: ((data: any) => Promise<void>)[];
     namespace methods {
         function publicData(models: any): any;
-        function loginPopulate(): {
+        function authPopulate(): {
             as: string;
             from: string;
             let: {

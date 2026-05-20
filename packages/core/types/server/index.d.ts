@@ -2,7 +2,6 @@ export * from "../util.js";
 export * from "../components/auth/auth.api.js";
 export * from "../components/billing/stripe.api.js";
 export * as util from "../util.js";
-export { sendEmail } from "./email/index.js";
 export { routes as authRoutes } from "../components/auth/auth.api.js";
 export { routes as stripeRoutes } from "../components/billing/stripe.api.js";
 /**
@@ -23,4 +22,5 @@ export function setupDefaultModels(db: any): Promise<void>;
 export { userModel, companyModel };
 export { currencies, countries } from "./constants.js";
 export { setupRouter, middleware, isValidUserOrRespond, isAdminUser } from "./router.js";
+export { sendEmail, requiredEmailConfigKeys, optionalEmailConfigKeys } from "./email/index.js";
 //# sourceMappingURL=index.d.ts.map

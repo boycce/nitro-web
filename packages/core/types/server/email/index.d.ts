@@ -29,6 +29,8 @@ export function sendEmail({ template, to, config, bcc, data, from, replyTo, reci
     skipCssInline?: boolean;
     test?: boolean;
 }): Promise<[any, any]>;
+export const requiredEmailConfigKeys: string[];
+export const optionalEmailConfigKeys: string[];
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
  */
