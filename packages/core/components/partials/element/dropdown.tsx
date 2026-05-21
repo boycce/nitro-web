@@ -164,7 +164,7 @@ export const Dropdown = forwardRef(function Dropdown({
         ' nitro-dropdown' +
         (className ? ` ${className}` : '')
       }
-      onClick={(e) => e.stopPropagation()} // required for dropdowns inside row links
+      onClick={(e) => { e.stopPropagation(); e.preventDefault() }} // required for dropdowns inside row links
       ref={dropdownRef} 
       css={style}
     >
