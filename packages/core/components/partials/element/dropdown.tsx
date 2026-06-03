@@ -72,7 +72,9 @@ export const Dropdown = forwardRef(function Dropdown({
     const pageClick = (event: MouseEvent | FocusEvent) => {
       try {
         // If the active element exists and is clicked outside of the dropdown, toggle the dropdown
-        if (dropdownRef.current !== null && !dropdownRef.current.contains(event.target as Node)) setIsActive(!isActive)
+        if (dropdownRef.current !== null && !dropdownRef.current.contains(event.target as Node)) {
+          setIsActive(!isActive)
+        }
       } catch (_e) {
         // Errors throw for contains() when the user clicks off the webpage when open
         setIsActive(!isActive)
@@ -148,7 +150,7 @@ export const Dropdown = forwardRef(function Dropdown({
     }
   }
 
-  function onClick(option: { onClick?: Function, preventCloseOnClick?: boolean }, e: React.MouseEvent) {
+  function onItemClick(option: { onClick?: Function, preventCloseOnClick?: boolean }, e: React.MouseEvent) {
     if (option.onClick) option.onClick(e, option)
     if (!menuIsOpen && !option?.preventCloseOnClick) setIsActive(!isActive)
   }
@@ -164,7 +166,10 @@ export const Dropdown = forwardRef(function Dropdown({
         ' nitro-dropdown' +
         (className ? ` ${className}` : '')
       }
-      onClick={(e) => { e.stopPropagation(); e.preventDefault() }} // required for dropdowns inside row links
+      // When the dropdown is inside a link, prevent click propagation
+      onClick={(e) => { e.preventDefault() }}
+      // When the dropdown is inside a link, prevent auto <a> focus propagation (for the window listener)
+      onMouseDown={(e) => { e.preventDefault() }}
       ref={dropdownRef} 
       css={style}
     >
@@ -192,7 +197,7 @@ export const Dropdown = forwardRef(function Dropdown({
               <li 
                 key={i} 
                 className={twMerge(`${optionStyle} ${option.className} ${menuOptionClassName}`)}
-                onClick={(e: React.MouseEvent) => onClick(option, e)}
+                onClick={(e: React.MouseEvent) => onItemClick(option, e)}
               >
                 { !!option.iconLeft && option.iconLeft }
                 <span class="flex-auto">{option.label}</span>
