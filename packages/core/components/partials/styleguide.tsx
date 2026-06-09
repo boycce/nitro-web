@@ -733,13 +733,22 @@ export function Styleguide({ className, elements, children, currencies, groups }
             columns={thead}
             generateCheckboxActions={generateCheckboxActions}
             generateTd={generateTd}
+            rowLink={(row) => `#/table-link/${row?._id}`}
+            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+            rows={rows.slice(0, 1).map(row => ({ ...row, _id: row._id + '1' }))}
+          />
+          <Table
+            className="mb-6"
+            columns={thead}
+            generateCheckboxActions={generateCheckboxActions}
+            generateTd={generateTd}
             headerHeightMin={35}
             rowGap={8}
             rowHeightMin={42}
             rowLinesMax={1}
             rowOnClick={useCallback((row: QuoteExample) => {setStore((s) => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
             rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
-            rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}
+            rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '2' }))}
 
             checkboxClassName="rounded-[2px] shadow-none"
             columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
