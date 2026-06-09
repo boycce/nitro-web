@@ -701,51 +701,52 @@ export function Styleguide({ className, elements, children, currencies, groups }
             />
           </div>
           <Table
+            className="mb-6"
+            columns={thead}
+            generateCheckboxActions={generateCheckboxActions}
+            generateTd={generateTd}
+            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
             rows={rows.slice(0, perPage)}
-            columns={thead}
-            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
-            generateCheckboxActions={generateCheckboxActions}
-            generateTd={generateTd}
-            className="mb-6"
           />
           <Table
-            rows={[]}
+            className="mb-6"
             columns={thead}
-            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
             generateCheckboxActions={generateCheckboxActions}
             generateTd={generateTd}
-            className="mb-6"
             isLoading={true}
+            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+            rows={[]}
           />
           <Table
-            rows={[]}
+            className="mb-6"
             columns={thead}
-            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
             generateCheckboxActions={generateCheckboxActions}
             generateTd={generateTd}
-            className="mb-6"
             isLoading={true}
-            showLoadingOverlay={false}
+            rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
+            rows={[]}
             showLoadingInline={true}
+            showLoadingOverlay={false}
           />
           <Table
-            rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}
+            className="mb-6"
             columns={thead}
-            rowLinesMax={1}
+            generateCheckboxActions={generateCheckboxActions}
+            generateTd={generateTd}
             headerHeightMin={35}
             rowGap={8}
             rowHeightMin={42}
-            rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
+            rowLinesMax={1}
             rowOnClick={useCallback((row: QuoteExample) => {setStore((s) => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
-            generateCheckboxActions={generateCheckboxActions}
-            generateTd={generateTd}
-            className="mb-5"
-            tableClassName="rounded-3px"
-            rowClassName="[&:hover>div]:bg-gray-50"
-            columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
-            columnSelectedClassName="bg-gray-50 border-indigo-300"
-            columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
+            rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
+            rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '1' }))}
+
             checkboxClassName="rounded-[2px] shadow-none"
+            columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
+            columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
+            columnSelectedClassName="bg-gray-50 border-indigo-300"
+            rowClassName="[&:hover>div]:bg-gray-50"
+            tableClassName="rounded-3px"
           />
         </div>
       )}

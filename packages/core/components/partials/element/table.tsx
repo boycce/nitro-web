@@ -54,6 +54,7 @@ export type TableProps<T> = {
   loadingMessage?: string
   showLoadingInline?: boolean|JSX.Element
   showLoadingOverlay?: boolean|JSX.Element
+  scrollContainerClassName?: string
 }
 
 export function Table<T extends TableRow>({ 
@@ -83,6 +84,7 @@ export function Table<T extends TableRow>({
   checkboxClassName,
   checkboxSize=16,
   loadingOverlayClassName,
+  scrollContainerClassName,
   // Loading
   isLoading=false,
   loadingMessage,
@@ -161,190 +163,192 @@ export function Table<T extends TableRow>({
   }, [rowSideColor, columnPaddingX, columnGap])
 
   return (
-    <div 
-      style={{ marginTop: -rowGap }}
-      className={twMerge('overflow-x-auto thin-scrollbar', className)}
-    >
+    <div className={className}>
       <div 
-        style={{ borderSpacing: `0 ${rowGap}px` }}
-        className={twMerge('table w-full border-separate', showLoadingOverlay ? 'relative' : '', tableClassName)}
+        style={{ marginTop: -rowGap, marginBottom: -rowGap }} 
+        className={twMerge('overflow-x-auto thin-scrollbar', scrollContainerClassName)}
       >
-        {/* Thead row */}
-        <div className="table-row relative">
-          {
-            columns.map((col, j) => {
-              const disableSort = col.disableSort || selectedRowIds.length
-              const { pl, pr } = getColumnPadding(j, undefined, 'thead')
+        <div 
+          style={{ borderSpacing: `0 ${rowGap}px` }}
+          className={twMerge('table w-full border-separate', showLoadingOverlay ? 'relative' : '', tableClassName)}
+        >
+          {/* Thead row */}
+          <div className="table-row relative">
+            {
+              columns.map((col, j) => {
+                const disableSort = col.disableSort || selectedRowIds.length
+                const { pl, pr } = getColumnPadding(j, undefined, 'thead')
 
-              if (col.isHidden) return <Fragment key={j} />
+                if (col.isHidden) return <Fragment key={j} />
+                return (
+                  <div
+                    key={j}
+                    onClick={disableSort ? undefined : () => onSort(col)}
+                    style={{ height: headerHeightMin, minWidth: col.minWidth, paddingLeft: pl, paddingRight: pr }}
+                    className={twMerge(
+                      _columnClassName,
+                      'h-auto text-sm font-medium border-t-1',
+                      disableSort ? '' : 'cursor-pointer select-none',
+                      getAlignClass(col.align),
+                      columnClassName,
+                      columnHeaderClassName,
+                      columnClassNameFn ? columnClassNameFn(col, undefined, j) : '',
+                      col.className
+                    )}
+                  >
+                    <div
+                      style={{ maxHeight: rowContentHeightMax }}
+                      className={twMerge(
+                        col.value == 'checkbox' ? 'relative' : getLineClampClassName(col.rowLinesMax),
+                        rowContentHeightMax ? 'overflow-hidden' : '',
+                        col.overflow ? 'overflow-visible' : '',
+                        col.innerClassName
+                      )}
+                    > 
+                      {
+                        col.value == 'checkbox'
+                          ? <Fragment>
+                              <Checkbox 
+                                size={checkboxSize}
+                                name={`checkbox-all-${rand}`}
+                                hitboxPadding={5}
+                                checked={rows.length > 0 && selectedRowIds.length === rows.length}
+                                className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
+                                checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
+                                onChange={(e) => onSelect('all', e.target.checked)}
+                              />
+                              <div 
+                                className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[35px] [&>*]:z-10 whitespace-nowrap`}
+                              >
+                                {generateCheckboxActions && generateCheckboxActions(selectedRowIds, setSelectedRowIds)}
+                              </div>
+                            </Fragment>
+                          : <span className={twMerge(
+                              'flex items-center gap-x-2 transition-opacity',
+                              selectedRowIds.length ? 'opacity-0' : '',
+                              getAlignClass(col.align, true)
+                            )}>
+                              <span>{col.label}</span>
+                              {
+                                (!col.disableSort && sortBy == col.sortByValue) 
+                                  ? (sort == '1' 
+                                      ? <ChevronDownIcon class='shrink-0 size-[16px]' /> 
+                                      : <ChevronUpIcon class='shrink-0 size-[16px]' />
+                                    )
+                                  : col.align == 'left' && <div class='size-[16px] shrink-0' /> // prevent layout shift on sort
+                              }
+                            </span>
+                      }
+                    </div>
+                  </div>
+                )
+              })
+            }
+          </div>
+          {/* Tbody rows */}
+          {
+            rowsToRender.map((row: T, i: number) => {
+              const isSelected = selectedRowIds.includes(row._id || '')
+              const Element = (rowLink ? Link : 'div') as React.ElementType
+              const extraProps = rowLink ? { to: rowLink(row) } : { onClick: rowOnClick ? () => rowOnClick(row) : undefined }
               return (
-                <div
-                  key={j}
-                  onClick={disableSort ? undefined : () => onSort(col)}
-                  style={{ height: headerHeightMin, minWidth: col.minWidth, paddingLeft: pl, paddingRight: pr }}
+                <Element
+                  {...extraProps}
+                  key={`${row._id}-${i}`}
+                  id={`row-${row._id}-${i}`}
                   className={twMerge(
-                    _columnClassName,
-                    'h-auto text-sm font-medium border-t-1',
-                    disableSort ? '' : 'cursor-pointer select-none',
-                    getAlignClass(col.align),
-                    columnClassName,
-                    columnHeaderClassName,
-                    columnClassNameFn ? columnClassNameFn(col, undefined, j) : '',
-                    col.className
+                    `table-row relative ${(rowOnClick || rowLink) ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`,
+                    rowClassName,
+                    rowClassNameFn ? rowClassNameFn(row, i) : ''
                   )}
                 >
-                  <div
-                    style={{ maxHeight: rowContentHeightMax }}
-                    className={twMerge(
-                      col.value == 'checkbox' ? 'relative' : getLineClampClassName(col.rowLinesMax),
-                      rowContentHeightMax ? 'overflow-hidden' : '',
-                      col.overflow ? 'overflow-visible' : '',
-                      col.innerClassName
-                    )}
-                  > 
-                    {
-                      col.value == 'checkbox'
-                        ? <Fragment>
-                            <Checkbox 
-                              size={checkboxSize}
-                              name={`checkbox-all-${rand}`}
-                              hitboxPadding={5}
-                              checked={rows.length > 0 && selectedRowIds.length === rows.length}
-                              className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
-                              checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
-                              onChange={(e) => onSelect('all', e.target.checked)}
-                            />
+                  {columns.map((col, j) => {
+                    const rowType = row._id ? 'row' : isLoading ? 'loading' : 'empty'
+                    const { pl, pr, sideColor } = getColumnPadding(j, isLoading ? undefined : row, rowType)
+                    if (col.isHidden) return <Fragment key={j} />
+                    return (
+                      <div
+                        key={j}
+                        style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
+                        className={twMerge(
+                          _columnClassName,
+                          getAlignClass(col.align),
+                          columnClassName,
+                          columnClassNameFn ? columnClassNameFn(col, row, i) : '',
+                          col.className,
+                          isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
+                        )}
+                      >
+                        <div 
+                          // pl:sideColorPadding was originally here
+                          style={{ maxHeight: rowContentHeightMax }} 
+                          className={twMerge(
+                            rowContentHeightMax ? 'overflow-hidden' : '',
+                            getLineClampClassName(col.rowLinesMax),
+                            col.overflow ? 'overflow-visible' : '',
+                            col.innerClassName
+                          )}
+                        >
+                          {
+                            // Side color
+                            sideColor && 
                             <div 
-                              className={`${selectedRowIds.length ? 'block' : 'hidden'} [&>*]:absolute [&>*]:inset-y-0 [&>*]:left-[35px] [&>*]:z-10 whitespace-nowrap`}
-                            >
-                              {generateCheckboxActions && generateCheckboxActions(selectedRowIds, setSelectedRowIds)}
+                              className={`absolute top-0 left-0 h-full ${sideColor?.className||''}`} 
+                              style={{ width: sideColor.width }}
+                            />
+                          }
+                          {
+                            // Rows (content hidden when loading inline)
+                            row._id &&
+                            <div className={isLoading && showLoadingInline ? 'opacity-0 pointer-events-none' : ''}>
+                              {
+                                col.value == 'checkbox'
+                                  ? <Checkbox 
+                                      size={checkboxSize} 
+                                      name={`checkbox-${row._id}`} 
+                                      onChange={(e) => onSelect(row?._id || '', e.target.checked)}
+                                      checked={selectedRowIds.includes(row?._id || '')}
+                                      onClick={(e) => e.stopPropagation()}
+                                      hitboxPadding={5}
+                                      className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
+                                      checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
+                                    />
+                                  : generateTd(col, row, i, i == rows.length - 1)
+                              }
                             </div>
-                          </Fragment>
-                        : <span className={twMerge(
-                            'flex items-center gap-x-2 transition-opacity',
-                            selectedRowIds.length ? 'opacity-0' : '',
-                            getAlignClass(col.align, true)
-                          )}>
-                            <span>{col.label}</span>
-                            {
-                              (!col.disableSort && sortBy == col.sortByValue) 
-                                ? (sort == '1' 
-                                    ? <ChevronDownIcon class='shrink-0 size-[16px]' /> 
-                                    : <ChevronUpIcon class='shrink-0 size-[16px]' />
-                                  )
-                                : col.align == 'left' && <div class='size-[16px] shrink-0' /> // prevent layout shift on sort
-                            }
-                          </span>
-                    }
-                  </div>
-                </div>
+                          }
+                          {
+                            // Show "no records" or "loading" text in the first column
+                            j == 0 && (!row._id || isLoading) &&
+                            <div className={'absolute top-0 h-full flex items-center justify-center gap-3 text-sm text-gray-500'}>
+                              {
+                                (!row._id && !isLoading) ? (
+                                  'No records found.' 
+                                ) : (!row._id && isLoading && showLoadingInline === true) ? (
+                                  <Fragment>
+                                    <Spinner className="border-gray-500" />
+                                    <LoadingWithDots message={loadingMessage} />
+                                  </Fragment>
+                                ) : (!row._id && isLoading && showLoadingInline) ? (
+                                  showLoadingInline
+                                ) : null
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    )
+                  })}
+                </Element>
               )
             })
           }
+          { 
+            (isLoading && showLoadingOverlay === true) 
+              ? <LoadingOverlay className={twMerge('m-[1px]', loadingOverlayClassName)} message={loadingMessage} /> 
+              : (isLoading && showLoadingOverlay) ? showLoadingOverlay : null
+          }
         </div>
-        {/* Tbody rows */}
-        {
-          rowsToRender.map((row: T, i: number) => {
-            const isSelected = selectedRowIds.includes(row._id || '')
-            const Element = (rowLink ? Link : 'div') as React.ElementType
-            const extraProps = rowLink ? { to: rowLink(row) } : { onClick: rowOnClick ? () => rowOnClick(row) : undefined }
-            return (
-              <Element
-                {...extraProps}
-                key={`${row._id}-${i}`}
-                id={`row-${row._id}-${i}`}
-                className={twMerge(
-                  `table-row relative ${(rowOnClick || rowLink) ? 'cursor-pointer' : ''} ${isSelected ? 'is-selected' : ''}`,
-                  rowClassName,
-                  rowClassNameFn ? rowClassNameFn(row, i) : ''
-                )}
-              >
-                {columns.map((col, j) => {
-                  const rowType = row._id ? 'row' : isLoading ? 'loading' : 'empty'
-                  const { pl, pr, sideColor } = getColumnPadding(j, isLoading ? undefined : row, rowType)
-                  if (col.isHidden) return <Fragment key={j} />
-                  return (
-                    <div
-                      key={j}
-                      style={{ height: rowHeightMin, paddingLeft: pl, paddingRight: pr }}
-                      className={twMerge(
-                        _columnClassName,
-                        getAlignClass(col.align),
-                        columnClassName,
-                        columnClassNameFn ? columnClassNameFn(col, row, i) : '',
-                        col.className,
-                        isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
-                      )}
-                    >
-                      <div 
-                        // pl:sideColorPadding was originally here
-                        style={{ maxHeight: rowContentHeightMax }} 
-                        className={twMerge(
-                          rowContentHeightMax ? 'overflow-hidden' : '',
-                          getLineClampClassName(col.rowLinesMax),
-                          col.overflow ? 'overflow-visible' : '',
-                          col.innerClassName
-                        )}
-                      >
-                        {
-                          // Side color
-                          sideColor && 
-                          <div 
-                            className={`absolute top-0 left-0 h-full ${sideColor?.className||''}`} 
-                            style={{ width: sideColor.width }}
-                          />
-                        }
-                        {
-                          // Rows (content hidden when loading inline)
-                          row._id &&
-                          <div className={isLoading && showLoadingInline ? 'opacity-0 pointer-events-none' : ''}>
-                            {
-                              col.value == 'checkbox'
-                                ? <Checkbox 
-                                    size={checkboxSize} 
-                                    name={`checkbox-${row._id}`} 
-                                    onChange={(e) => onSelect(row?._id || '', e.target.checked)}
-                                    checked={selectedRowIds.includes(row?._id || '')}
-                                    onClick={(e) => e.stopPropagation()}
-                                    hitboxPadding={5}
-                                    className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
-                                    checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
-                                  />
-                                : generateTd(col, row, i, i == rows.length - 1)
-                            }
-                          </div>
-                        }
-                        {
-                          // Show "no records" or "loading" text in the first column
-                          j == 0 && (!row._id || isLoading) &&
-                          <div className={'absolute top-0 h-full flex items-center justify-center gap-3 text-sm text-gray-500'}>
-                            {
-                              (!row._id && !isLoading) ? (
-                                'No records found.' 
-                              ) : (!row._id && isLoading && showLoadingInline === true) ? (
-                                <Fragment>
-                                  <Spinner className="border-gray-500" />
-                                  <LoadingWithDots message={loadingMessage} />
-                                </Fragment>
-                              ) : (!row._id && isLoading && showLoadingInline) ? (
-                                showLoadingInline
-                              ) : null
-                            }
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  )
-                })}
-              </Element>
-            )
-          })
-        }
-        { 
-          (isLoading && showLoadingOverlay === true) 
-            ? <LoadingOverlay className={twMerge('m-[1px]', loadingOverlayClassName)} message={loadingMessage} /> 
-            : (isLoading && showLoadingOverlay) ? showLoadingOverlay : null
-        }
       </div>
     </div>
   )
