@@ -26,8 +26,10 @@ export type TableRow = {
 export type TableProps<T> = {
   // todo: put the classnames into a single object
   columns: TableColumn[]
-  rows: T[]
   generateTd: (col: TableColumn, row: T, i: number, isLast: boolean) => JSX.Element | null
+  rows: T[]
+  // Optional settings
+  addOverflowScroll?: boolean
   generateCheckboxActions?: (selectedRowIds: string[], setSelectedRowIds: (selectedRowIds: string[]) => void) => JSX.Element | null
   headerHeightMin?: number
   rowHeightMin?: number
@@ -39,7 +41,10 @@ export type TableProps<T> = {
   rowLink?: (row: T) => string
   columnGap?: number
   columnPaddingX?: number
+  checkboxSize?: number
+  // Class names
   className?: string
+  scrollContainerClassName?: string
   tableClassName?: string
   rowClassName?: string
   rowClassNameFn?: (row: T, i: number) => string
@@ -48,32 +53,35 @@ export type TableProps<T> = {
   columnSelectedClassName?: string
   columnHeaderClassName?: string
   checkboxClassName?: string
-  checkboxSize?: number
   loadingOverlayClassName?: string
+  // Loading
   isLoading?:boolean
   loadingMessage?: string
   showLoadingInline?: boolean|JSX.Element
   showLoadingOverlay?: boolean|JSX.Element
-  scrollContainerClassName?: string
 }
 
 export function Table<T extends TableRow>({ 
-  rows, 
   columns: columnsProp, 
-  generateTd, 
-  generateCheckboxActions,
-  headerHeightMin=40,
-  rowHeightMin=48, 
-  rowContentHeightMax, 
-  rowLinesMax, 
-  rowSideColor,
-  rowGap=0,
-  rowOnClick,
-  rowLink,
+  generateTd,
+  rows,
+  // Optional settings
+  addOverflowScroll,
+  checkboxSize=16,
   columnGap=11,
   columnPaddingX=11,
+  generateCheckboxActions,
+  headerHeightMin=40,
+  rowContentHeightMax, 
+  rowGap=0,
+  rowHeightMin=48, 
+  rowLinesMax, 
+  rowLink,
+  rowOnClick,
+  rowSideColor,
   // Class names
   className,
+  scrollContainerClassName,
   tableClassName,
   rowClassName,
   rowClassNameFn,
@@ -82,9 +90,7 @@ export function Table<T extends TableRow>({
   columnSelectedClassName,
   columnHeaderClassName,
   checkboxClassName,
-  checkboxSize=16,
   loadingOverlayClassName,
-  scrollContainerClassName,
   // Loading
   isLoading=false,
   loadingMessage,
@@ -166,7 +172,7 @@ export function Table<T extends TableRow>({
     <div className={className}>
       <div 
         style={{ marginTop: -rowGap, marginBottom: -rowGap }} 
-        className={twMerge('overflow-x-auto thin-scrollbar', scrollContainerClassName)}
+        className={twMerge(addOverflowScroll ? 'overflow-x-auto thin-scrollbar' : '', scrollContainerClassName)}
       >
         <div 
           style={{ borderSpacing: `0 ${rowGap}px` }}
