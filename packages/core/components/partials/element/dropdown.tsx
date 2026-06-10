@@ -142,12 +142,17 @@ export const Dropdown = forwardRef(function Dropdown({
 
   function onMouseDown(e: { key: string, preventDefault: Function, target: EventTarget | null }) {
     if (e.key && e.key != 'Enter') return
-    if (e.key) e.preventDefault() // for button, stops buttons firing twice
+    if (e.key) e.preventDefault() // Enter on a <button> also fires a native click, cancel to avoid toggling twice
 
     if (!isHoverable && !menuIsOpen && ((menuToggles || e.key) || !isActive)) {
       if (isActive && preventCloseOnClickChild && dropdownRef.current?.contains(e.target as Node)) return // keep active
       setIsActive(!isActive)
     }
+  }
+
+  function onClick(e: React.MouseEvent) {
+    e.preventDefault()
+    e.stopPropagation()
   }
 
   function onItemClick(option: { onClick?: Function, preventCloseOnClick?: boolean }, e: React.MouseEvent) {
@@ -156,7 +161,9 @@ export const Dropdown = forwardRef(function Dropdown({
   }
 
   return (
-    <div 
+    <div
+      ref={dropdownRef} 
+      css={style}
       class={
         `relative is-${direction || dir}` + // until hovered, show the original direction to prevent scrollbars
         (isHoverable ? ' is-hoverable' : '') +
@@ -166,28 +173,36 @@ export const Dropdown = forwardRef(function Dropdown({
         ' nitro-dropdown' +
         (className ? ` ${className}` : '')
       }
-      // When the dropdown is inside a link, prevent click propagation
-      onClick={(e) => { e.preventDefault() }}
-      // When the dropdown is inside a link, prevent auto <a> focus propagation (for the window listener)
-      onMouseDown={(e) => { e.preventDefault() }}
-      ref={dropdownRef} 
-      css={style}
     >
       {
         (Array.isArray(children) ? children : [children]).map((el, key) => {
           const onKeyDown = onMouseDown 
           if (!el.type) throw new Error('Dropdown component requires a valid child element')
-          return cloneElement(el, { key, onMouseDown, onKeyDown }) // adds onClick
+          return cloneElement(el, { key, onMouseDown, onKeyDown, onClick })
         })
       }
       <ul
-        style={{ 
-          minWidth: minWidth, 
-          maxHeight: maxHeight, 
+        // Mousedown on non-focusable menu content now focuses the ul instead of escaping to parent link row,
+        // so the window 'focus' listener doesn't close the menu early
+        tabIndex={-1}
+        // Keep mousedown from bubbling to parent row handlers (focus containment is handled by tabIndex above)
+        onMouseDown={(e: React.MouseEvent) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => {
+          // Keep menu clicks from reaching parent row click handlers
+          e.stopPropagation()
+          // Cancel parent <a> row navigation, unless a link INSIDE the menu was clicked
+          // (closest() doesn't stop at the ul, so check the matched link is contained within it)
+          const link = (e.target as HTMLElement).closest('a[href]')
+          if (!link || !e.currentTarget.contains(link)) e.preventDefault()
+        }}
+        style={{
+          minWidth: minWidth,
+          maxHeight: maxHeight,
           ...(maxHeight ? { overflow: 'auto' } : {}),
         }}
-        class={
-          twMerge(`${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none min-w-full z-[1] ${menuClassName||''}`)}
+        class={twMerge(
+          `${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none outline-none min-w-full z-[1] ${menuClassName||''}`
+        )}
       >
         {menuContent}
         {

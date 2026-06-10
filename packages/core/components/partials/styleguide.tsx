@@ -220,7 +220,10 @@ export function Styleguide({ className, elements, children, currencies, groups }
       case 'actions':
         return (
           <Dropdown 
-            options={[{ label: 'Set Status' }, { label: 'Delete' }]} 
+            options={[
+              { label: 'Set Status', onClick: () => { console.log('set', row._id) } }, 
+              { label: 'Delete', onClick: () => { console.log('remove', row._id) } },
+            ]} 
             dir={rows.slice(0, perPage).length - 3 < i ? 'top-right' : 'bottom-right'} 
             minWidth={100}
           >
@@ -735,7 +738,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
             generateTd={generateTd}
             rowLink={(row) => `#/table-link/${row?._id}`}
             rowSideColor={(row) => ({ className: row?.status == 'pending' ? 'bg-yellow-400' : '', width: 5 })}
-            rows={rows.slice(0, 1).map(row => ({ ...row, _id: row._id + '1' }))}
+            rows={rows.slice(0, 1).map(row => ({ ...row, _id: '1_' + row._id }))}
           />
           <Table
             className="mb-6"
@@ -745,10 +748,13 @@ export function Styleguide({ className, elements, children, currencies, groups }
             headerHeightMin={35}
             rowGap={8}
             rowHeightMin={42}
-            rowLinesMax={1}
-            rowOnClick={useCallback((row: QuoteExample) => {setStore((s) => ({ ...s, message: `Row ${row?._id} clicked` }))}, [setStore])}
+            rowLinesMax={1} 
+            rowOnClick={useCallback((row: QuoteExample) => {
+              console.log('row clicked', row?._id)
+              setStore((s) => ({ ...s, message: `Row ${row?._id} clicked` }))
+            }, [setStore])}
             rowSideColor={(row) => ({ className: `rounded-l-xl ${statusColors(row?.status as string)}`, width: 10 })}
-            rows={rows.slice(0, 2).map(row => ({ ...row, _id: row._id + '2' }))}
+            rows={rows.slice(0, 2).map(row => ({ ...row, _id: '2_' + row._id }))}
 
             checkboxClassName="rounded-[2px] shadow-none"
             columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
