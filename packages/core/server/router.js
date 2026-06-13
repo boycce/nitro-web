@@ -219,6 +219,7 @@ function setupErrorResponses (expressApp) {
 
     // Mongo error
     } else if (util.isObject(error) && (error.name||'').match(/Mongo|BulkWriteError/)) {
+      // Below is thrown by Monastery if a custom message is not used, e.g. `{ ..., messages : { email: { unique: '...' } } }`
       if (error.code == 11000) {
         let [name] = duplicateKeyIndexAndValue(error)
         if (name == 'email') errors = [{ title: 'email', detail: 'That email is already linked to an account.' }]
