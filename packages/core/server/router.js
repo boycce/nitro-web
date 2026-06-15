@@ -9,7 +9,7 @@ import expressFileUpload from 'express-fileupload'
 import express from 'express'
 import bodyParser from 'body-parser'
 import sortRouteAddressesNodeps from 'sort-route-addresses-nodeps'
-
+import { formatDuplicateKeyError } from 'monastery'
 import { sendEmail } from 'nitro-web/server'
 import * as util from 'nitro-web/util'
 
@@ -177,17 +177,6 @@ function setupErrorResponses (expressApp) {
     serverError: function(a, b) { error.call(this, a, b, 500) },
   })
 
-  function duplicateKeyIndexAndValue(error) {
-    // https://github.com/Automattic/mongoose/issues/2129#issuecomment-280507821
-    // E.g. E11000 duplicate key error collection: anamata-production.person index:
-    //   email_1 dup key: { email: "person1@gmail.com" }
-    let regex = /index: (?:.*\.)?\$?(?:([_a-z0-9]*)(?:_\d*)|([_a-z0-9]*))\s*dup key/i
-    let match = error.message.match(regex)
-    let index = match[1] || match[2]
-    let value = (error.message.match(/.*{.*?: (.*) }/i)[1]||'').replace(/"/g, '')
-    return [index, value]
-  }
-
   function error(error, detail, status) {
     /**
      * Returns a formatted error
@@ -218,12 +207,15 @@ function setupErrorResponses (expressApp) {
       else errors = [{ detail: error || _detail }]
 
     // Mongo error
-    } else if (util.isObject(error) && (error.name||'').match(/Mongo|BulkWriteError/)) {
+    } else if (util.isObject(error) && (error.name || '').match(/Mongo|BulkWriteError/)) {
       // Below is thrown by Monastery if a custom message is not used, e.g. `{ ..., messages : { email: { unique: '...' } } }`
-      if (error.code == 11000) {
-        let [name] = duplicateKeyIndexAndValue(error)
-        if (name == 'email') errors = [{ title: 'email', detail: 'That email is already linked to an account.' }]
-        else errors = [{ title: name, detail: `Cannot insert duplicate values for "${name}".` }]
+      const formattedDuplicateKeyError = formatDuplicateKeyError(undefined, error)
+      if (formattedDuplicateKeyError) {
+        errors = formattedDuplicateKeyError
+        const hasRawMessage = errors[0].detail.includes('E11000 duplicate key')
+        // Add default messages if no custom message is used from definition.messages
+        if (hasRawMessage && errors[0].title == 'email') errors[0].detail = 'That email is already linked to an account.'
+        else if (hasRawMessage) errors[0].detail = `Cannot insert duplicate values for "${errors[0].title}".`
       } else {
         errors = [{ title: 'mongo', detail: error.message }]
       }
