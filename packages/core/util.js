@@ -1391,9 +1391,19 @@ export function pad (num=0, padLeft=0, fixedRight) {
 }
 
 /**
+ * Escapes a string for use in a regex
+ * @param {string} str
+ * @returns {string}
+ */
+export function escapeRegex(str) {
+  return ((str || '') + '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+/**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  *   - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
- *   - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
+ *   - `{ rule: 'text', numberFields?: string[] }` number fields require indexes to work.
+ *   - `{ rule: 'regex', fields: string[] }` case-insensitive regex against string fields.
  * @param {{ [key: string]: unknown }} query - req.query
  * @param {{ [key: string]: (
  *     'string'
@@ -1403,8 +1413,10 @@ export function pad (num=0, padLeft=0, fixedRight) {
  *     | EnumArray
  *     | { rule: 'ids', parseId: parseId }
  *     | 'text'
- *     | { rule: 'text', numberFields: string[] }
+ *     | { rule: 'text', numberFields?: string[] }
+ *     | { rule: 'regex', fields: string[] }
  *     | { rule: 'search' } & SearchOperators
+ *     | 'search_wildcard'
  *   )}} config - object of allowed filter/rule pairs.
  * 
  * Examples:
@@ -1428,8 +1440,11 @@ export function pad (num=0, padLeft=0, fixedRight) {
  *   status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
  *   customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
  *   text: 'text',
- *   text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
+ *   text: { rule: 'text', numberFields: ['age'] },
+ *   search: { rule: 'regex', fields: ['name', 'email'] },
  *   search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
+ *   search: { rule: 'search', wildcard: { query: "*{VALUE}*", path: { wildcard: '*' }, allowAnalyzedField: true } } 
+ *   search: 'search_wildcard', // same as above
  * }
  * @example returned MongoDB query object = {
  *   location: '10-RS',
@@ -1454,9 +1469,10 @@ export function parseFilters(query, config) {
    *     | { $gte?: number; $gt?: number; $lte?: number; $lt?: number; }
    *     | (string|number|boolean)
    *     | { $in: ObjectId[] } 
-   *     | { $search: string }                                              // key=$text
-   *     | ({ $text: { $search: string } } | { [key: string]: number })[]   // key=$or
-   *     | SearchOperators                                                  // key=$search
+   *     | { $search: string }                                               // key=$text
+   *     | ({ $text: { $search: string } } | { [key: string]: number })[]    // key=$or (text rule)
+   *     | { [key: string]: { $regex: string, $options: string } }[]         // key=$or (regex rule)
+   *     | SearchOperators                                                   // key=$search
    *   )
    * }} */
   const returnedMongoQuery = {}
@@ -1480,20 +1496,24 @@ export function parseFilters(query, config) {
     if (!rule) {
       continue
 
+    // String
     } else if (rule === 'string') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
       returnedMongoQuery[key] = val
 
+    // Number
     } else if (rule === 'number') {
       const num = parseFloat(val)
       if (isNaN(num)) throw new Error(`The "${key}" filter should be a number, but received "${val}".`)
       returnedMongoQuery[key] = num
 
+    // Boolean
     } else if (rule === 'boolean') {
       const bool = val === 'true' ? true : val === 'false' ? false : undefined
       if (bool === undefined) throw new Error(`The "${key}" filter should be a boolean, but received "${val}".`)
       returnedMongoQuery[key] = bool
 
+    // Date range
     } else if (rule === 'dateRange') {
       const [start, end] = val.split(',').map(Number)
       if (isNaN(start) && isNaN(end)) throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a date range.`)
@@ -1501,7 +1521,8 @@ export function parseFilters(query, config) {
       else if (isNaN(end)) returnedMongoQuery[key] = { $gte: start }
       else returnedMongoQuery[key] = { $gte: start, $lte: end }
 
-    } else if (Array.isArray(rule)) { // Enum
+    // Enum
+    } else if (Array.isArray(rule)) {
       // Detetect the entire array's type from the first item
       const type = typeof rule[0]
       if (!['string', 'number', 'boolean'].includes(type)) {
@@ -1515,7 +1536,8 @@ export function parseFilters(query, config) {
         if (valParsed === ruleItem) returnedMongoQuery[key] = valParsed
       }
     
-    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') { // ids
+    // IDs
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'ids') {
       if (!rule.parseId) {
         throw new Error(`The "${key}" filter has an invalid rule. Expected a parseId function.`)
       }
@@ -1526,31 +1548,54 @@ export function parseFilters(query, config) {
       if (!ids.length) throw new Error(`Please pass at least one id to the "${key}" filter.`)
       returnedMongoQuery[key] = { $in: ids }
 
+    // Text
     } else if (rule === 'text') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
       returnedMongoQuery['$text'] = { $search: '"' + val + '"' }
 
+    // Text rule with numberFields
     } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'text') {
       if (typeof val !== 'string') {
         throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
-      } else if (!Array.isArray(rule.numberFields) || !rule.numberFields.length) {
-        throw new Error(`The "${key}" filter has an invalid rule. Expected an numberFields to be a non-empty array.`)
+      } else if (Array.isArray(rule.numberFields) && !rule.numberFields.length) {
+        throw new Error(`The "${key}" filter has an invalid rule. Expected numberFields to be a non-empty array.`)
       }
       const ors = []
       const num = parseFloat(val)
       ors.push({ $text: { $search: val } })
-      if (!isNaN(num)) {
+      if (!isNaN(num) && Array.isArray(rule.numberFields)) {
         for (const field of rule.numberFields) {
           ors.push({ [field]: num })
         }
       }
       returnedMongoQuery.$or = ors
 
+    // Regex
+    } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'regex') {
+      if (typeof val !== 'string') {
+        throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      } else if (!Array.isArray(rule.fields) || !rule.fields.length) {
+        throw new Error(`The "${key}" filter has an invalid rule. Expected fields to be a non-empty array.`)
+      }
+      const ors = []
+      for (const field of rule.fields) {
+        ors.push({ [field]: { $regex: escapeRegex(val), $options: 'i' } })
+      }
+      returnedMongoQuery.$or = ors
+
+    // Atlas Search
     } else if (typeof rule === 'object' && 'rule' in rule && rule.rule === 'search') {
       if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
       const output = /** @type {SearchOperators} */(deepSetWithMatch(rule, '{VALUE}', val)) // replace {VALUE} with the value
       delete output.rule // need to remove rule from the object
       returnedMongoQuery['$search'] = output
+
+    // Atlas Search wildcard
+    } else if (rule === 'search_wildcard') {
+      if (typeof val !== 'string') throw new Error(`The "${key}" filter has an invalid value "${val}". Expected a string.`)
+      returnedMongoQuery['$search'] = { wildcard: { query: `*${val}*`, path: { wildcard: '*' }, allowAnalyzedField: true } }
+
+    // Unknown filter type
     } else {
       throw new Error(`Unknown filter type "${rule}" in the config.`)
     }
