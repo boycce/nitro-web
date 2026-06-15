@@ -566,9 +566,16 @@ export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.
  */
 export function pad(num?: number, padLeft?: number, fixedRight?: number): string;
 /**
+ * Escapes a string for use in a regex
+ * @param {string} str
+ * @returns {string}
+ */
+export function escapeRegex(str: string): string;
+/**
  * Validates req.query "filters" against a config object, and returns a MongoDB-compatible query object.
  *   - `{ rule: 'search' }` is only supported with supported $search operations (e.g. aggregate).
- *   - `{ rule: 'text', numberFields: string[] }` number fields require indexes to work.
+ *   - `{ rule: 'text', numberFields?: string[] }` number fields require indexes to work.
+ *   - `{ rule: 'regex', fields: string[] }` case-insensitive regex against string fields.
  * @param {{ [key: string]: unknown }} query - req.query
  * @param {{ [key: string]: (
  *     'string'
@@ -578,8 +585,10 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  *     | EnumArray
  *     | { rule: 'ids', parseId: parseId }
  *     | 'text'
- *     | { rule: 'text', numberFields: string[] }
+ *     | { rule: 'text', numberFields?: string[] }
+ *     | { rule: 'regex', fields: string[] }
  *     | { rule: 'search' } & SearchOperators
+ *     | 'search_wildcard'
  *   )}} config - object of allowed filter/rule pairs.
  *
  * Examples:
@@ -603,8 +612,11 @@ export function pad(num?: number, padLeft?: number, fixedRight?: number): string
  *   status: ['incomplete', 'complete'],  // EnumArray [string|boolean|number]
  *   customer: { rule: 'ids', ObjectId: ObjectIdConstructor },
  *   text: 'text',
- *   text: { rule: 'text', numberFields: ['age'] }, // search with numeric fields
+ *   text: { rule: 'text', numberFields: ['age'] },
+ *   search: { rule: 'regex', fields: ['name', 'email'] },
  *   search: { rule: 'search', text: { query: "{VALUE}", path: ['firstName'] } },
+ *   search: { rule: 'search', wildcard: { query: "*{VALUE}*", path: { wildcard: '*' }, allowAnalyzedField: true } }
+ *   search: 'search_wildcard', // same as above
  * }
  * @example returned MongoDB query object = {
  *   location: '10-RS',
@@ -626,10 +638,13 @@ export function parseFilters(query: {
         parseId: parseId;
     } | "text" | {
         rule: "text";
-        numberFields: string[];
+        numberFields?: string[];
+    } | {
+        rule: "regex";
+        fields: string[];
     } | ({
         rule: "search";
-    } & SearchOperators));
+    } & SearchOperators) | "search_wildcard");
 }): {
     [key: string]: string | number | boolean | SearchOperators | {
         $gte?: number;
@@ -646,7 +661,12 @@ export function parseFilters(query: {
         };
     } | {
         [key: string]: number;
-    })[];
+    })[] | {
+        [key: string]: {
+            $regex: string;
+            $options: string;
+        };
+    }[];
 };
 /**
  * Parses req.query "pagination" and "sorting" fields and returns a monastery-compatible options object.
