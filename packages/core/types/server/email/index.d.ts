@@ -8,6 +8,7 @@
  * @param {Config} opts.config - Config object
  * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>" (not sent in development)
  * @param {object} [opts.data] - template data shared across recipients
+ * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun)
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {string} [opts.replyTo] - reply-to address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {object} [opts.recipientVariables] - Mailgun recipient-variables for batch sending
@@ -16,12 +17,13 @@
  * @param {boolean} [opts.test] - enable test mode
  * @returns {Promise<[any, any]>} Resolves with [mailgunErr, mailgunInfo]
  */
-export function sendEmail({ template, to, config, bcc, data, from, replyTo, recipientVariables, subject, skipCssInline, test, }: {
+export function sendEmail({ template, to, config, bcc, data, swigData, from, replyTo, recipientVariables, subject, skipCssInline, test, }: {
     template: string;
     to: string;
     config: Config;
     bcc?: string;
     data?: object;
+    swigData?: object;
     from?: string;
     replyTo?: string;
     recipientVariables?: object;
