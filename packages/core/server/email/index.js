@@ -27,6 +27,7 @@ export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgu
  * @param {Config} opts.config - Config object
  * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>" (not sent in development)
  * @param {object} [opts.data] - template data shared across recipients
+ * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun)
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {string} [opts.replyTo] - reply-to address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {object} [opts.recipientVariables] - Mailgun recipient-variables for batch sending
@@ -40,7 +41,8 @@ export async function sendEmail({
   to, 
   config,
   bcc, 
-  data, 
+  data,
+  swigData,
   from, 
   replyTo, 
   recipientVariables, 
@@ -69,6 +71,17 @@ export async function sendEmail({
   // From, replayTo
   from = from || config.emailFrom
   replyTo = replyTo || config.emailReplyTo || from
+
+  if (swigData) {
+    swigData = {
+      configName: ucFirst(config.name),
+      domain: config.baseUrl,
+      replyToEmail: getNameEmail(replyTo)[1],
+      replyToName: getNameEmail(replyTo)[0],
+      ...swigData,
+    }
+  }
+
   const toSplit = to.split(',')
 
   // Add default recipientVariables
@@ -103,6 +116,7 @@ export async function sendEmail({
     test: isTest,
     to: to,
     url: config.baseUrl,
+    swigData: swigData,
   }
 
   // Grab html and send
@@ -114,36 +128,36 @@ export async function sendEmail({
 async function getTemplate(settings) {
   try {
     var templateName = settings.template
-    if (!templates[templateName] || settings.isDev) {
-      nunjucks.configure({ noCache: settings.isDev })
-      // Setup the nunjucks environment
-      let nunjucksEnv = new nunjucks.Environment([
-        new nunjucks.FileSystemLoader(`${settings.emailTemplateDir}`), // user templates take precedence
-        new nunjucks.FileSystemLoader(`${_dirname}`), // then fallback to nitro default templates
-      ])
-      // Get the template
-      let template = nunjucksEnv.getTemplate(templateName + '.html', true)
-      // Render the template
-      let html = template.render({})
-      if (settings.skipCssInline && settings.test) {
-        templates[templateName] = html
-      } else {
-        try { 
-          // First try to inline the CSS from the user templates directory
-          templates[templateName] = await inlineCssForPath(html, settings.emailTemplateDir)
-        } catch (e) {
-          // If the CSS is not found, use default nitro CSS file
-          if (templateName == 'reset-password' || templateName == 'welcome') {
-            templates[templateName] = await inlineCssForPath(html, `${_dirname}`)
-          } else {
-            throw e
-          }
-        }
-      }
-      return templates[templateName]
-    } else {
+    // Return cached template (if there is no swig data)
+    if (templates[templateName] && !settings.isDev && !settings.swigData) {
       return templates[templateName]
     }
+    // Setup the nunjucks environment
+    nunjucks.configure({ noCache: settings.isDev })
+    let nunjucksEnv = new nunjucks.Environment([
+      new nunjucks.FileSystemLoader(`${settings.emailTemplateDir}`), // user templates take precedence
+      new nunjucks.FileSystemLoader(`${_dirname}`), // then fallback to nitro default templates
+    ])
+    // Get the template
+    let template = nunjucksEnv.getTemplate(templateName + '.html', true)
+    let html = template.render(settings.swigData || {})
+    // Inline CSS
+    if (!settings.skipCssInline || !settings.test) {
+      try {
+        // First try to inline the CSS from the user templates directory
+        html = await inlineCssForPath(html, settings.emailTemplateDir)
+      } catch (e) {
+        // If the CSS is not found, use default nitro CSS file
+        if (templateName == 'reset-password' || templateName == 'welcome') {
+          html = await inlineCssForPath(html, `${_dirname}`)
+        } else {
+          throw e
+        }
+      }
+    }
+    // Cache the template (if there is no swig data)
+    if (!settings.swigData) templates[templateName] = html
+    return html
   } catch (e) {
     console.error(`Sendmail: issue retrieving the email template "${templateName}.html"`)
     console.error(e)

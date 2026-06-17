@@ -140,6 +140,7 @@ export async function setupRouter (config) {
           test: true,
           skipCssInline: true,
           to: 'Ricky<test@gmail.com>',
+          swigData: {},
         })
         res.send(html)
       } catch (e) {
