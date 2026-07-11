@@ -13,6 +13,7 @@ import { isArray, pick, ucFirst, fullNameSplit, isEmail } from 'nitro-web/util'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'replace_this_with_secure_env_secret'
 let authConfig = null
+const resolveBaseUrlWarned = new Set()
 const requiredConfigKeys = [...requiredEmailConfigKeys]
 const optionalConfigKeys = [...optionalEmailConfigKeys, 'masterPassword', 'isNotMultiTenant', 'autoAddExistingUsers', 'limitOneTenantPerUser']
 
@@ -740,12 +741,22 @@ export function resolveBaseUrl(reqUrl, cfgUrl) {
     const cfgHost = new URL(cfgUrl).hostname
     const reqApex = getDomain(reqHost)
     const cfgApex = getDomain(cfgHost)
+    const errorMessage = 'Nitro warning: auth.resolveBaseUrl: The request origin and the config baseUrl ' +
+      'are not the same apex domain. Defaulting to the Cfg baseUrl. Req:'
 
     if (reqApex && cfgApex) {
+      if (reqApex !== cfgApex && !resolveBaseUrlWarned.has(reqHost)) {
+        resolveBaseUrlWarned.add(reqHost)
+        console.warn(errorMessage, reqApex, '!=', cfgApex)
+      }
       return reqApex === cfgApex ? reqUrl : cfgUrl
     } else if (reqHost === cfgHost || reqHost.endsWith('.' + cfgHost)) {
       return reqUrl
     } else {
+      if (!resolveBaseUrlWarned.has(reqHost)) {
+        resolveBaseUrlWarned.add(reqHost)
+        console.warn(errorMessage, reqHost, '!=', cfgHost)
+      }
       return cfgUrl
     }
   } catch (_) {
