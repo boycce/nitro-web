@@ -91,11 +91,11 @@ export async function sendEmail({
   for (let toNameEmail of toSplit) {
     const [toName, toEmail] = getNameEmail(toNameEmail)
     recipientVariables[toEmail] = {
-      ...(data || {}),
       configName: ucFirst(config.name),
       domain: config.baseUrl,
       replyToEmail: getNameEmail(replyTo)[1],
       replyToName: getNameEmail(replyTo)[0],
+      ...(data || {}),
       email: toEmail,
       greet: toName ? 'Hi ' + toName : 'Hello',
       name: toName,
