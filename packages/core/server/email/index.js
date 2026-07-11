@@ -72,12 +72,17 @@ export async function sendEmail({
   from = from || config.emailFrom
   replyTo = replyTo || config.emailReplyTo || from
 
+  const defaultData = {
+    configName: ucFirst(config.name),
+    domain: config.baseUrl,
+    replyToEmail: getNameEmail(replyTo)[1],
+    replyToName: getNameEmail(replyTo)[0],
+    ...(data || {}),
+  }
+
   if (swigData) {
     swigData = {
-      configName: ucFirst(config.name),
-      domain: config.baseUrl,
-      replyToEmail: getNameEmail(replyTo)[1],
-      replyToName: getNameEmail(replyTo)[0],
+      ...defaultData,
       ...swigData,
     }
   }
@@ -91,11 +96,7 @@ export async function sendEmail({
   for (let toNameEmail of toSplit) {
     const [toName, toEmail] = getNameEmail(toNameEmail)
     recipientVariables[toEmail] = {
-      configName: ucFirst(config.name),
-      domain: config.baseUrl,
-      replyToEmail: getNameEmail(replyTo)[1],
-      replyToName: getNameEmail(replyTo)[0],
-      ...(data || {}),
+      ...defaultData,
       email: toEmail,
       greet: toName ? 'Hi ' + toName : 'Hello',
       name: toName,
@@ -115,7 +116,6 @@ export async function sendEmail({
     template: template,
     test: isTest,
     to: to,
-    url: config.baseUrl,
     swigData: swigData,
   }
 
