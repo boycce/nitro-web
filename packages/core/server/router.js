@@ -333,7 +333,7 @@ export const middleware = {
     // Handy boolean denoting that the request wants JSON returned
     req.json = req.xhr || req.accepts(['html', 'json']) == 'json'
     // Dynamic baseUrl from the request headers, may require app.set('trust proxy', 1) in the server setup for heroku proxying
-    req.nitroBaseUrl = req.protocol + '://' + req.headers.host
+    req.requestOrigin = req.protocol + '://' + req.headers.host
     // log the headers if the config.logHeaders is true
     if (configLocal.logHeaders) {
       console.info('Headers:', req.headers)

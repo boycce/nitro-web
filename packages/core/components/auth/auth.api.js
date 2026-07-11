@@ -729,7 +729,7 @@ export async function tokenSend({ type, id, payload, beforeUpdate, beforeSendEma
 }
 
 export function getBaseUrl(req) {
-  return resolveBaseUrl(req?.nitroBaseUrl, authConfig.baseUrl)
+  return resolveBaseUrl(req?.requestOrigin, authConfig.baseUrl)
 }
 
 export function resolveBaseUrl(reqUrl, cfgUrl) {
