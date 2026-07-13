@@ -739,8 +739,9 @@ export function resolveBaseUrl(reqUrl, cfgUrl) {
   try {
     const reqHost = new URL(reqUrl).hostname
     const cfgHost = new URL(cfgUrl).hostname
-    const reqApex = getDomain(reqHost)
-    const cfgApex = getDomain(cfgHost)
+    // tldts treats "localhost" as an unknown suffix, so we add an override
+    const reqApex = /(^|\.)localhost$/.test(reqHost) ? 'localhost' : getDomain(reqHost)
+    const cfgApex = /(^|\.)localhost$/.test(cfgHost) ? 'localhost' : getDomain(cfgHost)
     const errorMessage = 'Nitro warning: auth.resolveBaseUrl: The request origin and the config baseUrl ' +
       'are not the same apex domain. Defaulting to the Cfg baseUrl. Req:'
 

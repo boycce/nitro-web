@@ -16,6 +16,7 @@ const cases = [
 
   ['http://localhost:3000',      'http://localhost:3001',           'http://localhost:3001',          'match: localhost: port (ignored)'],
   ['http://localhost:3000',      'http://app.localhost:3001',       'http://app.localhost:3001',      'match: localhost: nested'],
+  ['http://app.localhost:3000',  'http://app2.localhost:3001',      'http://app2.localhost:3001',     'match: localhost: sibling'],
   ['http://127.0.0.1:3000',      'http://127.0.0.1:3000',           'http://127.0.0.1:3000',          'match: IP exact'],
 
   // cfg: mismatch
