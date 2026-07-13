@@ -31,7 +31,7 @@
     "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
     "republish": "npm publish && cd ../webpack && npm publish",
-    "test": "node --test components/**/*.test.js",
+    "test": "node --test tests/",
     "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
