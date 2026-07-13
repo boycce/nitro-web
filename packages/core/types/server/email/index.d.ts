@@ -7,8 +7,8 @@
  * @param {string} opts.to - Recipient(s), e.g. "Bruce<bruce@wayneenterprises.com>,..."
  * @param {Config} opts.config - Config object
  * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>" (not sent in development)
- * @param {object} [opts.data] - template data shared across recipients
- * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun)
+ * @param {object} [opts.data] - common template data shared across recipients
+ * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun). Inherits data.
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {string} [opts.replyTo] - reply-to address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {object} [opts.recipientVariables] - Mailgun recipient-variables for batch sending
