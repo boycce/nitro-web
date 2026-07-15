@@ -9,7 +9,7 @@ import { Errors, type Error } from 'nitro-web/types'
 import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon, PaperclipIcon } from 'lucide-react'
 import { memo, useState } from 'react'
 
-type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'date' | 'color' | 'file'
+type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'percent' | 'date' | 'color' | 'file'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
@@ -42,6 +42,7 @@ export type FieldProps = (
   | ({ type?: 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' } & InputProps & FieldExtraProps)
   | ({ type: 'textarea' } & TextareaProps & FieldExtraProps)
   | ({ type: 'currency' } & FieldCurrencyProps & FieldExtraProps)
+  | ({ type: 'percent' } & Omit<FieldCurrencyProps, 'currency'> & FieldExtraProps)
   | ({ type: 'color' } & FieldColorProps & FieldExtraProps)
   | ({ type: 'date' } & FieldDateProps & FieldExtraProps)
   | ({ type: 'file' } & InputProps & FieldExtraProps)
@@ -140,7 +141,13 @@ function FieldBase({ state, icon, iconPos: ip, errorTitle, inputClassName, ...pr
         {Icon}<FieldCurrency {...props} {...commonProps} />
       </FieldContainer>
     )
-  } else if (type == 'date') { 
+  } else if (type == 'percent') {
+    return (
+      <FieldContainer error={error} className={props.className}>
+        {Icon}<FieldCurrency {...props} {...commonProps} percent />
+      </FieldContainer>
+    )
+  } else if (type == 'date') {
     return (
       <FieldContainer error={error} className={props.className}>
         <FieldDate {...props} {...commonProps} Icon={Icon} />

@@ -22,8 +22,14 @@ export type FieldCurrencyProps = Omit<NumericFormatProps, 'onChange' | 'value' |
   name: string
   /** name is applied if id is not provided */
   id?: string
-  /** currency iso, e.g. 'nzd' */
-  currency: string
+  /** render as a percent field: no currency symbol, '%' suffix */
+  percent?: boolean
+  /** minimum decimal places to show (percent only; defaults to 0) */
+  minDecimals?: number
+  /** maximum decimal places to show (percent only; defaults to 2) */
+  maxDecimals?: number
+  /** currency iso, e.g. 'nzd' (defaults to 'nzd'; ignored when percent) */
+  currency?: string
   /** override the default currencies array used to lookup currency symbol and digits, e.g. {nzd: { symbol: '$', digits: 2 }} */
   currencies?: Currencies, 
   /** override the default CLDR country currency format, e.g. '¤#,##0.00' */
@@ -34,10 +40,14 @@ export type FieldCurrencyProps = Omit<NumericFormatProps, 'onChange' | 'value' |
   defaultValue?: Cents // defined to just fix typescript error
 }
 
-export function FieldCurrency({ currency='nzd', currencies, format, onChange: onChangeProp, ...props }: FieldCurrencyProps) {
+export function FieldCurrency({
+  currency='nzd', currencies, format, percent, minDecimals, maxDecimals, onChange: onChangeProp, ...props
+}: FieldCurrencyProps) {
   const [dontFix, setDontFix] = useState(false)
   const [lastBlurred, setLastBlurred] = useState(0)
-  const [settings, setSettings] = useState(() => getCurrencySettings(currency, currencies, format, props.name))
+  const [settings, setSettings] = useState(() => (
+    getCurrencySettings(currency, currencies, format, props.name, percent, minDecimals, maxDecimals)
+  ))
   const [prefixWidth, setPrefixWidth] = useState(0)
   const [inputPaddingLeft, setInputPaddingLeft] = useState(12)
   const ref = useRef({ dontFix }) // was null
@@ -64,30 +74,36 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange: on
 
   // Update the settings if the setting parameters change
   useEffect(() => {
-    const _settings = getCurrencySettings(currency, currencies, format, props.name)
+    const _settings = getCurrencySettings(currency, currencies, format, props.name, percent, minDecimals, maxDecimals)
     if (settings.key !== _settings.key) setSettings(_settings)
-  }, [currency, currencies, format])
+  }, [currency, currencies, format, percent, minDecimals, maxDecimals])
 
   // Get the prefix content width
   useEffect(() => {
     setPrefixWidth(settings.prefix ? getPrefixWidth(settings.prefix, 1) : 0)
   }, [settings.prefix])
 
-  function to(type: 'dollars' | 'cents', value?: Cents, settings?: { maxDecimals?: number }) {
+  function to(type: 'dollars' | 'cents', value?: Cents, settings?: { maxDecimals?: number, minDecimals?: number }) {
     const maxDecimals = settings?.maxDecimals
+    const minDecimals = Math.min(settings?.minDecimals ?? 0, maxDecimals ?? 0)
     const parsed = parseFloat(value + '')
     if (!parsed && parsed !== 0) return null
     if (!maxDecimals) return parsed
 
-    const value2 = type === 'dollars' 
-      ? parsed / Math.pow(10, maxDecimals) 
+    const value2 = type === 'dollars'
+      ? parsed / Math.pow(10, maxDecimals)
       : parsed * Math.pow(10, maxDecimals) // e.g. 1.23 => 123
 
     // dont fix when the user is typing.
     if (type === 'dollars' && ref.current.dontFix) { setDontFix(false) }
 
-    // console.log('to', type, value, value2)
-    return type === 'cents' || ref.current.dontFix ? value2 : value2.toFixed(maxDecimals)
+    if (type === 'cents' || ref.current.dontFix || !minDecimals) return value2
+
+    // pad to maxDecimals then trim trailing zeros back down to (at least) minDecimals
+    const [whole, decimals=''] = value2.toFixed(maxDecimals).split('.')
+    let trimmed = decimals
+    while (trimmed.length > minDecimals && trimmed.endsWith('0')) trimmed = trimmed.slice(0, -1)
+    return trimmed ? `${whole}.${trimmed}` : whole
   }
 
   function onChange(source: 'event' | 'prop', floatValue?: number) {
@@ -95,6 +111,10 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange: on
     if (onChangeProp) onChangeProp({ target: { name: props.name, value: to('cents', floatValue, settings) }})
     else setInternalValue(to('cents', floatValue, settings))
   }
+
+  useEffect(() => {
+    console.log('settings', settings)
+  }, [settings])
 
   return (
     <div className="relative">
@@ -110,6 +130,7 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange: on
         onBlur={() => { setLastBlurred(Date.now())}}
         placeholder={props.placeholder || '0.00'}
         value={inputValue}
+        suffix={settings.suffix}
         style={{ textIndent: `${prefixWidth}px` }}
         type="text"
       />
@@ -117,15 +138,28 @@ export function FieldCurrency({ currency='nzd', currencies, format, onChange: on
         class={`absolute top-0 bottom-0 inline-flex items-center select-none text-gray-500 text-input-base ${inputValue !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
         style={{ left: `${inputPaddingLeft}px` }}
       >
-        {settings.prefix || settings.suffix}
+        {settings.prefix}
       </span>
     </div>
   )
 }
 
-function getCurrencySettings(currency: string, currencies?: Currencies, format?: string, name?: string) {
+function getCurrencySettings(
+  currency: string, currencies?: Currencies, format?: string, name?: string, percent?: boolean,
+  minDecimals?: number, maxDecimals?: number
+) {
+  // percent reuses the currency machinery but with a '%' suffix and no currency lookup
+  if (percent) {
+    const _minDecimals = minDecimals ?? 0
+    const _maxDecimals = maxDecimals ?? 2
+    return {
+      key: `percent:${_minDecimals}:${_maxDecimals}`, currency: currency, decimalSeparator: '.', thousandSeparator: ',',
+      minDecimals: _minDecimals, maxDecimals: _maxDecimals, prefix: undefined, suffix: '%',
+    }
+  }
+
   // parse CLDR currency string format, e.g. '¤#,##0.00'
-  const output: { 
+  const output: {
     key?: string               
     currency: string,           // e.g. 'nzd'
     decimalSeparator?: string,  // e.g. '.'

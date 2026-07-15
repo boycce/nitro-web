@@ -69,6 +69,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       colorsMulti: ['blue', 'green'],
       country: 'cd',
       currency: 'nzd',
+      percent: 1250,
       customer: '1',
       date: Date.now(),
       dateRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 33],
@@ -89,7 +90,8 @@ export function Styleguide({ className, elements, children, currencies, groups }
       brandColor: '#8656ED',
       colorsMulti: ['blue'],
       country: 'au',
-      currency: 'btc', 
+      currency: 'btc',
+      percent: 875,
       date: Date.now() + 1000 * 60 * 60 * 24 * 1.2,
       dateRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 5.2],
       dateMultiple: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
@@ -223,7 +225,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
             options={[
               { label: 'Set Status', onClick: () => { console.log('set', row._id) } }, 
               { label: 'Delete', onClick: () => { console.log('remove', row._id) } },
-            ]} 
+            ]}
             dir={rows.slice(0, perPage).length - 3 < i ? 'top-right' : 'bottom-right'} 
             minWidth={100}
           >
@@ -583,12 +585,19 @@ export function Styleguide({ className, elements, children, currencies, groups }
             <div>
               <label for="amount">Amount ({state.amount})</label>
               <Field 
-                name="amount" type="currency" state={state} currency={state.currency || 'nzd'} 
+                name="amount" 
+                type="currency" 
+                state={state} 
+                currency={state.currency || 'nzd'} 
                 // Example of using a custom format and currencies, e.g. 
                 format={'¤#,##0.00'} 
                 currencies={currencies}
                 onChange={(e) => onChange(e, setState)}
               />
+            </div>
+            <div>
+              <label for="percent">Percent ({state.percent})</label>
+              <Field name="percent" type="percent" state={state} onChange={(e) => onChange(e, setState)} minDecimals={1} maxDecimals={4} />
             </div>
             <div>
               <label for="firstName">First Name (disabled)</label>
