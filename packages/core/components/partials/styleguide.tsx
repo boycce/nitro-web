@@ -10,20 +10,20 @@ import React from 'react'
 
 const perPage = 10
 const allGroups = [
-  // 'Links', 
-  // 'Dropdowns', 
-  // 'Filters', 
-  // 'Button Colors & Sizes', 
-  // 'Button Icons', 
-  // 'Loading Elements', 
-  // 'Varients', 
+  'Links', 
+  'Dropdowns', 
+  'Filters', 
+  'Button Colors & Sizes', 
+  'Button Icons', 
+  'Loading Elements', 
+  'Varients', 
   'Selects', 
-  // 'Inputs', 
-  // 'Date Inputs', 
-  // 'File Inputs & Calendar & Time', 
-  // 'Tables', 
-  // 'Modals & Notifications', 
-  // 'Custom Components',
+  'Inputs', 
+  'Date Inputs', 
+  'File Inputs & Calendar & Time', 
+  'Tables', 
+  'Modals & Notifications', 
+  'Custom Components',
 ] as const
 
 const statusColors = function(status: string) {
@@ -80,7 +80,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       calendarSingle: Date.now(),
       calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
       firstName: 'Bruce',
-      combobox: 'blue',
+      combobox: '11',
       tableFilter: '',
       errors: [
         { title: 'address', detail: 'Address is required' },
@@ -103,7 +103,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
       firstName: 'John',
       tableFilter: '',
-      combobox: 'green',
+      combobox: '22',
       errors: [
         { title: 'address', detail: 'Address is required' },
       ],
@@ -537,7 +537,24 @@ export function Styleguide({ className, elements, children, currencies, groups }
               />
             </div>
             <div>
-              <label for="combobox">Combobox (Autocomplete /w or free text)</label>
+              <label for="combobox">JSX label + custom search</label>
+              <Select
+                name="jsxlabel"
+                state={state}
+                onChange={(e) => onChange(e, setState)}
+                menuIsOpen={true}
+                options={useMemo(() => [
+                  { value: '11', label: <div class="inline-block bg-blue-300">Blue</div>, labelSearch: 'BL - blue', noTruncate: true },
+                  { value: '22', label: <div class="inline-block bg-green-300">Green</div>, labelSearch: 'GR - green', noTruncate: true },
+                  { value: '33', label: <div class="inline-block bg-yellow-300">Yellow</div>, labelSearch: 'YL - yellow', noTruncate: true },
+                  { value: '44', label: <div class="inline-block bg-red-300">Red</div>, labelSearch: 'RD - red', noTruncate: true },
+                  { value: '55', label: <div class="inline-block bg-orange-300">Orange</div>, labelSearch: 'OR - orange', noTruncate: true },
+                  { value: '66', label: <div class="inline-block bg-purple-300">Purple</div>, labelSearch: 'PU - purple', noTruncate: true },
+                ], [])}
+              />
+            </div>
+            <div>
+              <label for="combobox">Combobox (value={state.combobox})</label>
               <Select
                 name="combobox"
                 mode="combobox"
@@ -547,16 +564,12 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 placeholder="Start typing to search for a color..."
                 // hideDropdownIcon={true}
                 options={useMemo(() => [
-                  { value: 'blue', label: 'Blue' },
-                  { value: 'green', label: 'Green' },
-                  { value: 'yellow', label: 'Yellow' },
-                  { value: 'red', label: 'Red' },
-                  { value: 'orange', label: 'Orange' },
-                  { value: 'purple', label: 'Purple' },
-                  { value: 'pink', label: 'Pink' },
-                  { value: 'gray', label: 'Gray' },
-                  { value: 'black', label: 'Black' },
-                  { value: 'white', label: 'White' },
+                  { value: '11', label: <div class="inline-block bg-blue-300">Blue</div>, labelInput: 'BL - blue' },
+                  { value: '22', label: <div class="inline-block bg-green-300">Green</div>, labelInput: 'GR - green' },
+                  { value: '33', label: <div class="inline-block bg-yellow-300">Yellow</div>, labelInput: 'YL - yellow' },
+                  { value: '44', label: <div class="inline-block bg-red-300">Red</div>, labelInput: 'RD - red' },
+                  { value: '55', label: <div class="inline-block bg-orange-300">Orange</div>, labelInput: 'OR - orange' },
+                  { value: '66', label: <div class="inline-block bg-purple-300">Purple</div>, labelInput: 'PU - purple' },
                 ], [])}
               />
             </div>

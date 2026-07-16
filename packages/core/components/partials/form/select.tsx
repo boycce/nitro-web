@@ -28,6 +28,8 @@ type GetSelectClassName = {
 export type SelectOption = { 
   value: unknown, 
   label: string | React.ReactNode, 
+  /** Plain-string label shown in the input when selected (needed when `label` is not a string) **/
+  labelInput?: string,
   labelSearch?: string,
   noTruncate?: boolean,
   fixed?: boolean,
@@ -38,6 +40,9 @@ export type SelectOption = {
 }
 
 export type SelectedOption = SelectOption | null
+
+// Options/Control
+// 1. Control value comes from value or state (so if its the option it will be the option.labe;)
 
 /** Select (all other props are passed to react-select) **/
 export type SelectProps<IsMulti extends boolean = false> = {
@@ -110,14 +115,14 @@ function SelectBase<IsMulti extends boolean = false>({
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
   else if (typeof value == 'undefined') value = null // new
 
-  // Combobox: input text (option label when matched, else raw typed text) + matches, to gate the menu
+  // Combobox: input text (matched option's plain-string label, else raw typed text) + matches, to gate the menu
   const [focused, setFocused] = useState(false)
   const [pickedFromMenu, setPickedFromMenu] = useState(false) // keeps the menu closed after a selection until typing
-  const comboInput = typeof value == 'object' && value && typeof (value as SelectOption).label == 'string'
-    ? (value as SelectOption).label as string
-    : String(rawValue ?? '')
+  const valueOption = typeof value == 'object' ? value as SelectOption | null : null
+  const comboLabel = valueOption?.labelInput ?? (typeof valueOption?.label == 'string' ? valueOption.label : undefined)
+  const comboInput = comboLabel ?? String(rawValue ?? '')
   const comboMatches = !isCombobox ? 0 : options.filter((o) => {
-    const label = typeof o.label == 'string' ? o.label : (o.labelSearch || '')
+    const label = typeof o.label == 'string' ? o.label : (o.labelSearch || o.labelInput || '')
     return filterFn({ label: label, value: String(o.value), data: o }, comboInput)
   }).length
 
@@ -167,14 +172,15 @@ function SelectBase<IsMulti extends boolean = false>({
          *   menuIsOpen={false}
          */
         {...props}
-        _nitro={{ prefix, mode, showSearchIcon: showSearchIcon ?? isCombobox }}
+        _nitro={{ prefix: prefix, mode: mode, showSearchIcon: showSearchIcon ?? isCombobox }}
         key={isCombobox ? name : value as string}
         unstyled={true}
         inputId={id || name}
         id={containerId}
         filterOption={(option, searchText) => {
           if ((option.data as {fixed?: boolean}).fixed) return true
-          const labelSearch = (option.data as {labelSearch?: string}).labelSearch
+          const o = option.data as SelectOption
+          const labelSearch = o.labelSearch || o.labelInput
           return filterFn(labelSearch ? { ...option, label: labelSearch } : option, searchText)
         }}
         menuPlacement="auto"
@@ -328,15 +334,15 @@ function ValueContainer({ children, ...props}: ValueContainerProps) {
 }
 
 function SingleValue({ children, ...props }: SingleValueProps) {
-  const selectedOption = props.getValue()[0] as { labelControl?: string } & SelectOption
+  const selectedOption = props.getValue()[0] as SelectOption
   // @ts-expect-error 
   const flagClassName = props.getClassNames('flag')
 
   return (  
     <components.SingleValue {...props}>
       { 
-        selectedOption?.labelControl
-          ? <Fragment>{selectedOption.labelControl}</Fragment>
+        selectedOption?.labelInput
+          ? <Fragment>{selectedOption.labelInput}</Fragment>
           : <Fragment>
               {selectedOption?.flag && <span className={flagClassName}>{selectedOption.flag}</span>}
               {selectedOption?.IconLeft}
