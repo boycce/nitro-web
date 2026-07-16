@@ -10,20 +10,20 @@ import React from 'react'
 
 const perPage = 10
 const allGroups = [
-  'Links', 
-  'Dropdowns', 
-  'Filters', 
-  'Button Colors & Sizes', 
-  'Button Icons', 
-  'Loading Elements', 
-  'Varients', 
+  // 'Links', 
+  // 'Dropdowns', 
+  // 'Filters', 
+  // 'Button Colors & Sizes', 
+  // 'Button Icons', 
+  // 'Loading Elements', 
+  // 'Varients', 
   'Selects', 
-  'Inputs', 
-  'Date Inputs', 
-  'File Inputs & Calendar & Time', 
-  'Tables', 
-  'Modals & Notifications', 
-  'Custom Components',
+  // 'Inputs', 
+  // 'Date Inputs', 
+  // 'File Inputs & Calendar & Time', 
+  // 'Tables', 
+  // 'Modals & Notifications', 
+  // 'Custom Components',
 ] as const
 
 const statusColors = function(status: string) {
@@ -80,6 +80,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       calendarSingle: Date.now(),
       calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 8],
       firstName: 'Bruce',
+      combobox: 'blue',
       tableFilter: '',
       errors: [
         { title: 'address', detail: 'Address is required' },
@@ -102,6 +103,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       calendarRange: [Date.now(), Date.now() + 1000 * 60 * 60 * 24 * 3.2],
       firstName: 'John',
       tableFilter: '',
+      combobox: 'green',
       errors: [
         { title: 'address', detail: 'Address is required' },
       ],
@@ -472,8 +474,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
               <Select
                 // menuIsOpen={true}
                 placeholder="Select or add customer..."
-                name="customer" 
-                mode="customer"
+                name="customer"
                 state={state}
                 onChange={onCustomerInputChange}
                 onInputChange={onCustomerSearch}
@@ -532,6 +533,30 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 options={useMemo(() => [
                   { value: 'edit', label: 'Edit' },
                   { value: 'delete', label: 'Delete' },
+                ], [])}
+              />
+            </div>
+            <div>
+              <label for="combobox">Combobox (Autocomplete /w or free text)</label>
+              <Select
+                name="combobox"
+                mode="combobox"
+                minLenForSearch={1}
+                state={state}
+                onChange={(e) => onChange(e, setState)}
+                placeholder="Start typing to search for a color..."
+                // hideDropdownIcon={true}
+                options={useMemo(() => [
+                  { value: 'blue', label: 'Blue' },
+                  { value: 'green', label: 'Green' },
+                  { value: 'yellow', label: 'Yellow' },
+                  { value: 'red', label: 'Red' },
+                  { value: 'orange', label: 'Orange' },
+                  { value: 'purple', label: 'Purple' },
+                  { value: 'pink', label: 'Pink' },
+                  { value: 'gray', label: 'Gray' },
+                  { value: 'black', label: 'Black' },
+                  { value: 'white', label: 'White' },
                 ], [])}
               />
             </div>

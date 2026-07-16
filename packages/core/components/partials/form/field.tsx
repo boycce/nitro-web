@@ -9,7 +9,8 @@ import { Errors, type Error } from 'nitro-web/types'
 import { MailIcon, CalendarIcon, FunnelIcon, SearchIcon, EyeIcon, EyeOffIcon, ClockIcon, PaperclipIcon } from 'lucide-react'
 import { memo, useState } from 'react'
 
-type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' | 'currency' | 'percent' | 'date' | 'color' | 'file'
+type FieldType = 'text' | 'number' | 'password' | 'email' | 'filter' | 'search' | 'textarea' 
+  | 'currency' | 'percent' | 'date' | 'color' | 'file'
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>
 type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 type FieldExtraProps = {
