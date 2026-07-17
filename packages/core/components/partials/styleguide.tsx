@@ -537,12 +537,12 @@ export function Styleguide({ className, elements, children, currencies, groups }
               />
             </div>
             <div>
-              <label for="combobox">JSX label + custom search</label>
+              <label for="combobox">JSX label + custom search matching</label>
               <Select
                 name="jsxlabel"
                 state={state}
                 onChange={(e) => onChange(e, setState)}
-                menuIsOpen={true}
+                // menuIsOpen={true}
                 options={useMemo(() => [
                   { value: '11', label: <div class="inline-block bg-blue-300">Blue</div>, labelSearch: 'BL - blue', noTruncate: true },
                   { value: '22', label: <div class="inline-block bg-green-300">Green</div>, labelSearch: 'GR - green', noTruncate: true },
