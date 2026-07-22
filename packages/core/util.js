@@ -212,7 +212,7 @@ export function capitalise (str) {
  * @returns {string}
  */
 export function currency (cents, options) {
-  const { currency, decimals, decimalsMinimum, prefix, suffix } = options || { currency: 'usd' }
+  const { currency='usd', decimals, decimalsMinimum, prefix, suffix } = options || { currency: 'usd' }
   const currencyObject = currencies[/**@type {keyof typeof currencies}*/(currency)]
 
   if (currency && !currencyObject) {

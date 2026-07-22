@@ -267,6 +267,10 @@ function SelectBase<IsMulti extends boolean = false>({
             outline: undefined,
             transition: 'none',
           }),
+          input: (base) => ({
+            ...base,
+            visibility: 'inherit', // RS hardcodes to visblr, inherit visibility from  ancestor
+          }),
         }}
         // menuIsOpen={true}
         // isSearchable={false}
