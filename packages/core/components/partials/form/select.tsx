@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { memo, useMemo, useState, Fragment, FocusEvent } from 'react'
+import { memo, useMemo, useState, useRef, useLayoutEffect, Fragment, FocusEvent, ReactNode } from 'react'
 import ReactSelect, { 
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
-  DropdownIndicatorProps, MultiValueRemoveProps, // ClassNamesConfig,
+  DropdownIndicatorProps, MultiValueRemoveProps, MultiValueGenericProps, // ClassNamesConfig,
   ValueContainerProps,
   MenuProps,
   InputProps,
@@ -80,6 +80,8 @@ export type SelectProps<IsMulti extends boolean = false> = {
   hideEmptyMenu?: boolean
   /** Hide the right dropdown icon + its padding (text-field look) **/
   hideDropdownIcon?: boolean
+  /** Multi-select only: max lines of chips to show in the control, extras are hidden behind a "+N" counter (default 2) **/
+  maxLines?: number
   /** All other props are passed to react-select **/
   [key: string]: unknown
 }
@@ -90,7 +92,7 @@ export const Select = memo(SelectBase, (prev, next) => {
 
 function SelectBase<IsMulti extends boolean = false>({
   id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode, errorTitle, classNames: classNamesProp,
-  showSearchIcon, className, minLenForSearch = 0, hideEmptyMenu = true, hideDropdownIcon,
+  showSearchIcon, className, minLenForSearch = 0, hideEmptyMenu = true, hideDropdownIcon, maxLines,
   ...props
 }: SelectProps<IsMulti>) {
   let value: unknown|unknown[]
@@ -99,6 +101,9 @@ function SelectBase<IsMulti extends boolean = false>({
 
   // Combobox: free text with a suggestions dropdown, the typed text is the value (full-width text-input feel)
   const isCombobox = mode === 'combobox'
+
+  // Multi-selects collapse tags to 2 lines by default
+  maxLines = maxLines ?? (props.isMulti ? 2 : undefined)
 
   // Get value from value or state
   if (typeof props.value !== 'undefined') value = props.value
@@ -172,7 +177,7 @@ function SelectBase<IsMulti extends boolean = false>({
          *   menuIsOpen={false}
          */
         {...props}
-        _nitro={{ prefix: prefix, mode: mode, showSearchIcon: showSearchIcon ?? isCombobox }}
+        _nitro={{ prefix: prefix, mode: mode, showSearchIcon: showSearchIcon ?? isCombobox, maxLines: maxLines }}
         key={isCombobox ? name : value as string}
         unstyled={true}
         inputId={id || name}
@@ -210,6 +215,8 @@ function SelectBase<IsMulti extends boolean = false>({
           )
         }}
         options={options}
+        // maxLines hides overflow chips, so keep selected options in the menu to make them easy to unselect
+        {...(maxLines && !('hideSelectedOptions' in props) ? { hideSelectedOptions: false } : {})}
         value={isCombobox ? (typeof value == 'object' ? value : null) : value}
         // @ts-expect-error
         classNames={useMemo(() => ({
@@ -243,6 +250,7 @@ function SelectBase<IsMulti extends boolean = false>({
           Option,
           DropdownIndicator,
           ClearIndicator,
+          MultiValueLabel,
           MultiValueRemove,
           ValueContainer,
           Menu,
@@ -330,10 +338,85 @@ function Control({ children, ...props }: ControlProps) {
 }
 
 function ValueContainer({ children, ...props}: ValueContainerProps) {
+  const maxLines = (props.selectProps as { _nitro?: { maxLines?: number } })?._nitro?.maxLines
+  const kids = Array.isArray(children) ? children : [children]
+  const chips = kids[0] // array of chips for multi-select, else placeholder/single value
+
+  // No limit (or nothing to limit) renders as normal
+  if (!maxLines || !Array.isArray(chips)) {
+    return <components.ValueContainer {...props}>{children}</components.ValueContainer>
+  }
+  return <LimitedValueContainer chips={chips} rest={kids.slice(1)} maxLines={maxLines} {...props} />
+}
+
+// Multi-select: shows tags over up to maxLines rows with a "+N" counter for the rest. The rows above the
+// last stay fixed; the last row is a single no-wrap line, so as the input grows it pushes that row's tags
+// off to the left (for maxLines=1 the last row is the only row).
+function LimitedValueContainer({ chips, rest, maxLines, ...props }:
+  Omit<ValueContainerProps, 'children'> & { chips: ReactNode[], rest: ReactNode[], maxLines: number }) {
+  const sentinel = useRef<HTMLSpanElement>(null) // reaches the value container to measure tag rows
+  const lastRow = useRef<HTMLDivElement>(null)   // the scrolling last row
+  const widthRef = useRef(0)
+  // upper = tags on the fixed rows above the last; last = tags on the scrolling last row
+  const [split, setSplit] = useState<{ upper: number, last: number } | null>(null)
+
+  // Re-measure on width or chip-count changes
+  useLayoutEffect(() => {
+    const parent = sentinel.current?.parentElement
+    if (!parent) return
+    const ro = new ResizeObserver(([e]) => {
+      const w = e.contentRect.width
+      if (Math.abs(w - widthRef.current) > 1) { widthRef.current = w; setSplit(null) }
+    })
+    ro.observe(parent)
+    return () => ro.disconnect()
+  }, [])
+  useLayoutEffect(() => setSplit(null), [chips.length])
+
+  // Measure the natural wrap of all tags, keep maxLines rows: rows above the last stay fixed, the last row
+  // scrolls, and anything past maxLines rows becomes the "+N" count
+  useLayoutEffect(() => {
+    if (split !== null) return
+    const parent = sentinel.current?.parentElement
+    if (!parent) return
+    const nodes = Array.from(parent.children).slice(0, chips.length) as HTMLElement[]
+    if (!nodes.length) return setSplit({ upper: 0, last: 0 })
+    const tops = [...new Set(nodes.map((n) => Math.round(n.offsetTop)))].sort((a, b) => a - b)
+    const lastTop = tops[Math.min(maxLines, tops.length) - 1] // top of the last visible row
+    const upper = nodes.filter((n) => Math.round(n.offsetTop) < lastTop).length
+    const last = nodes.filter((n) => Math.round(n.offsetTop) === lastTop).length
+    setSplit({ upper, last })
+  }, [split, chips.length, maxLines])
+
+  // Keep the last row scrolled to the input while typing (pushes its tags left); left-aligned at rest
+  useLayoutEffect(() => {
+    const el = lastRow.current
+    if (el) el.scrollLeft = el.querySelector('input')?.value ? el.scrollWidth : 0
+  })
+
+  // Measuring pass: render all tags flat so we can read their rows
+  if (split === null) {
+    return (
+      <components.ValueContainer {...props}>
+        {chips}{rest}<span ref={sentinel} style={{ display: 'none' }} />
+      </components.ValueContainer>
+    )
+  }
+  const hidden = chips.length - split.upper - split.last
   return (
-    // <div class="cat-tre">
-    <components.ValueContainer {...props}>{children}</components.ValueContainer>
-    // </div>
+    <components.ValueContainer {...props}>
+      {chips.slice(0, split.upper)}
+      <div ref={lastRow} class="w-full min-w-0 flex flex-nowrap items-center gap-1 overflow-hidden [&>*]:shrink-0">
+        {chips.slice(split.upper, split.upper + split.last)}
+        {hidden > 0 && (
+          <span class="self-stretch flex items-center rounded bg-gray-100 text-gray-500 text-xs px-2 whitespace-nowrap">
+            +{hidden}
+          </span>
+        )}
+        {rest}
+      </div>
+      <span ref={sentinel} style={{ display: 'none' }} />
+    </components.ValueContainer>
   )
 }
 
@@ -391,6 +474,11 @@ const ClearIndicator = (props: ClearIndicatorProps) => {
       <XIcon size={14} />
     </components.ClearIndicator>
   )
+}
+
+const MultiValueLabel = (props: MultiValueGenericProps) => {
+  const data = props.data as SelectOption
+  return <components.MultiValueLabel {...props}>{data.labelInput ?? props.children}</components.MultiValueLabel>
 }
 
 const MultiValueRemove = (props: MultiValueRemoveProps) => {

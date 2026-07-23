@@ -66,7 +66,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       address: '',
       amount: 100,
       brandColor: '#F3CA5F',
-      colorsMulti: ['blue', 'green'],
+      colorsMulti: ['blue', 'green', 'yellow', 'red', 'orange', 'purple'],
       country: 'cd',
       currency: 'nzd',
       percent: 1250,
@@ -437,9 +437,10 @@ export function Styleguide({ className, elements, children, currencies, groups }
             </div>
             <div>
               <label for="colorsMulti">Mutli Select</label>
-              <Select 
+              <Select
                 name="colorsMulti"
                 isMulti={true}
+                maxLines={1}
                 state={state}
                 options={useMemo(() => [
                   { value: 'blue', label: 'Blue' },
