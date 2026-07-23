@@ -161,7 +161,7 @@ function SelectBase<IsMulti extends boolean = false>({
   }, [classNamesProp, isCombobox])
 
   return (
-    <div css={style} class={'mt-2.5 mb-6 ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}
+    <div css={style} class={'mt-2.5 mb-6 min-w-0 ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}
       // Combobox: clicking the (already focused) control reopens the menu after a selection
       onMouseDown={isCombobox ? () => setPickedFromMenu(false) : undefined}>
       <ReactSelect
