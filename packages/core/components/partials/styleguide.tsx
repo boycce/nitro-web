@@ -67,6 +67,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       amount: 100,
       brandColor: '#F3CA5F',
       colorsMulti: ['blue', 'green', 'yellow', 'red', 'orange', 'purple'],
+      colorsMultiFlex: ['blue', 'green', 'yellow', 'red', 'orange', 'purple'],
       country: 'cd',
       currency: 'nzd',
       percent: 1250,
@@ -422,8 +423,8 @@ export function Styleguide({ className, elements, children, currencies, groups }
       {visibleGroups.includes('Selects') && (
         <div>
           <h2 class="h3">Selects</h2>
-          <div class="grid grid-cols-3 lg:grid-cols-3 gap-x-6">
-            <div>
+          <div class="flex gap-x-6">
+            <div class="flex-1">
               <label for="action">Default</label>
               <Select 
                 // menuIsOpen={true}
@@ -435,7 +436,8 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 ], [])}
               />
             </div>
-            <div>
+            <div class="flex-1">
+              {/* Testing: This is in a flexbox to correctly evaluate dynamic parent container size issues */}
               <label for="colorsMulti">Mutli Select</label>
               <Select
                 name="colorsMulti"
@@ -457,7 +459,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 onChange={(e) => onChange(e, setState)}
               />
             </div>
-            <div>
+            <div class="flex-1">
               <label for="country">Countries</label>
               <Select
                 // https://github.com/lipis/flag-icons
@@ -470,6 +472,8 @@ export function Styleguide({ className, elements, children, currencies, groups }
                 // classNames={{ flag: () => 'mr-4' }}
               />
             </div>
+          </div>
+          <div class="grid grid-cols-3 lg:grid-cols-3 gap-x-6">
             <div>
               <label for="customer">List Item with Action</label>
               <Select

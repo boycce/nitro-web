@@ -102,8 +102,8 @@ function SelectBase<IsMulti extends boolean = false>({
   // Combobox: free text with a suggestions dropdown, the typed text is the value (full-width text-input feel)
   const isCombobox = mode === 'combobox'
 
-  // Multi-selects collapse tags to 2 lines by default
-  maxLines = maxLines ?? (props.isMulti ? 2 : undefined)
+  // Multi-selects collapse tags to 2 lines by default, pass 0 (or null) to turn it off
+  maxLines = maxLines === undefined ? (props.isMulti ? 2 : undefined) : maxLines
 
   // Get value from value or state
   if (typeof props.value !== 'undefined') value = props.value
@@ -161,7 +161,9 @@ function SelectBase<IsMulti extends boolean = false>({
   }, [classNamesProp, isCombobox])
 
   return (
-    <div css={style} class={'mt-2.5 mb-6 min-w-0 ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}
+    <div 
+      css={style} 
+      class={'mt-2.5 mb-6 min-w-0 contain-inline-size ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}
       // Combobox: clicking the (already focused) control reopens the menu after a selection
       onMouseDown={isCombobox ? () => setPickedFromMenu(false) : undefined}>
       <ReactSelect
@@ -222,7 +224,9 @@ function SelectBase<IsMulti extends boolean = false>({
         classNames={useMemo(() => ({
           // Input container
           control: (p) => getSelectClassName({ name: 'control', hasError: !!error, ...p, classNames: classNames }),
-          valueContainer: () => getSelectClassName({ name: 'valueContainer', classNames: classNames }),
+          // Clearable: zero right padding (X is padded itself). Dont twMerge: valueContainer keeps optional px-input-x.
+          valueContainer: () => getSelectClassName({ name: 'valueContainer', classNames: classNames })
+            + ((props.isClearable ?? props.isMulti) ? ' pr-0.5' : ''), // we rely on the clearable x icon padding
           // Input container objects
           input: () => getSelectClassName({ name: 'input', hasError: !!error, classNames: classNames }),
           multiValue: () => getSelectClassName({ name: 'multiValue', classNames: classNames }),
@@ -243,7 +247,7 @@ function SelectBase<IsMulti extends boolean = false>({
           option: (p) => getSelectClassName({ name: 'option', ...p, classNames: classNames }),
           // Nitro specific
           flag: () => getSelectClassName({ name: 'flag', classNames: classNames }),
-        }), [!!error, classNames])}
+        }), [!!error, classNames, props.isClearable, props.isMulti])}
         components={{
           Control,
           SingleValue,
@@ -349,15 +353,12 @@ function ValueContainer({ children, ...props}: ValueContainerProps) {
   return <LimitedValueContainer chips={chips} rest={kids.slice(1)} maxLines={maxLines} {...props} />
 }
 
-// Multi-select: shows tags over up to maxLines rows with a "+N" counter for the rest. The rows above the
-// last stay fixed; the last row is a single no-wrap line, so as the input grows it pushes that row's tags
-// off to the left (for maxLines=1 the last row is the only row).
+// maxLines multi-select: fixed upper rows, scrolling last-row chips, "+N" for the rest
 function LimitedValueContainer({ chips, rest, maxLines, ...props }:
   Omit<ValueContainerProps, 'children'> & { chips: ReactNode[], rest: ReactNode[], maxLines: number }) {
-  const sentinel = useRef<HTMLSpanElement>(null) // reaches the value container to measure tag rows
-  const lastRow = useRef<HTMLDivElement>(null)   // the scrolling last row
+  const sentinel = useRef<HTMLSpanElement>(null)
+  const lastRow = useRef<HTMLDivElement>(null)
   const widthRef = useRef(0)
-  // upper = tags on the fixed rows above the last; last = tags on the scrolling last row
   const [split, setSplit] = useState<{ upper: number, last: number } | null>(null)
 
   // Re-measure on width or chip-count changes
@@ -374,7 +375,8 @@ function LimitedValueContainer({ chips, rest, maxLines, ...props }:
   useLayoutEffect(() => setSplit(null), [chips.length])
 
   // Measure the natural wrap of all tags, keep maxLines rows: rows above the last stay fixed, the last row
-  // scrolls, and anything past maxLines rows becomes the "+N" count
+  // scrolls, and anything past maxLines rows becomes the "+N" count. Peel last-row chips so "+N" fits
+  // (contentRect already excludes padding; clear/X shrinks this via the indicators column).
   useLayoutEffect(() => {
     if (split !== null) return
     const parent = sentinel.current?.parentElement
@@ -384,11 +386,20 @@ function LimitedValueContainer({ chips, rest, maxLines, ...props }:
     const tops = [...new Set(nodes.map((n) => Math.round(n.offsetTop)))].sort((a, b) => a - b)
     const lastTop = tops[Math.min(maxLines, tops.length) - 1] // top of the last visible row
     const upper = nodes.filter((n) => Math.round(n.offsetTop) < lastTop).length
-    const last = nodes.filter((n) => Math.round(n.offsetTop) === lastTop).length
+    let last = nodes.filter((n) => Math.round(n.offsetTop) === lastTop).length
+    const gap = 4 // gap-1
+    const badgeW = 30 // "+N"
+    const available = parent.clientWidth - parseFloat(getComputedStyle(parent).paddingLeft)
+      - parseFloat(getComputedStyle(parent).paddingRight)
+    while (last > 0 && nodes.length - upper - last > 0) {
+      const chipsW = nodes.slice(upper, upper + last).reduce((s, n, i) => s + n.offsetWidth + (i ? gap : 0), 0)
+      if (chipsW + gap + badgeW <= available) break
+      last -= 1
+    }
     setSplit({ upper, last })
   }, [split, chips.length, maxLines])
 
-  // Keep the last row scrolled to the input while typing (pushes its tags left); left-aligned at rest
+  // Scroll chips toward the input while typing
   useLayoutEffect(() => {
     const el = lastRow.current
     if (el) el.scrollLeft = el.querySelector('input')?.value ? el.scrollWidth : 0
@@ -409,7 +420,7 @@ function LimitedValueContainer({ chips, rest, maxLines, ...props }:
       <div ref={lastRow} class="w-full min-w-0 flex flex-nowrap items-center gap-1 overflow-hidden [&>*]:shrink-0">
         {chips.slice(split.upper, split.upper + split.last)}
         {hidden > 0 && (
-          <span class="self-stretch flex items-center rounded bg-gray-100 text-gray-500 text-xs px-2 whitespace-nowrap">
+          <span class="self-stretch flex items-center rounded bg-gray-100 text-gray-500 text-xs px-1.5 whitespace-nowrap">
             +{hidden}
           </span>
         )}
