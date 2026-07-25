@@ -225,9 +225,7 @@ function SelectBase<IsMulti extends boolean = false>({
           // Input container
           control: (p) => getSelectClassName({ name: 'control', hasError: !!error, ...p, classNames: classNames }),
           // Clearable: zero right padding (X is padded itself). Dont twMerge: valueContainer keeps optional px-input-x.
-          valueContainer: () => getSelectClassName({ name: 'valueContainer', classNames: classNames })
-            + ((props.isClearable ?? props.isMulti) ? ' pr-0.5' : ''), // we rely on the clearable x icon padding
-          // Input container objects
+          valueContainer: () => getSelectClassName({ name: 'valueContainer', classNames: classNames }),
           input: () => getSelectClassName({ name: 'input', hasError: !!error, classNames: classNames }),
           multiValue: () => getSelectClassName({ name: 'multiValue', classNames: classNames }),
           multiValueLabel: () => '',
@@ -526,9 +524,9 @@ const selectClassNames = {
     disabled: 'text-input-disabled',
   },
   // Icon indicators
-  clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground',
+  clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground ml-[-0.8em]',
   dropdownIndicator: 'p-1 hover:bg-gray-100 text-gray-500 rounded-md hover:text-black',
-  indicatorsContainer: 'p-1 pl-0 pr-2 gap-1',
+  indicatorsContainer: 'p-1 pl-0 pr-2 gap-1 relative', // relative so the hitbox goes over the control
   indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
   // Dropdown menu
   menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
@@ -568,7 +566,9 @@ type ClassNames = {
   flag?: string
 }
 
-export function getSelectClassName({ name, isFocused, isSelected, isDisabled, hasError, usePrefixes, classNames }: GetSelectClassName) {
+export function getSelectClassName({ 
+  name, isFocused, isSelected, isDisabled, hasError, usePrefixes, classNames, 
+}: GetSelectClassName) {
   // Returns a class list that conditionally includes hover/focus modifier classes, or uses CSS modifiers, e.g. hover:, focus:
   // @ts-expect-error
   const obj = classNames?.[name] || selectClassNames[name]
