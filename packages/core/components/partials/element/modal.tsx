@@ -7,13 +7,16 @@ type ModalProps = {
   children: React.ReactNode
   className?: string
   rootClassName?: string
+  xClassName?: string
   dismissable?: boolean
   maxWidth?: string
   minHeight?: string
   [key: string]: unknown
 }
 
-export function Modal({ show, setShow, children, maxWidth, minHeight, dismissable = true, className, rootClassName }: ModalProps) {
+export function Modal({ 
+  show, setShow, children, maxWidth, minHeight, dismissable = true, className, rootClassName, xClassName,
+}: ModalProps) {
   const [state, setState] = useState(show ? 'open' : 'close')
   const containerEl = useRef<HTMLDivElement>(null)
   const isFirst = IsFirstRender()
@@ -76,7 +79,7 @@ export function Modal({ show, setShow, children, maxWidth, minHeight, dismissabl
             class={`${twMerge('relative w-full mx-6 mt-4 mb-8 bg-white rounded-lg shadow-lg p-9', className)}`}
           >
             <div 
-              class="absolute top-0 right-0 p-3 m-1 cursor-pointer" 
+              class={twMerge(`absolute top-0 right-0 p-3 m-1 cursor-pointer ${xClassName||''}`)} 
               onClick={() => { if (dismissable) { setShow(false) }}}
             >
               <SvgX1 />
