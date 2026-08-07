@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { css } from 'twin.macro'
-import { memo, useMemo, useState, useRef, useLayoutEffect, Fragment, FocusEvent, ReactNode } from 'react'
+import { memo, useMemo, useState, useRef, useLayoutEffect, startTransition, Fragment, FocusEvent, ReactNode } from 'react'
 import ReactSelect, { 
   components, ControlProps, createFilter, OptionProps, SingleValueProps, ClearIndicatorProps,
   DropdownIndicatorProps, MultiValueRemoveProps, MultiValueGenericProps, // ClassNamesConfig,
   ValueContainerProps,
   MenuProps,
   InputProps,
+  FilterOptionOption,
 } from 'react-select'
 import { CheckCircleIcon } from '@heroicons/react/20/solid'
 import { ChevronsUpDownIcon, SearchIcon, XIcon } from 'lucide-react'
@@ -25,6 +26,7 @@ type GetSelectClassName = {
   usePrefixes?: boolean
   classNames?: ClassNames
 }
+
 export type SelectOption = { 
   value: unknown, 
   label: string | React.ReactNode, 
@@ -64,7 +66,7 @@ export type SelectProps<IsMulti extends boolean = false> = {
   options: SelectOption[]
   /** The state object to get the value and check errors from **/
   state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
-  /** Select variations **/
+  /** Select variations, combobox is a free text input with a suggestions dropdown **/
   mode?: 'combobox'
   /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
   deps?: unknown[]
@@ -96,11 +98,12 @@ function SelectBase<IsMulti extends boolean = false>({
   ...props
 }: SelectProps<IsMulti>) {
   let value: unknown|unknown[]
+  const isCombobox = mode === 'combobox'
+  const [typed, setTyped] = useState<string | null>(null)
+  const [focused, setFocused] = useState(false)
+  const [pickedFromMenu, setPickedFromMenu] = useState(false) // keeps the menu closed after a selection until typing
   const error = getErrorFromState(state, errorTitle || name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
-
-  // Combobox: free text with a suggestions dropdown, the typed text is the value (full-width text-input feel)
-  const isCombobox = mode === 'combobox'
 
   // Multi-selects collapse tags to 2 lines by default, pass 0 (or null) to turn it off
   maxLines = maxLines === undefined ? (props.isMulti ? 2 : undefined) : maxLines
@@ -108,9 +111,7 @@ function SelectBase<IsMulti extends boolean = false>({
   // Get value from value or state
   if (typeof props.value !== 'undefined') value = props.value
   else if (typeof state == 'object') value = deepFind(state, name)
-
-  // Raw (unconverted) value, used as the combobox input text
-  const rawValue = value
+  const rawValue = value // Raw (unconverted) value, used as the combobox input text
 
   // If multi-select, filter options by value
   if (Array.isArray(value)) value = options.filter(o => (value as unknown[]).includes(o.value))
@@ -120,16 +121,16 @@ function SelectBase<IsMulti extends boolean = false>({
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
   else if (typeof value == 'undefined') value = null // new
 
-  // Combobox: input text (matched option's plain-string label, else raw typed text) + matches, to gate the menu
-  const [focused, setFocused] = useState(false)
-  const [pickedFromMenu, setPickedFromMenu] = useState(false) // keeps the menu closed after a selection until typing
   const valueOption = typeof value == 'object' ? value as SelectOption | null : null
   const comboLabel = valueOption?.labelInput ?? (typeof valueOption?.label == 'string' ? valueOption.label : undefined)
-  const comboInput = comboLabel ?? String(rawValue ?? '')
-  const comboMatches = !isCombobox ? 0 : options.filter((o) => {
-    const label = typeof o.label == 'string' ? o.label : (o.labelSearch || o.labelInput || '')
-    return filterFn({ label: label, value: String(o.value), data: o }, comboInput)
-  }).length
+  const comboInput = typed ?? comboLabel ?? String(rawValue ?? '')
+
+  // Combobox: open on focus, past minLenForSearch, and (unless hideEmptyMenu is off) only when something matches
+  const comboMenuOpen = isCombobox && focused && !pickedFromMenu && comboInput.length >= minLenForSearch
+    && (!hideEmptyMenu || options.some((o) => {
+      const label = typeof o.label == 'string' ? o.label : (o.labelSearch || o.labelInput || '')
+      return filterFn({ label: label, value: String(o.value), data: o }, comboInput)
+    }))
 
   // Merge class names (up to 1 level deep)
   const classNames = useMemo(() => {
@@ -184,16 +185,14 @@ function SelectBase<IsMulti extends boolean = false>({
         unstyled={true}
         inputId={id || name}
         id={containerId}
-        filterOption={(option, searchText) => {
-          if ((option.data as {fixed?: boolean}).fixed) return true
-          const o = option.data as SelectOption
-          const labelSearch = o.labelSearch || o.labelInput
-          return filterFn(labelSearch ? { ...option, label: labelSearch } : option, searchText)
-        }}
+        filterOption={filterOption}
         menuPlacement="auto"
         minMenuHeight={250}
         onChange={!onChange ? undefined : (o) => {
-          if (isCombobox) setPickedFromMenu(true) // close the menu after picking an option
+          if (isCombobox) {
+            setPickedFromMenu(true) // close the menu after picking an option
+            setTyped(null) // show the picked option's label, not the text that was typed to find it
+          }
           // An array is returned for multi-select
           type OptionType = IsMulti extends true ? SelectOption[] : SelectedOption
           let value: unknown | unknown[] = []
@@ -261,9 +260,10 @@ function SelectBase<IsMulti extends boolean = false>({
           ...props.components as object,
         }}
         // menuIsOpen={!search ? false : undefined}
-        styles={{
-          menu: (base) => ({ 
-            ...base, minWidth: minMenuWidth,
+        styles={useMemo(() => ({
+          menu: (base) => ({
+            ...base, 
+            minWidth: minMenuWidth,
           }),
           // On mobile, the label will truncate automatically, so we want to
           // override that behaviour.
@@ -281,7 +281,7 @@ function SelectBase<IsMulti extends boolean = false>({
             ...base,
             visibility: 'inherit', // RS hardcodes to visblr, inherit visibility from  ancestor
           }),
-        }}
+        }), [minMenuWidth])}
         // menuIsOpen={true}
         // isSearchable={false}
         // isClearable={true}
@@ -292,23 +292,21 @@ function SelectBase<IsMulti extends boolean = false>({
         {...(isCombobox ? {
           inputValue: comboInput,
           controlShouldRenderValue: false,
-          // Gate the menu: needs focus, min input length, and (optionally) a match to avoid the empty "No options" menu.
-          // A menuIsOpen prop hard-overrides this.
-          menuIsOpen: 'menuIsOpen' in props
-            ? props.menuIsOpen as boolean | undefined
-            : focused && !pickedFromMenu && comboInput.length >= minLenForSearch && (!hideEmptyMenu || comboMatches >= 1),
+          // A menuIsOpen prop hard-overrides the gate above
+          menuIsOpen: 'menuIsOpen' in props ? props.menuIsOpen as boolean | undefined : comboMenuOpen,
           onFocus: (e: FocusEvent<HTMLInputElement>) => {
             setFocused(true); setPickedFromMenu(false);
             (props.onFocus as ((e: FocusEvent<HTMLInputElement>) => void) | undefined)?.(e)
           },
           onBlur: (e: FocusEvent<HTMLInputElement>) => {
-            setFocused(false);
+            setFocused(false); setTyped(null); // state is authoritative again once focus leaves
             (props.onBlur as ((e: FocusEvent<HTMLInputElement>) => void) | undefined)?.(e)
           },
           onInputChange: (v: string, meta: { action: string }) => {
             if (meta.action !== 'input-change') return
+            setTyped(v) // urgent, so the character paints without waiting on the parent
             setPickedFromMenu(false) // typing re-opens the menu
-            onChange?.({ target: { name: name, value: v } }, null as never)
+            startTransition(() => onChange?.({ target: { name: name, value: v } }, null as never))
           },
         } : {})}
       />
@@ -496,6 +494,14 @@ const MultiValueRemove = (props: MultiValueRemoveProps) => {
       <XIcon className="size-[1em] p-[1px]" />
     </components.MultiValueRemove>
   )
+}
+
+const filterOption = (option: FilterOptionOption<unknown>, searchText: string) => {
+  // Match on labelSearch/labelInput when the label isn't plain text, fixed options always show
+  if ((option.data as {fixed?: boolean}).fixed) return true
+  const o = option.data as SelectOption
+  const labelSearch = o.labelSearch || o.labelInput
+  return filterFn(labelSearch ? { ...option, label: labelSearch } : option, searchText)
 }
 
 const selectClassNames = {
