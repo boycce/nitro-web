@@ -55,6 +55,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
   const Button = elements?.Button || ButtonNitro
   const [, setStore] = useTracked()
   const [customerSearch, setCustomerSearch] = useState('')
+  const [countrySearch, setCountrySearch] = useState('')
   const [showModal1, setShowModal1] = useState(false)
 
   // Tip: handy when developing or updating components, you can hide/show the groups you want to see
@@ -69,6 +70,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       colorsMulti: ['blue', 'green', 'yellow', 'red', 'orange', 'purple'],
       colorsMultiFlex: ['blue', 'green', 'yellow', 'red', 'orange', 'purple'],
       country: 'cd',
+      countrySearch: 'nz',
       currency: 'nzd',
       percent: 1250,
       customer: '1',
@@ -556,6 +558,25 @@ export function Styleguide({ className, elements, children, currencies, groups }
                   { value: '55', label: <div class="inline-block bg-orange-300">Orange</div>, labelSearch: 'OR - orange', noTruncate: true },
                   { value: '66', label: <div class="inline-block bg-purple-300">Purple</div>, labelSearch: 'PU - purple', noTruncate: true },
                 ], [])}
+              />
+            </div>
+            <div>
+              <label for="countrySearch">Search (parent filters, value={state.countrySearch})</label>
+              <Select
+                name="countrySearch"
+                mode="search"
+                minLenForSearch={1}
+                state={state}
+                placeholder="Start typing to search for a country..."
+                isClearable={true}
+                onChange={(e) => onChange(e, setState)}
+                onSearch={setCountrySearch}
+                options={useMemo(() => (!countrySearch ? [] : countryOptions
+                  .filter(o => o.label.toLowerCase().includes(countrySearch.toLowerCase()))
+                  .slice(0, 5)), [countrySearch])}
+                // the filtered options wont contain the stored value, so resolve it here
+                selectedOption={useMemo(() => countryOptions.find(o => o.value === state.countrySearch) || null,
+                  [state.countrySearch])}
               />
             </div>
             <div>

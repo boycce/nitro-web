@@ -66,8 +66,15 @@ export type SelectProps<IsMulti extends boolean = false> = {
   options: SelectOption[]
   /** The state object to get the value and check errors from **/
   state?: { errors?: Errors, [key: string]: any } // was unknown|unknown[]
-  /** Select variations, combobox is a free text input with a suggestions dropdown **/
-  mode?: 'combobox'
+  /** Select variations, combobox is a free text input with a suggestions dropdown, search is a combobox that
+   * selects an option (the parent filters/fetches the options via `onSearch`) **/
+  mode?: 'combobox' | 'search'
+  /** Search only: the typed text, for the parent to filter/fetch `options` with **/
+  onSearch?: (text: string) => void
+  /** Search only: option used to render the value when its missing from `options` (e.g. a value loaded from the api) **/
+  selectedOption?: SelectedOption
+  /** Search only: always drop the typed text on blur (by default its kept until something is selected) **/
+  clearSearch?: boolean
   /** Pass dependencies to break memoization, handy for onChange/onInputChange **/
   deps?: unknown[]
   /** title used to find related error messages */
@@ -93,15 +100,19 @@ export const Select = memo(SelectBase, (prev, next) => {
 }) as <IsMulti extends boolean = false>(props: SelectProps<IsMulti>) => React.ReactElement | null
 
 function SelectBase<IsMulti extends boolean = false>({
-  id, containerId, minMenuWidth, name, prefix='', onChange, options, state, mode, errorTitle, classNames: classNamesProp,
-  showSearchIcon, className, minLenForSearch = 0, hideEmptyMenu = true, hideDropdownIcon, maxLines,
+  id, containerId, minMenuWidth, name, prefix='', onChange, onSearch, options, selectedOption, clearSearch, state, mode,
+  errorTitle, classNames: classNamesProp, showSearchIcon, className, minLenForSearch = 0, hideEmptyMenu = true,
+  hideDropdownIcon, maxLines,
   ...props
 }: SelectProps<IsMulti>) {
   let value: unknown|unknown[]
   const isCombobox = mode === 'combobox'
+  const isSearch = mode === 'search'
+  const isTextInput = isCombobox || isSearch // both render the value inside the text input
   const [typed, setTyped] = useState<string | null>(null)
   const [focused, setFocused] = useState(false)
   const [pickedFromMenu, setPickedFromMenu] = useState(false) // keeps the menu closed after a selection until typing
+  const picked = useRef<SelectedOption>(null) // last picked option, filtered options wont contain it
   const error = getErrorFromState(state, errorTitle || name)
   if (!name) throw new Error('Select component requires a `name` and `options` prop')
 
@@ -113,9 +124,12 @@ function SelectBase<IsMulti extends boolean = false>({
   else if (typeof state == 'object') value = deepFind(state, name)
   const rawValue = value // Raw (unconverted) value, used as the combobox input text
 
+  // Search: the value may sit outside the filtered options, so also look at the last pick/selectedOption
+  const lookup = isSearch ? [...options, picked.current, selectedOption].filter(Boolean) as SelectOption[] : options
+
   // If multi-select, filter options by value
-  if (Array.isArray(value)) value = options.filter(o => (value as unknown[]).includes(o.value))
-  else value = options.find(o => value === o.value)
+  if (Array.isArray(value)) value = lookup.filter(o => (value as unknown[]).includes(o.value))
+  else value = lookup.find(o => value === o.value)
 
   // Input is always controlled if state is passed in
   if (typeof state == 'object' && typeof value == 'undefined') value = ''
@@ -123,11 +137,17 @@ function SelectBase<IsMulti extends boolean = false>({
 
   const valueOption = typeof value == 'object' ? value as SelectOption | null : null
   const comboLabel = valueOption?.labelInput ?? (typeof valueOption?.label == 'string' ? valueOption.label : undefined)
-  const comboInput = typed ?? comboLabel ?? String(rawValue ?? '')
+  // Search shows the value as a normal chip, so the input only ever holds the typed text
+  const comboInput = typed ?? (isSearch ? '' : comboLabel ?? String(rawValue ?? ''))
 
-  // Combobox: open on focus, past minLenForSearch, and (unless hideEmptyMenu is off) only when something matches
-  const comboMenuOpen = isCombobox && focused && !pickedFromMenu && comboInput.length >= minLenForSearch
-    && (!hideEmptyMenu || options.some((o) => {
+  // Search: with nothing typed the parent has no options, so fall back to the selection to open the menu on
+  const showSelected = isSearch && !comboInput && !!valueOption && !options.length
+  const menuOptions = showSelected ? [valueOption] : options
+
+  // Open on focus, past minLenForSearch, and (unless hideEmptyMenu is off) only when something matches
+  const comboMenuOpen = isTextInput && focused && !pickedFromMenu
+    && (showSelected || comboInput.length >= minLenForSearch)
+    && (isSearch ? menuOptions.length > 0 : !hideEmptyMenu || options.some((o) => {
       const label = typeof o.label == 'string' ? o.label : (o.labelSearch || o.labelInput || '')
       return filterFn({ label: label, value: String(o.value), data: o }, comboInput)
     }))
@@ -135,9 +155,9 @@ function SelectBase<IsMulti extends boolean = false>({
   // Merge class names (up to 1 level deep)
   const classNames = useMemo(() => {
     const merged = { ...selectClassNames }
-    // Combobox: input spans full width + stretches to full control height (cancels the valueContainer's vertical
+    // Combobox/search: input spans full width + stretches to full control height (cancels the valueContainer's vertical
     // padding) so the whole field is an easy text target, and the text cursor sits on the input, not the control
-    if (isCombobox) {
+    if (isTextInput) {
       const m = merged as ClassNames
       m.input = { ...m.input, base: twMerge(m.input?.base,
         'w-full ![grid-template-columns:0_1fr] cursor-text hover:cursor-text '
@@ -159,14 +179,14 @@ function SelectBase<IsMulti extends boolean = false>({
       }
     }
     return merged
-  }, [classNamesProp, isCombobox])
+  }, [classNamesProp, isTextInput])
 
   return (
     <div 
       css={style} 
       class={'mt-2.5 mb-6 min-w-0 contain-inline-size ' + twMerge(`mt-input-before mb-input-after nitro-select ${className || ''}`)}
-      // Combobox: clicking the (already focused) control reopens the menu after a selection
-      onMouseDown={isCombobox ? () => setPickedFromMenu(false) : undefined}>
+      // Combobox/search: clicking the (already focused) control reopens the menu after a selection
+      onMouseDown={isTextInput ? () => setPickedFromMenu(false) : undefined}>
       <ReactSelect
         /**
          * react-select prop quick reference (https://react-select.com/props#api):
@@ -180,8 +200,8 @@ function SelectBase<IsMulti extends boolean = false>({
          *   menuIsOpen={false}
          */
         {...props}
-        _nitro={{ prefix: prefix, mode: mode, showSearchIcon: showSearchIcon ?? isCombobox, maxLines: maxLines }}
-        key={isCombobox ? name : value as string}
+        _nitro={{ prefix: prefix, mode: mode, showSearchIcon: showSearchIcon ?? isTextInput, maxLines: maxLines }}
+        key={isTextInput ? name : value as string}
         unstyled={true}
         inputId={id || name}
         id={containerId}
@@ -189,7 +209,7 @@ function SelectBase<IsMulti extends boolean = false>({
         menuPlacement="auto"
         minMenuHeight={250}
         onChange={!onChange ? undefined : (o) => {
-          if (isCombobox) {
+          if (isTextInput) {
             setPickedFromMenu(true) // close the menu after picking an option
             setTyped(null) // show the picked option's label, not the text that was typed to find it
           }
@@ -210,15 +230,21 @@ function SelectBase<IsMulti extends boolean = false>({
             optionCopy = (isObject ? { ...o } : o) as OptionType
           }
 
+          // Search: remember the pick (the filtered options wont contain it) and reset the parent's search
+          if (isSearch) {
+            picked.current = Array.isArray(optionCopy) ? null : optionCopy as SelectedOption
+            onSearch?.('')
+          }
+
           return onChange(
-            { target: { name: name, value: value }}, 
+            { target: { name: name, value: value }},
             optionCopy
           )
         }}
-        options={options}
+        options={menuOptions}
         // maxLines hides overflow chips, so keep selected options in the menu to make them easy to unselect
         {...(maxLines && !('hideSelectedOptions' in props) ? { hideSelectedOptions: false } : {})}
-        value={isCombobox ? (typeof value == 'object' ? value : null) : value}
+        value={isTextInput ? (typeof value == 'object' ? value : null) : value}
         // @ts-expect-error
         classNames={useMemo(() => ({
           // Input container
@@ -255,7 +281,7 @@ function SelectBase<IsMulti extends boolean = false>({
           MultiValueRemove,
           ValueContainer,
           Menu,
-          ...(isCombobox ? { Input: ComboboxInput } : {}),
+          ...(isTextInput ? { Input: ComboboxInput } : {}),
           ...(hideDropdownIcon ? { IndicatorsContainer: () => null } : {}),
           ...props.components as object,
         }}
@@ -289,24 +315,31 @@ function SelectBase<IsMulti extends boolean = false>({
         // isDisabled={true}
         // maxMenuHeight={200}
         // Combobox: bind the input text to the value (typed text is the value), options are just suggestions
-        {...(isCombobox ? {
+        // Search: the value renders as usual (react-select hides it while theres input text), typing filters via onSearch
+        {...(isTextInput ? {
           inputValue: comboInput,
-          controlShouldRenderValue: false,
+          controlShouldRenderValue: isSearch,
           // A menuIsOpen prop hard-overrides the gate above
           menuIsOpen: 'menuIsOpen' in props ? props.menuIsOpen as boolean | undefined : comboMenuOpen,
+          ...(isSearch ? { filterOption: null } : {}), // the parent has already filtered
           onFocus: (e: FocusEvent<HTMLInputElement>) => {
             setFocused(true); setPickedFromMenu(false);
             (props.onFocus as ((e: FocusEvent<HTMLInputElement>) => void) | undefined)?.(e)
           },
           onBlur: (e: FocusEvent<HTMLInputElement>) => {
-            setFocused(false); setTyped(null); // state is authoritative again once focus leaves
-            (props.onBlur as ((e: FocusEvent<HTMLInputElement>) => void) | undefined)?.(e)
+            setFocused(false)
+            // Combobox state is authoritative once focus leaves, search keeps the typed text for the next focus
+            if (isCombobox || clearSearch) { setTyped(null); if (isSearch) onSearch?.('') }
+            const onBlur = props.onBlur as ((e: FocusEvent<HTMLInputElement>) => void) | undefined
+            onBlur?.(e)
           },
           onInputChange: (v: string, meta: { action: string }) => {
             if (meta.action !== 'input-change') return
             setTyped(v) // urgent, so the character paints without waiting on the parent
             setPickedFromMenu(false) // typing re-opens the menu
-            startTransition(() => onChange?.({ target: { name: name, value: v } }, null as never))
+            startTransition(() => isSearch
+              ? onSearch?.(v)
+              : onChange?.({ target: { name: name, value: v } }, null as never))
           },
         } : {})}
       />

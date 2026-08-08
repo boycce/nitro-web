@@ -230,10 +230,10 @@ export function isFieldCached(prev: IsFieldCachedProps, next: IsFieldCachedProps
   const nextState = next.state || {}
   const errorTitle = next.errorTitle || path
 
-  // Check if any prop has changed, except `onChange`/`onInputChange`
+  // Check if any prop has changed, except `onChange`/`onInputChange`/`onSearch`
   const allKeys = new Set([...Object.keys(prev), ...Object.keys(next)])
   for (const k of allKeys) {
-    if (k === 'state' || k === 'onChange' || k === 'onInputChange') continue
+    if (k === 'state' || k === 'onChange' || k === 'onInputChange' || k === 'onSearch') continue
     if (prev[k as keyof typeof prev] !== next[k as keyof typeof next]) {
       // console.log(4, 'changed', path, k)
       return false
