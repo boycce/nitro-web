@@ -6,6 +6,7 @@ node_modules
 
 # User files
 # .env
+.env.local
 resources/me
 migrate-mongo-config-*
 

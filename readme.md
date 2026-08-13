@@ -14,6 +14,8 @@ npm i nitro-web -D @nitro-web/webpack
 5. Uncomment `# .env` in `./gitignore`  
 5. Run `npm i`
 
+Env vars are loaded from `.env`, then `.env.local` is merged over the top (handy for local-only overrides, and it's gitignored by default).
+
 ### Usage
 
 On the client, you can import components and page-components. See ./packages/example for further info.

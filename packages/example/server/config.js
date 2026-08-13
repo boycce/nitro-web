@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import 'nitro-web/env'
 import { createRequire } from 'module'
 import { middleware } from 'nitro-web/server'
 

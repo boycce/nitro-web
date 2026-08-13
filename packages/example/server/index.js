@@ -1,4 +1,4 @@
-import 'dotenv/config'
+import 'nitro-web/env'
 import db from 'monastery'
 import config from './config.js'
 import { setupRouter, setupDefaultModels } from 'nitro-web/server'
