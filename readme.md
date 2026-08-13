@@ -100,7 +100,7 @@ console.log(res) // if config.emailTestMode=true, the template will be returned
 Run the following command to add nitro based development skills:
 
 ```bash
-npx skills add boycce/nitro-web
+npx skills add boycce/nitro-web -a claude-code
 ```
 
 As followed by [https://github.com/shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice/blob/main/reports/claude-skills-for-larger-mono-repos.md)
