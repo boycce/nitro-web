@@ -1,5 +1,9 @@
-# Application files
+# Application files.claude/worktrees
+.claude/launch.json
+.temp-params.json
+.cache
 client/dist
+server/dist
 node_modules
 **/node_modules
 *.log
