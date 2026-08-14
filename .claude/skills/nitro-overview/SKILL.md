@@ -12,6 +12,7 @@ description: For projects using nitro-web only. Quick overview of a Nitro web ap
   - The nitro-* skills are great reference when building a nitro-web app, but the host app may use slightly different patterns and libraries.
   - Dont export react hooks from files. Rather export pure functions and call it from a use* hook in the component which is easier to test/refactor. `/client/use-fetch.ts` is the only exception.
   - Single line comments only. Function overview comments are placed inside of the function, not outside of it.
+  - Use `import 'nitro-web/env'` to load environment variables (never `dotenv/config`), which reads `.env` then merges `.env.local` over the top. It must be the first import in any entry file that reads process.env, e.g. scripts and tests.
 
 # Where things live
 
@@ -19,6 +20,7 @@ description: For projects using nitro-web only. Quick overview of a Nitro web ap
   components/<feature>/            <feature>.tsx page, <feature>.api.js, and <feature>--<sub>.tsx together
   components/partials/elements/    shared UI wrappers, barrel export in index.tsx
   components/partials/layouts.tsx  Layout1 app shell, 2 auth, 3 public, 4 pdf test
+  server/config.js                 app config from process.env, imports 'nitro-web/env' first
   server/models/                   monastery schemas, auto-loaded by db.models()
   server/constants.js              enums, options arrays, status colours
   server/util.js                   local helpers, also re-exports all of nitro-web/util

@@ -9,9 +9,8 @@ description: For projects using nitro-web only. Writing or running a database mi
 
   ```js
   // E.g. npm run migrate:up
-  import dotenv from 'dotenv'
+  import 'nitro-web/env'
   import monastery from 'monastery'
-  dotenv.config({ path: '.env' })
 
   const url = process.env.mongoUrl
 

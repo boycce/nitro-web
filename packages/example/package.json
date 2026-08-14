@@ -14,6 +14,7 @@
     "dev:lint": "eslint ./components ./server/",
     "minor": "standard-version --release-as minor && git push staging",
     "patch": "standard-version --release-as patch && git push staging",
+    "skills:add": "npx skills add boycce/nitro-web --skill '*' --agent claude-code --copy --yes",
     "start": "node ./server",
     "stripe": "stripe listen --forward-to localhost:3001/api/stripe/webhook"
   },
