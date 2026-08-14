@@ -7,9 +7,9 @@ description: For projects using nitro-web only. Browser testing a Nitro-web app.
 
 # Dev server
 
-  - The user keeps the dev server running themselves, outside Claude Code. The URL is normally documented in CLAUDE.md.
-  - Never scan ports, probe, or launch a new dev server for this project.
-  - If you cannot find the dev server URL, request the user to define it in CLAUDE.md so AI doesnt continue guessing and probing for it.
+  - If not inside a git worktree, the user keeps the dev server running themselves, outside Claude Code.
+  - If inside a git worktree, feel free to run the dev client and/or server yourself.
+  - Client URL: If no /<PROJECT>/.claude/launch.json, the URL is generally `http://localhost:<PORT>`. Client PORT is found from .env.local OR .env
 
 # Login
 
