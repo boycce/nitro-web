@@ -158,7 +158,9 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
     // Listen for internal messageObject changes, and show and hide message
     if (!messageObject) return
     const timeout1 = setTimeout(() => setVisible(true), 20)
-    const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => setVisible(false), messageObject.timeout || 5000) : undefined
+    // hide() also unmounts the toast after the fade — leaving it mounted keeps an invisible pointer-events-auto
+    // box over the page (it sits fixed at z-[101]), swallowing clicks on anything underneath, e.g. a sticky header
+    const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => hide(), messageObject.timeout || 5000) : undefined
     return () => {
       clearTimeout(timeout1)
       clearTimeout(timeout2)
