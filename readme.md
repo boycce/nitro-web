@@ -96,3 +96,13 @@ console.log(res) // if config.emailTestMode=true, the template will be returned
 - `jest: ^29.7.0`
 - `migrate-mongo: ^10.0.0`
 - `eslint-plugin-jest: ^28.9.0`
+
+### Skills
+ 
+Run the following command to add nitro based development skills:
+
+```bash
+npx skills add boycce/nitro-web -a claude-code
+```
+
+As followed by [https://github.com/shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice/blob/main/reports/claude-skills-for-larger-mono-repos.md)
