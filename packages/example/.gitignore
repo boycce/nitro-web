@@ -1,11 +1,16 @@
-# Application files
+# Application files.claude/worktrees
+.claude/launch.json
+.temp-params.json
+.cache
 client/dist
+server/dist
 node_modules
 **/node_modules
 *.log
 
 # User files
 # .env
+.env.local
 resources/me
 migrate-mongo-config-*
 
