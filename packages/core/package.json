@@ -33,7 +33,7 @@
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish && git push --follow-tags",
     "republish": "npm publish && cd ../webpack && npm publish",
     "test": "node --test tests/",
-    "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
+    "types": "tsc --ignoreConfig --strict false --rootDir . util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",
