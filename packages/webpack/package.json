@@ -81,6 +81,6 @@
     "extends": "../core/.eslintrc.json"
   },
   "engines": {
-    "node": ">=18 <21"
+    "node": ">=20.19.0"
   }
 }
