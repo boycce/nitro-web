@@ -201,6 +201,33 @@ export function capitalise (str) {
 }
 
 /**
+ * Copies text to the clipboard, resolving true on success.
+ * @param {string} text
+ * @returns {Promise<boolean>}
+ */
+export async function copyToClipboard(text) {
+  // Clipboard API needs a secure context, so fall back to the hidden-textarea trick (e.g. LAN-IP dev)
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch (_err) {
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      const ok = document.execCommand('copy')
+      textarea.remove()
+      return ok
+    } catch (_err2) {
+      return false
+    }
+  }
+}
+
+/**
  * Formats a currency string
  * @param {number} cents
  * @param {object} [options]

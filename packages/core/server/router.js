@@ -10,7 +10,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import sortRouteAddressesNodeps from 'sort-route-addresses-nodeps'
 import { formatDuplicateKeyError } from 'monastery'
-import { sendEmail } from 'nitro-web/server'
+import { sendEmail, userFindFromProvider } from 'nitro-web/server'
 import * as util from 'nitro-web/util'
 
 /**
@@ -325,6 +325,7 @@ export const middleware = {
     'parseJson',
     'parseFile',
     'beforeAPIRoute',
+    'claudeDevAuth',
   ],
 
   // --- Default middleware ---------------------
@@ -374,6 +375,20 @@ export const middleware = {
 
   // --- Custom middleware ----------------------
 
+  claudeDevAuth: async (req, res, next) => {
+    // Auto-login the Claude browser as a dev user so it skips the signin flow when testing the app. Opt in by
+    // setting config.placeholderEmail; only ever runs in development and only for the Claude user-agent.
+    try {
+      if (configLocal.env !== 'development' || !configLocal.placeholderEmail) return next()
+      if (req.user) return next() // a real JWT already resolved a user, don't override
+      if (!(req.headers['user-agent'] || '').includes('Claude/')) return next()
+      req.user = await userFindFromProvider({ email: configLocal.placeholderEmail })
+      next()
+    } catch (err) {
+      console.error('claudeDevAuth error:', err)
+      next()
+    }
+  },
 
   isAdmin: (req, res, next) => {
     if (!isValidUserOrRespond(req, res)) return

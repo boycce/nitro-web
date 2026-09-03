@@ -105,6 +105,12 @@ export function hypenCaseToTitle(str: string, justCapitaliseFirst?: boolean): st
  */
 export function capitalise(str?: string): string;
 /**
+ * Copies text to the clipboard, resolving true on success.
+ * @param {string} text
+ * @returns {Promise<boolean>}
+ */
+export function copyToClipboard(text: string): Promise<boolean>;
+/**
  * Formats a currency string
  * @param {number} cents
  * @param {object} [options]

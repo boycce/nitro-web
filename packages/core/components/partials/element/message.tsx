@@ -158,7 +158,8 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
     // Listen for internal messageObject changes, and show and hide message
     if (!messageObject) return
     const timeout1 = setTimeout(() => setVisible(true), 20)
-    const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => setVisible(false), messageObject.timeout || 5000) : undefined
+    // const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => setVisible(false), messageObject.timeout || 5000) : undefined
+    const timeout2 = messageObject.timeout !== 0 ? setTimeout(() => hide(), messageObject.timeout || 5000) : undefined
     return () => {
       clearTimeout(timeout1)
       clearTimeout(timeout2)
@@ -190,7 +191,7 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
             <div className={twMerge(
               'overflow-hidden translate-y-[0.5rem] opacity-0 pointer-events-auto max-w-[350px] rounded-md bg-white shadow-lg ring-1 ring-black/5 transition text-sm font-medium text-gray-900',
               positionArr[1],
-              (visible ? 'translate-x-0 translate-y-0 sm:translate-x-0 sm:translate-y-0 opacity-100' : ''),
+              (visible ? 'translate-x-0 translate-y-0 sm:translate-x-0 sm:translate-y-0 opacity-100' : 'pointer-events-none'),
               className
             )}>
               <div className="p-3">

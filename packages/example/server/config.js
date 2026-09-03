@@ -16,6 +16,7 @@ const config = {
   mailgunKey: process.env.mailgunKey,
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
+  placeholderEmail: process.env.placeholderEmail, // used as a placeholder email in development to let the Claude browser auto-login
   publicPath: process.env.publicPath,
   port: port || 3000,
   portServer: process.env.portServer || port || 3001,
@@ -37,6 +38,7 @@ const config = {
           awsRegion: process.env.awsRegion,
           awsAccessKeyId: process.env.awsAccessKeyId,
           awsSecretAccessKey: process.env.awsSecretAccessKey,
+          awsAcl: process.env.awsAcl || undefined, //e.g. 'bucket-owner-full-control' for ACL-disabled buckets, else uses 'public-read'
           formats: ['png', 'jpg', 'jpeg', 'bmp', 'tiff', 'gif', 'webp'],
         }
       : undefined,
