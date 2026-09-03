@@ -28,9 +28,9 @@
     }
   },
   "scripts": {
-    "major": "npm run types && standard-version -a --release-as major && npm publish && cd ../webpack && npm publish",
-    "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish",
-    "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish",
+    "major": "npm run types && standard-version -a --release-as major && npm publish && cd ../webpack && npm publish && git push --follow-tags",
+    "minor": "npm run types && standard-version -a --release-as minor && npm publish && cd ../webpack && npm publish && git push --follow-tags",
+    "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish && git push --follow-tags",
     "republish": "npm publish && cd ../webpack && npm publish",
     "test": "node --test tests/",
     "types": "tsc util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
@@ -75,9 +75,10 @@
   "standard-version": {
     "releaseCommitMessageFormat": "{{currentTag}}",
     "sign": true,
+    "tag-prefix": "",
     "skip": {
       "changelog": true,
-      "tag": true
+      "tag": false
     },
     "scripts": {
       "prerelease": "npm run types && git add ./types"
