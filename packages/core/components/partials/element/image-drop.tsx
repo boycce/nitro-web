@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ImageIcon } from 'lucide-react'
 import { DropHandler } from 'nitro-web'
 import { deepFind, getErrorFromState, s3Image, twMerge } from 'nitro-web/util'
-import type { Errors, MonasteryImage } from 'nitro-web/types'
+import type { Errors, MonasteryFile } from 'nitro-web/types'
 
 type ImageDropProps = {
   awsUrl?: string
@@ -20,7 +20,7 @@ type ImageDropProps = {
   inheritedNote?: string
 }
 
-type ImageValue = File | MonasteryImage | null
+type ImageValue = File | MonasteryFile | null
 
 export function ImageDrop({ awsUrl, className, id, name, onChange, state, inheritedUrl, inheritedNote }: ImageDropProps) {
   // A friendlier Drop for images: the whole area is clickable, with an outlined image icon and a preview

@@ -29,14 +29,14 @@ export type User = {
   firstName?: string
   lastName?: string
   name?: string
-  avatar?: MonasteryImage
+  avatar?: MonasteryFile
   isAdmin?: boolean
 }
 
 export type Error = { title: string, detail: string }
 export type Errors = Error[]
 
-export type MonasteryImage = {
+export type MonasteryFile = {
   url: string
   filename: string
   path: string

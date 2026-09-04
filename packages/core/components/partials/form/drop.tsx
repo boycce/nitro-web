@@ -2,7 +2,7 @@
 import { deepFind, s3Image, getErrorFromState } from 'nitro-web/util'
 import { DropHandler } from 'nitro-web'
 import noImage from 'nitro-web/client/imgs/no-image.svg'
-import { Errors, MonasteryImage } from 'nitro-web/types'
+import { Errors, MonasteryFile } from 'nitro-web/types'
 import { twMerge } from 'nitro-web/util'
 
 type DropProps = {
@@ -27,7 +27,7 @@ type DropProps = {
   [key: string]: unknown
 }
 
-type Image = File | FileList | MonasteryImage | null
+type Image = File | FileList | MonasteryFile | null
 
 export function Drop({ awsUrl, className, id, name, onChange, multiple, state, errorTitle, ...props }: DropProps) {
   if (!name) throw new Error('Drop component requires a `name` prop')
@@ -44,7 +44,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
   if (typeof value == 'undefined') value = null
 
   useEffect(() => {
-    (async () => setUrls(await getUrls(value as File | FileList | MonasteryImage | null)))()
+    (async () => setUrls(await getUrls(value as File | FileList | MonasteryFile | null)))()
   }, [value])
 
   function tryAgain (e: { preventDefault: Function }) {
@@ -68,7 +68,7 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
     if (onChange) onChange({ target: { name: name, value: multiple ? files : files[0] } })
   }
 
-  async function getUrls(objectOrFileListItem: File | FileList | MonasteryImage | null) {
+  async function getUrls(objectOrFileListItem: File | FileList | MonasteryFile | null) {
     /**
      * @param {object|FileList} objectOrFileListItem - FileList object or monastery image object
      * @returns {Promise} - Resolves to an array of image URLs

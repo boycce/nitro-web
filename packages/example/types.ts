@@ -1,4 +1,4 @@
-import type { Address, Config, Errors, MessageObject, MonasteryImage, Store as NitroStore } from 'nitro-web/types'
+import type { Address, Config, Errors, MessageObject, MonasteryFile, Store as NitroStore } from 'nitro-web/types'
 import { UserRole, UserStatus, CompanyStatus, Currency } from './server/constants'
 export type { Config, Errors, MessageObject }
 
@@ -52,7 +52,7 @@ export type User = BaseEntity & {
   firstName?: string
   lastName?: string
   name?: string
-  avatar?: MonasteryImage
+  avatar?: MonasteryFile
   // If single tenancy application
   // isInvited?: boolean
 }

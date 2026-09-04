@@ -31,7 +31,7 @@ const config = {
     noDefaults: true,
     nullObjects: true,
     useMilliseconds: true,
-    imagePlugin: process.env.awsSecretAccessKey
+    filePlugin: process.env.awsSecretAccessKey
       ? {
           awsBucket: process.env.awsBucket,
           awsRegion: process.env.awsRegion,

@@ -4,7 +4,7 @@ import { ucFirst, fullName } from 'nitro-web/util'
 export default {
 
   fields: {
-    avatar: { type: 'image' },
+    avatar: { type: 'file' },
     company: { model: 'company', required: true }, // AKA "active company"
     email: { type: 'email', required: true, index: 'unique' },
     isAdmin: { type: 'boolean', default: false },
