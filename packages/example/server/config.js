@@ -16,7 +16,6 @@ const config = {
   mailgunKey: process.env.mailgunKey,
   masterPassword: process.env.masterPassword,
   mongoUrl: process.env.mongoUrl,
-  placeholderEmail: process.env.placeholderEmail, // used as a placeholder email in development to let the Claude browser auto-login
   publicPath: process.env.publicPath,
   port: port || 3000,
   portServer: process.env.portServer || port || 3001,
@@ -53,7 +52,7 @@ const config = {
     env: env,
     googleMapsApiKey: process.env.googleMapsApiKey,
     name: process.env.name,
-    placeholderEmail: process.env.placeholderEmail,
+    placeholderEmail: process.env.placeholderEmail, // dev-only, lets the Claude browser auto-login (core claudeDevAuth)
     stripePublishableKey: process.env.stripePublishableKey,
     version: _require(pwd + 'package.json').version,
   },
