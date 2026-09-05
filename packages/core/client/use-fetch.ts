@@ -21,7 +21,8 @@ type CollectionReturn<T> = {
   total: number,
   errors?: Errors,
   isLoading: boolean,
-  refetch: () => void
+  refetch: () => void,
+  setRows: React.Dispatch<React.SetStateAction<T[]>>
 }
 type DocumentReturn<T> = {
   data?: T,
@@ -136,7 +137,7 @@ function useFetchResource<T>(endpoint?: string, queryString?: string, isDocument
     setRefreshCount(prev => prev + 1)
   }
 
-  return isDocument === true ? { data, errors, isLoading, refetch, setData } : { rows, total, errors, isLoading, refetch }
+  return isDocument === true ? { data, errors, isLoading, refetch, setData } : { rows, total, errors, isLoading, refetch, setRows }
 }
 
 /** Clears a shared collection's cache (without refetching). Optionally appends an item immediately. */
