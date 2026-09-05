@@ -57,3 +57,6 @@ export const locales = {
 
 export const localeOptions = Object.entries(locales).map(([k, l]) => ({ value: /**@type {Country}*/(k), label: l.name }))
 
+
+// Table page size, used by the API (parseSortOptions) and the client <Pagination />
+export const perPage = 16

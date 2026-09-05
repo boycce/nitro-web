@@ -17,6 +17,9 @@ declare global {
     const content: string
     export default content
   }
+
+  /** Webpack css loader, side-effect imports e.g. import './css/index.css' */
+  declare module '*.css' {}
 }
 
 // Webpack: Twin.macro css extension

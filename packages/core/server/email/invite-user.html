@@ -12,10 +12,10 @@ todo: change naming to:
 <!-- block content is the content of the email -->
 {% block content %}
 
-  [[ subject = You've been invited to join IMG ]]
+  [[ subject = You've been invited to join %recipient.companyName% ]]
   <b>%recipient.greet%</b>,<br/>
   <br/>
-  You've been invited to join <b>%recipient.configName%</b>.<br/>
+  You've been invited to join <b>%recipient.companyName%</b>.<br/>
   <br/>
   If you didn't expect to receive this email, feel free to disregard this email.<br/>
   <br/>

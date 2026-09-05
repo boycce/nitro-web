@@ -31,6 +31,16 @@ export type User = {
   name?: string
   avatar?: MonasteryFile
   isAdmin?: boolean
+  companyRole?: 'owner' | 'manager' // role in the active company, set by getStore
+}
+
+// A collection cached on the store (see the example project's client/use-fetch.ts)
+export type SharedCollection<T> = {
+  rows: T[]
+  total: number
+  errors?: Errors
+  isLoading?: boolean
+  lastFetched?: number
 }
 
 export type Error = { title: string, detail: string }
@@ -56,7 +66,11 @@ export type Store = {
   jwt?: string
   message?: MessageObject | string
   user: User,
+  sharedCollections?: SharedCollections
 }
+
+// Collections cached on the store, fetched with useFetchSharedCol(). Extend this on your project's Store
+export interface SharedCollections {} // eslint-disable-line @typescript-eslint/no-empty-object-type
 
 // util.addressSchema
 export type Address = {

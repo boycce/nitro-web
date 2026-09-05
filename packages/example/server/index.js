@@ -18,7 +18,7 @@ const { server } = await setupRouter(config)
 
 // Start express
 server.listen({ port: config.portServer, host: '0.0.0.0' }, async () => {
-  // ...success
+  if (config.env !== 'development') console.log('Server started on port', config.portServer)
 })
 
 /**

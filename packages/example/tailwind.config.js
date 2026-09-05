@@ -11,6 +11,7 @@ const projectColors = {
   // list project colors here
   'status-indigo': '#4b59f2',
   'status-blue': '#106efb',
+  'border-1': '#E7E7E7',
   //...
 }
 

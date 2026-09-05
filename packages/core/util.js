@@ -12,20 +12,11 @@ export { TZDate } from '@date-fns/tz'
 /** @typedef {import('react').Dispatch<import('react').SetStateAction<any>>} SetState */
 
 /**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ * Axios types, `axios-retry` augments AxiosRequestConfig with the 'axios-retry' key itself
  * @typedef {import('axios').AxiosInstance} AxiosInstance
  * @typedef {import('axios').AxiosRequestConfig} AxiosRequestConfig
- * @typedef {import('axios').AxiosResponse} AxiosResponse
- * @typedef {import('axios-retry').IAxiosRetryConfigExtended} IAxiosRetryConfigExtended
- * 
- * Extend the config to be used below
- * @typedef {AxiosRequestConfig & { 'axios-retry'?: IAxiosRetryConfigExtended }} AxiosRequestConfigWithRetry
- * 
- * We only need to fix the `get` method, the rest of the methods inherit the new extended config...
- * @typedef {Omit<AxiosInstance, 'get'> & {
- *   get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>
-* }} AxiosInstanceWithRetry
-*/
+ * @typedef {AxiosInstance} AxiosInstanceWithRetry
+ */
 
 /** @typedef {object} ObjectId */
 /** @typedef {(value: string) => ObjectId} parseId */
@@ -1418,6 +1409,16 @@ export function pad (num=0, padLeft=0, fixedRight) {
 }
 
 /**
+ * Escape user input before it is interpolated into html, e.g. email templates
+ * @param {any} str
+ * @returns {string}
+ */
+export function escapeHtml (str) {
+  const map = /** @type {{ [key: string]: string }} */ ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' })
+  return String(str ?? '').replace(/[&<>"']/g, c => map[c])
+}
+
+/**
  * Escapes a string for use in a regex
  * @param {string} str
  * @returns {string}
@@ -1850,10 +1851,10 @@ export async function request (route, data, event, setIsLoading, setState, optio
     const formData2 = hasFiles ? formData({ ...data }, { allowEmptyArrays: true, indices: true }) : undefined
 
     // send the request
-    const axiosFn = axios()[method]
-    const axiosPromise = (method === 'get' || method === 'delete') 
-      ? axiosFn(uri, axiosConfig)
-      : axiosFn(uri, formData2 || data, axiosConfig)
+    const client = axios()
+    const axiosPromise = (method === 'get' || method === 'delete')
+      ? client[method](uri, axiosConfig)
+      : client[method](uri, formData2 || data, axiosConfig)
 
     const [res] = await Promise.allSettled([
       axiosPromise,
@@ -2236,4 +2237,32 @@ export function twMerge(...args) {
 export function ucFirst (string) {
   if (!string) return ''
   return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
+/**
+ * Ensures the saved document is in the select options, adding a "(Saved)" sentinel option when it's missing.
+ * Handy when the options list is filtered/paginated, but the form state still references a document.
+ * @template {{ value: any, label?: any }} T
+ * @param {T[]} [options]
+ * @param {{ [key: string]: any } | null} [optionToEnsure] - document to ensure is in the options list
+ * @returns {T[]}
+ */
+export function addSentinel (options=[], optionToEnsure) {
+  if (!optionToEnsure || typeof optionToEnsure !== 'object') return options
+  const value = optionToEnsure._id
+  const label = optionToEnsure.name ?? optionToEnsure.business?.name
+  if (options.some(o => o.value === value)) return options // option already exists
+
+  const sentinelOption = {
+    value: value,
+    label: label ? `${label} (Saved)` : 'Saved value',
+    IconLeft: optionToEnsure.IconLeft,
+    data: { ...optionToEnsure, IconLeft: undefined }, // original option/document data kept here
+  }
+
+  // Add sentinel after the "none"/"new" option if it exists, otherwise prepend it
+  const _options = [...options]
+  const afterIndex = _options.findIndex(o => o.value === '' || (typeof o.value === 'string' && o.value.includes('__new__')))
+  _options.splice(afterIndex >= 0 ? afterIndex + 1 : 0, 0, /** @type {any} */(sentinelOption))
+  return _options
 }

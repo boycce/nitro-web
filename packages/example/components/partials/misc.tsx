@@ -5,7 +5,7 @@
 //todo: rename to misc-pages?
 import { injectedConfig } from 'nitro-web'
 import { Styleguide, NotFound } from 'nitro-web'
-import { Button } from './element'
+import { Button } from './elements'
 
 // Styleguide page
 export const StyleguidePage = () => {

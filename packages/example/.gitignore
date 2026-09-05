@@ -1,4 +1,5 @@
-# Application files.claude/worktrees
+# Application files
+.claude/worktrees
 .claude/launch.json
 .temp-params.json
 .cache

@@ -1,6 +1,6 @@
-import type { Address, Config, Errors, MessageObject, MonasteryFile, Store as NitroStore } from 'nitro-web/types'
+import type { Address, Config, Errors, MessageObject, MonasteryFile, SharedCollection, Store as NitroStore } from 'nitro-web/types'
 import { UserRole, UserStatus, CompanyStatus, Currency } from './server/constants'
-export type { Config, Errors, MessageObject }
+export type { Config, Errors, MessageObject, SharedCollection }
 
 /* ---- Common ------------------------------- */
 
@@ -18,7 +18,13 @@ export type BaseEntity = {
 
 export type Store = NitroStore & {
   user: User
+  sharedCollections: { roleOptions: SharedCollection<Role> } // cached with useFetchSharedCol()
 }
+
+/* ---- Employees (mock data example) -------- */
+
+export type Role = { _id: string, name: string }
+export type Employee = { _id: string, name: string, email: string, role: string, startedAt: number }
 
 export type Company = BaseEntity & {
   business: {

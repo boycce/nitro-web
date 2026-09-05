@@ -433,8 +433,17 @@ export async function userSigninGetStore(user, isDesktop) {
 export async function getStore(user, _req) {
   // Initial store (req only passed from the /store route, not after signin)
   return {
-    user: user || undefined,
+    user: user ? { ...user, companyRole: getCompanyRole(user) } : undefined,
   }
+}
+
+/**
+ * The user's role in their active company (expects user.company to be populated)
+ * @param {object} user
+ * @returns {string|undefined}
+ */
+export function getCompanyRole(user) {
+  return user?.company?.users?.find(u => String(u._id) === String(user._id))?.role
 }
 
 /* ---- Helpers (not easily overridable) ----- */

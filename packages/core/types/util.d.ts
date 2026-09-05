@@ -572,6 +572,12 @@ export function onChange<T>(eventOrPathValue: EventOrPathValue, setState: React.
  */
 export function pad(num?: number, padLeft?: number, fixedRight?: number): string;
 /**
+ * Escape user input before it is interpolated into html, e.g. email templates
+ * @param {any} str
+ * @returns {string}
+ */
+export function escapeHtml(str: any): string;
+/**
  * Escapes a string for use in a regex
  * @param {string} str
  * @returns {string}
@@ -901,6 +907,20 @@ export function twMerge(...args: (string | null | undefined | false | 0 | 0n)[])
  * @returns {string}
  */
 export function ucFirst(string: string): string;
+/**
+ * Ensures the saved document is in the select options, adding a "(Saved)" sentinel option when it's missing.
+ * Handy when the options list is filtered/paginated, but the form state still references a document.
+ * @template {{ value: any, label?: any }} T
+ * @param {T[]} [options]
+ * @param {{ [key: string]: any } | null} [optionToEnsure] - document to ensure is in the options list
+ * @returns {T[]}
+ */
+export function addSentinel<T extends {
+    value: any;
+    label?: any;
+}>(options?: T[], optionToEnsure?: {
+    [key: string]: any;
+} | null): T[];
 export { TZDate } from "@date-fns/tz";
 export function getIdFromObject(object: {
     _id?: string;
@@ -937,33 +957,17 @@ export type Image = {
 };
 export type SetState = import("react").Dispatch<import("react").SetStateAction<any>>;
 /**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ * Axios types, `axios-retry` augments AxiosRequestConfig with the 'axios-retry' key itself
  */
 export type AxiosInstance = import("axios").AxiosInstance;
 /**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ * Axios types, `axios-retry` augments AxiosRequestConfig with the 'axios-retry' key itself
  */
 export type AxiosRequestConfig = import("axios").AxiosRequestConfig;
 /**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
+ * Axios types, `axios-retry` augments AxiosRequestConfig with the 'axios-retry' key itself
  */
-export type AxiosResponse = import("axios").AxiosResponse;
-/**
- * Extend the config to be used below
- */
-export type IAxiosRetryConfigExtended = import("axios-retry").IAxiosRetryConfigExtended;
-/**
- * We only need to fix the `get` method, the rest of the methods inherit the new extended config...
- */
-export type AxiosRequestConfigWithRetry = AxiosRequestConfig & {
-    "axios-retry"?: IAxiosRetryConfigExtended;
-};
-/**
- * Create an `axios` instance type that contains the `axios-retry` global declarations.
- */
-export type AxiosInstanceWithRetry = Omit<AxiosInstance, "get"> & {
-    get<T = any, R = AxiosResponse, D = any>(url: string, config?: AxiosRequestConfigWithRetry): Promise<R>;
-};
+export type AxiosInstanceWithRetry = AxiosInstance;
 export type ObjectId = object;
 export type parseId = (value: string) => ObjectId;
 /**

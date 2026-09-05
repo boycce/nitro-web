@@ -15,6 +15,12 @@ export function getStore(user: any, _req: any): Promise<{
     user: any;
 }>;
 /**
+ * The user's role in their active company (expects user.company to be populated)
+ * @param {object} user
+ * @returns {string|undefined}
+ */
+export function getCompanyRole(user: object): string | undefined;
+/**
  * Creates a new user and company (if multi tenant and `user.company` is not an id)
  * @param {object} userData - user data
  * @param {string} [userData.password] - optional

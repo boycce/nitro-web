@@ -1,7 +1,7 @@
 import { middleware } from 'nitro-web'
 import type { Store, Config } from 'types'
 
-export default { 
+const config: Config = {
   ...INJECTED_CONFIG as Config,
 
   middleware: {
@@ -18,3 +18,5 @@ export default {
     return { ...(prev || {}), user: initialStore.user, message: 'Signed out successfully.' }
   },
 }
+
+export default config

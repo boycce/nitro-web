@@ -2,22 +2,18 @@
 import { css } from 'twin.macro'
 import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
 import { injectedConfig } from 'nitro-web'
-import {
-  Bars3Icon,
-  HomeIcon,
-  UsersIcon,
-  ArrowLeftCircleIcon,
-  PaintBrushIcon,
-} from '@heroicons/react/24/outline'
-import { XIcon } from 'lucide-react'
+import React from 'react'
+import { House, LogOut, Menu, Paintbrush, Users, XIcon } from 'lucide-react'
 
 const sidebarWidth = 'w-80'
 
 export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
-  menu?: { name: string; to: string; Icon: React.FC<{ className?: string }> }[]
-  links?: { name: string; to: string; initial: string }[]
+  menu?: { name: string; to: string; toMatcher?: ToMatcher; Icon: React.FC<{ className?: string }> }[]
+  links?: { name: string; to: string; toMatcher?: ToMatcher; initial: string }[]
 }
+
+type ToMatcher = (pathname: string, search?: string) => boolean
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
@@ -26,7 +22,7 @@ function classNames(...classes: string[]) {
 export function Sidebar({ Logo, menu, links }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
-    <>
+    <React.Fragment>
       {/* desktop sidebar */}
       <div css={style} className={
         'fixed inset-y-0 z-50 flex flex-col ease-in-out lg:left-0 lg:translate-x-0 lg:!delay-0 lg:!duration-0 ' +
@@ -64,7 +60,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
       {/* mobile sidebar topbar */}
       <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
         <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
-          <Bars3Icon aria-hidden="true" className="size-6" />
+          <Menu aria-hidden="true" className="size-6" />
         </button>
         <div className="flex-1 text-sm/6 font-semibold text-gray-900">Dashboard</div>
         <Link to="#">
@@ -73,7 +69,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
       </div>
       
       <div class={`${sidebarWidth}`} />
-    </>
+    </React.Fragment>
   )
 }
 
@@ -82,17 +78,13 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
   const [store] = useTracked()
   const user = store.user
   
-  function isActive(path: string) {
-    if (path == '/' && location.pathname == path) return 'is-active'
-    else if (path != '/' && location.pathname.match(`^${path}`)) return 'is-active'
-    else return ''
-  }
+  const isActive = (item: { to: string, toMatcher?: ToMatcher }) => getIsActive(location, item)
 
   const _menu = menu || [
-    { name: 'Dashboard', to: '/', Icon: HomeIcon },
-    { name: injectedConfig.isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: PaintBrushIcon }, 
-    { name: 'Pricing', to: '/pricing', Icon: UsersIcon },
-    { name: 'Signout', to: '/signout', Icon: ArrowLeftCircleIcon },
+    { name: 'Dashboard', to: '/', Icon: House },
+    { name: injectedConfig.isDemo ? 'Design System' : 'Style Guide', to: '/styleguide', Icon: Paintbrush }, 
+    { name: 'Pricing', to: '/pricing', Icon: Users },
+    { name: 'Signout', to: '/signout', Icon: LogOut },
   ]
 
   const _links = links || [
@@ -103,7 +95,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
   return (
     <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white py-5 px-10 lg:border-r lg:border-gray-200">
       {Logo && (
-        <div className="flex h-16 shrink-0 items-center gap-2 justify-bedtween">
+        <div className="flex h-16 shrink-0 items-center gap-2 justify-between">
           <Link to="/">
             <Logo width="70" height={undefined} />
           </Link>
@@ -119,7 +111,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                   <Link
                     to={item.to}
                     className={classNames(
-                      isActive(item.to)
+                      isActive(item)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
                       'group flex gap-x-3 items-center rounded-md p-2 text-md/6 font-semibold'
@@ -128,7 +120,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                     { item.Icon && 
                       <item.Icon
                         className={classNames(
-                          isActive(item.to) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                          isActive(item) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
                           'size-5 shrink-0'
                         )}
                       />
@@ -147,7 +139,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                   <Link
                     to={team.to}
                     className={classNames(
-                      isActive(team.to)
+                      isActive(team)
                         ? 'bg-gray-50 text-indigo-600'
                         : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
                       'group flex gap-x-3 rounded-md p-2 text-md/6 font-semibold'
@@ -155,7 +147,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                   >
                     <span
                       className={classNames(
-                        isActive(team.to)
+                        isActive(team)
                           ? 'border-indigo-600 text-indigo-600'
                           : 'border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600',
                         'flex size-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium'
@@ -193,3 +185,14 @@ const style = css`
     transition: transform 300ms, opacity 300ms, left 0ms 0ms;
   }
 `
+
+// Active class for a menu/tab item, `toMatcher` overrides the default path prefix match
+export function getIsActive(
+  location: { pathname: string, search: string },
+  item?: { toMatcher?: ToMatcher, to?: string } | null
+) {
+  if (item?.toMatcher) return item.toMatcher(location.pathname, location.search) ? 'is-active' : ''
+  else if (item?.to == '/' && location.pathname == item.to) return 'is-active'
+  else if (item?.to && item.to != '/' && location.pathname.match(`^${item.to}`)) return 'is-active'
+  else return ''
+}
