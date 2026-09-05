@@ -10,7 +10,7 @@ description: For projects using nitro-web only. Quick overview of a Nitro web ap
 # Notes
 
   - The nitro-* skills are great reference when building a nitro-web app, but the host app may use slightly different patterns and libraries.
-  - Dont export react hooks from files. Rather export pure functions and call it from a use* hook in the component which is easier to test/refactor. `/client/use-fetch.ts` is the only exception.
+  - Dont export react hooks from files. Rather export pure functions and call it from a use* hook in the component which is easier to test/refactor. The fetch hooks from `nitro-web` are the exception.
   - Single line comments only. Function overview comments are placed inside of the function at the top, not outside of it.
   - Use `import 'nitro-web/env'` to load environment variables (never `dotenv/config`), which reads `.env` then merges `.env.local` over the top. It must be the first import in any entry file that reads process.env, e.g. scripts and tests.
 
@@ -25,7 +25,7 @@ description: For projects using nitro-web only. Quick overview of a Nitro web ap
   server/constants.js              enums, options arrays, status colours
   server/util.js                   local helpers, also re-exports all of nitro-web/util
   client/constants.tsx             re-exports server constants, adds JSX-decorated options
-  client/use-fetch.ts              useFetchDoc, useFetchCol, useFetchSharedCol, clearCache
+  client/index.ts                  createStore, seeds sharedCollections used by useFetchSharedCol
   types.ts                         shared types, imported via the `types` path alias
   ```
 
@@ -33,7 +33,7 @@ description: For projects using nitro-web only. Quick overview of a Nitro web ap
 
   ```
   component
-  fetch hook                 /client/use-fetch.ts, one for a doc, one for a collection, one shared/cached
+  fetch hook                 useFetchDoc/useFetchCol/useFetchSharedCol from nitro-web, one for a doc, one for a collection, one shared/cached
   request()                  from nitro-web, prefixes /api, verb inside the route string
   router (express) setup     scans components/**/*.api.js at startup
   components/<f>/<f>.api.js  route map to the controller

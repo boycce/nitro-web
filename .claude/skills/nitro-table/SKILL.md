@@ -17,9 +17,8 @@ description: For projects using nitro-web only. Building or changing a list page
 
   ```tsx
   import { Fragment, useCallback } from 'react'
-  import { currency, date, Table, TableColumn } from 'nitro-web'
-  import { Pagination, Tag, TableFooter, tableCommonProps } from '../partials/elements'
-  import { useFetchCol } from '../../client/use-fetch'
+  import { currency, date, Table, TableColumn, useFetchCol } from 'nitro-web'
+  import { Pagination, Tag, TableFooter, tableCommonProps } from '../partials/elements' // TableFooter is a plain flex row, inline it if the project has none
 
   const thead: TableColumn[] = [
     { value: 'number', label: 'Number' },

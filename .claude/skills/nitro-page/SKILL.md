@@ -105,11 +105,12 @@ description: For projects using nitro-web only. Adding a feature, client page, f
 
 # Fetching documents/data from the API
 
-  - Fetching hook utilities are provided in: `/client/use-fetch.ts`. Pass an empty string when there is nothing to load to no-op. Endpoints are relative, `/api` is prepended.
+  - Fetching hooks come from `nitro-web`: `useFetchDoc`, `useFetchCol`, `useFetchSharedCol`. Pass an empty string when there is nothing to load to no-op. Endpoints are relative, `/api` is prepended.
+  - Shared collections are declared on the project's `Store` type, e.g. `sharedCollections: { organisationOptions: SharedCollection<Organisation> }`.
   - For option lists that need to be shared across pages, use the shared-collection hook instead, which caches on the store.
 
   ```tsx
-  import { useFetchDoc } from '../../client/use-fetch'
+  import { useFetchDoc, useFetchSharedCol } from 'nitro-web'
 
   export function QuotePage() {
     const { id } = useParams()

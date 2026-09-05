@@ -7,7 +7,7 @@ description: For projects using nitro-web only. Building a form, modal, or dialo
 
   - No form library used. Just a state plain object, where validation errors come back from the server and bind by field path.
   - Validation rules belong in the model, not in the controller or component if it can be helped, see the nitro-model skill.
-  - If the form saves a list which is tracked on the store cache, invalidate it with `clearCache(setStore, 'organisationOptions')`, provided in: `/client/use-fetch.ts`
+  - If the form saves a list which is tracked on the store cache, invalidate it with `clearCache(setStore, 'organisationOptions')` from `nitro-web`
 
 # State
 
@@ -83,7 +83,7 @@ description: For projects using nitro-web only. Building a form, modal, or dialo
 
 # Modals
 
-  - `FormModal` and `ConfirmModal` come from the elements barrel and already block double submission, so no `isSubmitting` guard is needed.
+  - `FormModal` and `ConfirmModal` come from the elements barrel (thin wrappers over the `nitro-web` ones, passing the project Button) and already block double submission, so no `isSubmitting` guard is needed.
   - Modals stay mounted, so reset state when one opens.
 
   ## FormModal example:
