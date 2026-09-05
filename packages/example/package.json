@@ -24,11 +24,11 @@
   "dependencies": {
     "@stripe/stripe-js": "^1.34.0",
     "monastery": "^5.0.1",
-    "nitro-web": "0.3.2",
+    "nitro-web": "0.3.3",
     "stripe": "^9.16.0"
   },
   "devDependencies": {
-    "@nitro-web/webpack": "0.3.2",
+    "@nitro-web/webpack": "0.3.3",
     "color": "^4.2.3",
     "lucide-react": "^0.511.0",
     "migrate-mongo": "^14.0.7",
