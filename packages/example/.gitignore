@@ -10,7 +10,7 @@ node_modules
 *.log
 
 # User files
-# .env
+.env
 .env.local
 docs/
 resources/me

@@ -10,11 +10,11 @@ npm i nitro-web -D @nitro-web/webpack
 
 ### Install
 
-1. Copy ./packages/example into your project
-5. Uncomment `# .env` in `./gitignore`  
-5. Run `npm i`
+1. Copy `./packages/example` into your project
+2. Copy `.env.example` to `.env` and fill it in
+3. Run `npm i`
 
-Env vars are loaded from `.env`, then `.env.local` is merged over the top (handy for local-only overrides, and it's gitignored by default).
+Env vars load from `.env`, then `.env.local` is merged over the top (handy for local-only overrides). Both are gitignored.
 
 ### Usage
 
@@ -51,6 +51,8 @@ npm run build
 npm run start
 ```
 
+In development, set `placeholderEmail` in `.env` to let the Claude browser auto-login as that user (skips the signin flow while testing).
+
 ### Transaction Mailgun Emails
 
 The `sendEmail` utility compiles and sends Nunjuck templates with Mailgun.
@@ -82,8 +84,8 @@ console.log(res) // if config.emailTestMode=true, the template will be returned
 ### Versions
 
 - Express `^4.17`
-- Monastery `~4.0.1`
-- Node `^18`
+- Monastery `^5.0` (file plugin: image/file fields are `type: 'file'`)
+- Node `24` (`>=18` supported)
 - React `^18.3`
 - Tailwind `^3.4`
 - Webpack `^5.92`
