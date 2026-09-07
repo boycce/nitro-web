@@ -116,7 +116,7 @@ export function Calendar({ value, numberOfMonths, month: monthProp, className, p
       caption_label: `${d.caption_label} z-auto`,
       button_previous: `${d.button_previous} size-8`,// [&:hover>svg]:fill-input-border-focus`,
       button_next: `${d.button_next} size-8`,// [&:hover>svg]:fill-input-border-focus`,
-      chevron: `${d.chevron} fill-black size-[18px]`,
+      chevron: `${d.chevron} fill-foreground size-[18px]`,
 
       // Days
       weekday: `${d.weekday} text-[11px] font-bold uppercase`,
@@ -124,7 +124,7 @@ export function Calendar({ value, numberOfMonths, month: monthProp, className, p
       day_button: `${d.day_button} ${dayButtonClassName}`,
 
       // States
-      focused: `${d.focused} [&>button]:bg-gray-200 [&>button]:border-gray-200`,
+      focused: `${d.focused} [&>button]:bg-muted [&>button]:border-border`,
       range_start: `${d.range_start} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
       range_end: `${d.range_end} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
       selected: `${d.selected} font-normal `

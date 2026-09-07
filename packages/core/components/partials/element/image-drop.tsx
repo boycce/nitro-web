@@ -86,10 +86,10 @@ export function ImageDrop({ awsUrl, className, id, name, onChange, state, inheri
           )}
           {!url && !inheritedUrl && (
             <div class="flex flex-col items-center gap-2.5 pointer-events-none">
-              <ImageIcon size={30} strokeWidth={1.25} class="text-grey-2 transition-colors group-hover:text-primary" />
+              <ImageIcon size={30} strokeWidth={1.25} class="text-grey-2 transition-colors group-hover:text-primary-text" />
               <div>
                 Drag and drop your image here, or
-                <span class="text-primary font-medium"> select a file</span>
+                <span class="text-primary-text font-medium"> select a file</span>
               </div>
             </div>
           )}

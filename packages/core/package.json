@@ -18,6 +18,7 @@
     "./types": "./types.ts",
     "./.eslintrc.json": "./.eslintrc.json",
     "./tsconfig.json": "./tsconfig.json",
+    "./tailwind": "./tailwind.js",
     "./util": {
       "import": "./util.js",
       "types": "./types/util.d.ts"

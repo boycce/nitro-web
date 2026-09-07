@@ -135,7 +135,7 @@ export function FieldCurrency({
         type="text"
       />
       <span
-        class={`absolute top-0 bottom-0 inline-flex items-center select-none text-gray-500 text-input-base ${inputValue !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
+        class={`absolute top-0 bottom-0 inline-flex items-center select-none text-muted-foreground text-input-base ${inputValue !== null && settings.prefix == '$' ? 'text-foreground' : ''}`}
         style={{ left: `${inputPaddingLeft}px` }}
       >
         {settings.prefix}

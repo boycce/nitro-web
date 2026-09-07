@@ -2,6 +2,7 @@ import defaultTheme from 'tailwindcss/defaultTheme'
 import colors from 'tailwindcss/colors'
 import path from 'path'
 import Color from 'color'
+import nitroTheme, { v } from 'nitro-web/tailwind'
 
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
 const darken = (clr, val) => Color(clr).darken(val).rgb().string()
@@ -16,6 +17,7 @@ const projectColors = {
 }
 
 export default {
+  darkMode: 'class',
   content: {
     relative: true,
     files: [
@@ -43,11 +45,10 @@ export default {
         'primary-hover': lighten('#4c50f9', 0.05),
         'secondary': colors.green[500],
         'secondary-hover': lighten(colors.green[500], 0.05),
-        'label': colors.gray[900],
-        'link': colors.black,
+        'label': v('foreground'),
+        'link': v('foreground'),
         'link-hover': colors.blue[200],
         'link-focus': colors.blue[200],
-        'foreground': colors.gray[900],
         // Nitro feedback colors
         'danger': colors.red[500],
         'danger-foreground': colors.red[600],
@@ -59,14 +60,12 @@ export default {
         'success': colors.green[500],
         'success-hover': lighten(colors.green[500], 0.05),
         // Nitro element colors
-        'input': colors.gray[900],
-        'input-placeholder': colors.gray[400],
-        'input-disabled': colors.gray[400],
-        'input-disabled-bg': colors.gray[100],
-        'input-border': colors.gray[300],
+        'input': v('foreground'),
+        'input-placeholder': v('muted-foreground'),
+        'input-disabled': v('muted-foreground'),
         'input-border-focus': '#4c50f9',
-        'dropdown-selected-foreground': darken('#4c50f9', 0.05),
-        'dropdown-ul-border': colors.gray[200],
+        'dropdown-selected-foreground': v('primary-text'),
+        'dropdown-ul-border': v('border'),
         'variable-selected': '#4c50f9',
         // 'input-icon': '#c6c8ce', // optional
         // project colors
@@ -103,10 +102,40 @@ export default {
         // 'DEFAULT': '4px', // button small
       },
       borderColor: {
-        // e.g. 'DEFAULT': ...
+        'DEFAULT': v('border'),
       },
     },
   },
-  plugins: [],
+  plugins: [
+    // Theme colours per mode, each key becomes a css variable and a tailwind colour, omitted keys use the nitro defaults
+    nitroTheme({
+      light: {
+        'background': '#fdfdfd',
+        'foreground': '#111827',
+        'surface': '#ffffff', // cards, sidebar, dropdowns, modals
+        'muted': '#f9fafb', // hover rows, selected options
+        'muted-foreground': '#6b7280',
+        'border': '#e5e7eb', // lines
+        'input-border': '#d1d5db',
+        'input-bg': '#ffffff',
+        'input-disabled-bg': '#f3f4f6',
+        'overlay': '#6b7280', // used with opacity, e.g. bg-overlay/70
+        'primary-text': '#4c50f9', // primary used as text, e.g. sidebar active link
+      },
+      dark: {
+        'background': '#09090b',
+        'foreground': '#fafafa',
+        'surface': '#18181b',
+        'muted': '#27272a',
+        'muted-foreground': '#a1a1aa',
+        'border': '#3a3a40',
+        'input-border': '#3a3a40',
+        'input-bg': '#1c1c1f',
+        'input-disabled-bg': '#27272a',
+        'overlay': '#000000',
+        'primary-text': '#818cf8',
+      },
+    }),
+  ],
 }
 

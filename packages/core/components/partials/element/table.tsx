@@ -282,7 +282,7 @@ export function Table<T extends TableRow>({
                           columnClassName,
                           columnClassNameFn ? columnClassNameFn(col, row, i) : '',
                           col.className,
-                          isSelected ? `bg-gray-50 ${columnSelectedClassName||''}` : ''
+                          isSelected ? `bg-muted ${columnSelectedClassName||''}` : ''
                         )}
                       >
                         <div 
@@ -326,13 +326,13 @@ export function Table<T extends TableRow>({
                           {
                             // Show "no records" or "loading" text in the first column
                             j == 0 && (!row._id || isLoading) &&
-                            <div className={'absolute top-0 h-full flex items-center justify-center gap-3 text-sm text-gray-500'}>
+                            <div className={'absolute top-0 h-full flex items-center justify-center gap-3 text-sm text-muted-foreground'}>
                               {
                                 (!row._id && !isLoading) ? (
                                   'No records found.' 
                                 ) : (!row._id && isLoading && showLoadingInline === true) ? (
                                   <Fragment>
-                                    <Spinner className="border-gray-500" />
+                                    <Spinner className="border-muted-foreground" />
                                     <LoadingWithDots message={loadingMessage} />
                                   </Fragment>
                                 ) : (!row._id && isLoading && showLoadingInline) ? (

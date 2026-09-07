@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { Fragment } from 'react'
 import { deepFind, s3Image, getErrorFromState } from 'nitro-web/util'
 import { DropHandler } from 'nitro-web'
 import noImage from 'nitro-web/client/imgs/no-image.svg'
@@ -110,17 +111,17 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
       >
         {
           !value &&
-          <>
+          <Fragment>
             {/* {todo upload svg here} */}
             <div>
               Drag and drop your file here&nbsp;
-              <label class="weight-500 inline-block text-sm text-primary" for={inputId}>or select a file</label>
+              <label class="weight-500 inline-block text-sm text-primary-text" for={inputId}>or select a file</label>
             </div>
-          </>
+          </Fragment>
         }
         {
           !!value &&
-          <>
+          <Fragment>
             {
               urls.map((url, i) => (
                 <div key={i} class="flex align-items-center gap-1">
@@ -130,9 +131,9 @@ export function Drop({ awsUrl, className, id, name, onChange, multiple, state, e
             }
             <div>
               Your file has been added successfully.&nbsp; 
-              <Link to="#" class="text-primary" onClick={tryAgain}>Use another file?</Link>
+              <Link to="#" class="text-primary-text" onClick={tryAgain}>Use another file?</Link>
             </div>
-          </>
+          </Fragment>
         }
       </DropHandler>
       {error && <div class="form-error mt-0-5">{error.detail}</div>}
