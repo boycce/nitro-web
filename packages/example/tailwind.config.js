@@ -5,7 +5,7 @@ import Color from 'color'
 import nitroTheme, { v } from 'nitro-web/tailwind'
 
 const lighten = (clr, val) => Color(clr).lighten(val).rgb().string()
-const darken = (clr, val) => Color(clr).darken(val).rgb().string()
+// const darken = (clr, val) => Color(clr).darken(val).rgb().string()
 const nitroDir = path.dirname(require.resolve('nitro-web'))
 
 const projectColors = {
