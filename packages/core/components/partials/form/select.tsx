@@ -449,7 +449,7 @@ function LimitedValueContainer({ chips, rest, maxLines, ...props }:
       <div ref={lastRow} class="w-full min-w-0 flex flex-nowrap items-center gap-1 overflow-hidden [&>*]:shrink-0">
         {chips.slice(split.upper, split.upper + split.last)}
         {hidden > 0 && (
-          <span class="self-stretch flex items-center rounded bg-gray-100 text-gray-500 text-xs px-1.5 whitespace-nowrap">
+          <span class="self-stretch flex items-center rounded bg-muted text-muted-foreground text-xs px-1.5 whitespace-nowrap">
             +{hidden}
           </span>
         )}
@@ -491,7 +491,7 @@ function Option(props: OptionProps) {
   return (
     <components.Option className={data.className} {...props}>
       <span class="flex-auto min-w-0">{data.flag && <span className={flagClassName}>{data.flag}</span>}{data.IconLeft}{props.label}</span>
-      {props.isSelected && <CheckCircleIcon className="flex-shrink-0 size-[22px] text-primary -my-1 -mx-0.5" />}
+      {props.isSelected && <CheckCircleIcon className="flex-shrink-0 size-[22px] text-primary-text -my-1 -mx-0.5" />}
     </components.Option>
   )
 }
@@ -541,7 +541,7 @@ const selectClassNames = {
   // Based off https://www.jussivirtanen.fi/writing/styling-react-select-with-tailwind
   // Input container
   control: {
-    base: 'rounded-md bg-white hover:cursor-pointer text-input-base outline outline-1 -outline-offset-1 '
+    base: 'rounded-md bg-input-bg hover:cursor-pointer text-input-base outline outline-1 -outline-offset-1 '
       + '!min-h-0 outline-input-border',
     focus: 'outline-2 -outline-offset-2 outline-input-border-focus',
     error: 'outline-danger',
@@ -555,7 +555,7 @@ const selectClassNames = {
   },
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: 'text-xs',
-  multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-foreground hover:bg-red-50',
+  multiValueRemove: 'border border-border bg-clip-content bg-surface rounded-md text-foreground hover:bg-red-50',
   placeholder: 'text-input-placeholder truncate',
   singleValue: {
     base: 'text-input !overflow-visible min-w-0 flex items-center',
@@ -563,18 +563,18 @@ const selectClassNames = {
     disabled: 'text-input-disabled',
   },
   // Icon indicators
-  clearIndicator: 'text-gray-500 p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground ml-[-0.8em]',
-  dropdownIndicator: 'p-1 hover:bg-gray-100 text-gray-500 rounded-md hover:text-black',
+  clearIndicator: 'text-muted-foreground p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground ml-[-0.8em]',
+  dropdownIndicator: 'p-1 hover:bg-muted text-muted-foreground rounded-md hover:text-foreground',
   indicatorsContainer: 'p-1 pl-0 pr-2 gap-1 relative', // relative so the hitbox goes over the control
-  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-gray-100 before:w-px before:h-full',
+  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-muted before:w-px before:h-full',
   // Dropdown menu
-  menu: 'mt-1.5 border border-dropdown-ul-border bg-white rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
-  groupHeading: 'ml-3 mt-2 mb-1 text-gray-500 text-input-base',
-  noOptionsMessage: 'm-1 text-gray-500 p-2 bg-gray-50 border border-dashed border-gray-200 rounded-sm',
+  menu: 'mt-1.5 border border-dropdown-ul-border bg-surface rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
+  groupHeading: 'ml-3 mt-2 mb-1 text-muted-foreground text-input-base',
+  noOptionsMessage: 'm-1 text-muted-foreground p-2 bg-muted border border-dashed border-border rounded-sm',
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',
-    hover: 'bg-gray-50',
-    selected: '!bg-gray-100 text-dropdown-selected-foreground',
+    hover: 'bg-muted',
+    selected: '!bg-muted text-dropdown-selected-foreground',
   },
   // Nitro specific
   flag: 'align-middle text-[1.2em] leading-[1em] mr-1.5 flex-shrink-0',

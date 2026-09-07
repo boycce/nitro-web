@@ -4,11 +4,13 @@ import avatarImg from 'nitro-web/client/imgs/avatar.jpg'
 import { injectedConfig } from 'nitro-web'
 import React from 'react'
 import { House, LogOut, Menu, Paintbrush, Users, XIcon } from 'lucide-react'
+import { ThemeToggle } from './theme-toggle'
 
 const sidebarWidth = 'w-80'
 
 export type SidebarProps = {
   Logo?: React.FC<{ width?: string, height?: string }>;
+  themeToggle?: boolean; // defaults to true
   menu?: { name: string; to: string; toMatcher?: ToMatcher; Icon: React.FC<{ className?: string }> }[]
   links?: { name: string; to: string; toMatcher?: ToMatcher; initial: string }[]
 }
@@ -19,7 +21,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-export function Sidebar({ Logo, menu, links }: SidebarProps) {
+export function Sidebar({ Logo, menu, links, themeToggle }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
     <React.Fragment>
@@ -41,14 +43,14 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
             <XIcon aria-hidden="true" strokeWidth={1.5} size={24} className="text-white" />
           </button>
         </div>
-        <SidebarContents Logo={Logo} menu={menu} links={links} />
+        <SidebarContents Logo={Logo} menu={menu} links={links} themeToggle={themeToggle} />
       </div>
 
       {/* mobile backdrop */}
       <div 
         css={style} 
         onClick={() => setSidebarOpen(false)}
-        className={'fixed w-full z-[49] inset-0 bg-gray-900/70 ease-linear lg:hidden ' + 
+        className={'fixed w-full z-[49] inset-0 bg-overlay/70 ease-linear lg:hidden ' + 
           (
             sidebarOpen 
               ? 'left-0 opacity-100 sidebar-transition ' 
@@ -58,13 +60,14 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
       />
       
       {/* mobile sidebar topbar */}
-      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-        <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-gray-700 lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-surface px-4 py-4 shadow-sm sm:px-6 lg:hidden">
+        <button type="button" onClick={() => setSidebarOpen(true)} className="-m-2.5 p-2.5 text-foreground lg:hidden">
           <Menu aria-hidden="true" className="size-6" />
         </button>
-        <div className="flex-1 text-sm/6 font-semibold text-gray-900">Dashboard</div>
+        <div className="flex-1 text-sm/6 font-semibold text-foreground">Dashboard</div>
+        {themeToggle !== false && <ThemeToggle />}
         <Link to="#">
-          <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
+          <img alt="" src={avatarImg} className="size-8 rounded-full bg-muted" />
         </Link>
       </div>
       
@@ -73,7 +76,7 @@ export function Sidebar({ Logo, menu, links }: SidebarProps) {
   )
 }
 
-function SidebarContents ({ Logo, menu, links }: SidebarProps) {
+function SidebarContents ({ Logo, menu, links, themeToggle }: SidebarProps) {
   const location = useLocation()
   const [store] = useTracked()
   const user = store.user
@@ -93,13 +96,16 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
 
   // Sidebar component, swap this element with another sidebar if you like
   return (
-    <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white py-5 px-10 lg:border-r lg:border-gray-200">
+    <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-surface py-5 px-10 lg:border-r lg:border-border">
       {Logo && (
         <div className="flex h-16 shrink-0 items-center gap-2 justify-between">
           <Link to="/">
             <Logo width="70" height={undefined} />
           </Link>
-          <span className="text-[9px] text-gray-900 font-semibold mt-4">{injectedConfig.version}</span>
+          <div className="flex items-center gap-1 mt-4">
+            <span className="text-[9px] text-foreground font-semibold">{injectedConfig.version}</span>
+            {themeToggle !== false && <ThemeToggle size={13} className="p-1 -mr-1" />}
+          </div>
         </div>
       )}
       <nav className="flex flex-1 flex-col">
@@ -112,15 +118,15 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                     to={item.to}
                     className={classNames(
                       isActive(item)
-                        ? 'bg-gray-50 text-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                        ? 'bg-muted text-primary-text'
+                        : 'text-foreground/80 hover:bg-muted hover:text-primary-text',
                       'group flex gap-x-3 items-center rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >
                     { item.Icon && 
                       <item.Icon
                         className={classNames(
-                          isActive(item) ? 'text-indigo-600' : 'text-gray-400 group-hover:text-indigo-600',
+                          isActive(item) ? 'text-primary-text' : 'text-muted-foreground/70 group-hover:text-primary-text',
                           'size-5 shrink-0'
                         )}
                       />
@@ -132,7 +138,7 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
             </ul>
           </li>
           <li>
-            <div className="text-xs/6 font-semibold text-gray-400">Other Links</div>
+            <div className="text-xs/6 font-semibold text-muted-foreground/70">Other Links</div>
             <ul role="list" className="-mx-2 mt-2 space-y-1">
               {_links.map((team) => (
                 <li key={team.name}>
@@ -140,17 +146,17 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
                     to={team.to}
                     className={classNames(
                       isActive(team)
-                        ? 'bg-gray-50 text-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600',
+                        ? 'bg-muted text-primary-text'
+                        : 'text-foreground/80 hover:bg-muted hover:text-primary-text',
                       'group flex gap-x-3 rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >
                     <span
                       className={classNames(
                         isActive(team)
-                          ? 'border-indigo-600 text-indigo-600'
-                          : 'border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600',
-                        'flex size-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium'
+                          ? 'border-primary-text text-primary-text'
+                          : 'border-border text-muted-foreground/70 group-hover:border-primary-text group-hover:text-primary-text',
+                        'flex size-6 shrink-0 items-center justify-center rounded-lg border bg-surface text-[0.625rem] font-medium'
                       )}
                     >
                       {team.initial}
@@ -165,9 +171,9 @@ function SidebarContents ({ Logo, menu, links }: SidebarProps) {
           <li className="-mx-6 mt-auto hidden lg:block">
             <Link
               to="#"
-              className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-50"
+              className="flex items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-foreground hover:bg-muted"
             >
-              <img alt="" src={avatarImg} className="size-8 rounded-full bg-gray-50" />
+              <img alt="" src={avatarImg} className="size-8 rounded-full bg-muted" />
               <span aria-hidden="true" class="truncate1 flex-1">{user?.name || 'Guest'}</span>
             </Link>
           </li>

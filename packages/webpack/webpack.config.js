@@ -19,6 +19,7 @@ import { createRequire } from 'module'
 import { getDirectories } from 'nitro-web/util'
 
 const _require = createRequire(import.meta.url)
+
 const isBuild = process.env.NODE_ENV == 'production'
 const nitroVersion = _require('./package.json').version
 
@@ -297,6 +298,7 @@ export const getConfig = (config) => {
           isDemo: !!process.env.isDemo,
           isStatic: !!process.env.isStatic,
           jwtName: 'nitro-jwt' + (isBuild ? '' : '-' + formatSlug(name)),
+          themeName: 'nitro-theme' + (isBuild ? '' : '-' + formatSlug(name)),
           version: process.env.isDemo ? nitroVersion : version,
         }),
       }),

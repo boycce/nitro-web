@@ -217,7 +217,7 @@ export const Dropdown = forwardRef(function Dropdown({
                 { !!option.iconLeft && option.iconLeft }
                 <span class="flex-auto">{option.label}</span>
                 { !!option.icon && option.icon }
-                { option.isSelected && <CheckCircleIcon className="size-[22px] text-primary -my-1 -mx-0.5" /> }
+                { option.isSelected && <CheckCircleIcon className="size-[22px] text-primary-text -my-1 -mx-0.5" /> }
               </li>
             )
           })

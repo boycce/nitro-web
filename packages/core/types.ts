@@ -8,9 +8,11 @@ type InjectedConfig = {
   isDemo: boolean // implicitly defined by webpack
   isStatic: boolean // implicitly defined by webpack
   jwtName: string // implicitly defined by webpack
+  themeName: string // implicitly defined by webpack
   name: string
   placeholderEmail?: string
   stripePublishableKey?: string
+  theme?: 'light' | 'dark' | 'system' // default theme, users can override it via the ThemeToggle
   titleSeparator?: string
   version: string
 }

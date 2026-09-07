@@ -1,9 +1,20 @@
 
+/* ---- Calendar (react-day-picker) ----- */
+
+.nitro-calendar {
+  --rdp-accent-color: rgb(var(--primary-text));
+  --rdp-accent-background-color: rgb(var(--primary-text) / 0.08);
+  --rdp-today-color: rgb(var(--primary-text));
+}
+.dark .nitro-calendar {
+  --rdp-accent-background-color: rgb(var(--primary-text) / 0.25);
+}
+
 /* ---- Tailwind UI Components ---------- */
 
 @layer base {
   .border-bottom-with-space {
-    @apply relative mb-[6px] after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-gray-200;
+    @apply relative mb-[6px] after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-muted;
   }
 }
 

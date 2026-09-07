@@ -54,6 +54,7 @@ const config = {
     name: process.env.name,
     placeholderEmail: process.env.placeholderEmail, // dev-only, lets the Claude browser auto-login (core claudeDevAuth)
     stripePublishableKey: process.env.stripePublishableKey,
+    theme: process.env.theme, // default theme: 'light' | 'dark' | 'system' (defaults to light)
     version: _require(pwd + 'package.json').version,
   },
 

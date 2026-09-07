@@ -117,7 +117,7 @@ export function TimePicker({ value, onChange, className, tz, referenceTimestamp 
             <div 
               key={i}
               ref={refs[type]}
-              className="w-[60px] relative overflow-hidden hover:overflow-y-auto border-l border-gray-100 sm-scrollbar first:border-l-0"
+              className="w-[60px] relative overflow-hidden hover:overflow-y-auto border-l border-border sm-scrollbar first:border-l-0"
             >
               <div className="w-[60px] absolute flex flex-col items-center py-2">
                 {/* using absolute since the scrollbar takes up space  */}
@@ -133,7 +133,7 @@ export function TimePicker({ value, onChange, className, tz, referenceTimestamp 
                     <button 
                       key={item}
                       className={
-                        `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-gray-100 `
+                        `${dayButtonClassName} rounded-full flex justify-center items-center group-hover:bg-muted `
                         + (item === currentValue ? '!bg-input-border-focus text-white' : '')
                       }
                     >
