@@ -69,7 +69,7 @@ export function ConfirmModal({
     >
       <div className="text-center">
         <h3 className={twMerge('h3 text-[18px] mb-2.5', titleClassName)}>{cached.current.title}</h3>
-        {cached.current.subtitle && <p className={twMerge('h5 text-gray-500 mb-0', subtitleClassName)}>{cached.current.subtitle}</p>}
+        {cached.current.subtitle && <p className={twMerge('h5 text-muted-foreground mb-0', subtitleClassName)}>{cached.current.subtitle}</p>}
       </div>
       {cached.current.children}
       <div className="self-stretch flex mt-1.5">
@@ -134,7 +134,7 @@ export function FormModal({
             <h3 className="h3 text-[15.5px] mb-0 pb-0">{cached.current.title}</h3>
           </div>
           {cached.current.subtitle && (
-            <p className={twMerge('h5 text-gray-500 mb-0 text-left', subtitleClassName)}>{cached.current.subtitle}</p>
+            <p className={twMerge('h5 text-muted-foreground mb-0 text-left', subtitleClassName)}>{cached.current.subtitle}</p>
           )}
         </Fragment>
       )}
@@ -147,7 +147,7 @@ export function FormModal({
         </div>
       )}
       {cached.current.footerNote && (
-        <div className="-mt-1 text-xs text-gray-500 flex items-center justify-center gap-1.5">{cached.current.footerNote}</div>
+        <div className="-mt-1 text-xs text-muted-foreground flex items-center justify-center gap-1.5">{cached.current.footerNote}</div>
       )}
     </Modal>
   )

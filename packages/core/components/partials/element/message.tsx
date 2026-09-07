@@ -189,7 +189,7 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
         <div className="flex flex-col items-center space-y-4">
           {messageObject && (
             <div className={twMerge(
-              'overflow-hidden translate-y-[0.5rem] opacity-0 pointer-events-auto max-w-[350px] rounded-md bg-white shadow-lg ring-1 ring-black/5 transition text-sm font-medium text-gray-900',
+              'overflow-hidden translate-y-[0.5rem] opacity-0 pointer-events-auto max-w-[350px] rounded-md bg-surface shadow-lg ring-1 ring-border transition text-sm font-medium text-foreground',
               positionArr[1],
               (visible ? 'translate-x-0 translate-y-0 sm:translate-x-0 sm:translate-y-0 opacity-100' : 'pointer-events-none'),
               className
@@ -210,8 +210,8 @@ export function Message({ className, classNameWrapper, icons: iconsProp, positio
                     <button
                       type="button"
                       onClick={hide}
-                      className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 
-                        focus:ring-indigo-500 focus:ring-offset-2"
+                      className="inline-flex rounded-md bg-surface text-muted-foreground hover:text-muted-foreground focus:outline-none focus:ring-2 
+                        focus:ring-primary focus:ring-offset-2"
                     >
                       <span className="sr-only">Close</span>
                       <X aria-hidden="true" size={19} />

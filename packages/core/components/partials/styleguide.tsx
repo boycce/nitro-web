@@ -13,6 +13,7 @@ const allGroups = [
   'Links', 
   'Dropdowns', 
   'Filters', 
+  'Theme', 
   'Button Colors & Sizes', 
   'Button Icons', 
   'Loading Elements', 
@@ -336,6 +337,22 @@ export function Styleguide({ className, elements, children, currencies, groups }
               }}
               placeholder="Linked search bar..."
             />
+          </div>
+        </div>
+      )}
+
+      {visibleGroups.includes('Theme') && (
+        <div>
+          <h2 class="h3">Theme</h2>
+          <div class="flex flex-wrap gap-2 mb-6">
+            {['background', 'foreground', 'surface', 'muted', 'muted-foreground', 'border', 'input-bg', 'overlay'].map(token => (
+              <div
+                key={token}
+                class={`w-28 h-8 rounded-md border flex items-center px-2 text-xs bg-${token} ${token.match(/foreground|overlay/) ? 'text-background' : ''}`}
+              >
+                {token}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -831,9 +848,9 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
             checkboxClassName="rounded-[2px] shadow-none"
             columnClassName="border-t-1 first:rounded-l-xl last:rounded-r-xl"
-            columnHeaderClassName="text-gray-500 text-2xs uppercase border-none"
-            columnSelectedClassName="bg-gray-50 border-indigo-300"
-            rowClassName="[&:hover>div]:bg-gray-50"
+            columnHeaderClassName="text-muted-foreground text-2xs uppercase border-none"
+            columnSelectedClassName="bg-muted border-primary"
+            rowClassName="[&:hover>div]:bg-muted"
             tableClassName="rounded-3px"
           />
         </div>

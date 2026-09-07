@@ -19,6 +19,7 @@ import { createRequire } from 'module'
 import { getDirectories } from 'nitro-web/util'
 
 const _require = createRequire(import.meta.url)
+
 const isBuild = process.env.NODE_ENV == 'production'
 const nitroVersion = _require('./package.json').version
 
@@ -306,7 +307,7 @@ export const getConfig = (config) => {
       }),
       new MiniCssExtractPlugin({ filename: `assets/bundle.[name]${isBuild ? '.[contenthash]' : ''}.css` }),
       new HtmlWebpackPlugin({ template: clientDir + 'index.html', filename: distDir + 'index.html' }),
-      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPathResolved, NAME: name }),
+      new InterpolateHtmlPlugin(HtmlWebpackPlugin, { PUBLIC_PATH: publicPathResolved, NAME: name, THEME: client?.theme || 'system' }),
       new CleanTerminalPlugin({ skipFirstRun: true }),
       // !isBuild && new ReactRefreshWebpackPlugin({ overlay: false }),
     ].filter(Boolean),

@@ -43,10 +43,10 @@ export function Button({
   const colors = {
     'primary': 'bg-primary hover:bg-primary-hover ring-transparent text-white [&>.spinner]:border-white',
     'secondary': 'bg-secondary hover:bg-secondary-hover ring-transparent text-white [&>.spinner]:border-white',
-    'black': 'bg-black hover:bg-gray-800 ring-transparent text-white [&>.spinner]:border-white',
-    'dark': 'bg-gray-800 hover:bg-gray-700 ring-transparent text-white [&>.spinner]:border-white',
-    'white': 'bg-white hover:bg-gray-50 ring-gray-300 text-gray-900 [&>.spinner]:border-black', // maybe change to text-foreground
-    'clear': 'hover:bg-gray-50 ring-gray-300 hover:text-foreground [&>.spinner]:border-foreground !shadow-none',
+    'black': 'bg-foreground hover:bg-foreground/90 ring-transparent text-background [&>.spinner]:border-background',
+    'dark': 'bg-foreground/90 hover:bg-foreground/80 ring-transparent text-background [&>.spinner]:border-background',
+    'white': 'bg-surface hover:bg-muted ring-input-border text-foreground [&>.spinner]:border-foreground',
+    'clear': 'hover:bg-muted ring-input-border hover:text-foreground [&>.spinner]:border-foreground !shadow-none',
     'danger': 'bg-danger hover:bg-danger-hover ring-transparent text-white [&>.spinner]:border-white',
     'warning': 'bg-warning hover:bg-warning-hover ring-transparent text-white [&>.spinner]:border-white',
     'info': 'bg-info hover:bg-info-hover ring-transparent text-white [&>.spinner]:border-white',
@@ -101,7 +101,7 @@ export function Spinner({ className, absoluteCenter }: { className?: string, abs
   const absoluteCenterClass = absoluteCenter ? 'absolute top-[50%] left-[50%] ml-[-0.5rem] mt-[-0.5rem]' : ''
   return (
     <span
-      className={twMerge(`spinner border-black border-2 inline-block size-[1em] rounded-full animate-spin ${absoluteCenterClass} ${className||''} !border-t-transparent `)}
+      className={twMerge(`spinner border-foreground border-2 inline-block size-[1em] rounded-full animate-spin ${absoluteCenterClass} ${className||''} !border-t-transparent `)}
     />
   )
 }

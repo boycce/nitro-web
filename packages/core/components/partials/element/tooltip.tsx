@@ -118,7 +118,7 @@ export function Tooltip({
         <DefaultIcon
           size={14}
           tabIndex={0}
-          className={twMerge('cursor-help outline-none', pinned ? 'text-primary' : 'text-[#9A9A9A]', iconClassName)}
+          className={twMerge('cursor-help outline-none', pinned ? 'text-primary-text' : 'text-[#9A9A9A]', iconClassName)}
           onClick={() => setPinned(p => !p)}
         />
       )}
@@ -128,7 +128,7 @@ export function Tooltip({
           role="tooltip"
           style={{ maxWidth, ...gap }}
           className={twMerge(
-            'absolute z-50 w-max px-4 py-3 rounded-lg bg-black text-white text-xs font-medium shadow-md',
+            'absolute z-50 w-max px-4 py-3 rounded-lg bg-foreground text-background text-xs font-medium shadow-md',
             // interactive when pinned or hoverable so links/text/hover work, else click-through
             pinned || contentHoverable ? 'pointer-events-auto' : 'pointer-events-none',
             pos[actualSide],
