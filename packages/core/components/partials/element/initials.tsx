@@ -30,7 +30,7 @@ export function Initials({ initials, color, colorBg, colors, opacityBg, size, is
   if ((colorFgClass || colorBgClass) && (!color || !colorBg)) {
     throw new Error('When using className colors, `color` and `colorBg` params are required')
   }
-  // Check if hex colors were passed, otherwise use the color by letter
+  // Check if hex colors were passed, otherwise use the themed color by letter
   const colorFgHex = colorFgClass ? undefined : (color || getColorByLetter(initials, colors))
   const colorBgHex = colorBgClass ? undefined : (colorBg || colorFgHex)
 
@@ -42,7 +42,7 @@ export function Initials({ initials, color, colorBg, colors, opacityBg, size, is
       className={twMerge(
         (
           'nitro-initials flex-shrink-0 inline-flex items-center justify-center font-bold text-[11px] size-[24px] relative rounded-md ' +
-          `overflow-hidden ring-1 ring-inset ring-[#00000012] ${colorFgClass}`
+          `overflow-hidden ring-1 ring-inset ring-foreground/10 ${colorFgClass}`
         ),
         sizeClasses(size || 'normal'),
         isRound && 'rounded-full',
@@ -59,8 +59,9 @@ export function Initials({ initials, color, colorBg, colors, opacityBg, size, is
   )
 }
 
+// Default palette lives in nitro-web/client/css/theme.css (--initials-1..7) so it can differ per theme
 export function getColorByLetter(letter: string, colors?: string[]) {
-  const colors2 = colors || ['#067306', '#AA33FF', '#FF54AF', '#F44336', '#c03c3c', '#5451e0', '#d88c1b']
+  const colors2 = colors || [1, 2, 3, 4, 5, 6, 7].map(i => `rgb(var(--initials-${i}))`)
   const charIndex = letter.toLowerCase().charCodeAt(0) - 97
   const charIndexLimited = (charIndex < 0 || charIndex > 25) ? 25 : charIndex
   const index = Math.round(charIndexLimited / 25 * (colors2.length-1))

@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom/client'
 import { axios, camelCase, pick, toArray, setTimeoutPromise } from 'nitro-web/util'
 import { injectedConfig, preloadedStoreData, exposedStoreData } from './index'
 import { Config, Store } from 'nitro-web/types'
+import { applyTheme } from '../components/partials/element/theme-toggle'
 
 type StoreContainer = { 
   Provider: React.FC<{ children: ReactNode }> 
@@ -46,6 +47,7 @@ export async function setupApp(config: Config, storeContainer: StoreContainer, l
   if (!(window as unknown as { useTracked: unknown }).useTracked) {
     throw new Error('useTracked is not defined globally before setupApp()')
   }
+  applyTheme()
 
   // Fetch state and init app
   const settings: Settings = {
