@@ -1,6 +1,6 @@
 {
   "name": "nitro-web",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "repository": "github:boycce/nitro-web",
   "homepage": "https://boycce.github.io/nitro-web/",
   "description": "Nitro is a battle-tested, modular base project to turbocharge your projects, styled using Tailwind 🚀",
@@ -33,7 +33,7 @@
     "patch": "npm run types && standard-version -a --release-as patch && npm publish && cd ../webpack && npm publish && git push --follow-tags",
     "republish": "npm publish && cd ../webpack && npm publish",
     "test": "node --test tests/*.test.js",
-    "types": "tsc --ignoreConfig --strict false --rootDir . util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
+    "types": "tsc --strict false --rootDir . util.js ./server/index.js --declaration --declarationMap --allowJs --emitDeclarationOnly --jsx react-jsx --esModuleInterop --skipLibCheck --outDir types && cd ../webpack && npm run types -w . && cd ../core"
   },
   "dependencies": {
     "@date-fns/tz": "^1.4.1",

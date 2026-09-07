@@ -8,7 +8,7 @@ export function updateMemberRole(req: any, res: any): Promise<void>;
 export function removeMember(req: any, res: any): Promise<void>;
 export function userFindFromProvider(query: any, passwordToCheck: any, ...args: any[]): Promise<any>;
 export function userSigninGetStore(user: any, isDesktop: any): Promise<{
-    jwt: string;
+    jwt: any;
     user: any;
 }>;
 export function getStore(user: any, _req: any): Promise<{
@@ -40,15 +40,15 @@ export function tokenCreate(modelName: any, id: any): Promise<any>;
 export function tokenParse(token: any, modelName: any, maxAgeMs?: number): any;
 export function addUserToCompany(companyId: any, userId: any, role: any, token: any, justValidate: any): Promise<any>;
 export function tokenConfirmForReset(req: any): Promise<{
-    jwt: string;
+    jwt: any;
     user: any;
 }>;
 export function tokenConfirmForSingleTenant(req: any, isReset: any): Promise<{
-    jwt: string;
+    jwt: any;
     user: any;
 }>;
 export function tokenConfirmForMultiTenant(req: any): Promise<{
-    jwt: string;
+    jwt: any;
     user: any;
 } | {
     isExistingUser: boolean;
