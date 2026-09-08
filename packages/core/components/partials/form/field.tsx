@@ -196,7 +196,7 @@ function getInputClasses({ error, Icon, iconPos, type }: { error?: Error, Icon?:
     (type == 'file' 
       ? 'file:inline-flex file:shrink-0 file:cursor-pointer file:items-center file:justify-center ' +
         'file:rounded file:border-0 file:bg-transparent file:py-[0.1em] file:my-[-0.1em] file:px-[0.4em] file:ml-[-0.4em] file:mr-[0.7em] file:text-input-base file:font-medium file:text-input ' +
-        'file:outline-none file:bg-muted hover:file:bg-border ' 
+        'file:outline-none file:bg-accent hover:file:bg-border ' 
       : ''
     ) +
     'nitro-input'

@@ -75,7 +75,7 @@ export function Checkbox({
                       checked={value}
                       className={
                         twMerge(
-                          `${type === 'radio' ? 'rounded-full' : 'rounded'} appearance-none border border-input-border bg-input-bg forced-colors:appearance-auto disabled:border-input-border disabled:bg-muted disabled:checked:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ` + 
+                          `${type === 'radio' ? 'rounded-full' : 'rounded'} appearance-none border border-input-border bg-input-bg forced-colors:appearance-auto disabled:border-input-border disabled:bg-input-disabled-bg disabled:checked:bg-input-disabled-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ` + 
                           // Variable-selected theme colors (was .*-blue-600)
                           'checked:border-variable-selected checked:bg-variable-selected indeterminate:border-variable-selected indeterminate:bg-variable-selected focus-visible:outline-variable-selected ' +
                           // Dark mode not used yet... dark:focus-visible:outline-blue-800
@@ -131,7 +131,7 @@ export function Checkbox({
                       style={{ width: toggleWidth, height: toggleHeight }}
                       className={
                         twMerge(
-                          'block bg-muted rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 p-2 ' +
+                          'block bg-border rounded-full transition-colors peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 p-2 ' +
                           // Variable-selected theme colors (was .*-blue-600)
                           'peer-checked:bg-variable-selected peer-focus-visible:outline-variable-selected ' +
                           labelClassName

@@ -217,7 +217,7 @@ export function FieldDate({
                 // useffect in the timepicker will use the previous `value`
                 value={getStringValue(props.value, props.defaultValue)} 
                 onChange={onChange<Timestamp>} 
-                className={`border-l border-border ${props.mode == 'single' ? 'min-h-[0]' : ''}`}
+                className={`border-l border-accent ${props.mode == 'single' ? 'min-h-[0]' : ''}`}
                 referenceTimestamp={referenceTimestamp} 
                 tz={tz}
                 // _data={{ name: props.name }}
@@ -226,7 +226,7 @@ export function FieldDate({
           </div>
           {
             props.mode == 'time' && 
-            <div className="flex justify-between p-2 border-t border-border">
+            <div className="flex justify-between p-2 border-t border-accent">
               <Button color="secondary" size="xs" onClick={() => onNowClick()}>Now</Button>
               <Button color="primary" size="xs" onClick={() => dropdownRef.current?.setIsActive(false)}>Done</Button>
             </div>

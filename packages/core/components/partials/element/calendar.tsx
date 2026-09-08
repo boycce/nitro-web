@@ -124,7 +124,7 @@ export function Calendar({ value, numberOfMonths, month: monthProp, className, p
       day_button: `${d.day_button} ${dayButtonClassName}`,
 
       // States
-      focused: `${d.focused} [&>button]:bg-muted [&>button]:border-border`,
+      focused: `${d.focused} [&>button]:bg-border [&>button]:border-border`,
       range_start: `${d.range_start} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
       range_end: `${d.range_end} [&>button]:!bg-input-border-focus [&>button]:!border-input-border-focus`,
       selected: `${d.selected} font-normal `

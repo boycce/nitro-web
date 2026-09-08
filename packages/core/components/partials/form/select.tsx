@@ -449,7 +449,7 @@ function LimitedValueContainer({ chips, rest, maxLines, ...props }:
       <div ref={lastRow} class="w-full min-w-0 flex flex-nowrap items-center gap-1 overflow-hidden [&>*]:shrink-0">
         {chips.slice(split.upper, split.upper + split.last)}
         {hidden > 0 && (
-          <span class="self-stretch flex items-center rounded bg-muted text-muted-foreground text-xs px-1.5 whitespace-nowrap">
+          <span class="self-stretch flex items-center rounded bg-accent text-muted-foreground text-xs px-1.5 whitespace-nowrap">
             +{hidden}
           </span>
         )}
@@ -555,7 +555,7 @@ const selectClassNames = {
   },
   multiValue: 'bg-primary text-white rounded items-center pl-2 pr-1.5 gap-1.5',
   multiValueLabel: 'text-xs',
-  multiValueRemove: 'border border-border bg-clip-content bg-surface rounded-md text-foreground hover:bg-red-50',
+  multiValueRemove: 'border border-black/10 bg-clip-content bg-white rounded-md text-black hover:bg-red-50', // fixed colours, sits on the primary chip
   placeholder: 'text-input-placeholder truncate',
   singleValue: {
     base: 'text-input !overflow-visible min-w-0 flex items-center',
@@ -564,9 +564,9 @@ const selectClassNames = {
   },
   // Icon indicators
   clearIndicator: 'text-muted-foreground p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground ml-[-0.8em]',
-  dropdownIndicator: 'p-1 hover:bg-muted text-muted-foreground rounded-md hover:text-foreground',
+  dropdownIndicator: 'p-1 hover:bg-accent text-muted-foreground rounded-md hover:text-foreground',
   indicatorsContainer: 'p-1 pl-0 pr-2 gap-1 relative', // relative so the hitbox goes over the control
-  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-muted before:w-px before:h-full',
+  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-accent before:w-px before:h-full',
   // Dropdown menu
   menu: 'mt-1.5 border border-dropdown-ul-border bg-surface rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
   groupHeading: 'ml-3 mt-2 mb-1 text-muted-foreground text-input-base',
@@ -574,7 +574,7 @@ const selectClassNames = {
   option: {
     base: 'relative px-3 py-2 !flex items-center gap-2 cursor-default',
     hover: 'bg-muted',
-    selected: '!bg-muted text-dropdown-selected-foreground',
+    selected: '!bg-accent text-dropdown-selected-foreground',
   },
   // Nitro specific
   flag: 'align-middle text-[1.2em] leading-[1em] mr-1.5 flex-shrink-0',

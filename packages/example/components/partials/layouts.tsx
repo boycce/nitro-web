@@ -54,7 +54,7 @@ export function Layout2() {
           <Outlet />
         </div>
 
-        <div class="max-w-[700px] mx-auto w-full px-5 pb-4 flex items-center text-sm text-muted-foreground">
+        <div class="max-w-[700px] mx-auto w-full px-5 pb-4 flex items-center text-sm text-foreground">
           <ul class="flex-1 flex gap-4 list-style-none">
             <li><Link class="underline1" to="/">Home</Link></li>
             <li><Link class="underline1" to="/about">About</Link></li>

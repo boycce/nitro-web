@@ -119,7 +119,7 @@ function SidebarContents ({ Logo, menu, links, themeToggle }: SidebarProps) {
                     className={classNames(
                       isActive(item)
                         ? 'bg-muted text-primary-text'
-                        : 'text-foreground/80 hover:bg-muted hover:text-primary-text',
+                        : 'text-foreground/85 hover:bg-muted hover:text-primary-text',
                       'group flex gap-x-3 items-center rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >
@@ -147,7 +147,7 @@ function SidebarContents ({ Logo, menu, links, themeToggle }: SidebarProps) {
                     className={classNames(
                       isActive(team)
                         ? 'bg-muted text-primary-text'
-                        : 'text-foreground/80 hover:bg-muted hover:text-primary-text',
+                        : 'text-foreground/85 hover:bg-muted hover:text-primary-text',
                       'group flex gap-x-3 rounded-md p-2 text-md/6 font-semibold'
                     )}
                   >

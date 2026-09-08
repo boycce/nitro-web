@@ -14,7 +14,7 @@
 
 @layer base {
   .border-bottom-with-space {
-    @apply relative mb-[6px] after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-muted;
+    @apply relative mb-[6px] after:content-[""] after:absolute after:bottom-[-4px] after:left-0 after:h-[1px] after:w-full after:bg-border;
   }
 }
 

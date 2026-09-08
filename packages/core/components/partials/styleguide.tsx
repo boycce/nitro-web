@@ -13,7 +13,6 @@ const allGroups = [
   'Links', 
   'Dropdowns', 
   'Filters', 
-  'Theme', 
   'Button Colors & Sizes', 
   'Button Icons', 
   'Loading Elements', 
@@ -23,6 +22,7 @@ const allGroups = [
   'Date Inputs', 
   'File Inputs & Calendar & Time', 
   'Tables', 
+  'Theme', 
   'Modals & Notifications', 
   'Custom Components',
 ] as const
@@ -33,6 +33,21 @@ const statusColors = function(status: string) {
     approved: 'bg-green-400',
     rejected: 'bg-red-400',
   }[status]
+}
+
+// Section heading with an id, click to jump to it (works with hash routing too)
+function Heading({ children }: { children: string }) {
+  const id = children.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+  const jump = (e: React.MouseEvent) => {
+    e.preventDefault()
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
+  }
+  return (
+    <h2 id={id} class="h3 group relative scroll-mt-4">
+      <a href={`#${id}`} onClick={jump} class="absolute -left-4 inset-y-0 flex items-center text-base text-foreground opacity-0 group-hover:opacity-100">#</a>
+      <a href={`#${id}`} onClick={jump}>{children}</a>
+    </h2>
+  )
 }
 
 type StyleguideProps = {
@@ -268,7 +283,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Links') && (
         <div>
-          <h2 class="h3">Links</h2>
+          <Heading>Links</Heading>
           <div class="mb-6">
             <a class="mr-2" href="#">Default</a>
             <a class="underline1 is-active mr-2" href="#">Underline1</a>
@@ -279,7 +294,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
   
       {visibleGroups.includes('Dropdowns') && (
         <div>
-          <h2 class="h3">Dropdowns</h2>
+          <Heading>Dropdowns</Heading>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
             <div>
               <Dropdown options={options} minWidth="250px">
@@ -313,7 +328,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Filters') && (
         <div>
-          <h2 class="h3">Filters</h2>
+          <Heading>Filters</Heading>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
             {/* Filter dropdown */}
             <Filters
@@ -341,25 +356,9 @@ export function Styleguide({ className, elements, children, currencies, groups }
         </div>
       )}
 
-      {visibleGroups.includes('Theme') && (
-        <div>
-          <h2 class="h3">Theme</h2>
-          <div class="flex flex-wrap gap-2 mb-6">
-            {['background', 'foreground', 'surface', 'muted', 'muted-foreground', 'border', 'input-bg', 'overlay'].map(token => (
-              <div
-                key={token}
-                class={`w-28 h-8 rounded-md border flex items-center px-2 text-xs bg-${token} ${token.match(/foreground|overlay/) ? 'text-background' : ''}`}
-              >
-                {token}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
       {visibleGroups.includes('Button Colors & Sizes') && (
         <div>
-          <h2 class="h3">Button Colors & Sizes</h2>
+          <Heading>Button Colors & Sizes</Heading>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
             {/* Colors */}
             <div><Button color="primary">primary (default)</Button></div>
@@ -383,7 +382,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Button Icons') && (
         <div>
-          <h2 class="h3">Button Icons</h2>
+          <Heading>Button Icons</Heading>
           <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
             {/* Icons */}
             <div><Button IconLeft={<Check size={19} className="-my-5" />}>IconLeft</Button></div>
@@ -403,7 +402,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Loading Elements') && (
         <div>
-          <h2 class="h3">Loading Elements</h2>
+          <Heading>Loading Elements</Heading>
           <div class="flex flex-wrap gap-x-6 gap-y-4 items-center mb-6">
             <div><Spinner /></div>
             <div><Spinner className="border-secondary" /></div>
@@ -415,7 +414,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Varients') && (
         <div>
-          <h2 class="h3">Varients</h2>
+          <Heading>Varients</Heading>
           <div class="grid grid-cols-3 gap-x-6">
             <div>
               <label for="input2">Toggles</label>
@@ -441,7 +440,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Selects') && (
         <div>
-          <h2 class="h3">Selects</h2>
+          <Heading>Selects</Heading>
           <div class="flex gap-x-6">
             <div class="flex-1">
               <label for="action">Default</label>
@@ -622,7 +621,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Inputs') && (
         <div>
-          <h2 class="h3">Inputs</h2>
+          <Heading>Inputs</Heading>
           <div class="grid grid-cols-3 gap-x-6">
             <div>
               <label for="firstName">First Name</label>
@@ -694,7 +693,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('Date Inputs') && (
         <div>
-          <h2 class="h3">Date Inputs</h2>
+          <Heading>Date Inputs</Heading>
           <div class="grid grid-cols-1 gap-x-6 sm:grid-cols-3">
             <div>
               <label for="dateTime">Date with time</label>
@@ -745,7 +744,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
 
       {visibleGroups.includes('File Inputs & Calendar & Time') && (
         <div>
-          <h2 class="h3">File Inputs & Calendar & Time</h2>
+          <Heading>File Inputs & Calendar & Time</Heading>
           <div class="grid grid-cols-3 gap-x-6">
             <div>
               <label for="avatar">Avatar</label>
@@ -783,7 +782,7 @@ export function Styleguide({ className, elements, children, currencies, groups }
       {visibleGroups.includes('Tables') && (
         <div>
           <div class="flex justify-between items-start">
-            <h2 class="h3">Tables</h2>
+            <Heading>Tables</Heading>
             <Field 
               name="tableFilter"
               type="search"
@@ -856,10 +855,26 @@ export function Styleguide({ className, elements, children, currencies, groups }
         </div>
       )}
 
+      {visibleGroups.includes('Theme') && (
+        <div>
+          <Heading>Theme</Heading>
+          <div class="flex flex-wrap gap-2 mb-6">
+            {['background', 'foreground', 'surface', 'muted', 'muted-foreground', 'border', 'input-bg', 'overlay'].map(token => (
+              <div
+                key={token}
+                class={`w-28 h-8 rounded-md border flex items-center px-2 text-xs bg-${token} ${token.match(/foreground|overlay/) ? 'text-background' : ''}`}
+              >
+                {token}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {visibleGroups.includes('Modals & Notifications') && (
         <React.Fragment>
           <div>
-            <h2 class="h3">Modals & Notifications</h2>
+            <Heading>Modals & Notifications</Heading>
             <div class="flex flex-wrap gap-x-6 gap-y-4 mb-6">
               <Button color="primary" onClick={() => setShowModal1(true)}>Modal (default)</Button>
               <Button color="danger" onClick={() => setStore((s) => ({ ...s, message: { text: 'Error.', type: 'error' }}))}>

@@ -3,9 +3,9 @@ import { injectedConfig } from 'nitro-web'
 
 export function Dashboard() {
   const [store] = useTracked()
-  const textColor = store.apiAvailable ? 'text-green-700' : injectedConfig.isStatic ? 'text-foreground' : 'text-pink-700'
+  const textColor = store.apiAvailable ? 'text-green-700 dark:text-green-400' : injectedConfig.isStatic ? 'text-foreground/85' : 'text-pink-700 dark:text-pink-400'
   const fillColor = store.apiAvailable ? 'fill-green-500' : injectedConfig.isStatic ? 'fill-muted-foreground' : 'fill-pink-500'
-  const bgColor = store.apiAvailable ? 'bg-green-100' : injectedConfig.isStatic ? 'bg-muted' : 'bg-pink-100'
+  const bgColor = store.apiAvailable ? 'bg-green-100 dark:bg-green-500/15' : injectedConfig.isStatic ? 'bg-foreground/[0.07]' : 'bg-pink-100 dark:bg-pink-500/15'
 
   return (
     <div css={style}>

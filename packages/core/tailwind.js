@@ -11,10 +11,13 @@ export const themeDefaults = {
     'background': '#fdfdfd',
     'foreground': '#111827', // gray-900
     'surface': '#ffffff', // cards, sidebar, dropdowns, modals
-    'muted': '#f9fafb', // hover rows, selected options (gray-50)
+    'muted': '#f9fafb', // hover rows (gray-50)
+    'accent': '#f3f4f6', // selected options, chips, a step above muted (gray-100)
     'muted-foreground': '#6b7280', // gray-500
-    'border': '#e5e7eb', // lines, gray-200
+    'border': '#e7e7e7', // lines
     'input-border': '#d1d5db', // gray-300
+    'input-placeholder': '#9ca3af', // gray-400
+    'input-disabled': '#9ca3af',
     'input-bg': '#ffffff',
     'input-disabled-bg': '#f3f4f6', // gray-100
     'overlay': '#6b7280', // used with opacity, e.g. bg-overlay/70
@@ -26,9 +29,12 @@ export const themeDefaults = {
     'foreground': '#fafafa', // zinc-50
     'surface': '#18181b', // zinc-900
     'muted': '#27272a', // zinc-800
+    'accent': '#303035',
     'muted-foreground': '#a1a1aa', // zinc-400
     'border': '#3a3a40',
     'input-border': '#3a3a40',
+    'input-placeholder': '#71717a', // zinc-500
+    'input-disabled': '#71717a',
     'input-bg': '#1c1c1f',
     'input-disabled-bg': '#27272a',
     'overlay': '#000000',

@@ -61,8 +61,6 @@ export default {
         'success-hover': lighten(colors.green[500], 0.05),
         // Nitro element colors
         'input': v('foreground'),
-        'input-placeholder': v('muted-foreground'),
-        'input-disabled': v('muted-foreground'),
         'input-border-focus': '#4c50f9',
         'dropdown-selected-foreground': v('primary-text'),
         'dropdown-ul-border': v('border'),
@@ -113,10 +111,13 @@ export default {
         'background': '#fdfdfd',
         'foreground': '#111827',
         'surface': '#ffffff', // cards, sidebar, dropdowns, modals
-        'muted': '#f9fafb', // hover rows, selected options
+        'muted': '#f9fafb', // hover rows
+        'accent': '#f3f4f6', // selected options, chips, a step above muted
         'muted-foreground': '#6b7280',
-        'border': '#e5e7eb', // lines
+        'border': '#e7e7e7', // lines
         'input-border': '#d1d5db',
+        'input-placeholder': '#9ca3af',
+        'input-disabled': '#9ca3af',
         'input-bg': '#ffffff',
         'input-disabled-bg': '#f3f4f6',
         'overlay': '#6b7280', // used with opacity, e.g. bg-overlay/70
@@ -127,9 +128,12 @@ export default {
         'foreground': '#fafafa',
         'surface': '#18181b',
         'muted': '#27272a',
+        'accent': '#303035',
         'muted-foreground': '#a1a1aa',
         'border': '#3a3a40',
         'input-border': '#3a3a40',
+        'input-placeholder': '#71717a',
+        'input-disabled': '#71717a',
         'input-bg': '#1c1c1f',
         'input-disabled-bg': '#27272a',
         'overlay': '#000000',
