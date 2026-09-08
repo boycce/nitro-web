@@ -38,6 +38,7 @@ export type TableProps<T> = {
   rowSideColor?: (row: T|undefined, type: TableRowType) => { className: string, width: number }
   rowGap?: number
   rowOnClick?: (row: T) => void
+  rowSelectable?: (row: T) => boolean // rows returning false get no checkbox and are skipped by select all
   rowLink?: (row: T) => string
   columnGap?: number
   columnPaddingX?: number
@@ -78,6 +79,7 @@ export function Table<T extends TableRow>({
   rowLinesMax, 
   rowLink,
   rowOnClick,
+  rowSelectable,
   rowSideColor,
   // Class names
   className,
@@ -120,15 +122,17 @@ export function Table<T extends TableRow>({
     return cols
   }, [columnsProp])
 
+  const selectableRows = useMemo(() => (rows ?? []).filter(row => !rowSelectable || rowSelectable(row)), [rows, rowSelectable])
+
   const onSelect = useCallback((idOrAll: string, checked: boolean) => {
     setSelectedRowIds((o) => {
-      if (idOrAll == 'all' && checked) return (rows ?? []).map(row => row._id || '')
+      if (idOrAll == 'all' && checked) return selectableRows.map(row => row._id || '')
       else if (idOrAll == 'all' && !checked) return []
       else if (o.includes(idOrAll) && !checked) return o.filter(id => id != idOrAll)
       else if (!o.includes(idOrAll) && checked) return [...o, idOrAll]
       else return o
     })
-  }, [selectedRowIds, rows])
+  }, [selectedRowIds, selectableRows])
   
   const getAlignClass = useCallback((align: TableColumn['align'], _returnJustify?: boolean) => {
     if (_returnJustify) return align == 'left' ? '' : align == 'center' ? 'justify-center' : 'justify-end'
@@ -141,8 +145,8 @@ export function Table<T extends TableRow>({
   // Drive the header checkbox's indeterminate state when some (but not all) rows are selected
   useEffect(() => {
     const input = document.querySelector<HTMLInputElement>(`input[name="checkbox-all-${rand}"]`)
-    if (input) input.indeterminate = selectedRowIds.length > 0 && selectedRowIds.length < rows.length
-  }, [selectedRowIds, rows, rand])
+    if (input) input.indeterminate = selectedRowIds.length > 0 && selectedRowIds.length < selectableRows.length
+  }, [selectedRowIds, selectableRows, rand])
 
   // --- Sorting ---
 
@@ -218,7 +222,7 @@ export function Table<T extends TableRow>({
                                 size={checkboxSize}
                                 name={`checkbox-all-${rand}`}
                                 hitboxPadding={5}
-                                checked={rows.length > 0 && selectedRowIds.length === rows.length}
+                                checked={selectableRows.length > 0 && selectedRowIds.length === selectableRows.length}
                                 className='!m-0 py-[5px]' // py-5 is required for hitbox (restricted to tabel cell height)
                                 checkboxClassName={twMerge('border-foreground shadow-[0_1px_2px_0px_#0000001c]', checkboxClassName)}
                                 onChange={(e) => onSelect('all', e.target.checked)}
@@ -309,7 +313,7 @@ export function Table<T extends TableRow>({
                             <div className={isLoading && showLoadingInline ? 'opacity-0 pointer-events-none' : ''}>
                               {
                                 col.value == 'checkbox'
-                                  ? <Checkbox 
+                                  ? (!rowSelectable || rowSelectable(row)) && <Checkbox 
                                       size={checkboxSize} 
                                       name={`checkbox-${row._id}`} 
                                       onChange={(e) => onSelect(row?._id || '', e.target.checked)}
