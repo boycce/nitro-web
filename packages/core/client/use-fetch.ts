@@ -39,7 +39,7 @@ export function useFetchDoc<T>(endpoint?: string, queryString?: string) {
 
 /** Fetches a collection */
 export function useFetchCol<T>(endpoint?: string, queryString?: string) {
-  return useFetchResource<T>(endpoint, queryString) as CollectionReturn<T>
+  return useFetchResource<T>(endpoint, queryString || '') as CollectionReturn<T>
 }
 
 /** Fetches a shared collection (e.g. options), which is cached on the store */
