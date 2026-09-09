@@ -19,7 +19,8 @@ export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgu
 
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
- * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ * @typedef {{ baseUrl?: string, emailFrom?: string, env?: string, mailgunDomain?: string, mailgunKey?: string,
+ *   name?: string, pwd?: string }} Config
  *
  * @param {object} opts
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
@@ -142,7 +143,7 @@ async function getTemplate(settings) {
     let template = nunjucksEnv.getTemplate(templateName + '.html', true)
     let html = template.render(settings.swigData || {})
     // Inline CSS
-    if (!settings.skipCssInline || !settings.test) {
+    if (!settings.skipCssInline) {
       try {
         // First try to inline the CSS from the user templates directory
         html = await inlineCssForPath(html, settings.emailTemplateDir)
