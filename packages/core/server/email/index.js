@@ -27,6 +27,8 @@ export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgu
  * @param {Config} opts.config - Config object
  * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>" (not sent in development)
  * @param {object} [opts.data] - common template data shared across recipients
+ * @param {{ filename: string, content?: Buffer|string, path?: string, contentType?: string, cid?: string }[]}
+ *   [opts.attachments] - files to attach, in nodemailer's shape; one carrying a `cid` is embedded inline
  * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun). Inherits data.
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
  * @param {string} [opts.replyTo] - reply-to address, e.g. "Bruce<bruce@wayneenterprises.com>"
@@ -42,6 +44,7 @@ export async function sendEmail({
   config,
   bcc, 
   data,
+  attachments,
   swigData,
   from, 
   replyTo, 
@@ -50,8 +53,10 @@ export async function sendEmail({
   skipCssInline,
   test,  
 }) {
-  const isTest = config.emailTestMode || test
   if (!config) throw new Error('sendEmail: `config` missing')
+  // Coerced rather than read straight: config.emailTestMode usually comes from process.env, where every value
+  // is a string, so 'false' would otherwise read as true and silently discard every email.
+  const isTest = isTruthy(config.emailTestMode) || test
   for (const key of requiredEmailConfigKeys) {
     if (!config[key]) throw new Error(`sendEmail: config.${key} is missing`)
   }
@@ -105,6 +110,7 @@ export async function sendEmail({
   }
 
   let settings = {
+    attachments: attachments,
     bcc: bcc,
     emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
@@ -170,6 +176,16 @@ async function inlineCssForPath(html, path) {
   return await inlineCss(html, { url })
 }
 
+/**
+ * Whether an option is on. Anything arriving from the environment is a string, so the words that mean 'off'
+ * are spelled out; everything else follows normal truthiness.
+ * @param {unknown} value
+ */
+function isTruthy(value) {
+  if (typeof value === 'string') return !['', 'false', '0', 'no', 'off'].includes(value.toLowerCase())
+  return !!value
+}
+
 function getNameEmail(nameEmail) {
   // Splits 'Bruce<bruce@gmail.com>' into [name, email]
   nameEmail = nameEmail.split(',')[0]
@@ -203,6 +219,7 @@ async function sendWithMailgun(settings, html) {
   const processedhtml = await processTemplate(settings, html)
   const mailgunOpts = {
     ...(settings.bcc && !settings.isDev? { bcc: settings.bcc } : {}),
+    ...(settings.attachments?.length? { attachments: settings.attachments } : {}),
     from: settings.from,
     html: processedhtml,
     'h:Reply-To': settings.replyTo,
@@ -215,7 +232,12 @@ async function sendWithMailgun(settings, html) {
     }),
   }
   if (settings.test && settings.isDev) {
-    console.info('Test mode: sendEmail mailgunOpts', { ...mailgunOpts, html: null, 'recipient-variables': settings.recipientVariables })
+    console.info('Test mode: sendEmail mailgunOpts', {
+      ...mailgunOpts,
+      html: null,
+      'recipient-variables': settings.recipientVariables,
+      ...(mailgunOpts.attachments? { attachments: mailgunOpts.attachments.map(o => o.filename) } : {}),
+    })
   }
   if (settings.test) return processedhtml
 
