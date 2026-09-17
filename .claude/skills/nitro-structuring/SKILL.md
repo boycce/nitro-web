@@ -12,11 +12,11 @@ description: For projects using nitro-web only. How to name, place and split fil
   - third party imports
   - local imports 
   - reusable types (if applicable)
-  - constants/vars
+  - constants/vars (single-line only; multi-line configs drop to the bottom)
   - Main export (see nitro-page skill for component order)
   - referenced/sub components (top down)
   - page routes (if applicable)
-  - reusable functions (if there are many separate via a section banner)
+  - reusable functions + multi-line config consts (group at the bottom under section banners)
 
 # Naming and placement
 
@@ -148,6 +148,24 @@ description: For projects using nitro-web only. How to name, place and split fil
   Don't export a hook plus helper functions for a single consumer. State, and the row/item helpers that read it, live
   inside the component; callers pass props.
 
+  A component that earns its file owns its own state, effects, handlers and derived data. Give it context, not plumbing:
+
+  - Pass the fetch hook (`useFetchPo`), not the unpacked `data` + `setData` + derived lists. Let it unpack and derive.
+  - Let it call shared hooks itself (`useTracked` for toasts). Don't thread them through props.
+  - Define its handlers inside it. Never drill a list of `onSave`/`onEdit`/`onRemove` callbacks the child can own.
+  - A repeated section (per-row, per-doc) is one such component, rendered in a `.map`, not a `renderThing()` closure
+    inside the parent. If a child's props interface is getting long, move the logic **into** the child, don't inline
+    the child back into the parent.
+
+  ```tsx
+  // Bad: parent unpacks everything and drills callbacks; child is a dumb renderer
+  <DocSection doc={doc} po={po} setPo={setPo} setStore={setStore} edit={edit} setEdit={setEdit}
+    onSave={onSave} onRevert={onRevert} onIgnore={onIgnore} poLines={poLines} … />
+
+  // Good: one context prop, child owns its state + handlers
+  <DocSection doc={doc} useFetchPo={useFetchPo} highlight={id === highlightId} onRemove={() => setRemoveId(doc._id)} />
+  ```
+
 # Naming exports and internals
 
   Exports carry the entity (`ChargeTable`, `ChargeField`); file-private names drop it (`columns`, `tableClassName`,
@@ -170,7 +188,7 @@ description: For projects using nitro-web only. How to name, place and split fil
 
 # Props and comments
 
-  - One props object typed above the component (`type ThingTableProps = { … }`), keys alphabetised, a short comment
-    only on the non-obvious ones.
+  - Inline the props in the signature for a small list. Pull them out to a `type ThingTableProps = { … }` above the
+    component only when the list is large; then alphabetise the keys. Either way, a short comment only on non-obvious ones.
   - The summary comment goes **inside** the function as its first line, not as JSDoc above it.
   - Number the parts of a compound comment: `// 1) inputs move left, 2) show only red outline, 3) darken when resting`.
