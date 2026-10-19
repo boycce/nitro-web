@@ -10,7 +10,9 @@ type CommonProps = {
   rowClassName?: string
 }
 export type FilterType = (
-  | FieldProps & CommonProps
+  // `options` is forbidden on the field variant so that a filter meant as a dropdown, but missing
+  // `type: 'select'`, is a compile error rather than a text input rendered at runtime
+  | (FieldProps & CommonProps & { options?: never })
   | ({ type: 'select' } & SelectProps & CommonProps)
 )
 
