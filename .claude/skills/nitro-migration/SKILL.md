@@ -17,10 +17,6 @@ description: For projects using nitro-web only. Writing or running a database mi
   export default {
     mongodb: {
       url: (!url.match(/^mongodb/) ? 'mongodb://' : '') + url,
-      options: {
-        useNewUrlParser: true, // removes a deprecation warning when connecting
-        useUnifiedTopology: true, // removes a deprecating warning when connecting
-      },
     },
     migrationsDir: 'resources/migrations',
     changelogCollectionName: 'changelog',

@@ -25,7 +25,8 @@ description: For projects using nitro-web only. Adding a feature, client page, f
 # Component order
 
   - If possible, use the following component order: useStore/useState, use* hooks, variables, useMemo, fetch hooks, useEffect, functions/useCallback, return JSX.
-  - JSX shouldn't be split into variables since this ruins the reading flow, unless absolutely necessary. If it's getting big with distinct parts (e.g. separate handlers, useEffect calls), it's better to split it into a separate component
+  - Don't split JSX into variables, it breaks the reading flow. If it's getting big with distinct parts (own handlers, effects), split it into a separate component instead.
+  - Rare: a large component can group code by concern under banners, with the order applied inside each section.
 
 # Page routes
 

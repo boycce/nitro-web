@@ -12,11 +12,15 @@ description: For projects using nitro-web only. How to name, place and split fil
   - third party imports
   - local imports 
   - reusable types (if applicable)
-  - constants/vars (single-line only; multi-line configs drop to the bottom)
+  - constants/vars (single-line only; x3 lines or more drop to the bottom, unless they're really important to the file, then they can stay at the top)
+  - single-line constants first, then multi-line ones
+  - single-line arrow functions can sit with the constants, unless the file already has a helpers section, then they go there
+  - a memo wrapper sits directly above its component, with a short comment at the end of the same line
   - Main export (see nitro-page skill for component order)
   - referenced/sub components (top down)
   - page routes (if applicable)
   - reusable functions + multi-line config consts (group at the bottom under section banners)
+  - styles at the very bottom, after the helpers
 
 # Naming and placement
 
@@ -96,7 +100,7 @@ description: For projects using nitro-web only. How to name, place and split fil
 
 # Comment banners
 
-  A banner's total line length, indentation included, always ends at exactly 49 characters — pad the trailing dashes
+  A banner's total line length, indentation included, always ends at exactly 49 characters: pad the trailing dashes
   to reach it, not the leading ones. A nested banner starts with less room and so gets fewer dashes:
 
   ```tsx
@@ -191,4 +195,7 @@ description: For projects using nitro-web only. How to name, place and split fil
   - Inline the props in the signature for a small list. Pull them out to a `type ThingTableProps = { … }` above the
     component only when the list is large; then alphabetise the keys. Either way, a short comment only on non-obvious ones.
   - The summary comment goes **inside** the function as its first line, not as JSDoc above it.
+  - Same for objects and styled blocks: the comment goes inside as the first line, never above.
+  - A one-line arrow function that needs a comment gets a block body, so the comment can go inside.
+  - Skip comments that only restate the code.
   - Number the parts of a compound comment: `// 1) inputs move left, 2) show only red outline, 3) darken when resting`.
