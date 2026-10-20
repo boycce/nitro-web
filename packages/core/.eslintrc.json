@@ -1,4 +1,5 @@
 {
+  "ignorePatterns": ["resources/*", "!resources/migrations"],
   "extends": [
     "eslint:recommended",
     "plugin:react/recommended",
