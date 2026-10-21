@@ -1,7 +1,7 @@
 import plugin from 'tailwindcss/plugin'
 
 /**
- * Nitro theme plugin. Every key in light/dark becomes a CSS variable (:root / .dark) and a tailwind colour,
+ * Nitro theme plugin. Every key in light/dark becomes a CSS variable (:root and .light / .dark) and a tailwind colour,
  * e.g. 'surface' -> --surface, bg-surface, text-surface/50. Anything omitted uses the defaults below, and you
  * can add your own keys.
  *   plugins: [nitroTheme({ dark: { 'primary-text': '#818cf8' } })]
@@ -74,7 +74,8 @@ export default function nitroTheme(options = {}) {
       }
       return out
     }
-    addBase({ ':root': vars('light'), '.dark': vars('dark') })
+    // .light lets a light area sit inside a dark one, e.g. a white menu in a dark row
+    addBase({ ':root, .light': vars('light'), '.dark': vars('dark') })
   }, {
     theme: { extend: { colors } },
   })
