@@ -563,10 +563,10 @@ const selectClassNames = {
     disabled: 'text-input-disabled',
   },
   // Icon indicators
-  clearIndicator: 'text-muted-foreground p-1 rounded-md hover:bg-red-50 hover:text-danger-foreground ml-[-0.8em]',
+  clearIndicator: 'text-muted-foreground p-1 rounded-md hover:bg-danger/10 hover:text-danger-foreground ml-[-0.8em]',
   dropdownIndicator: 'p-1 hover:bg-accent text-muted-foreground rounded-md hover:text-foreground',
   indicatorsContainer: 'p-1 pl-0 pr-2 gap-1 relative', // relative so the hitbox goes over the control
-  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-accent before:w-px before:h-full',
+  indicatorSeparator: 'py-0.5 before:content-[""] before:block before:bg-input-separator before:w-px before:h-full',
   // Dropdown menu
   menu: 'mt-1.5 border border-dropdown-ul-border bg-surface rounded-md text-input-base overflow-hidden shadow-dropdown-ul',
   groupHeading: 'ml-3 mt-2 mb-1 text-muted-foreground text-input-base',

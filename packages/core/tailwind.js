@@ -19,7 +19,9 @@ export const themeDefaults = {
     'input-placeholder': '#9ca3af', // gray-400
     'input-disabled': '#9ca3af',
     'input-bg': '#ffffff',
+    'input-separator': '#f3f4f6', // select divider before the arrow (gray-100)
     'input-disabled-bg': '#f3f4f6', // gray-100
+    'checkbox-bg': '#ffffff',
     'overlay': '#6b7280', // used with opacity, e.g. bg-overlay/70
     'primary-text': undefined, // primary used as text, defaults to colors.primary
     'initials': ['#067306', '#aa33ff', '#ff54af', '#f44336', '#c03c3c', '#5451e0', '#d88c1b'], // <Initials /> palette
@@ -36,7 +38,9 @@ export const themeDefaults = {
     'input-placeholder': '#71717a', // zinc-500
     'input-disabled': '#71717a',
     'input-bg': '#1c1c1f',
+    'input-separator': '#303035',
     'input-disabled-bg': '#27272a',
+    'checkbox-bg': '#1c1c1f',
     'overlay': '#000000',
     'primary-text': undefined,
     'initials': ['#4ade80', '#c084fc', '#f472b6', '#f87171', '#fb923c', '#818cf8', '#facc15'],
