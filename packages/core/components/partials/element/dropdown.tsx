@@ -192,8 +192,12 @@ export const Dropdown = forwardRef(function Dropdown({
           e.stopPropagation()
           // Cancel parent <a> row navigation, unless a link INSIDE the menu was clicked
           // (closest() doesn't stop at the ul, so check the matched link is contained within it)
-          const link = (e.target as HTMLElement).closest('a[href]')
-          if (!link || !e.currentTarget.contains(link)) e.preventDefault()
+          // Only when there is a parent link, and never for form controls, whose default click toggles e.g. a checkbox
+          const target = e.target as HTMLElement
+          const link = target.closest('a[href]')
+          const hasParentLink = !!e.currentTarget.parentElement?.closest('a[href]')
+          const isControl = !!target.closest('input, label, select, textarea')
+          if (hasParentLink && !isControl && (!link || !e.currentTarget.contains(link))) e.preventDefault()
         }}
         style={{
           minWidth: minWidth,
