@@ -37,7 +37,7 @@ export type TableProps<T> = {
   rowLinesMax?: number
   rowSideColor?: (row: T|undefined, type: TableRowType) => { className: string, width: number }
   rowGap?: number
-  rowOnClick?: (row: T) => void
+  rowOnClick?: (row: T, e: React.MouseEvent) => void // the event lets a caller tell a field click from a row click
   rowSelectable?: (row: T) => boolean // rows returning false get no checkbox and are skipped by select all
   rowLink?: (row: T) => string
   columnGap?: number
@@ -260,7 +260,9 @@ export function Table<T extends TableRow>({
             rowsToRender.map((row: T, i: number) => {
               const isSelected = selectedRowIds.includes(row._id || '')
               const Element = (rowLink ? Link : 'div') as React.ElementType
-              const extraProps = rowLink ? { to: rowLink(row) } : { onClick: rowOnClick ? () => rowOnClick(row) : undefined }
+              const extraProps = rowLink
+                ? { to: rowLink(row) }
+                : { onClick: rowOnClick ? (e: React.MouseEvent) => rowOnClick(row, e) : undefined }
               return (
                 <Element
                   {...extraProps}
