@@ -343,7 +343,7 @@ function SelectBase<IsMulti extends boolean = false>({
           },
         } : {})}
       />
-      {error && <div class="mt-1.5 text-xs text-danger-foreground">{error.detail}</div>}
+      {error && <div class="mt-1.5 text-xs text-danger-foreground nitro-error">{error.detail}</div>}
     </div>
   )
 }

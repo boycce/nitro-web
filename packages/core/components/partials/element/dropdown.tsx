@@ -205,7 +205,9 @@ export const Dropdown = forwardRef(function Dropdown({
           ...(maxHeight ? { overflow: 'auto' } : {}),
         }}
         class={twMerge(
-          `${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none outline-none min-w-full z-[1] ${menuClassName||''}`
+          // cursor-default: the menu shouldn't inherit the pointer from a clickable row it happens to sit in
+          `${menuStyle} ${ready ? 'is-ready' : ''} absolute invisible opacity-0 select-none outline-none cursor-default `
+          + `min-w-full z-[1] ${menuClassName||''}`
         )}
       >
         {menuContent}
