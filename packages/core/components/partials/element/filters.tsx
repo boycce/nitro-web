@@ -56,6 +56,13 @@ export function Filters({
   const [state, setState] = [stateProp || stateDefault, setStateProp || setStateDefault]
   const count = useMemo(() => Object.keys(state).filter((k) => state[k] && filters?.some((f) => f.name === k)).length, [state, filters])
   const pushChangesToPath = usePushChangesToPath(state)
+  const flushRef = useRef(false)
+
+  useEffect(() => {
+    // Only typing is debounced, everything else flushes here (not in the handler, the new state is only available after render)
+    if (flushRef.current) pushChangesToPath.flush()
+    flushRef.current = false
+  }, [state])
 
   const Elements = {
     Button: elements?.Button || Button,
@@ -84,16 +91,17 @@ export function Filters({
     onAfterChange()
   }
 
-  async function onInputChange(e: {target: {name: string, value: unknown}}) {
+  async function onInputChange(e: {target: {name: string, value: unknown}}, isTyping: boolean) {
     // console.log('onInputChange', e.target.name, e.target.value)
     // the state is flattened for the query string, so here we se full paths as the key names e.g. 'job.location': '10')
     setState((s) => ({ ...s, [e.target.name]: e.target.value as unknown })) 
-    onAfterChange()
+    onAfterChange(isTyping)
   }
 
-  function onAfterChange() {
+  function onAfterChange(isTyping = false) {
     setLastUpdated(Date.now())
     pushChangesToPath()
+    flushRef.current = !isTyping
   }
 
   function getBasisWidth(width: 'full' | 'half' | 'third' | 'quarter' | 'fifth') {
@@ -160,7 +168,7 @@ export function Filters({
             {
               filters?.map(({label, width='full', rowClassName, ...filter}, i) => {
                 // `filter.name` is a full path e.g. 'job.location', not just the key `location`
-                const common = { className: '!mb-0', onChange: onInputChange  }
+                const common = { className: '!mb-0', onChange: (e: {target: {name: string, value: unknown}}) => onInputChange(e, filter.type !== 'select') }
                 return (
                   <div key={i} class={twMerge(getBasisWidth(width), rowClassName || '')}>
                     <div class="flex justify-between"> 
