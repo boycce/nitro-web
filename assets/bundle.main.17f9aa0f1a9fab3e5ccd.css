@@ -926,7 +926,7 @@ video {
   display: none;
 }
 
-:root {
+:root, .light {
   color-scheme: light;
   --background: 253 253 253;
   --foreground: 17 24 39;
@@ -939,7 +939,9 @@ video {
   --input-placeholder: 156 163 175;
   --input-disabled: 156 163 175;
   --input-bg: 255 255 255;
+  --input-separator: 243 244 246;
   --input-disabled-bg: 243 244 246;
+  --checkbox-bg: 255 255 255;
   --overlay: 107 114 128;
   --primary-text: 76 80 249;
   --initials-1: 6 115 6;
@@ -964,7 +966,9 @@ video {
   --input-placeholder: 113 113 122;
   --input-disabled: 113 113 122;
   --input-bg: 28 28 31;
+  --input-separator: 48 48 53;
   --input-disabled-bg: 39 39 42;
+  --checkbox-bg: 28 28 31;
   --overlay: 0 0 0;
   --primary-text: 129 140 248;
   --initials-1: 74 222 128;
@@ -2617,6 +2621,11 @@ video {
   background-color: rgb(var(--border) / var(--tw-bg-opacity, 1));
 }
 
+.bg-checkbox-bg {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--checkbox-bg) / var(--tw-bg-opacity, 1));
+}
+
 .bg-danger {
   --tw-bg-opacity: 1;
   background-color: rgb(239 68 68 / var(--tw-bg-opacity, 1));
@@ -4161,10 +4170,10 @@ video {
   width: 1px;
 }
 
-  .before\:bg-accent::before {
+  .before\:bg-input-separator::before {
   content: var(--tw-content);
   --tw-bg-opacity: 1;
-  background-color: rgb(var(--accent) / var(--tw-bg-opacity, 1));
+  background-color: rgb(var(--input-separator) / var(--tw-bg-opacity, 1));
 }
 
   .before\:bg-primary::before {
@@ -4254,6 +4263,10 @@ video {
   .hover\:bg-danger-hover:hover {
   --tw-bg-opacity: 1;
   background-color: rgb(240 82 82 / var(--tw-bg-opacity, 1));
+}
+
+  .hover\:bg-danger\/10:hover {
+  background-color: rgb(239 68 68 / 0.1);
 }
 
   .hover\:bg-foreground\/80:hover {
