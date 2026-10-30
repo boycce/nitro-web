@@ -12,7 +12,7 @@ node_modules
 # User files
 .env
 .env.local
-docs/
+/docs/
 resources/me
 migrate-mongo-config-*
 
