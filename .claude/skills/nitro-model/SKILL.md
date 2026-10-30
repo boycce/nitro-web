@@ -12,6 +12,13 @@ description: For projects using nitro-web only. Adding or changing a monastery m
   - Default export with `fields`, optional `rules`, and lifecycle hooks.
   - Keep validation first in the fields, or if not, then in the beforeValidate hook, or then in the controller at worst.
   - A field missing from `fields` is stripped on validation.
+  - End field names with a suffix that says the unit:
+    - `*Amount`: money in cents, e.g. `totalAmount`
+    - `*By`: a user ref, e.g. `preparedBy`
+    - `*Percent`: a percentage, e.g. `marginPercent`
+    - `*Date`: a timestamp, e.g. `expiryDate` (`*At` for system times, e.g. `createdAt`)
+    - `*Days` / `*Ms`: a duration, e.g. `leadTimeDays`
+    - `*Cache`: a snapshot of another document, e.g. `companyCache`
   - Below is just a basic overview, see https://boycce.github.io/monastery/definition/ for the full documentation if needed.
 
   ```js

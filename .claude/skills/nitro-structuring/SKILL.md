@@ -198,4 +198,12 @@ description: For projects using nitro-web only. How to name, place and split fil
   - Same for objects and styled blocks: the comment goes inside as the first line, never above.
   - A one-line arrow function that needs a comment gets a block body, so the comment can go inside.
   - Skip comments that only restate the code.
+  - Keep each comment to one short, plain line: the what or the why, not both.
+  - Avoid stacked clauses, dashes and labels like `Deliberate:`, they read as jarring.
+    ```js
+    // Bad
+    // Price the line first, like the table does on edit, so the new row's sell isn't saved as 0
+    // Good
+    // Work out the sell before saving
+    ```
   - Number the parts of a compound comment: `// 1) inputs move left, 2) show only red outline, 3) darken when resting`.
