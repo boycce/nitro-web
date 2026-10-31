@@ -34,6 +34,7 @@ export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgu
  * @param {string} [opts.subject] - subject (can also be defined in template)
  * @param {boolean} [opts.skipCssInline] - skip CSS inlining
  * @param {boolean} [opts.test] - enable test mode
+ * @param {{ filename: string, content: Buffer, contentType?: string }[]} [opts.attachments] - file attachments
  * @returns {Promise<[any, any]>} Resolves with [mailgunErr, mailgunInfo]
  */
 export async function sendEmail({ 
@@ -49,6 +50,7 @@ export async function sendEmail({
   subject, 
   skipCssInline,
   test,  
+  attachments,
 }) {
   const isTest = config.emailTestMode || test
   if (!config) throw new Error('sendEmail: `config` missing')
@@ -105,6 +107,7 @@ export async function sendEmail({
   }
 
   let settings = {
+    attachments: attachments,
     bcc: bcc,
     emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
@@ -203,6 +206,7 @@ async function sendWithMailgun(settings, html) {
   const processedhtml = await processTemplate(settings, html)
   const mailgunOpts = {
     ...(settings.bcc && !settings.isDev? { bcc: settings.bcc } : {}),
+    ...(settings.attachments?.length ? { attachments: settings.attachments } : {}),
     from: settings.from,
     html: processedhtml,
     'h:Reply-To': settings.replyTo,
@@ -215,7 +219,12 @@ async function sendWithMailgun(settings, html) {
     }),
   }
   if (settings.test && settings.isDev) {
-    console.info('Test mode: sendEmail mailgunOpts', { ...mailgunOpts, html: null, 'recipient-variables': settings.recipientVariables })
+    console.info('Test mode: sendEmail mailgunOpts', {
+      ...mailgunOpts,
+      html: null,
+      'recipient-variables': settings.recipientVariables,
+      attachments: settings.attachments?.map((a) => `${a.filename} (${a.content?.length} bytes)`),
+    })
   }
   if (settings.test) return processedhtml
 

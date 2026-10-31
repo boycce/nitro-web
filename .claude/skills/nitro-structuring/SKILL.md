@@ -207,3 +207,5 @@ description: For projects using nitro-web only. How to name, place and split fil
     // Work out the sell before saving
     ```
   - Number the parts of a compound comment: `// 1) inputs move left, 2) show only red outline, 3) darken when resting`.
+  - When a summary numbers ordered rules, reuse the same numbers in the comments below: `// 2) description, then 3) qty and price`.
+  - A summary with several points is a plain `-` bullet list, around 4 points max.
