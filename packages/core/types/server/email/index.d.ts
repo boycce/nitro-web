@@ -15,9 +15,10 @@
  * @param {string} [opts.subject] - subject (can also be defined in template)
  * @param {boolean} [opts.skipCssInline] - skip CSS inlining
  * @param {boolean} [opts.test] - enable test mode
+ * @param {{ filename: string, content: Buffer, contentType?: string }[]} [opts.attachments] - file attachments
  * @returns {Promise<[any, any]>} Resolves with [mailgunErr, mailgunInfo]
  */
-export function sendEmail({ template, to, config, bcc, data, swigData, from, replyTo, recipientVariables, subject, skipCssInline, test, }: {
+export function sendEmail({ template, to, config, bcc, data, swigData, from, replyTo, recipientVariables, subject, skipCssInline, test, attachments, }: {
     template: string;
     to: string;
     config: Config;
@@ -30,6 +31,11 @@ export function sendEmail({ template, to, config, bcc, data, swigData, from, rep
     subject?: string;
     skipCssInline?: boolean;
     test?: boolean;
+    attachments?: {
+        filename: string;
+        content: Buffer;
+        contentType?: string;
+    }[];
 }): Promise<[any, any]>;
 export const requiredEmailConfigKeys: string[];
 export const optionalEmailConfigKeys: string[];
