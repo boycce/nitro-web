@@ -1,3 +1,6 @@
+// axios-retry augments axios's request config with the 'axios-retry' key used below. The augmentation only
+// applies where the package is referenced, so without this any project typechecking this file errors on it.
+/// <reference types="axios-retry" />
 import { createBrowserRouter, createHashRouter, redirect, RouterProvider } from 'react-router-dom' 
 import { Fragment, ReactNode } from 'react'
 import ReactDOM from 'react-dom/client'
