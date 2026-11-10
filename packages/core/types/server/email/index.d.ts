@@ -1,6 +1,7 @@
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
- * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string,
+ *   emailRedirectTo?: string, emailAllowList?: string }} Config
  *
  * @param {object} opts
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
@@ -39,6 +40,31 @@ export function sendEmail({ template, to, config, cc, bcc, data, swigData, from,
         contentType?: string;
     }[];
 }): Promise<[any, any]>;
+/**
+ * Keeps non-production email out of real inboxes. With `config.emailRedirectTo` set, every email is sent to that
+ * address instead of its recipients, unless all of them are on `config.emailAllowList`, so testers can still receive
+ * their own. The intended recipients are kept in the subject. Set `emailRedirectTo` in every environment that must
+ * not reach real people (a developer's machine, staging) and leave it unset in production: an address sitting on a
+ * user record is otherwise a live recipient, whichever path sends to it (`tokenSend` included).
+ * @param {object} opts
+ * @param {string} opts.to - as passed to sendEmail
+ * @param {string} [opts.cc]
+ * @param {string} [opts.bcc]
+ * @param {Config} opts.config - reads `emailRedirectTo` and `emailAllowList`
+ * @returns {{ to: string, cc?: string, bcc?: string, redirected: boolean, subjectPrefix?: string }}
+ */
+export function guardRecipients({ to, cc, bcc, config }: {
+    to: string;
+    cc?: string;
+    bcc?: string;
+    config: Config;
+}): {
+    to: string;
+    cc?: string;
+    bcc?: string;
+    redirected: boolean;
+    subjectPrefix?: string;
+};
 export const requiredEmailConfigKeys: string[];
 export const optionalEmailConfigKeys: string[];
 /**
@@ -50,5 +76,7 @@ export type Config = {
     mailgunDomain?: string;
     mailgunKey?: string;
     name?: string;
+    emailRedirectTo?: string;
+    emailAllowList?: string;
 };
 //# sourceMappingURL=index.d.ts.map

@@ -14,12 +14,15 @@ let nodemailerMailgun = undefined
 const _dirname = dirname(fileURLToPath(import.meta.url)) + '/'
 
 export const requiredEmailConfigKeys = ['baseUrl', 'emailFrom', 'name', 'env']
-export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgunDomain', 'mailgunKey']
+export const optionalEmailConfigKeys = [
+  'emailAllowList', 'emailRedirectTo', 'emailReplyTo', 'emailTestMode', 'mailgunDomain', 'mailgunKey',
+]
 
 
 /**
  * Sends an email using a predefined template, with optional data/or recipientVariables
- * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string }} Config
+ * @typedef {{ baseUrl?: string, emailFrom?: string, mailgunDomain?: string, mailgunKey?: string, name?: string,
+ *   emailRedirectTo?: string, emailAllowList?: string }} Config
  *
  * @param {object} opts
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
@@ -65,6 +68,10 @@ export async function sendEmail({
   if (!template) throw new Error('sendEmail: `template` missing')
   if (!to) throw new Error('sendEmail: `to` missing')
 
+  // Outside production every email can be sent to one inbox instead (see guardRecipients). The variables below are
+  // still built for the intended recipients, so the redirected copy reads as they would have seen it.
+  const guard = guardRecipients({ to, cc, bcc, config })
+
   // Setup nodemailer once
   if (!nodemailerMailgun && !isTest) {
     nodemailerMailgun = nodemailer.createTransport(
@@ -109,10 +116,16 @@ export async function sendEmail({
     }
   }
 
+  // A redirected email is sent to one address, which takes the first intended recipient's variables
+  if (guard.redirected) {
+    const [, firstEmail] = getNameEmail(to)
+    recipientVariables = { [getNameEmail(guard.to)[1]]: recipientVariables[firstEmail] }
+  }
+
   let settings = {
     attachments: attachments,
-    cc: cc,
-    bcc: bcc,
+    cc: guard.cc,
+    bcc: guard.bcc,
     emailTemplateDir: getDirectories(path, config.pwd).emailTemplateDir,
     from: from,
     isDev: config.env === 'development',
@@ -120,9 +133,10 @@ export async function sendEmail({
     replyTo: replyTo,
     skipCssInline: skipCssInline,
     subject: subject,
+    subjectPrefix: guard.subjectPrefix,
     template: template,
     test: isTest,
-    to: to,
+    to: guard.to,
     swigData: swigData,
   }
 
@@ -203,7 +217,49 @@ function processTemplate(settings, html) {
     if (foundSubject) settings.subject = foundSubject[1]
     else throw new Error('Sendmail: please pass `subject` or set it in the template')
   }
+  // A redirected email names its intended recipients, otherwise they are indistinguishable in the one inbox
+  if (settings.subjectPrefix) settings.subject = settings.subjectPrefix + settings.subject
   return html
+}
+
+/**
+ * Keeps non-production email out of real inboxes. With `config.emailRedirectTo` set, every email is sent to that
+ * address instead of its recipients, unless all of them are on `config.emailAllowList`, so testers can still receive
+ * their own. The intended recipients are kept in the subject. Set `emailRedirectTo` in every environment that must
+ * not reach real people (a developer's machine, staging) and leave it unset in production: an address sitting on a
+ * user record is otherwise a live recipient, whichever path sends to it (`tokenSend` included).
+ * @param {object} opts
+ * @param {string} opts.to - as passed to sendEmail
+ * @param {string} [opts.cc]
+ * @param {string} [opts.bcc]
+ * @param {Config} opts.config - reads `emailRedirectTo` and `emailAllowList`
+ * @returns {{ to: string, cc?: string, bcc?: string, redirected: boolean, subjectPrefix?: string }}
+ */
+export function guardRecipients({ to, cc, bcc, config }) {
+  const redirectTo = config?.emailRedirectTo
+  if (!redirectTo || allAllowed([to, cc, bcc], config.emailAllowList)) {
+    return { to: to, cc: cc, bcc: bcc, redirected: false }
+  }
+  const intended = to + (cc ? ` cc:${cc}` : '') + (bcc ? ` bcc:${bcc}` : '')
+  return { to: redirectTo, cc: undefined, bcc: undefined, redirected: true, subjectPrefix: `[redirected → ${intended}] ` }
+}
+
+/**
+ * Whether every address in the recipient fields is on the allow list. The list is comma separated: an entry that
+ * starts with `@` admits that whole domain, anything else one exact address. Case-insensitive. An empty list, or a
+ * message with no recipients, admits nothing.
+ * @param {(string|undefined)[]} fields - to, cc, bcc, each `Name<a@b.c>` or `a@b.c`, comma separated
+ * @param {string} [allowList] - e.g. `@wayneenterprises.com,alfred@example.com`
+ */
+function allAllowed(fields, allowList) {
+  const entries = String(allowList || '').split(',').map((e) => e.trim().toLowerCase()).filter(Boolean)
+  const addresses = fields.filter(Boolean).join(',').split(',')
+    .map((part) => getNameEmail(part)[1].trim().toLowerCase())
+    .filter(Boolean)
+  if (!entries.length || !addresses.length) return false
+  return addresses.every((address) => entries.some((entry) =>
+    entry.startsWith('@') ? address.endsWith(entry) : address === entry
+  ))
 }
 
 async function sendWithMailgun(settings, html) {
