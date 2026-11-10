@@ -31,7 +31,7 @@ export const routes = {
   'post    /api/signin': [signin], // [todo: route gaurd basic limiter]
   'post    /api/signup': [signup], // [todo: route gaurd Altcha]
   'post    /api/reset-instructions': [resetInstructions],
-  'post    /api/reset-confirm': [resetConfirm], // was reset-password
+  'post    /api/reset-confirm/:token': [resetConfirm], // was reset-password
   'post    /api/invite-instructions': [inviteInstructions],
   'post    /api/resend-instructions': [resendInstructions],
   'get     /api/invite-pre-confirm/:token': [invitePreConfirm],

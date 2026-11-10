@@ -115,7 +115,7 @@ export const routes: {
     'post    /api/signin': (typeof signin)[];
     'post    /api/signup': (typeof signup)[];
     'post    /api/reset-instructions': (typeof resetInstructions)[];
-    'post    /api/reset-confirm': (typeof resetConfirm)[];
+    'post    /api/reset-confirm/:token': (typeof resetConfirm)[];
     'post    /api/invite-instructions': (typeof inviteInstructions)[];
     'post    /api/resend-instructions': (typeof resendInstructions)[];
     'get     /api/invite-pre-confirm/:token': (typeof invitePreConfirm)[];

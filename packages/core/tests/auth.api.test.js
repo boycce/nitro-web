@@ -1,5 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
+import { readFile } from 'node:fs/promises'
 import { resolveBaseUrl } from '../components/auth/auth.api.js'
 
 const cases = [
@@ -38,4 +39,13 @@ test('resolveBaseUrl', async (t) => {
       assert.equal(resolveBaseUrl(reqUrl, cfgUrl), expected)
     })
   }
+})
+
+test('the reset page posts to the route the server registers, with the token in the path', async () => {
+  // The server route was renamed from reset-password to reset-confirm/:token, so a client still posting the old
+  // URL got a 404 and the page showed "Oops there was an error" for every password reset
+  const { routes, resetConfirm } = await import('../components/auth/auth.api.js')
+  assert.deepEqual(routes['post    /api/reset-confirm/:token'], [resetConfirm])
+  const page = await readFile(new URL('../components/auth/reset.tsx', import.meta.url), 'utf8')
+  assert.match(page, /request\(`post \/api\/reset-confirm\/\$\{params\.token\}`/)
 })

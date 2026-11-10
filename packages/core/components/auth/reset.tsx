@@ -65,7 +65,6 @@ export function ResetPassword({ className, elements, redirectTo, config }: reset
   const [state, setState] = useState(() => ({
     password: '',
     password2: '',
-    token: params.token,
     errors: [] as Errors,
   }))
   
@@ -77,7 +76,7 @@ export function ResetPassword({ className, elements, redirectTo, config }: reset
   async function onSubmit (event: React.FormEvent<HTMLFormElement>) {
     try {
       if (isLoading) return
-      const data = await request('post /api/reset-password', state, event, setIsLoading, setState)
+      const data = await request(`post /api/reset-confirm/${params.token}`, state, event, setIsLoading, setState)
       setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...data }))
       setTimeout(() => navigate(redirectTo || '/'), 10) // wait for setStore
     } catch (e) {
