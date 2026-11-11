@@ -6,8 +6,8 @@
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
  * @param {string} opts.to - Recipient(s), e.g. "Bruce<bruce@wayneenterprises.com>,..."
  * @param {Config} opts.config - Config object
- * @param {string} [opts.cc] - CC, e.g. "Bruce<bruce@wayneenterprises.com>,..." (not sent in development)
- * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>,..." (not sent in development)
+ * @param {string} [opts.cc] - CC, e.g. "Bruce<bruce@wayneenterprises.com>,..."
+ * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>,..."
  * @param {object} [opts.data] - common template data shared across recipients
  * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun). Inherits data.
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
