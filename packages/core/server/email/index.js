@@ -25,8 +25,8 @@ export const optionalEmailConfigKeys = ['emailReplyTo', 'emailTestMode', 'mailgu
  * @param {string} opts.template - Template name or raw HTML, e.g., 'reset-password'
  * @param {string} opts.to - Recipient(s), e.g. "Bruce<bruce@wayneenterprises.com>,..."
  * @param {Config} opts.config - Config object
- * @param {string} [opts.cc] - CC, e.g. "Bruce<bruce@wayneenterprises.com>,..." (not sent in development)
- * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>,..." (not sent in development)
+ * @param {string} [opts.cc] - CC, e.g. "Bruce<bruce@wayneenterprises.com>,..."
+ * @param {string} [opts.bcc] - BCC, e.g. "Bruce<bruce@wayneenterprises.com>,..."
  * @param {object} [opts.data] - common template data shared across recipients
  * @param {object} [opts.swigData] - vars for Nunjucks/Swig render only (not sent to Mailgun). Inherits data.
  * @param {string} [opts.from] - sender address, e.g. "Bruce<bruce@wayneenterprises.com>"
@@ -210,9 +210,9 @@ async function sendWithMailgun(settings, html) {
   // Supports batch sending via recipientVariables, limit 1000 emails
   // https://documentation.mailgun.com/en/latest/user_manual.html?highlight=batch%20sending#batch-sending
   const processedhtml = await processTemplate(settings, html)
-  const copies = { ...(settings.cc ? { cc: settings.cc } : {}), ...(settings.bcc ? { bcc: settings.bcc } : {}) }
   const mailgunOpts = {
-    ...(settings.isDev ? {} : copies),
+    ...(settings.cc ? { cc: settings.cc } : {}),
+    ...(settings.bcc ? { bcc: settings.bcc } : {}),
     ...(settings.attachments?.length ? { attachments: settings.attachments } : {}),
     from: settings.from,
     html: processedhtml,
@@ -229,7 +229,6 @@ async function sendWithMailgun(settings, html) {
   if (settings.test && settings.isDev) {
     console.info('Test mode: sendEmail mailgunOpts', {
       ...mailgunOpts,
-      ...copies,
       html: null,
       'recipient-variables': settings.recipientVariables,
       attachments: settings.attachments?.map((a) => `${a.filename} (${a.content?.length} bytes)`),
