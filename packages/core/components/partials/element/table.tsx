@@ -70,7 +70,7 @@ export function Table<T extends TableRow>({
   addOverflowScroll,
   checkboxSize=16,
   columnGap=11,
-  columnPaddingX=11,
+  columnPaddingX=20,
   generateCheckboxActions,
   headerHeightMin=40,
   rowContentHeightMax, 
@@ -166,11 +166,11 @@ export function Table<T extends TableRow>({
 
   const getColumnPadding = useCallback((j: number, row: T|undefined, rowType: TableRowType) => {
     const sideColor = j == 0 && rowSideColor ? rowSideColor(row, rowType) : undefined
-    const sideColorPadding = sideColor /*&& rows.length > 0*/ ? sideColor.width + 5 : 0
-    const pl = sideColorPadding + (j == 0 ? columnPaddingX : columnGap)
-    const pr = j == columns.length - 1 ? columnPaddingX : columnGap
+    // Checkboxes and actions sit tighter to the edge, a side color needs the full padding
+    const pl = j == 0 && (columns[j].value != 'checkbox' || sideColor) ? columnPaddingX : columnGap
+    const pr = j == columns.length - 1 && columns[j].value != 'actions' ? columnPaddingX : columnGap
     return { pl, pr, sideColor }
-  }, [rowSideColor, columnPaddingX, columnGap])
+  }, [rowSideColor, columnPaddingX, columnGap, columns]) // columns recently added as a dependency, maybe keep an eye on this
 
   return (
     <div className={className}>
@@ -296,7 +296,7 @@ export function Table<T extends TableRow>({
                           style={{ maxHeight: rowContentHeightMax }} 
                           className={twMerge(
                             rowContentHeightMax ? 'overflow-hidden' : '',
-                            getLineClampClassName(col.rowLinesMax),
+                            col.value == 'checkbox' ? '' : getLineClampClassName(col.rowLinesMax), // clamping clips the checkbox hitbox
                             col.overflow ? 'overflow-visible' : '',
                             col.innerClassName
                           )}
