@@ -979,10 +979,6 @@ video {
   --initials-6: 129 140 248;
   --initials-7: 250 204 21;
 }
-  /* Stops the parent line height stretching labels in standards mode */
-  label {
-    display: block;
-  }
   .border-bottom-with-space {
   position: relative;
   margin-bottom: 6px;
@@ -1832,8 +1828,12 @@ video {
   min-height: 1.4em;
 }
 
-.min-h-\[150px\] {
-  min-height: 150px;
+.min-h-\[100\%\] {
+  min-height: 100%;
+}
+
+.min-h-\[150\] {
+  min-height: 150;
 }
 
 .min-h-\[220px\] {
@@ -1850,10 +1850,6 @@ video {
 
 .min-h-full {
   min-height: 100%;
-}
-
-.min-h-screen {
-  min-height: 100vh;
 }
 
 .\!w-\[100\%\] {
@@ -3183,10 +3179,6 @@ video {
   font-size: 15.5px;
 }
 
-.text-\[16px\] {
-  font-size: 16px;
-}
-
 .text-\[18px\] {
   font-size: 18px;
 }
@@ -3292,10 +3284,6 @@ video {
 
 .leading-\[inherit\] {
   line-height: inherit;
-}
-
-.leading-\[normal\] {
-  line-height: normal;
 }
 
 .tracking-tight {
