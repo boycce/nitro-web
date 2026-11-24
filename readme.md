@@ -86,7 +86,7 @@ console.log(res) // if config.emailTestMode=true, the template will be returned
 
 - Express `^4.17`
 - Monastery `^5.0` (file plugin: image/file fields are `type: 'file'`)
-- Node `24` (`>=20.19 <=26.x` supported)
+- Node `26` (`>=20.19 <=26.x` supported)
 - React `^18.3`
 - Tailwind `^3.4`
 - Webpack `^5.92`
