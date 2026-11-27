@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { resolveBaseUrl } from '../components/auth/auth.api.js'
+import { ensureNotLastOwner, resolveBaseUrl } from '../components/auth/auth.api.js'
 
 const cases = [
   // [cfgUrl, reqUrl, expected, description]
@@ -38,4 +38,17 @@ test('resolveBaseUrl', async (t) => {
       assert.equal(resolveBaseUrl(reqUrl, cfgUrl), expected)
     })
   }
+})
+
+test('ensureNotLastOwner', async (t) => {
+  const owner = (id, status = 'active') => ({ _id: id, role: 'owner', status })
+  await t.test('throws when removing the only owner', () => {
+    assert.throws(() => ensureNotLastOwner([owner('a'), { _id: 'b', role: 'manager', status: 'active' }], 'a'))
+  })
+  await t.test('allows it while another active owner remains', () => {
+    assert.doesNotThrow(() => ensureNotLastOwner([owner('a'), owner('b')], 'a'))
+  })
+  await t.test('ignores owners that are not active', () => {
+    assert.throws(() => ensureNotLastOwner([owner('a'), owner('b', 'invited'), owner('c', 'deleted')], 'a'))
+  })
 })
