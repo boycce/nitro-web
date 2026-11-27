@@ -53,9 +53,11 @@ export function tokenConfirmForMultiTenant(req: any): Promise<{
 } | {
     isExistingUser: boolean;
     email: any;
+    companyName: any;
 } | {
     isExistingUser?: undefined;
     email?: undefined;
+    companyName?: undefined;
 }>;
 /**
  * Creates and sends a reset or invite token to a user or company

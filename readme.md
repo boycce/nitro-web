@@ -121,6 +121,7 @@ As followed by [https://github.com/shanraisshan/claude-code-best-practice](https
 
 | Version | Changes |
 | --- | --- |
+| [0.3.35](packages/core/CHANGELOG.md#0335-2026-11-27) | show the company you joined on the invite accepted page |
 | [0.3.34](packages/core/CHANGELOG.md#0334-2026-11-27) | accepting an invite as another user asks you to sign in as the invited email; owners can remove themselves while another active owner remains |
 <!-- /changelog -->
 
