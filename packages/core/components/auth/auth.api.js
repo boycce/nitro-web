@@ -630,7 +630,10 @@ export async function tokenConfirmForMultiTenant(req) {
   const companyId = db.id(auth.tokenParse(token, 'company', inviteMaxAge))
 
   // Find the invite (we need to bypass hooks as inviteToken maybe true in an afterFind hook)
-  const company = await db.company._findOne({ _id: companyId, 'invites.inviteToken': token }, { projection: { invites: 1, users: 1 } })
+  const company = await db.company._findOne(
+    { _id: companyId, 'invites.inviteToken': token },
+    { projection: { invites: 1, users: 1, name: 1, 'business.name': 1 } }
+  )
   const invite = company?.invites?.find(inv => inv.inviteToken === token)
   if (!company) throw new Error('Sorry your token is invalid or has already been used.')
   if (!invite.email) throw new Error('Internal error: Email address missing from the invite.')
@@ -646,7 +649,9 @@ export async function tokenConfirmForMultiTenant(req) {
   }
 
   // Dont submit yet if the user is requesting preConfirm data (used to show the correct form fields first)
-  if (req.preConfirm) return { isExistingUser: !!existingUser, email: invite.email }
+  if (req.preConfirm) {
+    return { isExistingUser: !!existingUser, email: invite.email, companyName: company.name || company.business?.name }
+  }
 
   // Existing user: add the user to company
   if (existingUser) {

@@ -1,7 +1,8 @@
 import { Topbar, Field, FormError, Button, request, onChange, getResponseErrors, getSignoutStore, getInitialStore } from 'nitro-web'
 import { Config, Errors } from 'nitro-web/types'
 import { twMerge } from 'nitro-web/util'
-import { Fragment, useEffect } from 'react'
+import { Fragment, useEffect, useRef } from 'react'
+import { CheckIcon } from 'lucide-react'
 
 type InviteConfirmProps = {
   className?: string,
@@ -18,6 +19,8 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
   const [isLoading, setIsLoading] = useState(false)
   const [isExistingUser, setIsExistingUser] = useState<boolean | 'pending'>('pending')
   const [isAccepted, setIsAccepted] = useState(false)
+  const [companyName, setCompanyName] = useState('')
+  const redirectTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
   const [state, setState] = useState(() => ({
     firstName: '',
     lastName: '',
@@ -32,9 +35,10 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
     Header: elements?.Header || null,
   }
 
-  // Get invite details on mount
+  // Get invite details on mount, and stop the redirect if the page is left first
   useEffect(() => {
     preSubmit()
+    return () => clearTimeout(redirectTimer.current)
   }, [])
 
   async function preSubmit() {
@@ -42,6 +46,7 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
       const result = await request(`get /api/invite-pre-confirm/${params.token}`)
       setIsExistingUser(result.isExistingUser)
       setState((s) => ({ ...s, email: result.email }))
+      setCompanyName(result.companyName || '')
       if (result.isExistingUser) submit({ token: params.token }, undefined, result.email)
     } catch (e) {
       setState((s) => ({ ...s, errors: getResponseErrors(e) }))
@@ -60,27 +65,46 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
       // Only update the store if the user was created AND refreshly signed in
       if (result?.jwt) setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...result }))
       setIsAccepted(true)
-      setTimeout(() => {
-        if (result?.jwt) navigate(redirectTo || '/')
-        // Existing users sign in as the invited email, or reload so the new company shows
-        else if (isOtherUser(email)) navigate(`/signout?email=${encodeURIComponent(email)}`)
-        else window.location.href = redirectTo || '/'
-      }, 5000)
+      redirectTimer.current = setTimeout(() => goNext(email, !!result?.jwt), 8000)
     } catch (e) {
       setState((s) => ({ ...s, errors: getResponseErrors(e) }))
     }
+  }
+
+  function goNext(email: string, isNewUser: boolean) {
+    // New users are already signed in, others sign in as the invited email, or reload to show the new company
+    if (isNewUser) navigate(redirectTo || '/')
+    else if (isOtherUser(email)) navigate(`/signout?email=${encodeURIComponent(email)}`)
+    else window.location.href = redirectTo || '/'
   }
 
   if (isExistingUser || isAccepted) {
     return (
       <div className={twMerge('min-h-[250px]', className)}>
         {isAccepted ? (
-          <Fragment>
-            <div class="text-2xl font-bold mb-4">Your invite has been accepted.</div>
-            {isExistingUser === true && isOtherUser(state.email)
-              ? <p class="">You&apos;ll be redirected to sign in as {state.email} shortly...</p>
-              : <p class="">You&apos;ll be redirected back to the <Link to="/">home page</Link> shortly...</p>}
-          </Fragment>
+          <div class="text-center pt-4">
+            {!!companyName && (
+              <span class="relative inline-flex mb-6">
+                <span class="flex items-center justify-center size-14 rounded-lg bg-gray-900 text-white text-lg font-semibold">
+                  {companyName.trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase()}
+                </span>
+                <span class="absolute -right-1.5 -bottom-1.5 flex items-center justify-center size-5 rounded-full
+                  bg-green-500 ring-2 ring-white">
+                  <CheckIcon size={12} className="text-white" strokeWidth={3.5} />
+                </span>
+              </span>
+            )}
+            <div class="text-2xl font-bold mb-3">{companyName ? `You've joined ${companyName}` : 'You\'re in!'}</div>
+            <p class="text-gray-600 mb-8">
+              {isExistingUser === true && isOtherUser(state.email)
+                ? <Fragment>Sign in as <strong class="text-gray-900">{state.email}</strong> to get started.</Fragment>
+                : 'Your invite has been accepted.'}
+            </p>
+            <Elements.Button class="w-full mb-3" onClick={() => goNext(state.email, isExistingUser === false)}>
+              Continue
+            </Elements.Button>
+            <p class="text-xs text-gray-400">We&apos;ll take you there in a few seconds</p>
+          </div>
         ) : isExistingUser === 'pending' && !state.errors.length ? (
           <Fragment>
             <div class="text-2xl font-bold mb-4">One moment please...</div>
