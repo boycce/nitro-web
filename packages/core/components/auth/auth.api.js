@@ -344,7 +344,6 @@ export async function removeMember(req, res) {
 
     const company = await db.company.findOne({ query: { _id: companyId }, blacklist: false, project: { users: 1, invites: 1 } })
     if (!company) throw { title: 'error', detail: 'Company not found.' }
-    if (uid && uid.toString() === req.user._id.toString()) throw { title: 'error', detail: 'You cannot remove yourself.' }
     if (uid && !company.users.find((u) => u._id.toString() === uid.toString())) throw { title: 'error', detail: 'User not found.' }
     if (email && !company.invites.find((i) => i.email === email)) throw { title: 'error', detail: 'Invite not found.' }
     if (uid) ensureNotLastOwner(company?.users, uid)
@@ -354,15 +353,19 @@ export async function removeMember(req, res) {
       query: { _id: companyId, ...(uid ? { 'users._id': uid } : { 'invites.email': email }) },
       $pull: { ...(uid ? { users: { _id: uid } } : { invites: { email } }) },
     })
-    // Not required since the company.users is checked on auth.
-    //
-    //   Remove the user's active company, if it's the same
-    //   if (uid) {
-    //     await db.user.update({
-    //       query: { _id: uid, company: cid },
-    //       $set: { company: null },
-    //     })
-    //   }
+    // Move the user's active company to another active one they belong to, e.g. when removing yourself
+    if (uid) {
+      const next = await db.company.findOne({
+        query: {
+          _id: { $ne: companyId },
+          status: 'active',
+          isDeleted: { $ne: true },
+          users: { $elemMatch: { _id: uid, status: 'active' } },
+        },
+        project: { _id: 1 },
+      })
+      await db.user.update({ query: { _id: uid, company: companyId }, $set: { company: next?._id || null } })
+    }
     res.json({})
   } catch (err) {
     res.error(err)
@@ -778,7 +781,7 @@ export function resolveBaseUrl(reqUrl, cfgUrl) {
 
 export function ensureNotLastOwner(companyUsers, idNowNonOwner) {
   const remaining = (companyUsers || []).filter((u) =>
-    u.role === 'owner' && u.status !== 'deleted' && u._id.toString() !== idNowNonOwner.toString()
+    u.role === 'owner' && u.status === 'active' && u._id.toString() !== idNowNonOwner.toString()
   )
   if (!remaining.length) throw { title: 'role', detail: 'There must be at least one active owner.' }
 }
