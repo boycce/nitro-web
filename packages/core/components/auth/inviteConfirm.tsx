@@ -13,7 +13,7 @@ type InviteConfirmProps = {
 export function InviteConfirm({ className, elements, redirectTo, config }: InviteConfirmProps) {
   const navigate = useNavigate()
   const params = useParams()
-  const [, setStore] = useTracked()
+  const [{ user }, setStore] = useTracked()
   const getSignoutStoreFn = config.getSignoutStore || getSignoutStore
   const [isLoading, setIsLoading] = useState(false)
   const [isExistingUser, setIsExistingUser] = useState<boolean | 'pending'>('pending')
@@ -42,20 +42,30 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
       const result = await request(`get /api/invite-pre-confirm/${params.token}`)
       setIsExistingUser(result.isExistingUser)
       setState((s) => ({ ...s, email: result.email }))
-      if (result.isExistingUser) submit({ token: params.token })
+      if (result.isExistingUser) submit({ token: params.token }, undefined, result.email)
     } catch (e) {
       setState((s) => ({ ...s, errors: getResponseErrors(e) }))
     }
   }
 
-  async function submit(data: object, event?: React.FormEvent<HTMLFormElement>) {
+  // Signed out, or signed in as someone other than the invited email
+  function isOtherUser(email: string) {
+    return !!email && user?.email?.toLowerCase() !== email.toLowerCase()
+  }
+
+  async function submit(data: object, event?: React.FormEvent<HTMLFormElement>, email = state.email) {
     try {
       if (isLoading) return
       const result = await request(`post /api/invite-confirm/${params.token}`, data, event, setIsLoading, setState)
       // Only update the store if the user was created AND refreshly signed in
       if (result?.jwt) setStore((s) => ({ ...getSignoutStoreFn(s, getInitialStore()), ...result }))
       setIsAccepted(true)
-      setTimeout(() => navigate(redirectTo || '/'), 5000)
+      setTimeout(() => {
+        if (result?.jwt) navigate(redirectTo || '/')
+        // Existing users sign in as the invited email, or reload so the new company shows
+        else if (isOtherUser(email)) navigate(`/signout?email=${encodeURIComponent(email)}`)
+        else window.location.href = redirectTo || '/'
+      }, 5000)
     } catch (e) {
       setState((s) => ({ ...s, errors: getResponseErrors(e) }))
     }
@@ -67,7 +77,9 @@ export function InviteConfirm({ className, elements, redirectTo, config }: Invit
         {isAccepted ? (
           <Fragment>
             <div class="text-2xl font-bold mb-4">Your invite has been accepted.</div>
-            <p class="">You&apos;ll be redirected back to the <Link to="/">home page</Link> shortly...</p>
+            {isExistingUser === true && isOtherUser(state.email)
+              ? <p class="">You&apos;ll be redirected to sign in as {state.email} shortly...</p>
+              : <p class="">You&apos;ll be redirected back to the <Link to="/">home page</Link> shortly...</p>}
           </Fragment>
         ) : isExistingUser === 'pending' && !state.errors.length ? (
           <Fragment>
