@@ -111,6 +111,17 @@ npx skills add boycce/nitro-web -a claude-code
 As followed by [https://github.com/shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice/blob/main/reports/claude-skills-for-larger-mono-repos.md)
 
 <!-- changelog -->
+### Breaking changes
+
+| Version | How to update |
+| --- | --- |
+| [0.3.34](packages/core/CHANGELOG.md#0334-2026-11-27) | hide the remove member action for the signed in user if your app shouldn't let people remove themselves |
+
+### Recent changes
+
+| Version | Changes |
+| --- | --- |
+| [0.3.34](packages/core/CHANGELOG.md#0334-2026-11-27) | accepting an invite as another user asks you to sign in as the invited email; owners can remove themselves while another active owner remains |
 <!-- /changelog -->
 
 See the [changelog](packages/core/CHANGELOG.md) for everything.
