@@ -82,7 +82,8 @@
       "tag": false
     },
     "scripts": {
-      "prerelease": "npm run types && git add ./types ../webpack/types"
+      "prerelease": "npm run types && git add ./types ../webpack/types",
+      "postbump": "node changelog.js"
     },
     "bumpFiles": [
       "package.json",

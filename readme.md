@@ -109,3 +109,8 @@ npx skills add boycce/nitro-web -a claude-code
 ```
 
 As followed by [https://github.com/shanraisshan/claude-code-best-practice](https://github.com/shanraisshan/claude-code-best-practice/blob/main/reports/claude-skills-for-larger-mono-repos.md)
+
+<!-- changelog -->
+<!-- /changelog -->
+
+See the [changelog](packages/core/CHANGELOG.md) for everything.
